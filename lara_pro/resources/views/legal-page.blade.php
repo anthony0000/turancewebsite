@@ -6,7 +6,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&amp;family=Hanken+Grotesk:wght@400;500;600;700&amp;display=swap">
-    <link rel="stylesheet" href="{{ asset('/assets/css/home-reference.css') }}?v=2.2">
+    <link rel="stylesheet" href="{{ asset('/assets/css/home-reference.css') }}?v=2.4">
     <link rel="stylesheet" href="{{ asset('/assets/css/home-sections.css') }}?v=2.1">
     <link rel="stylesheet" href="{{ asset('/assets/css/legal-reference.css') }}?v=1.0">
 @endpush
@@ -63,7 +63,7 @@
                     <span class="tt-section-heading__eyebrow"><i aria-hidden="true"></i>Questions?</span>
                     <h2 id="legal-cta-title">Need to talk something through?</h2>
                 </div>
-                <a class="tt-primary-button" href="{{ route('contact.show') }}#contact-form">Contact our team <i aria-hidden="true"><svg viewBox="0 0 20 20"><path d="M4 10h12M11 5l5 5-5 5" /></svg></i></a>
+                <a class="tt-primary-button" href="{{ route('contact.show') }}">Contact our team <i aria-hidden="true"><svg viewBox="0 0 20 20"><path d="M4 10h12M11 5l5 5-5 5" /></svg></i></a>
             </div>
         </section>
 
@@ -72,5 +72,5 @@
 @endsection
 
 @push('scripts')
-    <script src="{{ asset('/assets/js/home-reference.js') }}?v=2.3" defer></script>
+    <script src="{{ asset('/assets/js/home-reference.js') }}?v=2.5" defer></script>
 @endpush

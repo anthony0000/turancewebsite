@@ -19,7 +19,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&amp;family=Hanken+Grotesk:wght@400;500;600;700&amp;display=swap">
-    <link rel="stylesheet" href="{{ asset('/assets/css/home-reference.css') }}?v=2.2">
+    <link rel="stylesheet" href="{{ asset('/assets/css/home-reference.css') }}?v=2.4">
     <link rel="stylesheet" href="{{ asset('/assets/css/home-sections.css') }}?v=2.1">
     <link rel="stylesheet" href="{{ asset('/assets/css/service-detail-reference.css') }}?v=1.0">
 @endpush
@@ -51,7 +51,8 @@
                         </ul>
                     @endif
                     <div class="tt-detail-hero__actions">
-                        <x-home.primary-button :href="route('contact.show').'#contact-form'">Start a project</x-home.primary-button>
+                        <x-home.primary-button :href="route('contact.show', ['service' => $serviceKey])"
+                            data-conversion="service_hero_quote">Get a project estimate</x-home.primary-button>
                         <a class="tt-text-link" href="#approach">Explore our approach
                             <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3v14M5 12l5 5 5-5" /></svg>
                         </a>
@@ -204,7 +205,8 @@
                     title="Ready to shape this properly?"
                     copy="Tell us where the opportunity is, what is getting in the way and what a strong result should make possible." />
                 <div class="tt-contact-cta__actions" data-reveal>
-                    <x-home.primary-button :href="route('contact.show').'#contact-form'">Discuss your project</x-home.primary-button>
+                    <x-home.primary-button :href="route('contact.show', ['service' => $serviceKey])"
+                        data-conversion="service_bottom_quote">Get a project estimate</x-home.primary-button>
                     <a class="tt-contact-cta__secondary" href="mailto:{{ config('seo.email') }}">Contact our team
                         <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5" /></svg>
                     </a>
@@ -217,5 +219,5 @@
 @endsection
 
 @push('scripts')
-    <script src="{{ asset('/assets/js/home-reference.js') }}?v=2.3" defer></script>
+    <script src="{{ asset('/assets/js/home-reference.js') }}?v=2.5" defer></script>
 @endpush

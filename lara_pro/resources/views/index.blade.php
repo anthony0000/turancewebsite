@@ -7,8 +7,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&amp;family=Hanken+Grotesk:wght@400;500;600;700&amp;display=swap">
-    <link rel="stylesheet" href="{{ asset('/assets/css/home-reference.css') }}?v=2.2">
-    <link rel="stylesheet" href="{{ asset('/assets/css/home-sections.css') }}?v=2.1">
+    <link rel="stylesheet" href="{{ asset('/assets/css/home-reference.css') }}?v=2.4">
+    <link rel="stylesheet" href="{{ asset('/assets/css/home-sections.css') }}?v=2.2">
 @endpush
 
 @section('content')
@@ -50,8 +50,28 @@
                 'services' => ['UX design', 'Web development', 'Donation workflows'], 'year' => 'Live',
                 'outcome' => 'One accessible destination for causes, donations, volunteering, organisational work and partner engagement.',
                 'visual' => 'impact',
-                'image' => asset('/assets/img/project/36plusone-live.webp'),
+                'image' => null,
                 'link' => 'https://www.36plusone.org/',
+                'link_label' => 'View live project',
+            ],
+            [
+                'name' => 'KiddoVista', 'industry' => 'Family commerce', 'category' => 'Multi-vendor marketplace',
+                'summary' => 'A trusted baby marketplace that brings approved sellers, independent storefronts and essential products into one family-friendly shopping experience.',
+                'services' => ['Marketplace UX', 'Vendor management', 'Commerce engineering'], 'year' => 'Live',
+                'outcome' => 'A connected destination where families can discover products and shop across trusted seller stores.',
+                'visual' => 'family',
+                'image' => null,
+                'link' => 'https://kiddovista.co.uk/',
+                'link_label' => 'View live project',
+            ],
+            [
+                'name' => 'IHcPro Store', 'industry' => 'Healthcare commerce', 'category' => 'E-commerce platform',
+                'summary' => 'A UK healthcare storefront designed to make medical supplies, cleaning products and specialist equipment easier to discover and purchase.',
+                'services' => ['Commerce strategy', 'UI/UX design', 'E-commerce development'], 'year' => 'Live',
+                'outcome' => 'A structured digital shop connecting healthcare customers with essential products and clear purchasing journeys.',
+                'visual' => 'healthcare',
+                'image' => null,
+                'link' => 'https://shop.ihcpro.co.uk/',
                 'link_label' => 'View live project',
             ],
         ];
@@ -96,16 +116,7 @@
             ['category' => 'Automation', 'title' => 'When business automation becomes a competitive advantage', 'summary' => 'Where thoughtful automation creates capacity without losing human judgement.', 'date' => 'Editorial preview', 'time' => '7 min read', 'visual' => 'automation', 'link' => null],
         ];
 
-        $faqs = [
-            ['question' => 'What types of businesses do you work with?', 'answer' => 'We work with ambitious organisations at different stages, from growing businesses to established teams modernising critical digital products.'],
-            ['question' => 'Can Turance Technologies improve an existing product?', 'answer' => 'Yes. We can assess an existing website, application or workflow, identify the most valuable improvements and deliver them in focused phases.'],
-            ['question' => 'Do you provide both design and development?', 'answer' => 'Yes. Strategy, product design and engineering can be delivered as one engagement or shaped around the capability you already have.'],
-            ['question' => 'How long does a typical project take?', 'answer' => 'Timing depends on scope, complexity and review cycles. We establish a realistic delivery plan after discovery and keep milestones visible throughout.'],
-            ['question' => 'Do you provide maintenance after launch?', 'answer' => 'Yes. Ongoing maintenance, monitoring, optimisation and technical support can be included around the needs of the product.'],
-            ['question' => 'Can you work with an existing internal team?', 'answer' => 'Absolutely. We can extend an internal product or engineering team, own a defined workstream or provide specialist guidance.'],
-            ['question' => 'How do you determine project pricing?', 'answer' => 'Pricing is based on the agreed scope, technical complexity, delivery model and timeline. Discovery gives us the detail needed to quote clearly.'],
-            ['question' => 'How do we start a project?', 'answer' => 'Share what you are building, improving or trying to solve. We will review the context and arrange a focused first conversation.'],
-        ];
+        $faqs = config('seo.home_faqs', []);
     @endphp
 
     <a class="tt-skip-link" href="#main-content">Skip to main content</a>
@@ -129,7 +140,7 @@
             <div class="tt-hero__main">
                 <div class="tt-hero__content">
                     <div class="tt-hero__eyebrow tt-reveal tt-reveal--one">
-                        <span>Turance Technologies</span>
+                        <span>Web design &amp; software development</span>
                         <i aria-hidden="true"></i>
                     </div>
 
@@ -140,15 +151,27 @@
                     </h1>
 
                     <p class="tt-hero__description tt-reveal tt-reveal--three">
-                        We craft powerful digital experiences<br>
-                        that drive growth and set brands apart.
+                        Conversion-focused websites, mobile apps and SaaS platforms<br>
+                        for ambitious businesses in Nigeria and worldwide.
                     </p>
 
-                    <div class="tt-reveal tt-reveal--four">
-                        <x-home.primary-button href="#work">
-                            Explore our work
+                    <div class="tt-hero__actions tt-reveal tt-reveal--four">
+                        <x-home.primary-button :href="route('contact.show')"
+                            data-conversion="home_hero_quote">
+                            Get a project estimate
                         </x-home.primary-button>
+                        <a class="tt-hero__secondary" href="{{ route('service.show') }}">
+                            View services &amp; pricing
+                            <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5" /></svg>
+                        </a>
                     </div>
+
+                    <ul class="tt-hero__assurances tt-reveal tt-reveal--four"
+                        aria-label="What every Turance engagement includes">
+                        <li>Strategy to launch</li>
+                        <li>SEO-ready builds</li>
+                        <li>Post-launch support</li>
+                    </ul>
                 </div>
 
                 <x-home.hero-visual />
@@ -373,10 +396,10 @@
                                             <i style="--rating: {{ $testimonial['rating'] }}%" aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9733;</i>
                                         </span>
                                     </div>
-                                    <blockquote>&ldquo;{{ $testimonial['quote'] }}&rdquo;</blockquote>
+                                    <blockquote aria-label="&ldquo;{{ $testimonial['quote'] }}&rdquo;"><span data-decode aria-hidden="true">&ldquo;{{ $testimonial['quote'] }}&rdquo;</span></blockquote>
                                     <footer>
                                         <span></span>
-                                        <div><strong>{{ $testimonial['name'] }}</strong><small>{{ $testimonial['company'] }}</small></div>
+                                        <div><strong aria-label="{{ $testimonial['name'] }}"><span data-decode aria-hidden="true">{{ $testimonial['name'] }}</span></strong><small>{{ $testimonial['company'] }}</small></div>
                                     </footer>
                                 </div>
                             </article>
@@ -465,7 +488,8 @@
                     title="Have an ambitious digital idea? Let’s shape it properly."
                     copy="Tell us what you are building, improving or trying to solve. We will help you identify the right next step." />
                 <div class="tt-contact-cta__actions" data-reveal>
-                    <x-home.primary-button :href="route('contact.show')">Start a project</x-home.primary-button>
+                    <x-home.primary-button :href="route('contact.show')"
+                        data-conversion="home_bottom_quote">Get a project estimate</x-home.primary-button>
                     <a class="tt-contact-cta__secondary" href="mailto:{{ config('seo.email') }}">Contact our team
                         <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5" /></svg>
                     </a>
@@ -478,5 +502,5 @@
 @endsection
 
 @push('scripts')
-    <script src="{{ asset('/assets/js/home-reference.js') }}?v=2.3" defer></script>
+    <script src="{{ asset('/assets/js/home-reference.js') }}?v=2.5" defer></script>
 @endpush

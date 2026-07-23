@@ -11,12 +11,28 @@ Route::get('/sitemap.xml', function () {
     $siteUrl = rtrim(config('seo.site_url'), '/');
     $pages = collect(config('seo.pages'))
         ->map(function (array $page) use ($siteUrl) {
-            return [
+            $viewPath = isset($page['view'])
+                ? resource_path('views/'.str_replace('.', '/', $page['view']).'.blade.php')
+                : null;
+            $contentFiles = array_filter([
+                $viewPath,
+                config_path('seo.php'),
+                str_starts_with($page['route'], 'services.') ? config_path('service-pages.php') : null,
+                $page['route'] === 'contact.show' ? config_path('contact.php') : null,
+                in_array($page['route'], ['privacy.show', 'terms.show'], true) ? config_path('legal.php') : null,
+            ], fn ($path) => $path && is_file($path));
+            $modifiedTimestamp = collect($contentFiles)
+                ->map(fn ($path) => filemtime($path))
+                ->filter()
+                ->max();
+            $modifiedAt = $modifiedTimestamp ? date('Y-m-d', $modifiedTimestamp) : null;
+
+            return array_filter([
                 'loc' => $siteUrl.'/'.ltrim(route($page['route'], [], false), '/'),
-                'lastmod' => now()->toDateString(),
+                'lastmod' => $modifiedAt,
                 'changefreq' => $page['changefreq'] ?? 'monthly',
                 'priority' => $page['priority'] ?? '0.7',
-            ];
+            ], fn ($value) => $value !== null);
         })
         ->unique('loc')
         ->values();

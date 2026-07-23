@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
   const alert = document.querySelector("[data-form-alert]");
-  const form = document.getElementById("contact-form");
+  const form = document.getElementById("project-enquiry-form");
 
   if (alert) {
     window.requestAnimationFrame(function () {
@@ -23,6 +23,13 @@ document.addEventListener("DOMContentLoaded", function () {
       event.preventDefault();
       return;
     }
+
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({
+      event: "generate_lead",
+      lead_topic: form.elements.topic ? form.elements.topic.value : "",
+      page_path: window.location.pathname,
+    });
 
     button.disabled = true;
     button.setAttribute("aria-busy", "true");

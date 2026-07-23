@@ -22,9 +22,14 @@ use Throwable;
 
 class ContactController extends Controller
 {
-    public function show(): View
+    public function show(Request $request): View
     {
+        $serviceTopic = config('contact.service_topics.'.(string) $request->query('service'));
+
         return view('contact', [
+            'selectedTopic' => in_array($serviceTopic, config('contact.topics', []), true)
+                ? $serviceTopic
+                : null,
             'contactContext' => Crypt::encryptString(json_encode([
                 'issued_at' => now()->timestamp,
                 'nonce' => Str::random(32),

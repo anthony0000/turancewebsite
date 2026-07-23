@@ -24,6 +24,15 @@
     linear-gradient(112deg, #fdfcf9 0%, #fbfaf6 52%, #f5f1e7 100%);
 }
 
+.tt-contact-anchor {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  pointer-events: none;
+}
+
 .tt-contact-hero::after {
   content: "";
   position: absolute;
@@ -178,23 +187,6 @@
 .tt-contact-field {
   position: relative;
   margin-bottom: 30px;
-}
-
-#contact-form {
-  scroll-margin-top: 128px;
-}
-
-/* When a CTA opens the form directly, keep both columns clear of the fixed header. */
-.tt-contact-page:has(#contact-form:target) .tt-contact-hero__intro,
-.tt-contact-page:has(#contact-form:target) .tt-contact-form-shell {
-  transform: translateY(88px);
-}
-
-/* Keep the hash landing state reliable in browsers that restore the native
-   anchor after styles or scripts finish loading. */
-body.tt-contact-anchor-active .tt-contact-page .tt-contact-hero__intro,
-body.tt-contact-anchor-active .tt-contact-page .tt-contact-form-shell {
-  transform: translateY(88px);
 }
 
 .tt-contact-trap {
@@ -522,15 +514,6 @@ body.tt-contact-anchor-active .tt-contact-page .tt-contact-form-shell {
   .tt-contact-hero__details div,
   .tt-contact-hero__details div:nth-child(even) { grid-column: auto; padding: 16px 0; border-left: 0; }
   .tt-contact-form-shell { padding: 30px 22px; }
-  #contact-form { scroll-margin-top: 96px; }
-  .tt-contact-page:has(#contact-form:target) .tt-contact-hero__intro,
-  .tt-contact-page:has(#contact-form:target) .tt-contact-form-shell {
-    transform: translateY(64px);
-  }
-  body.tt-contact-anchor-active .tt-contact-page .tt-contact-hero__intro,
-  body.tt-contact-anchor-active .tt-contact-page .tt-contact-form-shell {
-    transform: translateY(64px);
-  }
   .tt-contact-form-shell__top { margin-bottom: 32px; padding-bottom: 24px; }
   .tt-contact-form-shell__top h2 { font-size: 34px; }
   .tt-contact-form-shell__index { font-size: 36px; }

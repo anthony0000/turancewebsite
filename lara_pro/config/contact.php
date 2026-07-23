@@ -30,9 +30,17 @@ return [
         'Web Design',
         'Web Development',
         'Mobile App Development',
+        'SaaS Platform Development',
         'Branding',
         'UI/UX Design',
         'Graphics Design',
+    ],
+
+    'service_topics' => [
+        'web' => 'Web Design',
+        'mobile' => 'Mobile App Development',
+        'saas' => 'SaaS Platform Development',
+        'branding' => 'Branding',
     ],
 
     'success_message' => 'Thanks for reaching out. We have received your message and will get back to you shortly.',

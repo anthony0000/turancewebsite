@@ -2,10 +2,10 @@
 
 it('renders page specific seo metadata on public pages', function () {
     $services = [
-        '/single/web' => 'Website Design and Development Services | Turance Technologies',
-        '/single/mobile' => 'Mobile App Development Services | Turance Technologies',
-        '/single/saas' => 'SaaS Product Design and Development | Turance Technologies',
-        '/single/branding' => 'Branding and Identity Design Services | Turance Technologies',
+        '/single/web' => 'Web Design Company in Abuja, Nigeria | Turance',
+        '/single/mobile' => 'Mobile App Development Company | Turance',
+        '/single/saas' => 'SaaS Product Development Company | Turance',
+        '/single/branding' => 'Branding &amp; Identity Design Agency | Turance',
     ];
 
     foreach ($services as $url => $title) {
@@ -15,10 +15,39 @@ it('renders page specific seo metadata on public pages', function () {
             ->assertSee('<link rel="canonical" href="https://turancetechnologies.com'.$url.'">', false)
             ->assertSee('application/ld+json', false)
             ->assertSee('"@type": "Service"', false)
+            ->assertSee('"@type": "FAQPage"', false)
+            ->assertSee('"@type": "BreadcrumbList"', false)
             ->assertSee('tt-detail-hero', false)
             ->assertSee('tt-header', false)
             ->assertSee('tt-footer', false)
             ->assertDontSee('wt-breadcrumb', false);
+    }
+});
+
+it('presents a search focused homepage with direct conversion paths', function () {
+    $this->get('/')
+        ->assertOk()
+        ->assertSee('Web Design &amp; Software Development Agency | Turance', false)
+        ->assertSee('Excellence')
+        ->assertSee('Delivered')
+        ->assertSee('Get a project estimate')
+        ->assertSee('data-conversion="home_hero_quote"', false)
+        ->assertSee('data-mobile-sales-bar', false)
+        ->assertSee('"@type": "FAQPage"', false);
+});
+
+it('prefills a valid service topic on the quote form', function () {
+    $this->get('/contact?service=saas')
+        ->assertOk()
+        ->assertSee('<option value="SaaS Platform Development" selected>', false)
+        ->assertSee('<link rel="canonical" href="https://turancetechnologies.com/contact">', false);
+});
+
+it('keeps quote links free of the contact form fragment', function () {
+    foreach (['/', '/service', '/single/web', '/privacy'] as $url) {
+        $this->get($url)
+            ->assertOk()
+            ->assertDontSee('#contact-form', false);
     }
 });
 
@@ -64,7 +93,14 @@ it('links every detailed service from the home page', function () {
         ->assertSee(route('services.branding', absolute: false), false)
         ->assertSee('36 Plus One')
         ->assertSee('https://www.36plusone.org/', false)
-        ->assertSee('/assets/img/project/36plusone-live.webp', false);
+        ->assertSee('KiddoVista')
+        ->assertSee('https://kiddovista.co.uk/', false)
+        ->assertSee('IHcPro Store')
+        ->assertSee('https://shop.ihcpro.co.uk/', false)
+        ->assertSee('Abstract interface preview for 36 Plus One')
+        ->assertSee('Abstract interface preview for KiddoVista')
+        ->assertSee('Abstract interface preview for IHcPro Store')
+        ->assertDontSee('/assets/img/project/36plusone-live.webp', false);
 });
 
 it('renders the services overview with the current public design system', function () {
@@ -75,6 +111,10 @@ it('renders the services overview with the current public design system', functi
         ->assertSee('tt-header', false)
         ->assertSee('tt-footer', false)
         ->assertSee('id="service-pricing"', false)
+        ->assertSee('From $500')
+        ->assertSee('From $2,500')
+        ->assertSee('From $6,500')
+        ->assertSee('These are starting prices, not fixed packages.')
         ->assertDontSee('wt-header-area', false)
         ->assertDontSee('tt-service-hero', false);
 });

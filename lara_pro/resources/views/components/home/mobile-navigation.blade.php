@@ -87,8 +87,9 @@
             <small>New projects and partnerships</small>
         </div>
 
-        <a class="tt-mobile-navigation__inquiry" href="{{ request()->routeIs('home') ? '#contact' : route('contact.show').'#contact-form' }}">
-            Start an inquiry
+        <a class="tt-mobile-navigation__inquiry" href="{{ route('contact.show') }}"
+            data-conversion="mobile_menu_quote">
+            Get a project estimate
             <svg viewBox="0 0 20 20" aria-hidden="true">
                 <path d="M5 15 15 5M7 5h8v8" />
             </svg>

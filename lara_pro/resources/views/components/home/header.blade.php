@@ -15,8 +15,9 @@
     </nav>
 
     <div class="tt-header__actions">
-        <a class="tt-header__inquiries" href="{{ request()->routeIs('home') ? '#contact' : route('contact.show').'#contact-form' }}">
-            <span>Inquiries</span>
+        <a class="tt-header__inquiries" href="{{ route('contact.show') }}"
+            data-conversion="header_quote">
+            <span>Get a quote</span>
             <svg viewBox="0 0 20 20" aria-hidden="true">
                 <path d="M5 15 15 5M7 5h8v8" />
             </svg>

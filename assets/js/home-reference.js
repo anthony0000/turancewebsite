@@ -1,20 +1,15 @@
 function anchorOffsetFor(target) {
-  const header = document.querySelector(".tt-header");
-  const headerHeight = header ? header.getBoundingClientRect().height + 18 : 18;
-
-  if (!target || target.id !== "contact-form") {
-    return headerHeight;
+  if (target && target.id === "contact-form") {
+    return 0;
   }
 
-  // Keep the first form row clear of the fixed header when arriving from a CTA.
-  const contactOffset = window.matchMedia("(max-width: 719.98px)").matches ? 96 : 128;
-  return Math.max(headerHeight, contactOffset);
+  const header = document.querySelector(".tt-header");
+  return header ? header.getBoundingClientRect().height + 18 : 18;
 }
 
 function anchorPositionFor(target) {
   if (target && target.id === "contact-form") {
-    return document.querySelector(".tt-contact-hero__intro h1")
-      || document.querySelector(".tt-contact-hero__intro")
+    return document.querySelector(".tt-contact-hero")
       || target;
   }
 
@@ -22,16 +17,9 @@ function anchorPositionFor(target) {
 }
 
 function syncHashState() {
-  const target = window.location.hash
+  return window.location.hash
     ? document.getElementById(window.location.hash.slice(1))
     : null;
-  const contactFormActive = Boolean(target && target.id === "contact-form");
-
-  if (document.body) {
-    document.body.classList.toggle("tt-contact-anchor-active", contactFormActive);
-  }
-
-  return target;
 }
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -941,21 +929,122 @@ document.addEventListener("DOMContentLoaded", function () {
     return;
   }
 
+  const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const decodeCharset = "01ABCDEFGHIJKLMNOPQRSTUVWXYZ#$%&*+-/<>";
+
+  function decodeText(el, duration) {
+    if (!el) {
+      return;
+    }
+
+    if (!el.dataset.finalText) {
+      el.dataset.finalText = el.textContent;
+    }
+
+    const finalText = el.dataset.finalText;
+
+    if (prefersReducedMotion) {
+      el.textContent = finalText;
+      return;
+    }
+
+    const chars = finalText.split("");
+    const revealDelays = chars.map(function (_, index) {
+      return (index / chars.length) * duration * 0.75 + Math.random() * duration * 0.25;
+    });
+    let start = null;
+
+    el.classList.add("is-decoding");
+
+    function frame(timestamp) {
+      if (start === null) {
+        start = timestamp;
+      }
+      const elapsed = timestamp - start;
+      let output = "";
+
+      for (let i = 0; i < chars.length; i++) {
+        if (chars[i] === " ") {
+          output += " ";
+        } else if (elapsed >= revealDelays[i]) {
+          output += chars[i];
+        } else {
+          output += decodeCharset[Math.floor(Math.random() * decodeCharset.length)];
+        }
+      }
+
+      el.textContent = output;
+
+      if (elapsed < duration) {
+        window.requestAnimationFrame(frame);
+      } else {
+        el.textContent = finalText;
+        el.classList.remove("is-decoding");
+      }
+    }
+
+    window.requestAnimationFrame(frame);
+  }
+
+  function decodeSlide(slide) {
+    decodeText(slide.querySelector("blockquote [data-decode]"), 560);
+    decodeText(slide.querySelector("footer strong [data-decode]"), 420);
+  }
+
   let currentIndex = 0;
   let touchStartX = null;
+  let leaveTimer = null;
 
   function showSlide(nextIndex) {
-    currentIndex = (nextIndex + slides.length) % slides.length;
+    const total = slides.length;
+    const targetIndex = (nextIndex + total) % total;
 
-    slides.forEach(function (slide, index) {
-      const isActive = index === currentIndex;
-      slide.classList.toggle("is-active", isActive);
-      slide.setAttribute("aria-hidden", String(!isActive));
-      slide.inert = !isActive;
-    });
+    if (targetIndex === currentIndex) {
+      return;
+    }
 
+    let diff = targetIndex - currentIndex;
+    if (diff > total / 2) diff -= total;
+    if (diff < -total / 2) diff += total;
+    const forward = diff >= 0;
+
+    carousel.classList.toggle("tt-dir-next", forward);
+    carousel.classList.toggle("tt-dir-prev", !forward);
+
+    const outgoing = slides[currentIndex];
+    const incoming = slides[targetIndex];
+
+    if (leaveTimer !== null) {
+      window.clearTimeout(leaveTimer);
+      slides.forEach(function (slide) {
+        slide.classList.remove("is-leaving");
+      });
+    }
+
+    outgoing.classList.remove("is-active");
+    outgoing.classList.add("is-leaving");
+    outgoing.setAttribute("aria-hidden", "true");
+    outgoing.inert = true;
+
+    incoming.classList.remove("is-leaving");
+    incoming.classList.add("is-active");
+    incoming.setAttribute("aria-hidden", "false");
+    incoming.inert = false;
+
+    currentIndex = targetIndex;
     currentLabel.textContent = String(currentIndex + 1).padStart(2, "0");
+
+    decodeSlide(incoming);
+
+    leaveTimer = window.setTimeout(function () {
+      outgoing.classList.remove("is-leaving");
+      leaveTimer = null;
+    }, 650);
   }
+
+  slides.forEach(function (slide, index) {
+    slide.inert = index !== currentIndex;
+  });
 
   previousButton.addEventListener("click", function () {
     showSlide(currentIndex - 1);
@@ -998,8 +1087,6 @@ document.addEventListener("DOMContentLoaded", function () {
     },
     { passive: true }
   );
-
-  showSlide(0);
 });
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -1129,4 +1216,32 @@ window.addEventListener("load", function () {
   // once after that restoration so a fixed header never covers the contact hero.
   window.setTimeout(applyHashTarget, 80);
   window.setTimeout(applyHashTarget, 260);
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+  const mobileSalesBar = document.querySelector("[data-mobile-sales-bar]");
+
+  if (mobileSalesBar) {
+    const syncSalesBar = function () {
+      mobileSalesBar.classList.toggle("is-visible", window.scrollY > 420);
+    };
+
+    syncSalesBar();
+    window.addEventListener("scroll", syncSalesBar, { passive: true });
+  }
+
+  document.addEventListener("click", function (event) {
+    const conversionLink = event.target.closest("[data-conversion]");
+    if (!conversionLink) {
+      return;
+    }
+
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({
+      event: "conversion_intent",
+      conversion_name: conversionLink.getAttribute("data-conversion"),
+      destination: conversionLink.getAttribute("href") || "",
+      page_path: window.location.pathname,
+    });
+  });
 });

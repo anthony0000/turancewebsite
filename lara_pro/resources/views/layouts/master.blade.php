@@ -19,6 +19,7 @@
         $canonicalPath = route($pageSeo['route'] ?? 'home', [], false);
         $canonical = $canonicalOverride ?: $siteUrl.'/'.ltrim($canonicalPath, '/');
         $keywords = implode(', ', config('seo.keywords', []));
+        $serviceItems = collect(config('seo.service_items', []))->values();
 
         $organization = [
             '@type' => 'ProfessionalService',
@@ -28,6 +29,9 @@
             'logo' => [
                 '@type' => 'ImageObject',
                 'url' => config('seo.logo'),
+                'contentUrl' => config('seo.logo'),
+                'width' => 694,
+                'height' => 178,
             ],
             'image' => config('seo.image'),
             'slogan' => config('seo.tagline'),
@@ -53,6 +57,22 @@
                 'telephone' => config('seo.phone'),
                 'areaServed' => config('seo.area_served', []),
                 'availableLanguage' => ['English'],
+            ],
+            'knowsAbout' => $serviceItems->pluck('name')->all(),
+            'hasOfferCatalog' => [
+                '@type' => 'OfferCatalog',
+                'name' => 'Digital product and brand services',
+                'itemListElement' => $serviceItems
+                    ->map(fn ($service) => [
+                        '@type' => 'Offer',
+                        'itemOffered' => [
+                            '@type' => 'Service',
+                            'name' => $service['name'],
+                            'description' => $service['description'],
+                            'url' => $siteUrl.'/'.ltrim(route($service['route'], [], false), '/'),
+                        ],
+                    ])
+                    ->all(),
             ],
         ];
 
@@ -101,14 +121,78 @@
                 '@type' => 'ItemList',
                 '@id' => $siteUrl.'/service#services',
                 'name' => 'Turance Technologies services',
-                'itemListElement' => collect(config('seo.service_items', []))
-                    ->values()
+                'itemListElement' => $serviceItems
                     ->map(fn ($service, $index) => [
                         '@type' => 'ListItem',
                         'position' => $index + 1,
                         'name' => $service['name'],
                         'url' => $siteUrl.'/'.ltrim(route($service['route'], [], false), '/'),
                         'description' => $service['description'],
+                    ])
+                    ->all(),
+            ];
+        }
+
+        $breadcrumbItems = collect([
+            ['name' => 'Home', 'url' => $siteUrl.'/'],
+        ]);
+
+        if (! empty($pageSeo['parent_route'])) {
+            $parentSeo = $seoPages[$pageSeo['parent_route']] ?? null;
+
+            if ($parentSeo) {
+                $breadcrumbItems->push([
+                    'name' => $parentSeo['breadcrumb'] ?? $parentSeo['title'],
+                    'url' => $siteUrl.'/'.ltrim(route($parentSeo['route'], [], false), '/'),
+                ]);
+            }
+        }
+
+        if ($seoRouteName !== 'home') {
+            $breadcrumbItems->push([
+                'name' => $pageSeo['breadcrumb'] ?? $title,
+                'url' => $canonical,
+            ]);
+        }
+
+        if ($breadcrumbItems->count() > 1) {
+            $schemaGraph[] = [
+                '@type' => 'BreadcrumbList',
+                '@id' => $canonical.'#breadcrumb',
+                'itemListElement' => $breadcrumbItems
+                    ->values()
+                    ->map(fn ($item, $index) => [
+                        '@type' => 'ListItem',
+                        'position' => $index + 1,
+                        'name' => $item['name'],
+                        'item' => $item['url'],
+                    ])
+                    ->all(),
+            ];
+        }
+
+        $pageFaqs = match (true) {
+            $seoRouteName === 'home' => config('seo.home_faqs', []),
+            $seoRouteName === 'service.show' => config('seo.services_faqs', []),
+            str_starts_with((string) $seoRouteName, 'services.') => config(
+                'service-pages.'.\Illuminate\Support\Str::after((string) $seoRouteName, 'services.').'.faqs',
+                []
+            ),
+            default => [],
+        };
+
+        if (! empty($pageFaqs)) {
+            $schemaGraph[] = [
+                '@type' => 'FAQPage',
+                '@id' => $canonical.'#faq',
+                'mainEntity' => collect($pageFaqs)
+                    ->map(fn ($faq) => [
+                        '@type' => 'Question',
+                        'name' => $faq['question'],
+                        'acceptedAnswer' => [
+                            '@type' => 'Answer',
+                            'text' => $faq['answer'],
+                        ],
                     ])
                     ->all(),
             ];
@@ -121,14 +205,17 @@
     @endphp
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $title }}</title>
     <meta name="description" content="{{ $description }}">
     <meta name="keywords" content="{{ $keywords }}">
     <meta name="robots" content="{{ $robots }}">
     <meta name="author" content="{{ config('seo.site_name') }}">
+    <meta name="theme-color" content="#071426">
     <link rel="canonical" href="{{ $canonical }}">
+    <link rel="alternate" hreflang="en" href="{{ $canonical }}">
+    <link rel="alternate" hreflang="x-default" href="{{ $canonical }}">
 
     <meta property="og:site_name" content="{{ config('seo.site_name') }}">
     <meta property="og:title" content="{{ $title }}">
@@ -136,6 +223,7 @@
     <meta property="og:type" content="website">
     <meta property="og:url" content="{{ $canonical }}">
     <meta property="og:image" content="{{ $image }}">
+    <meta property="og:image:alt" content="{{ $title }}">
     <meta property="og:locale" content="{{ config('seo.locale') }}">
 
     <meta name="twitter:card" content="summary_large_image">
@@ -145,6 +233,7 @@
     <script type="application/ld+json">
         {!! json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!}
     </script>
+    @stack('structured_data')
 
     <link rel="shortcut icon" type="image/x-icon" href="{{ asset('/assets/img/logo/favicon.png') }}">
 
@@ -339,6 +428,16 @@
 
     @if ($minimalPage)
         @yield('content')
+        @if (request()->routeIs('home', 'service.show', 'services.*'))
+            <aside class="tt-mobile-sales-bar" aria-label="Project enquiry shortcuts" data-mobile-sales-bar>
+                <a href="tel:{{ preg_replace('/\s+/', '', config('seo.phone')) }}"
+                    data-conversion="mobile_sales_call">Call us</a>
+                <a href="{{ route('contact.show') }}"
+                    data-conversion="mobile_sales_quote">Get an estimate
+                    <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5" /></svg>
+                </a>
+            </aside>
+        @endif
     @else
     <div id="smooth-wrapper">
 

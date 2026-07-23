@@ -471,13 +471,91 @@ body.tt-custom-cursor-active button {
   line-height: 1.42;
 }
 
+.tt-hero__actions {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-top: clamp(24px, 3vh, 32px);
+}
+
+.tt-hero__actions .tt-primary-button {
+  margin-top: 0;
+}
+
+.tt-hero__secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 0;
+  color: var(--tt-navy);
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 1.25;
+  text-decoration: underline;
+  text-decoration-color: rgba(201, 147, 33, 0.55);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 5px;
+}
+
+.tt-hero__secondary svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: var(--tt-gold);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.6;
+  transition: transform 220ms ease;
+}
+
+.tt-hero__secondary:hover svg {
+  transform: translateX(3px);
+}
+
+.tt-hero__assurances {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  margin: 20px 0 0;
+  padding: 0;
+  color: var(--tt-muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.025em;
+  list-style: none;
+}
+
+.tt-hero__assurances li {
+  position: relative;
+  padding-left: 15px;
+}
+
+.tt-hero__assurances li::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 6px;
+  height: 6px;
+  border: 1px solid var(--tt-gold);
+  border-radius: 50%;
+  transform: translateY(-50%);
+}
+
+.tt-mobile-sales-bar {
+  display: none;
+}
+
 .tt-primary-button {
   position: relative;
   overflow: hidden;
   display: inline-flex;
   align-items: center;
   justify-content: space-between;
-  min-width: clamp(232px, 15.5vw, 260px);
+  gap: 20px;
+  width: max-content;
+  max-width: 100%;
+  min-width: clamp(250px, 18vw, 300px);
   height: 54px;
   margin-top: clamp(24px, 3vh, 32px);
   padding: 5px 5px 5px 26px;
@@ -512,7 +590,12 @@ body.tt-custom-cursor-active button {
   z-index: 1;
 }
 
+.tt-primary-button > span {
+  white-space: nowrap;
+}
+
 .tt-primary-button i {
+  flex: 0 0 44px;
   display: grid;
   place-items: center;
   width: 44px;
@@ -1825,16 +1908,40 @@ body.tt-custom-cursor-active button {
     display: none;
   }
 
+  .tt-hero__actions {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 28px;
+  }
+
+  .tt-hero__actions .tt-primary-button {
+    margin-top: 0;
+  }
+
+  .tt-hero__secondary {
+    width: fit-content;
+    padding: 7px 2px;
+  }
+
+  .tt-hero__assurances {
+    gap: 8px 14px;
+    margin-top: 18px;
+    font-size: 10px;
+  }
+
   .tt-primary-button {
-    width: min(100%, 260px);
+    gap: 12px;
+    width: min(100%, 320px);
     min-width: 0;
     height: 58px;
     margin-top: 28px;
-    padding-left: 28px;
-    font-size: 15px;
+    padding-left: clamp(20px, 6vw, 28px);
+    font-size: clamp(12px, 3.8vw, 15px);
   }
 
   .tt-primary-button i {
+    flex-basis: 48px;
     width: 48px;
     height: 48px;
   }
@@ -1860,6 +1967,62 @@ body.tt-custom-cursor-active button {
     top: 2%;
     right: -2%;
     width: 108%;
+  }
+
+  .tt-mobile-sales-bar {
+    position: fixed;
+    right: 12px;
+    bottom: max(12px, env(safe-area-inset-bottom));
+    left: 12px;
+    z-index: 80;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 8px;
+    padding: 7px;
+    border: 1px solid rgba(201, 147, 33, 0.24);
+    border-radius: 999px;
+    background: rgba(7, 20, 38, 0.96);
+    box-shadow: 0 16px 45px rgba(7, 20, 38, 0.24);
+    opacity: 0;
+    transform: translateY(calc(100% + 24px));
+    transition: opacity 240ms ease, transform 360ms cubic-bezier(0.2, 0.8, 0.2, 1);
+    pointer-events: none;
+    backdrop-filter: blur(18px);
+  }
+
+  .tt-mobile-sales-bar.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  .tt-mobile-sales-bar a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 46px;
+    padding: 0 18px;
+    border-radius: 999px;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 650;
+    letter-spacing: 0.02em;
+  }
+
+  .tt-mobile-sales-bar a:last-child {
+    gap: 9px;
+    background: linear-gradient(110deg, var(--tt-gold-light), var(--tt-gold-soft));
+    color: var(--tt-navy);
+  }
+
+  .tt-mobile-sales-bar svg {
+    width: 17px;
+    height: 17px;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.7;
   }
 
   .tt-hero__linework {
@@ -2060,6 +2223,18 @@ body.tt-custom-cursor-active button {
 
   .tt-hero__main {
     padding-top: 46px;
+  }
+
+  .tt-primary-button {
+    gap: 9px;
+    padding-left: 18px;
+    font-size: 12px;
+  }
+
+  .tt-primary-button i {
+    flex-basis: 46px;
+    width: 46px;
+    height: 46px;
   }
 
   .tt-hero-visual {

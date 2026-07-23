@@ -48,14 +48,14 @@
     $plans = [
         [
             'name' => 'Essential Presence',
-            'price' => 'From $1,500',
+            'price' => 'From $500',
             'fit' => 'A focused, premium digital presence for founders and growing businesses.',
             'timeline' => '2–4 weeks',
             'items' => ['Discovery and direction', 'Landing page or focused website', 'Responsive build and enquiry flow', 'SEO foundation and launch support'],
         ],
         [
             'name' => 'Growth Build',
-            'price' => 'From $6,000',
+            'price' => 'From $2,500',
             'fit' => 'A custom product experience with deeper journeys, workflows or integrations.',
             'timeline' => '5–12 weeks',
             'featured' => true,
@@ -63,19 +63,14 @@
         ],
         [
             'name' => 'Flagship System',
-            'price' => 'From $12,000',
+            'price' => 'From $6,500',
             'fit' => 'An ambitious multi-surface platform or complete brand and product ecosystem.',
             'timeline' => '12+ weeks',
             'items' => ['End-to-end product direction', 'Advanced UX and technical architecture', 'Connected brand and digital systems', 'Priority launch and growth planning'],
         ],
     ];
 
-    $faqs = [
-        ['question' => 'How do we choose the right engagement?', 'answer' => 'We use your goals, timeline, current assets and technical needs to shape the right level of work. The first conversation is about clarity, not forcing a package.'],
-        ['question' => 'Can you improve an existing brand or product?', 'answer' => 'Yes. We identify what already works, preserve the strongest foundations and focus investment on the areas limiting clarity, adoption or growth.'],
-        ['question' => 'Do you handle both design and development?', 'answer' => 'Yes. Strategy, product design, engineering, testing and launch can stay aligned under one delivery team instead of being divided across several vendors.'],
-        ['question' => 'What happens after launch?', 'answer' => 'We can support optimisation, analytics review, maintenance and new feature delivery. Launch is the beginning of real-world learning, not the end of the relationship.'],
-    ];
+    $faqs = config('seo.services_faqs', []);
 @endphp
 
 @push('styles')
@@ -83,7 +78,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&amp;family=Hanken+Grotesk:wght@400;500;600;700&amp;display=swap">
-    <link rel="stylesheet" href="{{ asset('/assets/css/home-reference.css') }}?v=2.2">
+    <link rel="stylesheet" href="{{ asset('/assets/css/home-reference.css') }}?v=2.4">
     <link rel="stylesheet" href="{{ asset('/assets/css/home-sections.css') }}?v=2.1">
     <link rel="stylesheet" href="{{ asset('/assets/css/services-overview-reference.css') }}?v=1.1">
 @endpush
@@ -109,7 +104,8 @@
                         around one outcome: lasting progress.
                     </p>
                     <div class="tt-services-overview-hero__actions">
-                        <x-home.primary-button :href="route('contact.show').'#contact-form'">Start a project</x-home.primary-button>
+                        <x-home.primary-button :href="route('contact.show')"
+                            data-conversion="services_hero_quote">Get a project estimate</x-home.primary-button>
                         <a class="tt-text-link" href="#capabilities">Explore capabilities
                             <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3v14M5 12l5 5 5-5" /></svg>
                         </a>
@@ -208,9 +204,9 @@
                 <div class="tt-services-pricing__heading">
                     <div>
                         <p class="tt-services-overview-kicker">Starting points</p>
-                        <h2 id="pricing-title">A clear frame for planning the investment.</h2>
+                        <h2 id="pricing-title">Flexible starting points for planning the investment.</h2>
                     </div>
-                    <p>Every proposal is shaped around scope, complexity and timing. These ranges provide a useful place to begin.</p>
+                    <p>These are starting prices, not fixed packages. Every proposal is shaped around the required scope, complexity, integrations and delivery timeline.</p>
                 </div>
 
                 <div class="tt-services-pricing__grid">
@@ -225,7 +221,8 @@
                             </ul>
                             <div>
                                 <span>Typical timeline · {{ $plan['timeline'] }}</span>
-                                <a href="{{ route('contact.show') }}#contact-form">Discuss this scope
+                                <a href="{{ route('contact.show') }}"
+                                    data-conversion="pricing_{{ \Illuminate\Support\Str::slug($plan['name'], '_') }}">Discuss this scope
                                     <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5" /></svg>
                                 </a>
                             </div>
@@ -271,7 +268,8 @@
                     title="Bring us the ambition. We will help shape the right path."
                     copy="Tell us what you are building, improving or trying to solve. The first useful outcome is clarity." />
                 <div class="tt-contact-cta__actions" data-reveal>
-                    <x-home.primary-button :href="route('contact.show').'#contact-form'">Start your project</x-home.primary-button>
+                    <x-home.primary-button :href="route('contact.show')"
+                        data-conversion="services_bottom_quote">Get a project estimate</x-home.primary-button>
                     <a class="tt-contact-cta__secondary" href="mailto:{{ config('seo.email') }}">Contact our team
                         <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5" /></svg>
                     </a>
@@ -284,5 +282,5 @@
 @endsection
 
 @push('scripts')
-    <script src="{{ asset('/assets/js/home-reference.js') }}?v=2.3" defer></script>
+    <script src="{{ asset('/assets/js/home-reference.js') }}?v=2.5" defer></script>
 @endpush
