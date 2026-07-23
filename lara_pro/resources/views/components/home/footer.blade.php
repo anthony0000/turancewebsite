@@ -20,10 +20,10 @@
                 </nav>
                 <nav aria-label="Footer services">
                     <span>Services</span>
-                    <a href="{{ route('home') }}#services">Product strategy</a>
-                    <a href="{{ route('home') }}#services">UI/UX design</a>
-                    <a href="{{ route('home') }}#services">Web &amp; mobile</a>
-                    <a href="{{ route('home') }}#services">Automation &amp; cloud</a>
+                    <a href="{{ route('services.web') }}">Web development</a>
+                    <a href="{{ route('services.mobile') }}">Mobile products</a>
+                    <a href="{{ route('services.saas') }}">SaaS platforms</a>
+                    <a href="{{ route('services.branding') }}">Branding &amp; identity</a>
                 </nav>
                 <address>
                     <span>Connect</span>
@@ -36,7 +36,7 @@
         </div>
         <div class="tt-footer__bottom">
             <p>&copy; {{ date('Y') }} Turance Technologies. All rights reserved.</p>
-            <div><span>Privacy policy</span><span>Terms</span></div>
+            <div><a href="{{ route('privacy.show') }}">Privacy policy</a><a href="{{ route('terms.show') }}">Terms</a></div>
             <a class="tt-footer__top-link" href="#main-content">Back to top
                 <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 16V4M5 9l5-5 5 5" /></svg>
             </a>

@@ -39,20 +39,42 @@ Route::get('/llms.txt', function () {
 })->name('seo.llms');
 
 Route::view('/', 'index')->name('home');
-Route::view('/service', 'service')->name('service.show');
+Route::view('/service', 'services-overview')->name('service.show');
 Route::redirect('/index.htm', '/', 301);
 Route::redirect('/index.html', '/', 301);
 Route::redirect('/service.html', '/service', 301);
 
-Route::view('/single/web', 'single-web')->name('services.web');
-Route::view('/single/mobile', 'single-mobile')->name('services.mobile');
-Route::view('/single/saas', 'single-saas')->name('services.saas');
-Route::view('/single/branding', 'branding')->name('services.branding');
+Route::view('/single/web', 'service-detail')->name('services.web');
+Route::view('/single/mobile', 'service-detail')->name('services.mobile');
+Route::view('/single/saas', 'service-detail')->name('services.saas');
+Route::view('/single/branding', 'service-detail')->name('services.branding');
 Route::redirect('/single-service.html', '/single/web', 301);
+
+// Preserve links from the previous static site without publishing duplicate pages.
+Route::redirect('/index2.html', '/single/web', 301);
+Route::redirect('/index3.html', '/single/mobile', 301);
+Route::redirect('/index4.html', '/single/branding', 301);
+Route::redirect('/about.html', '/#about', 301);
+Route::redirect('/team.html', '/#about', 301);
+Route::redirect('/team-details.html', '/#about', 301);
+Route::redirect('/testimonial.html', '/#perspectives', 301);
+Route::redirect('/pricing.html', '/service#service-pricing', 301);
+Route::redirect('/portfolio.html', '/#work', 301);
+Route::redirect('/portfolio-gallery.html', '/#work', 301);
+Route::redirect('/portfolio-list.html', '/#work', 301);
+Route::redirect('/portfolio-single.html', '/#work', 301);
+Route::redirect('/faq.html', '/#faq', 301);
 
 Route::get('/contact', [ContactController::class, 'show'])->name('contact.show');
 Route::redirect('/contact.html', '/contact', 301);
-Route::post('/contact', [ContactController::class, 'store'])->name('contact.store');
+Route::post('/contact', [ContactController::class, 'store'])
+    ->middleware('throttle:contact')
+    ->name('contact.store');
+Route::get('/privacy', fn () => view('legal-page', ['legal' => config('legal.privacy')]))->name('privacy.show');
+Route::get('/terms', fn () => view('legal-page', ['legal' => config('legal.terms')]))->name('terms.show');
+Route::redirect('/privacy-policy', '/privacy', 301);
+Route::redirect('/terms-of-service', '/terms', 301);
+Route::redirect('/terms-and-conditions', '/terms', 301);
 Route::get('/p/{token}', [AdminProposalController::class, 'share'])->name('proposals.share');
 
 Route::prefix('admin')->name('admin.')->group(function () {

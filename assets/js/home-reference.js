@@ -1,4 +1,44 @@
+function anchorOffsetFor(target) {
+  const header = document.querySelector(".tt-header");
+  const headerHeight = header ? header.getBoundingClientRect().height + 18 : 18;
+
+  if (!target || target.id !== "contact-form") {
+    return headerHeight;
+  }
+
+  // Keep the first form row clear of the fixed header when arriving from a CTA.
+  const contactOffset = window.matchMedia("(max-width: 719.98px)").matches ? 96 : 128;
+  return Math.max(headerHeight, contactOffset);
+}
+
+function anchorPositionFor(target) {
+  if (target && target.id === "contact-form") {
+    return document.querySelector(".tt-contact-hero__intro h1")
+      || document.querySelector(".tt-contact-hero__intro")
+      || target;
+  }
+
+  return target;
+}
+
+function syncHashState() {
+  const target = window.location.hash
+    ? document.getElementById(window.location.hash.slice(1))
+    : null;
+  const contactFormActive = Boolean(target && target.id === "contact-form");
+
+  if (document.body) {
+    document.body.classList.toggle("tt-contact-anchor-active", contactFormActive);
+  }
+
+  return target;
+}
+
 document.addEventListener("DOMContentLoaded", function () {
+  syncHashState();
+
+  window.addEventListener("hashchange", syncHashState);
+
   const header = document.querySelector(".tt-header");
 
   if (!header) {
@@ -461,7 +501,11 @@ document.addEventListener("DOMContentLoaded", function () {
   const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const hasFinePointer = window.matchMedia("(pointer: fine)").matches;
 
-  if (prefersReducedMotion || !hasFinePointer) {
+  if (
+    prefersReducedMotion ||
+    !hasFinePointer ||
+    document.querySelector(".tt-detail, .tt-services-overview")
+  ) {
     return;
   }
 
@@ -971,11 +1015,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  function headerOffset() {
-    const header = document.querySelector(".tt-header");
-    return header ? header.getBoundingClientRect().height + 18 : 18;
-  }
-
   function easeInOutCubic(progress) {
     return progress < 0.5
       ? 4 * progress * progress * progress
@@ -984,13 +1023,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function scrollToTarget(target, hash) {
     cancelScroll();
+    window.history.pushState(null, "", hash);
+    syncHashState();
 
     const startY = window.scrollY;
     const documentHeight = document.documentElement.scrollHeight;
+    const positionTarget = anchorPositionFor(target);
     const destination = Math.max(
       0,
       Math.min(
-        target.getBoundingClientRect().top + startY - headerOffset(),
+        positionTarget.getBoundingClientRect().top + startY - anchorOffsetFor(target),
         documentHeight - window.innerHeight
       )
     );
@@ -998,7 +1040,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (prefersReducedMotion.matches || Math.abs(distance) < 2) {
       window.scrollTo(0, destination);
-      window.history.pushState(null, "", hash);
       return;
     }
 
@@ -1017,7 +1058,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
       animationFrame = null;
       document.documentElement.style.scrollBehavior = "";
-      window.history.pushState(null, "", hash);
     }
 
     animationFrame = window.requestAnimationFrame(step);
@@ -1060,30 +1100,33 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 window.addEventListener("load", function () {
-  if (!window.location.hash) {
-    return;
-  }
-
-  const target = document.querySelector(window.location.hash);
-  const header = document.querySelector(".tt-header");
-
-  if (!target) {
-    return;
-  }
-
-  const previousBehaviour = document.documentElement.style.scrollBehavior;
-  const headerOffset = header ? header.getBoundingClientRect().height + 18 : 0;
-  document.documentElement.style.scrollBehavior = "auto";
-  const targetTop = target.getBoundingClientRect().top + window.scrollY;
-  window.scrollTo(0, Math.max(0, targetTop - headerOffset));
-  const revealRoot = target.closest("[data-reveal]");
-  [target, revealRoot].concat(Array.from(target.querySelectorAll("[data-reveal]"))).filter(Boolean).forEach(function (element) {
-    if (element.hasAttribute && element.hasAttribute("data-reveal")) {
-      element.style.transitionDelay = "0ms";
-      element.classList.add("is-visible");
+  function applyHashTarget() {
+    const target = syncHashState();
+    if (!target) {
+      return;
     }
-  });
-  window.requestAnimationFrame(function () {
-    document.documentElement.style.scrollBehavior = previousBehaviour;
-  });
+
+    const previousBehaviour = document.documentElement.style.scrollBehavior;
+    document.documentElement.style.scrollBehavior = "auto";
+    const positionTarget = anchorPositionFor(target);
+    const targetTop = positionTarget.getBoundingClientRect().top + window.scrollY;
+    window.scrollTo(0, Math.max(0, targetTop - anchorOffsetFor(target)));
+    const revealRoot = target.closest("[data-reveal]");
+    [target, revealRoot].concat(Array.from(target.querySelectorAll("[data-reveal]"))).filter(Boolean).forEach(function (element) {
+      if (element.hasAttribute && element.hasAttribute("data-reveal")) {
+        element.style.transitionDelay = "0ms";
+        element.classList.add("is-visible");
+      }
+    });
+    window.requestAnimationFrame(function () {
+      document.documentElement.style.scrollBehavior = previousBehaviour;
+    });
+  }
+
+  applyHashTarget();
+
+  // Browsers can restore the native hash position after the load event. Re-apply
+  // once after that restoration so a fixed header never covers the contact hero.
+  window.setTimeout(applyHashTarget, 80);
+  window.setTimeout(applyHashTarget, 260);
 });

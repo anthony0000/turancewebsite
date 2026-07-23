@@ -89,6 +89,20 @@ return [
             'priority' => '0.85',
             'changefreq' => 'monthly',
         ],
+        'privacy.show' => [
+            'title' => 'Privacy Policy | Turance Technologies',
+            'description' => 'Learn how Turance Technologies collects, uses and protects information submitted through this website.',
+            'route' => 'privacy.show',
+            'priority' => '0.4',
+            'changefreq' => 'yearly',
+        ],
+        'terms.show' => [
+            'title' => 'Terms of Use | Turance Technologies',
+            'description' => 'Read the terms that apply to using the Turance Technologies website and submitting project enquiries.',
+            'route' => 'terms.show',
+            'priority' => '0.4',
+            'changefreq' => 'yearly',
+        ],
     ],
     'service_items' => [
         [

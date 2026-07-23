@@ -81,6 +81,12 @@
 
                     <form id="contact-form" action="{{ route('contact.store') }}" method="post">
                         @csrf
+                        <input type="hidden" name="contact_context" value="{{ $contactContext }}">
+                        <div class="tt-contact-trap" aria-hidden="true">
+                            <label for="company-fax">Leave this field empty</label>
+                            <input type="text" id="company-fax" name="company_fax" value=""
+                                tabindex="-1" autocomplete="off">
+                        </div>
 
                         <div class="tt-contact-form__row">
                             <div class="tt-contact-field {{ $errors->has('name') ? 'has-error' : '' }}">
@@ -123,6 +129,14 @@
                             <span class="tt-contact-field__guidance" id="message-guidance">A few clear details are enough to begin.</span>
                             @error('message')<small id="message-error">{{ $message }}</small>@enderror
                         </div>
+
+                        @if (config('contact.turnstile.enabled') && filled(config('contact.turnstile.site_key')))
+                            <div class="tt-contact-turnstile">
+                                <div class="cf-turnstile" data-sitekey="{{ config('contact.turnstile.site_key') }}"
+                                    data-theme="light" data-response-field-name="cf-turnstile-response"></div>
+                                @error('cf-turnstile-response')<small>{{ $message }}</small>@enderror
+                            </div>
+                        @endif
 
                         <div class="tt-contact-form__submit">
                             <button class="tt-contact-submit" type="submit">
@@ -179,6 +193,9 @@
 @endsection
 
 @push('scripts')
-    <script src="{{ asset('/assets/js/home-reference.js') }}?v=2.2" defer></script>
+    @if (config('contact.turnstile.enabled') && filled(config('contact.turnstile.site_key')))
+        <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+    @endif
+    <script src="{{ asset('/assets/js/home-reference.js') }}?v=2.3" defer></script>
     <script src="{{ asset('/assets/js/contact-reference.js') }}?v=1.0" defer></script>
 @endpush

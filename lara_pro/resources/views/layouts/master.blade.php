@@ -229,13 +229,13 @@
                                                                 alt="Website design preview">
                                                             <div class="homemenu-btn">
                                                                 <a class="menu-btn show-1"
-                                                                    href="{{ url('index2.html') }}">View
+                                                                    href="{{ route('services.web') }}">View
                                                                     Page</a>
                                                             </div>
                                                         </div>
                                                         <div class="homemenu-content text-center">
                                                             <h4 class="homemenu-title">
-                                                                <a href="{{ url('index2.html') }}">Home 02</a>
+                                                                <a href="{{ route('services.web') }}">Website Design</a>
                                                             </h4>
                                                         </div>
                                                     </div>
@@ -245,13 +245,13 @@
                                                                 alt="Mobile and SaaS product preview">
                                                             <div class="homemenu-btn">
                                                                 <a class="menu-btn show-1"
-                                                                    href="{{ url('index3.html') }}">View
+                                                                    href="{{ route('services.mobile') }}">View
                                                                     Page</a>
                                                             </div>
                                                         </div>
                                                         <div class="homemenu-content text-center">
                                                             <h4 class="homemenu-title">
-                                                                <a href="{{ url('index3.html') }}">Home 03</a>
+                                                                <a href="{{ route('services.mobile') }}">Mobile Products</a>
                                                             </h4>
                                                         </div>
                                                     </div>
@@ -261,13 +261,13 @@
                                                                 alt="Brand identity preview">
                                                             <div class="homemenu-btn">
                                                                 <a class="menu-btn show-1"
-                                                                    href="{{ url('index4.html') }}">View
+                                                                    href="{{ route('services.branding') }}">View
                                                                     Page</a>
                                                             </div>
                                                         </div>
                                                         <div class="homemenu-content text-center">
                                                             <h4 class="homemenu-title">
-                                                                <a href="{{ url('index4.html') }}">Home 04</a>
+                                                                <a href="{{ route('services.branding') }}">Brand Identity</a>
                                                             </h4>
                                                         </div>
                                                     </div>
@@ -283,21 +283,13 @@
                                                 <li><a href="{{ route('services.branding') }}">branding</a></li>
                                             </ul>
                                         </li>
-                                        <li class="has-dropdown"><a href="{{ url('#') }}">Pages</a>
+                                        <li class="has-dropdown"><a href="{{ route('home') }}#about">Company</a>
                                             <ul class="submenu dark wt-submenu">
-                                                <li><a href="{{ url('about.html') }}">about</a></li>
-                                                <li><a href="{{ url('team.html') }}">team</a></li>
-                                                <li><a href="{{ url('team-details.html') }}">team details</a></li>
-                                                <li><a href="{{ url('testimonial.html') }}">testimonial</a></li>
-                                                <li><a href="{{ url('pricing.html') }}">pricing</a></li>
-                                                <li><a href="{{ url('portfolio.html') }}">portfolio</a></li>
-                                                <li><a href="{{ url('portfolio-gallery.html') }}">portfolio
-                                                        gallery</a></li>
-                                                <li><a href="{{ url('portfolio-list.html') }}">portfolio list</a></li>
-                                                <li><a href="{{ url('portfolio-single.html') }}">portfolio single</a>
-                                                </li>
-                                                <li><a href="{{ url('faq.html') }}">faq</a></li>
-                                                <li><a href="{{ url('error.html') }}">error</a></li>
+                                                <li><a href="{{ route('home') }}#about">about</a></li>
+                                                <li><a href="{{ route('home') }}#work">selected work</a></li>
+                                                <li><a href="{{ route('home') }}#perspectives">client perspectives</a></li>
+                                                <li><a href="{{ route('service.show') }}#service-pricing">pricing</a></li>
+                                                <li><a href="{{ route('home') }}#faq">faq</a></li>
                                             </ul>
                                         </li>
                                         <li><a href="{{ route('contact.show') }}">Contact</a></li>
@@ -428,7 +420,7 @@
                                                 <ul class="submenu">
                                                     <li><a href="{{ route('home') }}">Home</a></li>
                                                     <li><a href="{{ route('service.show') }}">Services</a></li>
-                                                    <li><a href="{{ url('about.html') }}">About</a></li>
+                                                    <li><a href="{{ route('home') }}#about">About</a></li>
                                                     <li><a href="{{ route('contact.show') }}">Contact</a></li>
                                                 </ul>
                                             </li>

@@ -14,12 +14,12 @@
 @section('content')
     @php
         $services = [
-            ['name' => 'Product Strategy', 'copy' => 'Transform ideas and business requirements into focused digital roadmaps.'],
-            ['name' => 'UI/UX Design', 'copy' => 'Create intuitive, memorable and conversion-focused digital experiences.'],
-            ['name' => 'Web Development', 'copy' => 'Build fast, responsive, secure and scalable websites and applications.'],
-            ['name' => 'Mobile Development', 'copy' => 'Develop high-quality mobile products for modern customer experiences.'],
-            ['name' => 'Business Automation', 'copy' => 'Replace repetitive processes with connected and efficient digital systems.'],
-            ['name' => 'Cloud & Technical Support', 'copy' => 'Deploy, maintain, optimise and support reliable digital infrastructure.'],
+            ['name' => 'Product Strategy', 'copy' => 'Transform ideas and business requirements into focused digital roadmaps.', 'route' => 'service.show'],
+            ['name' => 'UI/UX Design', 'copy' => 'Create intuitive, memorable and conversion-focused digital experiences.', 'route' => 'service.show'],
+            ['name' => 'Web Development', 'copy' => 'Build fast, responsive, secure and scalable websites and applications.', 'route' => 'services.web'],
+            ['name' => 'Mobile Development', 'copy' => 'Develop high-quality mobile products for modern customer experiences.', 'route' => 'services.mobile'],
+            ['name' => 'SaaS & Automation', 'copy' => 'Turn complex operations into scalable products and connected workflows.', 'route' => 'services.saas'],
+            ['name' => 'Branding & Identity', 'copy' => 'Build a distinct visual and verbal system that earns recognition and trust.', 'route' => 'services.branding'],
         ];
 
         $projects = [
@@ -43,6 +43,16 @@
                 'services' => ['Workflow strategy', 'UI/UX design', 'Web application'], 'year' => '2025',
                 'outcome' => 'Better operational visibility and more consistent service control.', 'visual' => 'operations',
                 'image' => null, 'link' => null,
+            ],
+            [
+                'name' => '36 Plus One', 'industry' => 'Social impact', 'category' => 'Nonprofit platform',
+                'summary' => 'A public-facing platform helping a development initiative communicate its mission and connect people with community causes.',
+                'services' => ['UX design', 'Web development', 'Donation workflows'], 'year' => 'Live',
+                'outcome' => 'One accessible destination for causes, donations, volunteering, organisational work and partner engagement.',
+                'visual' => 'impact',
+                'image' => asset('/assets/img/project/36plusone-live.webp'),
+                'link' => 'https://www.36plusone.org/',
+                'link_label' => 'View live project',
             ],
         ];
 
@@ -111,7 +121,6 @@
                 <svg class="tt-hero__linework" viewBox="0 0 900 900" fill="none"
                     xmlns="http://www.w3.org/2000/svg">
                     <ellipse cx="660" cy="426" rx="390" ry="318" stroke="currentColor" stroke-width="1" />
-                    <path d="M178 900C390 624 606 407 900 158" stroke="currentColor" stroke-width="1" />
                 </svg>
             </div>
 
@@ -125,9 +134,9 @@
                     </div>
 
                     <h1 class="tt-hero__title tt-reveal tt-reveal--two" id="hero-title"
-                        aria-label="Digital Excellence Built to Inspire">
-                        <span data-scramble aria-hidden="true">Digital Excellence</span>
-                        <span data-scramble aria-hidden="true">Built to Inspire</span>
+                        aria-label="Excellence Delivered">
+                        <span data-scramble aria-hidden="true">Excellence</span>
+                        <span data-scramble aria-hidden="true">Delivered</span>
                     </h1>
 
                     <p class="tt-hero__description tt-reveal tt-reveal--three">
@@ -202,7 +211,7 @@
 
                 <div class="tt-services__list">
                     @foreach ($services as $service)
-                        <a class="tt-service-row" href="{{ route('contact.show') }}" data-reveal>
+                        <a class="tt-service-row" href="{{ route($service['route']) }}" data-reveal>
                             <span class="tt-service-row__number">{{ str_pad($loop->iteration, 2, '0', STR_PAD_LEFT) }}</span>
                             <span class="tt-service-row__body">
                                 <strong>{{ $service['name'] }}</strong>
@@ -255,7 +264,11 @@
                                 </ul>
                                 <div class="tt-project__outcome"><span>Outcome</span><strong>{{ $project['outcome'] }}</strong></div>
                                 @if ($project['link'])
-                                    <a class="tt-text-link" href="{{ $project['link'] }}">View case study <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5" /></svg></a>
+                                    <a class="tt-text-link" href="{{ $project['link'] }}"
+                                        @if (\Illuminate\Support\Str::startsWith($project['link'], ['http://', 'https://'])) target="_blank" rel="noopener noreferrer" @endif>
+                                        {{ $project['link_label'] ?? 'View case study' }}
+                                        <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5" /></svg>
+                                    </a>
                                 @else
                                     <span class="tt-project__status">Case study awaiting publication</span>
                                 @endif
@@ -465,5 +478,5 @@
 @endsection
 
 @push('scripts')
-    <script src="{{ asset('/assets/js/home-reference.js') }}?v=2.2" defer></script>
+    <script src="{{ asset('/assets/js/home-reference.js') }}?v=2.3" defer></script>
 @endpush
