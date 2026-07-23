@@ -569,6 +569,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const ring = document.querySelector("[data-orbit-ring]");
   const dots = Array.from(document.querySelectorAll("[data-orbit-dot]"));
   const spark = document.querySelector("[data-orbit-spark]");
+  const shock = document.querySelector("[data-orbit-shock]");
   const wobble = document.querySelector("[data-tilt-wobble]");
   const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -620,15 +621,25 @@ document.addEventListener("DOMContentLoaded", function () {
       }, 600);
     });
 
-    if (spark) {
+    if (spark || shock) {
       const x = (posA.x + posB.x) / 2;
       const y = (posA.y + posB.y) / 2;
 
-      spark.style.setProperty("--spark-x", x.toFixed(2) + "px");
-      spark.style.setProperty("--spark-y", y.toFixed(2) + "px");
-      spark.classList.remove("is-bursting");
-      void spark.offsetWidth;
-      spark.classList.add("is-bursting");
+      if (spark) {
+        spark.style.setProperty("--spark-x", x.toFixed(2) + "px");
+        spark.style.setProperty("--spark-y", y.toFixed(2) + "px");
+        spark.classList.remove("is-bursting");
+        void spark.offsetWidth;
+        spark.classList.add("is-bursting");
+      }
+
+      if (shock) {
+        shock.style.setProperty("--spark-x", x.toFixed(2) + "px");
+        shock.style.setProperty("--spark-y", y.toFixed(2) + "px");
+        shock.classList.remove("is-shocking");
+        void shock.offsetWidth;
+        shock.classList.add("is-shocking");
+      }
     }
 
     if (wobble) {

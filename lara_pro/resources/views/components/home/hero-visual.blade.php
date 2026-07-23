@@ -7,6 +7,7 @@
         <span class="tt-hero-visual__orbit-dot tt-hero-visual__orbit-dot--inner" data-orbit-dot>
             <span class="tt-hero-visual__orbit-dot__core"></span>
         </span>
+        <span class="tt-hero-visual__orbit-shock" data-orbit-shock></span>
         <span class="tt-hero-visual__orbit-spark" data-orbit-spark></span>
     </div>
     <div class="tt-hero-visual__object">

@@ -28,9 +28,9 @@
                 <address>
                     <span>Connect</span>
                     <a href="mailto:{{ config('seo.email') }}">{{ config('seo.email') }}</a>
-                    <a href="tel:{{ preg_replace('/\s+/', '', config('seo.phone')) }}">{{ config('seo.phone') }}</a>
+                    <a href="{{ config('seo.whatsapp_url') }}" target="_blank"
+                        rel="noopener noreferrer">{{ config('seo.phone') }}</a>
                     <p>{{ config('seo.address.city') }}, {{ config('seo.address.region') }} &middot; {{ config('seo.address.country') }}</p>
-                    <small>Social profiles available on request</small>
                 </address>
             </div>
         </div>

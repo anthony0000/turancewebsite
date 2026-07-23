@@ -388,7 +388,7 @@
 
                             <!-- mail -->
                             <div class="wt-header-mail d-none d-lg-block">
-                                <a href="mailto:support@turancetechnologies.com">support@turancetechnologies.com</a>
+                                <a href="mailto:{{ config('seo.email') }}">{{ config('seo.email') }}</a>
                             </div>
 
                             <!-- social -->
@@ -430,8 +430,8 @@
         @yield('content')
         @if (request()->routeIs('home', 'service.show', 'services.*'))
             <aside class="tt-mobile-sales-bar" aria-label="Project enquiry shortcuts" data-mobile-sales-bar>
-                <a href="tel:{{ preg_replace('/\s+/', '', config('seo.phone')) }}"
-                    data-conversion="mobile_sales_call">Call us</a>
+                <a href="{{ config('seo.whatsapp_url') }}" target="_blank" rel="noopener noreferrer"
+                    data-conversion="mobile_sales_whatsapp">WhatsApp</a>
                 <a href="{{ route('contact.show') }}"
                     data-conversion="mobile_sales_quote">Get an estimate
                     <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5" /></svg>
@@ -471,7 +471,7 @@
                                     <div class="wt-footer-widget-border"></div>
                                     <div class="wt-footer-widget-mail">
                                         <h6>email us</h6>
-                                        <a href="mailto:support@turancetechnologies.com">support@turancetechnologies.com</a>
+                                        <a href="mailto:{{ config('seo.email') }}">{{ config('seo.email') }}</a>
                                     </div>
                                     <div class="wt-footer-right-social">
                                         <ul>
@@ -661,13 +661,14 @@
                             </li>
                             <li>
                                 <i class="fas fa-envelope"></i>
-                                <a href="mailto:support@turancetechnologies.com">
-                                    <span class="__cf_email__">support@turancetechnologies.com</span>
+                                <a href="mailto:{{ config('seo.email') }}">
+                                    <span class="__cf_email__">{{ config('seo.email') }}</span>
                                 </a>
                             </li>
                             <li>
-                                <i class="fa-solid fa-phone-flip"></i>
-                                <a href="tel:+2349124948602">+2349124948602</a>
+                                <i class="fa-brands fa-whatsapp"></i>
+                                <a href="{{ config('seo.whatsapp_url') }}" target="_blank"
+                                    rel="noopener noreferrer">{{ config('seo.phone') }}</a>
                             </li>
                         </ul>
                     </div>

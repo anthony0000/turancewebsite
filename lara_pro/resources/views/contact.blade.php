@@ -43,8 +43,9 @@
                             <dd><a href="mailto:{{ config('seo.email') }}">{{ config('seo.email') }}</a></dd>
                         </div>
                         <div>
-                            <dt>Telephone</dt>
-                            <dd><a href="tel:{{ preg_replace('/\s+/', '', config('seo.phone')) }}">{{ config('seo.phone') }}</a></dd>
+                            <dt>WhatsApp</dt>
+                            <dd><a href="{{ config('seo.whatsapp_url') }}" target="_blank"
+                                    rel="noopener noreferrer">{{ config('seo.phone') }}</a></dd>
                         </div>
                         <div>
                             <dt>Studio</dt>

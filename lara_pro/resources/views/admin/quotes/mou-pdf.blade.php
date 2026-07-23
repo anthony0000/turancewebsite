@@ -58,7 +58,7 @@
     $exchangeRateLabel = '$1 = NGN '.number_format($exchangeRate, 2);
     $brandName = $brand['studio_name'] ?? 'Turance Technologies';
     $brandLogoSrc = DocumentBranding::logoSource($brand['logo_path'] ?? null);
-    $brandEmail = $brand['contact_email'] ?? 'support@turancetechnologies.com';
+    $brandEmail = $brand['contact_email'] ?? 'hello@turancetechnologies.com';
     $brandPhone = $brand['contact_phone'] ?? '+2349124948602';
     $brandWebsite = $brand['website'] ?? config('app.url');
     $clientSigner = $quote->recipient_name ?: 'Authorized Client Representative';

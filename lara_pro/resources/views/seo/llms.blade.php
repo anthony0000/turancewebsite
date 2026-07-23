@@ -4,7 +4,7 @@
 
 Website: {{ rtrim(config('seo.site_url'), '/') }}
 Contact email: {{ config('seo.email') }}
-Contact phone: {{ config('seo.phone') }}
+WhatsApp: {{ config('seo.phone') }}
 Location: {{ config('seo.address.city') }}, {{ config('seo.address.country') }}
 
 ## What We Do

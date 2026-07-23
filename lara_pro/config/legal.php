@@ -34,7 +34,7 @@ return [
             ],
             [
                 'title' => 'Contact',
-                'body' => 'For privacy questions or requests, email '.config('seo.email').' or write to '.config('seo.address.street').', '.config('seo.address.city').', '.config('seo.address.region').'.',
+                'body' => 'For privacy questions or requests, email hello@turancetechnologies.com.',
             ],
         ],
     ],
@@ -71,7 +71,7 @@ return [
             ],
             [
                 'title' => 'Changes and questions',
-                'body' => 'We may update these terms as the website or our services evolve. The latest version will be published here. Questions can be sent to '.config('seo.email').'.',
+                'body' => 'We may update these terms as the website or our services evolve. The latest version will be published here. Questions can be sent to hello@turancetechnologies.com.',
             ],
         ],
     ],

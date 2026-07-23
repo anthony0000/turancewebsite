@@ -27,12 +27,18 @@ it('renders page specific seo metadata on public pages', function () {
 it('presents a search focused homepage with direct conversion paths', function () {
     $this->get('/')
         ->assertOk()
+        ->assertSee('hello@turancetechnologies.com')
+        ->assertDontSee('support@turancetechnologies.com')
         ->assertSee('Web Design &amp; Software Development Agency | Turance', false)
         ->assertSee('Excellence')
         ->assertSee('Delivered')
         ->assertSee('Get a project estimate')
         ->assertSee('data-conversion="home_hero_quote"', false)
         ->assertSee('data-mobile-sales-bar', false)
+        ->assertSee('data-conversion="mobile_sales_whatsapp"', false)
+        ->assertSee('https://wa.me/2349124948602', false)
+        ->assertSee('WhatsApp')
+        ->assertDontSee('Call us')
         ->assertSee('"@type": "FAQPage"', false);
 });
 
@@ -124,6 +130,11 @@ it('renders linked privacy and terms pages with current public metadata', functi
         ->assertOk()
         ->assertSee('Privacy Policy | Turance Technologies', false)
         ->assertSee('tt-legal-page', false)
+        ->assertSee('tt-legal-hero__summary', false)
+        ->assertSee('Document status')
+        ->assertSee('Policy sections')
+        ->assertSee('For privacy questions or requests, email hello@turancetechnologies.com.')
+        ->assertDontSee('or write to , , .')
         ->assertSee(route('terms.show', absolute: false), false)
         ->assertSee('tt-footer', false);
 
@@ -131,6 +142,7 @@ it('renders linked privacy and terms pages with current public metadata', functi
         ->assertOk()
         ->assertSee('Terms of Use | Turance Technologies', false)
         ->assertSee('tt-legal-page', false)
+        ->assertSee('tt-legal-hero__summary', false)
         ->assertSee(route('privacy.show', absolute: false), false)
         ->assertSee('tt-footer', false);
 

@@ -10,8 +10,9 @@ return [
     'logo' => $siteUrl.'/assets/img/logo/logo.png',
     'favicon' => $siteUrl.'/assets/img/logo/favicon.png',
     'image' => $siteUrl.'/assets/img/service/service-inner-hero-thumb.jpg',
-    'email' => 'support@turancetechnologies.com',
+    'email' => 'hello@turancetechnologies.com',
     'phone' => '+2349124948602',
+    'whatsapp_url' => 'https://wa.me/2349124948602',
     'address' => [
         'street' => 'No 3 Ademola Adetokunbo Crescent',
         'city' => 'Abuja',

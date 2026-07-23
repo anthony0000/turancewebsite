@@ -2,7 +2,7 @@
 
 return [
     'recipient' => [
-        'address' => env('CONTACT_RECIPIENT_ADDRESS', 'support@turancetechnologies.com'),
+        'address' => env('CONTACT_RECIPIENT_ADDRESS', 'hello@turancetechnologies.com'),
         'name' => env('CONTACT_RECIPIENT_NAME', env('APP_NAME', 'Turance Technologies')),
     ],
 
