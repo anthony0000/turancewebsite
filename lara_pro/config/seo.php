@@ -1,0 +1,115 @@
+<?php
+
+$siteUrl = rtrim(env('SEO_SITE_URL', 'https://turancetechnologies.com'), '/');
+
+return [
+    'site_url' => $siteUrl,
+    'site_name' => 'Turance Technologies',
+    'tagline' => 'Excellence Delivered',
+    'locale' => 'en_NG',
+    'logo' => $siteUrl.'/assets/img/logo/logo.png',
+    'favicon' => $siteUrl.'/assets/img/logo/favicon.png',
+    'image' => $siteUrl.'/assets/img/service/service-inner-hero-thumb.jpg',
+    'email' => 'support@turancetechnologies.com',
+    'phone' => '+2349124948602',
+    'address' => [
+        'street' => 'No 3 Ademola Adetokunbo Crescent',
+        'city' => 'Abuja',
+        'region' => 'FCT',
+        'country' => 'NG',
+    ],
+    'area_served' => ['Nigeria', 'United States', 'United Kingdom', 'United Arab Emirates', 'Worldwide'],
+    'keywords' => [
+        'website design company',
+        'software development company',
+        'mobile app development',
+        'SaaS development agency',
+        'branding agency',
+        'web design Abuja',
+        'Turance Technologies',
+    ],
+    'default' => [
+        'title' => 'Turance Technologies | Website, Mobile App, SaaS and Branding Agency',
+        'description' => 'Turance Technologies designs and builds premium websites, mobile apps, SaaS platforms, and brand identities that help ambitious companies win trust, enquiries, and sales.',
+        'route' => 'home',
+        'priority' => '1.0',
+        'changefreq' => 'weekly',
+    ],
+    'pages' => [
+        'home' => [
+            'title' => 'Turance Technologies | Premium Website, App, SaaS and Branding Agency',
+            'description' => 'Build a stronger digital presence with Turance Technologies. We create conversion-focused websites, mobile apps, SaaS products, and premium brand systems for ambitious businesses.',
+            'route' => 'home',
+            'priority' => '1.0',
+            'changefreq' => 'weekly',
+        ],
+        'service.show' => [
+            'title' => 'Digital Services | Web Design, Mobile Apps, SaaS and Branding',
+            'description' => 'Explore Turance Technologies services for high-converting websites, mobile applications, SaaS platforms, brand identity systems, UX design, and launch support.',
+            'route' => 'service.show',
+            'priority' => '0.9',
+            'changefreq' => 'weekly',
+        ],
+        'services.web' => [
+            'title' => 'Website Design and Development Services | Turance Technologies',
+            'description' => 'Premium website design and development for businesses that need credibility, faster trust, lead generation, SEO-ready architecture, and a polished online presence.',
+            'route' => 'services.web',
+            'priority' => '0.9',
+            'changefreq' => 'monthly',
+            'service_type' => 'Website design and development',
+        ],
+        'services.mobile' => [
+            'title' => 'Mobile App Development Services | Turance Technologies',
+            'description' => 'Launch user-friendly mobile apps with product strategy, UX design, secure APIs, payments, notifications, analytics, and app store support from Turance Technologies.',
+            'route' => 'services.mobile',
+            'priority' => '0.85',
+            'changefreq' => 'monthly',
+            'service_type' => 'Mobile app development',
+        ],
+        'services.saas' => [
+            'title' => 'SaaS Product Design and Development | Turance Technologies',
+            'description' => 'Design and build scalable SaaS platforms with onboarding, dashboards, subscriptions, permissions, analytics, integrations, and polished product UX.',
+            'route' => 'services.saas',
+            'priority' => '0.85',
+            'changefreq' => 'monthly',
+            'service_type' => 'SaaS product design and development',
+        ],
+        'services.branding' => [
+            'title' => 'Branding and Identity Design Services | Turance Technologies',
+            'description' => 'Create a premium brand identity with strategy, messaging, visual systems, typography, color direction, rollout assets, and consistent digital presentation.',
+            'route' => 'services.branding',
+            'priority' => '0.8',
+            'changefreq' => 'monthly',
+            'service_type' => 'Branding and identity design',
+        ],
+        'contact.show' => [
+            'title' => 'Contact Turance Technologies | Request a Website, App or Branding Quote',
+            'description' => 'Talk to Turance Technologies about your website, mobile app, SaaS platform, or branding project. Request a quote and get a clear delivery path.',
+            'route' => 'contact.show',
+            'priority' => '0.85',
+            'changefreq' => 'monthly',
+        ],
+    ],
+    'service_items' => [
+        [
+            'name' => 'Website design and development',
+            'route' => 'services.web',
+            'description' => 'Premium websites that build trust, generate qualified enquiries, and support long-term search visibility.',
+        ],
+        [
+            'name' => 'Mobile app development',
+            'route' => 'services.mobile',
+            'description' => 'User-friendly mobile apps with strategy, UX, secure backends, payments, notifications, and launch support.',
+        ],
+        [
+            'name' => 'SaaS product design and development',
+            'route' => 'services.saas',
+            'description' => 'Scalable SaaS platforms with onboarding, dashboards, subscriptions, analytics, and integrations.',
+        ],
+        [
+            'name' => 'Branding and identity design',
+            'route' => 'services.branding',
+            'description' => 'Premium brand systems with positioning, messaging, visual identity, and rollout-ready assets.',
+        ],
+    ],
+];

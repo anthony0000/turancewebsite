@@ -1,0 +1,1012 @@
+.tt-service-page {
+  --tt-gold: #d7b56d;
+  --tt-gold-strong: #f0d089;
+  --tt-gold-soft: rgba(215, 181, 109, 0.18);
+  --tt-cream: #f4ecda;
+  --tt-ink: #050505;
+  --tt-ink-soft: #0f0f10;
+  --tt-card: rgba(14, 14, 15, 0.9);
+  --tt-card-border: rgba(255, 255, 255, 0.08);
+  --tt-copy: rgba(244, 236, 218, 0.76);
+  --tt-spot-x: 74%;
+  --tt-spot-y: 18%;
+  background:
+    radial-gradient(circle at 16% 18%, rgba(215, 181, 109, 0.12), transparent 28%),
+    radial-gradient(circle at 82% 10%, rgba(215, 181, 109, 0.12), transparent 24%),
+    linear-gradient(180deg, #040404 0%, #090909 18%, #060606 52%, #030303 100%);
+  color: var(--tt-cream);
+  overflow: hidden;
+}
+
+.tt-service-page section {
+  position: relative;
+  z-index: 1;
+}
+
+.tt-service-page .container {
+  position: relative;
+  z-index: 2;
+}
+
+.tt-service-hero {
+  background:
+    radial-gradient(circle at var(--tt-spot-x) var(--tt-spot-y), rgba(240, 208, 137, 0.16), transparent 24%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent 20%),
+    transparent;
+}
+
+.tt-service-hero-noise {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 120px 120px;
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.85), transparent);
+  opacity: 0.22;
+  pointer-events: none;
+}
+
+.tt-service-hero-halo {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(20px);
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.tt-service-hero-halo-one {
+  top: 120px;
+  right: 12%;
+  width: 220px;
+  height: 220px;
+  background: radial-gradient(circle, rgba(240, 208, 137, 0.24), transparent 70%);
+}
+
+.tt-service-hero-halo-two {
+  bottom: 70px;
+  left: 8%;
+  width: 160px;
+  height: 160px;
+  background: radial-gradient(circle, rgba(240, 208, 137, 0.12), transparent 75%);
+}
+
+.tt-service-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+  color: var(--tt-gold-strong);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+}
+
+.tt-service-kicker::before {
+  content: "";
+  width: 40px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--tt-gold));
+}
+
+.tt-service-title,
+.tt-service-section-title {
+  color: #ffffff;
+  letter-spacing: -0.04em;
+  line-height: 0.98;
+}
+
+.tt-service-title {
+  max-width: 780px;
+  margin-bottom: 24px;
+  font-size: clamp(44px, 7vw, 92px);
+}
+
+.tt-service-lead,
+.tt-service-section-copy {
+  max-width: 630px;
+  color: var(--tt-copy);
+  font-size: 18px;
+  line-height: 1.8;
+}
+
+.tt-service-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin: 34px 0 42px;
+}
+
+.tt-service-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 58px;
+  padding: 16px 26px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.tt-service-btn-primary {
+  background: linear-gradient(135deg, #f0d089 0%, #d7b56d 100%);
+  color: #111111;
+  box-shadow: 0 18px 45px rgba(215, 181, 109, 0.16);
+}
+
+.tt-service-btn-primary:hover {
+  color: #000000;
+  transform: translateY(-2px);
+}
+
+.tt-service-btn-secondary {
+  border-color: rgba(215, 181, 109, 0.32);
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--tt-cream);
+}
+
+.tt-service-btn-secondary:hover {
+  border-color: rgba(215, 181, 109, 0.72);
+  color: var(--tt-gold-strong);
+}
+
+.tt-service-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  max-width: 760px;
+}
+
+.tt-service-stat-card {
+  padding: 24px 22px;
+  border-radius: 22px;
+  border: 1px solid var(--tt-card-border);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+}
+
+.tt-service-stat-value {
+  display: block;
+  margin-bottom: 10px;
+  color: var(--tt-gold-strong);
+  font-size: clamp(28px, 4vw, 42px);
+  font-weight: 700;
+  letter-spacing: -0.05em;
+}
+
+.tt-service-stat-card p {
+  margin: 0;
+  color: rgba(244, 236, 218, 0.7);
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.tt-service-hero-stage {
+  position: relative;
+  min-height: 630px;
+  perspective: 1200px;
+}
+
+.tt-service-hero-frame {
+  position: absolute;
+  inset: 40px 30px 80px 20px;
+  padding: 16px;
+  border-radius: 34px;
+  border: 1px solid rgba(215, 181, 109, 0.22);
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
+  box-shadow:
+    0 28px 80px rgba(0, 0, 0, 0.48),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+  transform-style: preserve-3d;
+}
+
+.tt-service-hero-frame::before {
+  content: "";
+  position: absolute;
+  inset: -35% auto auto -10%;
+  width: 60%;
+  height: 180%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.22), transparent);
+  transform: rotate(24deg);
+  opacity: 0.25;
+  pointer-events: none;
+}
+
+.tt-service-hero-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 24px;
+  filter: saturate(0.88) contrast(1.04) brightness(0.82);
+}
+
+.tt-service-frame-badge {
+  position: absolute;
+  right: 28px;
+  bottom: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px 18px;
+  border-radius: 18px;
+  border: 1px solid rgba(215, 181, 109, 0.28);
+  background: rgba(8, 8, 8, 0.8);
+  backdrop-filter: blur(12px);
+}
+
+.tt-service-frame-badge span,
+.tt-service-floating-card span,
+.tt-service-plan-label,
+.tt-service-plan-badge,
+.tt-service-plan-footer span,
+.tt-service-addon-row > span,
+.tt-service-process-tags span {
+  color: var(--tt-gold-strong);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.tt-service-frame-badge strong,
+.tt-service-floating-card strong {
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.tt-service-orbit {
+  position: absolute;
+  inset: 8px;
+  border: 1px dashed rgba(215, 181, 109, 0.16);
+  border-radius: 50%;
+  animation: ttServiceOrbit 26s linear infinite;
+}
+
+.tt-service-orbit span {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--tt-gold-strong), var(--tt-gold));
+  box-shadow: 0 0 18px rgba(215, 181, 109, 0.65);
+}
+
+.tt-service-orbit span:nth-child(1) {
+  top: 11%;
+  left: 16%;
+}
+
+.tt-service-orbit span:nth-child(2) {
+  top: 22%;
+  right: 8%;
+}
+
+.tt-service-orbit span:nth-child(3) {
+  bottom: 10%;
+  left: 24%;
+}
+
+.tt-service-floating-card {
+  position: absolute;
+  max-width: 250px;
+  padding: 18px 20px;
+  border-radius: 22px;
+  border: 1px solid rgba(215, 181, 109, 0.22);
+  background: rgba(8, 8, 9, 0.86);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.tt-service-floating-card p {
+  margin: 6px 0 0;
+  color: rgba(244, 236, 218, 0.68);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.tt-service-floating-card.one {
+  top: 10px;
+  left: 0;
+  animation: ttServiceFloat 6s ease-in-out infinite;
+}
+
+.tt-service-floating-card.two {
+  right: 0;
+  bottom: 140px;
+  animation: ttServiceFloat 7.2s ease-in-out infinite 0.3s;
+}
+
+.tt-service-floating-card.three {
+  left: 46px;
+  bottom: 20px;
+  max-width: 220px;
+  animation: ttServiceFloat 5.7s ease-in-out infinite 0.6s;
+}
+
+.tt-service-marquee {
+  padding: 18px 0;
+  border-top: 1px solid rgba(215, 181, 109, 0.12);
+  border-bottom: 1px solid rgba(215, 181, 109, 0.12);
+  background: rgba(255, 255, 255, 0.02);
+  overflow: hidden;
+}
+
+.tt-service-marquee-track {
+  display: flex;
+  width: max-content;
+  gap: 30px;
+  animation: ttServiceMarquee 28s linear infinite;
+}
+
+.tt-service-marquee-track span {
+  position: relative;
+  color: rgba(244, 236, 218, 0.72);
+  font-size: 14px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.tt-service-marquee-track span::after {
+  content: "•";
+  margin-left: 30px;
+  color: var(--tt-gold);
+}
+
+.tt-service-section-heading {
+  max-width: 760px;
+}
+
+.tt-service-section-title {
+  margin-bottom: 0;
+  font-size: clamp(34px, 5vw, 60px);
+}
+
+.tt-service-offer-card,
+.tt-service-feature-card,
+.tt-service-pricing-card,
+.tt-service-faq-item,
+.tt-service-panel {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(215, 181, 109, 0.15);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.015));
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.tt-service-offer-card::before,
+.tt-service-feature-card::before,
+.tt-service-pricing-card::before,
+.tt-service-cta-wrap::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(240, 208, 137, 0.08), transparent 35%, transparent 70%, rgba(240, 208, 137, 0.08));
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  pointer-events: none;
+}
+
+.tt-service-offer-card:hover::before,
+.tt-service-feature-card:hover::before,
+.tt-service-pricing-card:hover::before,
+.tt-service-cta-wrap:hover::before {
+  opacity: 1;
+}
+
+.tt-service-offer-card {
+  display: block;
+  height: 100%;
+  padding: 34px;
+  border-radius: 28px;
+  color: inherit;
+  transition: transform 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
+}
+
+.tt-service-offer-card:hover {
+  transform: translateY(-8px);
+  border-color: rgba(215, 181, 109, 0.4);
+  color: inherit;
+}
+
+.tt-service-offer-index {
+  display: inline-block;
+  margin-bottom: 20px;
+  color: rgba(240, 208, 137, 0.45);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+}
+
+.tt-service-offer-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.tt-service-offer-head h3,
+.tt-service-feature-card h3,
+.tt-service-process-body h3,
+.tt-service-pricing-card h3 {
+  margin: 0;
+  color: #ffffff;
+  font-size: clamp(24px, 3vw, 34px);
+  letter-spacing: -0.03em;
+}
+
+.tt-service-offer-price {
+  display: inline-flex;
+  align-items: center;
+  min-height: 38px;
+  padding: 0 16px;
+  border-radius: 999px;
+  background: rgba(215, 181, 109, 0.12);
+  color: var(--tt-gold-strong);
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.tt-service-offer-card p,
+.tt-service-feature-card p,
+.tt-service-process-body p,
+.tt-service-plan-meta,
+.tt-service-faq-body,
+.tt-service-cta-phone {
+  color: var(--tt-copy);
+}
+
+.tt-service-offer-card p,
+.tt-service-feature-card p,
+.tt-service-process-body p,
+.tt-service-plan-meta {
+  line-height: 1.8;
+}
+
+.tt-service-offer-card ul,
+.tt-service-pricing-card ul {
+  margin: 24px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tt-service-offer-card li,
+.tt-service-pricing-card li {
+  position: relative;
+  padding-left: 24px;
+  color: rgba(244, 236, 218, 0.82);
+  font-size: 15px;
+  line-height: 1.85;
+}
+
+.tt-service-offer-card li + li,
+.tt-service-pricing-card li + li {
+  margin-top: 10px;
+}
+
+.tt-service-offer-card li::before,
+.tt-service-pricing-card li::before {
+  content: "";
+  position: absolute;
+  top: 11px;
+  left: 0;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--tt-gold-strong), var(--tt-gold));
+  box-shadow: 0 0 12px rgba(240, 208, 137, 0.3);
+}
+
+.tt-service-offer-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 26px;
+  color: var(--tt-gold-strong);
+  font-weight: 600;
+}
+
+.tt-service-panel {
+  padding: 50px;
+  border-radius: 34px;
+}
+
+.tt-service-feature-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.tt-service-feature-card {
+  min-height: 100%;
+  padding: 28px;
+  border-radius: 24px;
+}
+
+.tt-service-feature-card span {
+  display: inline-block;
+  margin-bottom: 18px;
+  color: rgba(240, 208, 137, 0.45);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+}
+
+.tt-service-process-intro {
+  position: sticky;
+  top: 130px;
+}
+
+.tt-service-process-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 30px;
+}
+
+.tt-service-process-tags span {
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(215, 181, 109, 0.18);
+  background: rgba(255, 255, 255, 0.02);
+  letter-spacing: 0.12em;
+}
+
+.tt-service-process-list {
+  position: relative;
+  padding-left: 40px;
+}
+
+.tt-service-process-progress {
+  position: absolute;
+  top: 10px;
+  bottom: 10px;
+  left: 11px;
+  width: 2px;
+  background: rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+}
+
+.tt-service-process-progress span {
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform-origin: top center;
+  transform: scaleY(0);
+  background: linear-gradient(180deg, rgba(240, 208, 137, 0.18), rgba(240, 208, 137, 0.98));
+}
+
+.tt-service-process-item {
+  position: relative;
+  padding: 28px 30px 28px 34px;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(215, 181, 109, 0.13);
+}
+
+.tt-service-process-item + .tt-service-process-item {
+  margin-top: 18px;
+}
+
+.tt-service-process-item::before {
+  content: "";
+  position: absolute;
+  top: 38px;
+  left: -34px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--tt-gold-strong), var(--tt-gold));
+  box-shadow: 0 0 14px rgba(240, 208, 137, 0.28);
+}
+
+.tt-service-process-number {
+  display: inline-block;
+  margin-bottom: 12px;
+  color: rgba(240, 208, 137, 0.52);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+}
+
+.tt-service-pricing-card {
+  height: 100%;
+  padding: 36px 32px;
+  border-radius: 30px;
+  transform-style: preserve-3d;
+  transition: transform 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
+}
+
+.tt-service-pricing-card h3 {
+  margin: 16px 0 12px;
+}
+
+.tt-service-pricing-card:hover {
+  border-color: rgba(215, 181, 109, 0.4);
+  box-shadow: 0 32px 70px rgba(0, 0, 0, 0.28);
+}
+
+.tt-service-pricing-card.featured {
+  border-color: rgba(240, 208, 137, 0.38);
+  background:
+    radial-gradient(circle at top, rgba(240, 208, 137, 0.14), transparent 35%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.015));
+}
+
+.tt-service-plan-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 0 14px;
+  border-radius: 999px;
+  margin-bottom: 18px;
+  background: rgba(240, 208, 137, 0.14);
+}
+
+.tt-service-plan-meta {
+  min-height: 92px;
+}
+
+.tt-service-plan-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 28px;
+}
+
+.tt-service-plan-footer a,
+.tt-service-addon-list a,
+.tt-service-cta-phone {
+  color: var(--tt-gold-strong);
+  font-weight: 600;
+}
+
+.tt-service-addon-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-top: 32px;
+  padding: 28px 30px;
+  border-radius: 24px;
+  border: 1px solid rgba(215, 181, 109, 0.12);
+  background: rgba(255, 255, 255, 0.015);
+}
+
+.tt-service-addon-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.tt-service-addon-list a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 38px;
+  padding: 0 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(215, 181, 109, 0.18);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.tt-service-addon-list a:hover {
+  border-color: rgba(215, 181, 109, 0.52);
+}
+
+.tt-service-faq-accordion {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.tt-service-faq-item {
+  border-radius: 24px;
+}
+
+.tt-service-faq-item .accordion-header,
+.tt-service-faq-item .accordion-button,
+.tt-service-faq-item .accordion-body {
+  background: transparent;
+}
+
+.tt-service-faq-button {
+  padding: 26px 30px;
+  color: #ffffff;
+  font-size: 22px;
+  font-weight: 500;
+  line-height: 1.4;
+  box-shadow: none;
+}
+
+.tt-service-faq-button:not(.collapsed) {
+  color: var(--tt-gold-strong);
+}
+
+.tt-service-faq-button::after {
+  width: 18px;
+  height: 18px;
+  background-size: 18px;
+  filter: brightness(0) saturate(100%) invert(78%) sepia(30%) saturate(534%) hue-rotate(357deg) brightness(101%) contrast(90%);
+}
+
+.tt-service-faq-body {
+  padding: 0 30px 28px;
+  max-width: 92%;
+  font-size: 16px;
+  line-height: 1.85;
+}
+
+.tt-service-cta-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 30px;
+  padding: 54px 56px;
+  border-radius: 36px;
+  border: 1px solid rgba(215, 181, 109, 0.18);
+  background:
+    radial-gradient(circle at top left, rgba(240, 208, 137, 0.12), transparent 28%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.015));
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.28);
+}
+
+.tt-service-cta-copy {
+  max-width: 760px;
+}
+
+.tt-service-cta-copy .tt-service-section-title {
+  font-size: clamp(32px, 4vw, 52px);
+}
+
+.tt-service-cta-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 18px;
+  min-width: 220px;
+}
+
+.tt-service-cta-phone {
+  font-size: 20px;
+  letter-spacing: 0.04em;
+}
+
+.tt-service-reveal {
+  will-change: transform, opacity;
+}
+
+@keyframes ttServiceOrbit {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes ttServiceFloat {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+
+  50% {
+    transform: translate3d(0, -14px, 0);
+  }
+}
+
+@keyframes ttServiceMarquee {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@media (max-width: 1399.98px) {
+  .tt-service-hero-stage {
+    min-height: 580px;
+  }
+
+  .tt-service-hero-frame {
+    inset: 50px 20px 80px 20px;
+  }
+}
+
+@media (max-width: 1199.98px) {
+  .tt-service-hero {
+    padding-top: 170px;
+    padding-bottom: 90px;
+  }
+
+  .tt-service-stat-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .tt-service-hero-stage {
+    min-height: 540px;
+  }
+
+  .tt-service-panel,
+  .tt-service-cta-wrap {
+    padding: 40px;
+  }
+
+  .tt-service-process-intro {
+    position: static;
+  }
+}
+
+@media (max-width: 991.98px) {
+  .tt-service-title {
+    font-size: clamp(40px, 10vw, 72px);
+  }
+
+  .tt-service-section-title {
+    font-size: clamp(30px, 8vw, 48px);
+  }
+
+  .tt-service-stat-grid,
+  .tt-service-feature-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .tt-service-hero-stage {
+    min-height: 520px;
+    margin-top: 10px;
+  }
+
+  .tt-service-hero-frame {
+    position: relative;
+    inset: auto;
+    min-height: 430px;
+  }
+
+  .tt-service-orbit {
+    inset: -10px;
+  }
+
+  .tt-service-floating-card.one {
+    top: -14px;
+  }
+
+  .tt-service-floating-card.two {
+    right: 10px;
+    bottom: 90px;
+  }
+
+  .tt-service-floating-card.three {
+    left: 18px;
+    bottom: 10px;
+  }
+
+  .tt-service-addon-row,
+  .tt-service-cta-wrap {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .tt-service-addon-list,
+  .tt-service-cta-actions {
+    justify-content: flex-start;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .tt-service-hero {
+    padding-top: 135px;
+    padding-bottom: 70px;
+  }
+
+  .tt-service-lead,
+  .tt-service-section-copy {
+    font-size: 16px;
+  }
+
+  .tt-service-actions {
+    margin-bottom: 28px;
+  }
+
+  .tt-service-stat-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .tt-service-hero-stage {
+    min-height: 460px;
+  }
+
+  .tt-service-hero-frame {
+    min-height: 360px;
+    padding: 12px;
+    border-radius: 26px;
+  }
+
+  .tt-service-frame-badge {
+    right: 18px;
+    bottom: 18px;
+  }
+
+  .tt-service-floating-card {
+    position: relative;
+    left: auto;
+    right: auto;
+    top: auto;
+    bottom: auto;
+    max-width: none;
+    margin-top: 14px;
+  }
+
+  .tt-service-orbit {
+    display: none;
+  }
+
+  .tt-service-offer-card,
+  .tt-service-feature-card,
+  .tt-service-pricing-card {
+    padding: 26px;
+  }
+
+  .tt-service-offer-head {
+    flex-direction: column;
+  }
+
+  .tt-service-panel,
+  .tt-service-cta-wrap {
+    padding: 28px 24px;
+    border-radius: 26px;
+  }
+
+  .tt-service-process-list {
+    padding-left: 28px;
+  }
+
+  .tt-service-process-item {
+    padding: 24px 22px 24px 26px;
+  }
+
+  .tt-service-process-item::before {
+    left: -24px;
+  }
+
+  .tt-service-faq-button {
+    padding: 22px 22px 18px;
+    font-size: 18px;
+  }
+
+  .tt-service-faq-body {
+    padding: 0 22px 22px;
+    max-width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tt-service-orbit,
+  .tt-service-floating-card,
+  .tt-service-marquee-track {
+    animation: none;
+  }
+
+  .tt-service-reveal,
+  .tt-service-pricing-card,
+  .tt-service-offer-card,
+  .tt-service-feature-card,
+  .tt-service-btn {
+    transition: none;
+  }
+}
