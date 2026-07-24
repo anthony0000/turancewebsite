@@ -11,7 +11,11 @@
         $seoRouteName = $routeName ?: ($fallbackRoutes[trim(request()->path(), '/')] ?? 'home');
         $seoPages = config('seo.pages', []);
         $pageSeo = $seoPages[$seoRouteName] ?? config('seo.default');
-        $title = trim($__env->yieldContent('seo_title', $pageSeo['title'] ?? config('seo.default.title')));
+        $title = html_entity_decode(
+            trim($__env->yieldContent('seo_title', $pageSeo['title'] ?? config('seo.default.title'))),
+            ENT_QUOTES | ENT_HTML5,
+            'UTF-8'
+        );
         $description = trim($__env->yieldContent('seo_description', $pageSeo['description'] ?? config('seo.default.description')));
         $image = trim($__env->yieldContent('seo_image', config('seo.image')));
         $robots = trim($__env->yieldContent('seo_robots', 'index, follow, max-image-preview:large'));
