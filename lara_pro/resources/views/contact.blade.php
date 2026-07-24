@@ -7,9 +7,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&amp;family=Hanken+Grotesk:wght@400;500;600;700&amp;display=swap">
-    <link rel="stylesheet" href="{{ asset('/assets/css/home-reference.css') }}?v=1.8">
+    <link rel="stylesheet" href="{{ asset('/assets/css/home-reference.css') }}?v=2.4">
     <link rel="stylesheet" href="{{ asset('/assets/css/home-sections.css') }}?v=1.8">
-    <link rel="stylesheet" href="{{ asset('/assets/css/contact-reference.css') }}?v=1.1">
+    <link rel="stylesheet" href="{{ asset('/assets/css/contact-reference.css') }}?v=1.3">
 @endpush
 
 @section('content')
@@ -21,6 +21,7 @@
         <x-home.header />
 
         <section class="tt-contact-hero" id="contact" aria-labelledby="contact-page-title">
+            <span class="tt-contact-anchor" id="contact-form" aria-hidden="true"></span>
             <div class="tt-contact-hero__geometry" aria-hidden="true">
                 <span class="tt-contact-hero__orbit tt-contact-hero__orbit--one"></span>
                 <span class="tt-contact-hero__orbit tt-contact-hero__orbit--two"></span>
@@ -33,8 +34,8 @@
             <div class="tt-section__inner tt-contact-hero__inner">
                 <div class="tt-contact-hero__intro">
                     <span class="tt-section-heading__eyebrow" data-reveal><i aria-hidden="true"></i>Start a conversation</span>
-                    <h1 id="contact-page-title" data-reveal>Let’s shape what comes next.</h1>
-                    <p data-reveal>Tell us what you are building, improving or trying to solve. We will help you identify a clear and practical next step.</p>
+                    <h1 id="contact-page-title" data-reveal>Get a clear project estimate.</h1>
+                    <p data-reveal>Tell us what you need to build or improve. We will review the opportunity and recommend a practical scope, timeline and next step.</p>
 
                     <dl class="tt-contact-hero__details" data-reveal>
                         <div>
@@ -42,8 +43,9 @@
                             <dd><a href="mailto:{{ config('seo.email') }}">{{ config('seo.email') }}</a></dd>
                         </div>
                         <div>
-                            <dt>Telephone</dt>
-                            <dd><a href="tel:{{ preg_replace('/\s+/', '', config('seo.phone')) }}">{{ config('seo.phone') }}</a></dd>
+                            <dt>WhatsApp</dt>
+                            <dd><a href="{{ config('seo.whatsapp_url') }}" target="_blank"
+                                    rel="noopener noreferrer">{{ config('seo.phone') }}</a></dd>
                         </div>
                         <div>
                             <dt>Studio</dt>
@@ -56,7 +58,7 @@
                     <div class="tt-contact-form-shell__top">
                         <div>
                             <span>Project enquiry</span>
-                            <h2>Tell us about the ambition.</h2>
+                            <h2>Tell us what you need.</h2>
                         </div>
                         <span class="tt-contact-form-shell__index" aria-hidden="true">01</span>
                     </div>
@@ -74,13 +76,25 @@
 
                     @if (session('contact_success'))
                         <div class="tt-contact-alert tt-contact-alert--success" role="status" tabindex="-1" data-form-alert>
-                            <strong>Message received.</strong>
-                            <p>{{ session('contact_success') }}</p>
+                            <span class="tt-contact-alert__icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" focusable="false"><path d="m6.5 12.5 3.5 3.5 7.5-8" /></svg>
+                            </span>
+                            <div class="tt-contact-alert__content">
+                                <span class="tt-contact-alert__eyebrow">Enquiry received</span>
+                                <strong>Thank you for reaching out.</strong>
+                                <p>{{ session('contact_success') }}</p>
+                            </div>
                         </div>
                     @endif
 
-                    <form id="contact-form" action="{{ route('contact.store') }}" method="post">
+                    <form id="project-enquiry-form" action="{{ route('contact.store') }}" method="post">
                         @csrf
+                        <input type="hidden" name="contact_context" value="{{ $contactContext }}">
+                        <div class="tt-contact-trap" aria-hidden="true">
+                            <label for="company-fax">Leave this field empty</label>
+                            <input type="text" id="company-fax" name="company_fax" value=""
+                                tabindex="-1" autocomplete="off">
+                        </div>
 
                         <div class="tt-contact-form__row">
                             <div class="tt-contact-field {{ $errors->has('name') ? 'has-error' : '' }}">
@@ -105,9 +119,9 @@
                             <span class="tt-contact-select">
                                 <select id="topic" name="topic" required
                                     aria-describedby="{{ $errors->has('topic') ? 'topic-error' : '' }}">
-                                    <option value="" disabled {{ old('topic') ? '' : 'selected' }}>Select a project type</option>
+                                    <option value="" disabled {{ old('topic', $selectedTopic) ? '' : 'selected' }}>Select a project type</option>
                                     @foreach ($topics as $topic)
-                                        <option value="{{ $topic }}" {{ old('topic') === $topic ? 'selected' : '' }}>{{ $topic }}</option>
+                                        <option value="{{ $topic }}" {{ old('topic', $selectedTopic) === $topic ? 'selected' : '' }}>{{ $topic }}</option>
                                     @endforeach
                                 </select>
                                 <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m6 8 4 4 4-4" /></svg>
@@ -124,9 +138,17 @@
                             @error('message')<small id="message-error">{{ $message }}</small>@enderror
                         </div>
 
+                        @if (config('contact.turnstile.enabled') && filled(config('contact.turnstile.site_key')))
+                            <div class="tt-contact-turnstile">
+                                <div class="cf-turnstile" data-sitekey="{{ config('contact.turnstile.site_key') }}"
+                                    data-theme="light" data-response-field-name="cf-turnstile-response"></div>
+                                @error('cf-turnstile-response')<small>{{ $message }}</small>@enderror
+                            </div>
+                        @endif
+
                         <div class="tt-contact-form__submit">
                             <button class="tt-contact-submit" type="submit">
-                                <span>Send enquiry</span>
+                                <span>Request project estimate</span>
                                 <i aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12h14M14 7l5 5-5 5" /></svg></i>
                             </button>
                             <p>By sending this form, you agree that we may use your details to respond to this enquiry.</p>
@@ -179,6 +201,9 @@
 @endsection
 
 @push('scripts')
-    <script src="{{ asset('/assets/js/home-reference.js') }}?v=2.2" defer></script>
-    <script src="{{ asset('/assets/js/contact-reference.js') }}?v=1.0" defer></script>
+    @if (config('contact.turnstile.enabled') && filled(config('contact.turnstile.site_key')))
+        <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+    @endif
+    <script src="{{ asset('/assets/js/home-reference.js') }}?v=2.5" defer></script>
+    <script src="{{ asset('/assets/js/contact-reference.js') }}?v=1.2" defer></script>
 @endpush

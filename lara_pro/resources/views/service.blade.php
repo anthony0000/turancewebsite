@@ -512,7 +512,8 @@
                     <div class="tt-service-cta-actions">
                         <a class="tt-service-btn tt-service-btn-primary wt-btn-bounce"
                             href="{{ route('contact.show') }}">Request a proposal</a>
-                        <a class="tt-service-cta-phone" href="tel:+2349124948602">+2349124948602</a>
+                        <a class="tt-service-cta-phone" href="{{ config('seo.whatsapp_url') }}" target="_blank"
+                            rel="noopener noreferrer">{{ config('seo.phone') }}</a>
                     </div>
                 </div>
             </div>

@@ -24,6 +24,15 @@
     linear-gradient(112deg, #fdfcf9 0%, #fbfaf6 52%, #f5f1e7 100%);
 }
 
+.tt-contact-anchor {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  pointer-events: none;
+}
+
 .tt-contact-hero::after {
   content: "";
   position: absolute;
@@ -178,6 +187,26 @@
 .tt-contact-field {
   position: relative;
   margin-bottom: 30px;
+}
+
+.tt-contact-trap {
+  position: absolute !important;
+  left: -10000px !important;
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
+}
+
+.tt-contact-turnstile {
+  min-height: 65px;
+  margin: 0 0 24px;
+}
+
+.tt-contact-turnstile > small {
+  display: block;
+  margin-top: 8px;
+  color: #a43131;
+  font-size: 12px;
 }
 
 .tt-contact-field label {
@@ -343,7 +372,55 @@
 .tt-contact-alert p { margin: 0; }
 .tt-contact-alert ul { margin: 6px 0 0; padding-left: 18px; }
 .tt-contact-alert--error { border-color: #a43131; background: #fff3f2; color: #7b2929; }
-.tt-contact-alert--success { border-color: var(--tt-gold); background: #fff9e9; color: #4f3a0e; }
+.tt-contact-alert--success {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 19px 20px 20px;
+  border: 1px solid rgba(46, 107, 82, .22);
+  border-radius: 14px;
+  background: linear-gradient(135deg, #f2faf5 0%, #fbfdf9 100%);
+  box-shadow: 0 12px 30px rgba(28, 63, 47, .08);
+  color: #254d3d;
+}
+
+.tt-contact-alert__icon {
+  display: grid;
+  flex: 0 0 34px;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  margin-top: 1px;
+  border-radius: 50%;
+  background: #2e6b52;
+  color: #fff;
+}
+
+.tt-contact-alert__icon svg {
+  width: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
+}
+
+.tt-contact-alert__content { min-width: 0; }
+.tt-contact-alert__eyebrow {
+  display: block;
+  margin-bottom: 5px;
+  color: #2e6b52;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .14em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+.tt-contact-alert--success strong { margin-bottom: 5px; color: #173c2d; font-size: 15px; }
+
+@media (max-width: 520px) {
+  .tt-contact-alert--success { padding: 16px; }
+}
 
 .tt-contact-hero__geometry {
   position: absolute;

@@ -1,13 +1,61 @@
 <?php
 
 it('renders page specific seo metadata on public pages', function () {
-    $this->get('/single/web')
+    $services = [
+        '/single/web' => 'Web Design Company in Abuja, Nigeria | Turance',
+        '/single/mobile' => 'Mobile App Development Company | Turance',
+        '/single/saas' => 'SaaS Product Development Company | Turance',
+        '/single/branding' => 'Branding &amp; Identity Design Agency | Turance',
+    ];
+
+    foreach ($services as $url => $title) {
+        $this->get($url)
+            ->assertOk()
+            ->assertSee($title, false)
+            ->assertSee('<link rel="canonical" href="https://turancetechnologies.com'.$url.'">', false)
+            ->assertSee('application/ld+json', false)
+            ->assertSee('"@type": "Service"', false)
+            ->assertSee('"@type": "FAQPage"', false)
+            ->assertSee('"@type": "BreadcrumbList"', false)
+            ->assertSee('tt-detail-hero', false)
+            ->assertSee('tt-header', false)
+            ->assertSee('tt-footer', false)
+            ->assertDontSee('wt-breadcrumb', false);
+    }
+});
+
+it('presents a search focused homepage with direct conversion paths', function () {
+    $this->get('/')
         ->assertOk()
-        ->assertSee('Website Design and Development Services | Turance Technologies', false)
-        ->assertSee('<meta name="description" content="Premium website design and development', false)
-        ->assertSee('<link rel="canonical" href="https://turancetechnologies.com/single/web">', false)
-        ->assertSee('application/ld+json', false)
-        ->assertSee('"@type": "Service"', false);
+        ->assertSee('hello@turancetechnologies.com')
+        ->assertDontSee('support@turancetechnologies.com')
+        ->assertSee('<title>Web Design &amp; Software Development Agency | Turance</title>', false)
+        ->assertDontSee('&amp;amp;', false)
+        ->assertSee('Excellence')
+        ->assertSee('Delivered')
+        ->assertSee('Get a project estimate')
+        ->assertSee('data-conversion="home_hero_quote"', false)
+        ->assertSee('data-mobile-sales-bar', false)
+        ->assertSee('data-conversion="mobile_sales_whatsapp"', false)
+        ->assertSee('https://wa.me/2349124948602', false)
+        ->assertSee('WhatsApp')
+        ->assertDontSee('Call us')
+        ->assertSee('"@type": "FAQPage"', false);
+});
+
+it('prefills a valid service topic on the quote form', function () {
+    $this->get('/contact?service=saas')
+        ->assertOk()
+        ->assertSee('<option value="SaaS Platform Development" selected>', false)
+        ->assertSee('<link rel="canonical" href="https://turancetechnologies.com/contact">', false);
+});
+
+it('keeps quote links free of the contact form fragment', function () {
+    foreach (['/', '/service', '/single/web', '/privacy'] as $url) {
+        $this->get($url)
+            ->assertOk()
+            ->assertDontSee('#contact-form', false);
+    }
 });
 
 it('publishes crawler discovery files', function () {
@@ -30,5 +78,75 @@ it('publishes crawler discovery files', function () {
 it('keeps legacy duplicate urls out of the index', function () {
     $this->get('/index.html')->assertRedirect('/');
     $this->get('/contact.html')->assertRedirect('/contact');
-    $this->get('/about.html')->assertNotFound();
+    $this->get('/index4.html')->assertRedirect('/single/branding');
+    $this->get('/about.html')->assertRedirect('/#about');
+    $this->get('/pricing.html')->assertRedirect('/service#service-pricing');
+    $this->get('/portfolio.html')->assertRedirect('/#work');
+    $this->get('/faq.html')->assertRedirect('/#faq');
+});
+
+it('does not expose missing static template pages in public navigation', function () {
+    $this->get('/single/branding')
+        ->assertOk()
+        ->assertDontSee('.html', false);
+});
+
+it('links every detailed service from the home page', function () {
+    $this->get('/')
+        ->assertOk()
+        ->assertSee(route('services.web', absolute: false), false)
+        ->assertSee(route('services.mobile', absolute: false), false)
+        ->assertSee(route('services.saas', absolute: false), false)
+        ->assertSee(route('services.branding', absolute: false), false)
+        ->assertSee('36 Plus One')
+        ->assertSee('https://www.36plusone.org/', false)
+        ->assertSee('KiddoVista')
+        ->assertSee('https://kiddovista.co.uk/', false)
+        ->assertSee('IHcPro Store')
+        ->assertSee('https://shop.ihcpro.co.uk/', false)
+        ->assertSee('Abstract interface preview for 36 Plus One')
+        ->assertSee('Abstract interface preview for KiddoVista')
+        ->assertSee('Abstract interface preview for IHcPro Store')
+        ->assertDontSee('/assets/img/project/36plusone-live.webp', false);
+});
+
+it('renders the services overview with the current public design system', function () {
+    $this->get('/service')
+        ->assertOk()
+        ->assertSee('tt-services-overview-hero', false)
+        ->assertSee('tt-capability-deck', false)
+        ->assertSee('tt-header', false)
+        ->assertSee('tt-footer', false)
+        ->assertSee('id="service-pricing"', false)
+        ->assertSee('From $500')
+        ->assertSee('From $2,500')
+        ->assertSee('From $6,500')
+        ->assertSee('These are starting prices, not fixed packages.')
+        ->assertDontSee('wt-header-area', false)
+        ->assertDontSee('tt-service-hero', false);
+});
+
+it('renders linked privacy and terms pages with current public metadata', function () {
+    $this->get('/privacy')
+        ->assertOk()
+        ->assertSee('Privacy Policy | Turance Technologies', false)
+        ->assertSee('tt-legal-page', false)
+        ->assertSee('tt-legal-hero__summary', false)
+        ->assertSee('Document status')
+        ->assertSee('Policy sections')
+        ->assertSee('For privacy questions or requests, email hello@turancetechnologies.com.')
+        ->assertDontSee('or write to , , .')
+        ->assertSee(route('terms.show', absolute: false), false)
+        ->assertSee('tt-footer', false);
+
+    $this->get('/terms')
+        ->assertOk()
+        ->assertSee('Terms of Use | Turance Technologies', false)
+        ->assertSee('tt-legal-page', false)
+        ->assertSee('tt-legal-hero__summary', false)
+        ->assertSee(route('privacy.show', absolute: false), false)
+        ->assertSee('tt-footer', false);
+
+    $this->get('/privacy-policy')->assertRedirect('/privacy');
+    $this->get('/terms-and-conditions')->assertRedirect('/terms');
 });

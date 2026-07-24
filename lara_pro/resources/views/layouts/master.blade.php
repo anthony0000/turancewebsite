@@ -11,7 +11,11 @@
         $seoRouteName = $routeName ?: ($fallbackRoutes[trim(request()->path(), '/')] ?? 'home');
         $seoPages = config('seo.pages', []);
         $pageSeo = $seoPages[$seoRouteName] ?? config('seo.default');
-        $title = trim($__env->yieldContent('seo_title', $pageSeo['title'] ?? config('seo.default.title')));
+        $title = html_entity_decode(
+            trim($__env->yieldContent('seo_title', $pageSeo['title'] ?? config('seo.default.title'))),
+            ENT_QUOTES | ENT_HTML5,
+            'UTF-8'
+        );
         $description = trim($__env->yieldContent('seo_description', $pageSeo['description'] ?? config('seo.default.description')));
         $image = trim($__env->yieldContent('seo_image', config('seo.image')));
         $robots = trim($__env->yieldContent('seo_robots', 'index, follow, max-image-preview:large'));
@@ -19,6 +23,7 @@
         $canonicalPath = route($pageSeo['route'] ?? 'home', [], false);
         $canonical = $canonicalOverride ?: $siteUrl.'/'.ltrim($canonicalPath, '/');
         $keywords = implode(', ', config('seo.keywords', []));
+        $serviceItems = collect(config('seo.service_items', []))->values();
 
         $organization = [
             '@type' => 'ProfessionalService',
@@ -28,6 +33,9 @@
             'logo' => [
                 '@type' => 'ImageObject',
                 'url' => config('seo.logo'),
+                'contentUrl' => config('seo.logo'),
+                'width' => 694,
+                'height' => 178,
             ],
             'image' => config('seo.image'),
             'slogan' => config('seo.tagline'),
@@ -53,6 +61,22 @@
                 'telephone' => config('seo.phone'),
                 'areaServed' => config('seo.area_served', []),
                 'availableLanguage' => ['English'],
+            ],
+            'knowsAbout' => $serviceItems->pluck('name')->all(),
+            'hasOfferCatalog' => [
+                '@type' => 'OfferCatalog',
+                'name' => 'Digital product and brand services',
+                'itemListElement' => $serviceItems
+                    ->map(fn ($service) => [
+                        '@type' => 'Offer',
+                        'itemOffered' => [
+                            '@type' => 'Service',
+                            'name' => $service['name'],
+                            'description' => $service['description'],
+                            'url' => $siteUrl.'/'.ltrim(route($service['route'], [], false), '/'),
+                        ],
+                    ])
+                    ->all(),
             ],
         ];
 
@@ -101,14 +125,78 @@
                 '@type' => 'ItemList',
                 '@id' => $siteUrl.'/service#services',
                 'name' => 'Turance Technologies services',
-                'itemListElement' => collect(config('seo.service_items', []))
-                    ->values()
+                'itemListElement' => $serviceItems
                     ->map(fn ($service, $index) => [
                         '@type' => 'ListItem',
                         'position' => $index + 1,
                         'name' => $service['name'],
                         'url' => $siteUrl.'/'.ltrim(route($service['route'], [], false), '/'),
                         'description' => $service['description'],
+                    ])
+                    ->all(),
+            ];
+        }
+
+        $breadcrumbItems = collect([
+            ['name' => 'Home', 'url' => $siteUrl.'/'],
+        ]);
+
+        if (! empty($pageSeo['parent_route'])) {
+            $parentSeo = $seoPages[$pageSeo['parent_route']] ?? null;
+
+            if ($parentSeo) {
+                $breadcrumbItems->push([
+                    'name' => $parentSeo['breadcrumb'] ?? $parentSeo['title'],
+                    'url' => $siteUrl.'/'.ltrim(route($parentSeo['route'], [], false), '/'),
+                ]);
+            }
+        }
+
+        if ($seoRouteName !== 'home') {
+            $breadcrumbItems->push([
+                'name' => $pageSeo['breadcrumb'] ?? $title,
+                'url' => $canonical,
+            ]);
+        }
+
+        if ($breadcrumbItems->count() > 1) {
+            $schemaGraph[] = [
+                '@type' => 'BreadcrumbList',
+                '@id' => $canonical.'#breadcrumb',
+                'itemListElement' => $breadcrumbItems
+                    ->values()
+                    ->map(fn ($item, $index) => [
+                        '@type' => 'ListItem',
+                        'position' => $index + 1,
+                        'name' => $item['name'],
+                        'item' => $item['url'],
+                    ])
+                    ->all(),
+            ];
+        }
+
+        $pageFaqs = match (true) {
+            $seoRouteName === 'home' => config('seo.home_faqs', []),
+            $seoRouteName === 'service.show' => config('seo.services_faqs', []),
+            str_starts_with((string) $seoRouteName, 'services.') => config(
+                'service-pages.'.\Illuminate\Support\Str::after((string) $seoRouteName, 'services.').'.faqs',
+                []
+            ),
+            default => [],
+        };
+
+        if (! empty($pageFaqs)) {
+            $schemaGraph[] = [
+                '@type' => 'FAQPage',
+                '@id' => $canonical.'#faq',
+                'mainEntity' => collect($pageFaqs)
+                    ->map(fn ($faq) => [
+                        '@type' => 'Question',
+                        'name' => $faq['question'],
+                        'acceptedAnswer' => [
+                            '@type' => 'Answer',
+                            'text' => $faq['answer'],
+                        ],
                     ])
                     ->all(),
             ];
@@ -121,14 +209,17 @@
     @endphp
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $title }}</title>
     <meta name="description" content="{{ $description }}">
     <meta name="keywords" content="{{ $keywords }}">
     <meta name="robots" content="{{ $robots }}">
     <meta name="author" content="{{ config('seo.site_name') }}">
+    <meta name="theme-color" content="#071426">
     <link rel="canonical" href="{{ $canonical }}">
+    <link rel="alternate" hreflang="en" href="{{ $canonical }}">
+    <link rel="alternate" hreflang="x-default" href="{{ $canonical }}">
 
     <meta property="og:site_name" content="{{ config('seo.site_name') }}">
     <meta property="og:title" content="{{ $title }}">
@@ -136,6 +227,7 @@
     <meta property="og:type" content="website">
     <meta property="og:url" content="{{ $canonical }}">
     <meta property="og:image" content="{{ $image }}">
+    <meta property="og:image:alt" content="{{ $title }}">
     <meta property="og:locale" content="{{ config('seo.locale') }}">
 
     <meta name="twitter:card" content="summary_large_image">
@@ -145,6 +237,7 @@
     <script type="application/ld+json">
         {!! json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!}
     </script>
+    @stack('structured_data')
 
     <link rel="shortcut icon" type="image/x-icon" href="{{ asset('/assets/img/logo/favicon.png') }}">
 
@@ -229,13 +322,13 @@
                                                                 alt="Website design preview">
                                                             <div class="homemenu-btn">
                                                                 <a class="menu-btn show-1"
-                                                                    href="{{ url('index2.html') }}">View
+                                                                    href="{{ route('services.web') }}">View
                                                                     Page</a>
                                                             </div>
                                                         </div>
                                                         <div class="homemenu-content text-center">
                                                             <h4 class="homemenu-title">
-                                                                <a href="{{ url('index2.html') }}">Home 02</a>
+                                                                <a href="{{ route('services.web') }}">Website Design</a>
                                                             </h4>
                                                         </div>
                                                     </div>
@@ -245,13 +338,13 @@
                                                                 alt="Mobile and SaaS product preview">
                                                             <div class="homemenu-btn">
                                                                 <a class="menu-btn show-1"
-                                                                    href="{{ url('index3.html') }}">View
+                                                                    href="{{ route('services.mobile') }}">View
                                                                     Page</a>
                                                             </div>
                                                         </div>
                                                         <div class="homemenu-content text-center">
                                                             <h4 class="homemenu-title">
-                                                                <a href="{{ url('index3.html') }}">Home 03</a>
+                                                                <a href="{{ route('services.mobile') }}">Mobile Products</a>
                                                             </h4>
                                                         </div>
                                                     </div>
@@ -261,13 +354,13 @@
                                                                 alt="Brand identity preview">
                                                             <div class="homemenu-btn">
                                                                 <a class="menu-btn show-1"
-                                                                    href="{{ url('index4.html') }}">View
+                                                                    href="{{ route('services.branding') }}">View
                                                                     Page</a>
                                                             </div>
                                                         </div>
                                                         <div class="homemenu-content text-center">
                                                             <h4 class="homemenu-title">
-                                                                <a href="{{ url('index4.html') }}">Home 04</a>
+                                                                <a href="{{ route('services.branding') }}">Brand Identity</a>
                                                             </h4>
                                                         </div>
                                                     </div>
@@ -283,21 +376,13 @@
                                                 <li><a href="{{ route('services.branding') }}">branding</a></li>
                                             </ul>
                                         </li>
-                                        <li class="has-dropdown"><a href="{{ url('#') }}">Pages</a>
+                                        <li class="has-dropdown"><a href="{{ route('home') }}#about">Company</a>
                                             <ul class="submenu dark wt-submenu">
-                                                <li><a href="{{ url('about.html') }}">about</a></li>
-                                                <li><a href="{{ url('team.html') }}">team</a></li>
-                                                <li><a href="{{ url('team-details.html') }}">team details</a></li>
-                                                <li><a href="{{ url('testimonial.html') }}">testimonial</a></li>
-                                                <li><a href="{{ url('pricing.html') }}">pricing</a></li>
-                                                <li><a href="{{ url('portfolio.html') }}">portfolio</a></li>
-                                                <li><a href="{{ url('portfolio-gallery.html') }}">portfolio
-                                                        gallery</a></li>
-                                                <li><a href="{{ url('portfolio-list.html') }}">portfolio list</a></li>
-                                                <li><a href="{{ url('portfolio-single.html') }}">portfolio single</a>
-                                                </li>
-                                                <li><a href="{{ url('faq.html') }}">faq</a></li>
-                                                <li><a href="{{ url('error.html') }}">error</a></li>
+                                                <li><a href="{{ route('home') }}#about">about</a></li>
+                                                <li><a href="{{ route('home') }}#work">selected work</a></li>
+                                                <li><a href="{{ route('home') }}#perspectives">client perspectives</a></li>
+                                                <li><a href="{{ route('service.show') }}#service-pricing">pricing</a></li>
+                                                <li><a href="{{ route('home') }}#faq">faq</a></li>
                                             </ul>
                                         </li>
                                         <li><a href="{{ route('contact.show') }}">Contact</a></li>
@@ -307,7 +392,7 @@
 
                             <!-- mail -->
                             <div class="wt-header-mail d-none d-lg-block">
-                                <a href="mailto:support@turancetechnologies.com">support@turancetechnologies.com</a>
+                                <a href="mailto:{{ config('seo.email') }}">{{ config('seo.email') }}</a>
                             </div>
 
                             <!-- social -->
@@ -347,6 +432,16 @@
 
     @if ($minimalPage)
         @yield('content')
+        @if (request()->routeIs('home', 'service.show', 'services.*'))
+            <aside class="tt-mobile-sales-bar" aria-label="Project enquiry shortcuts" data-mobile-sales-bar>
+                <a href="{{ config('seo.whatsapp_url') }}" target="_blank" rel="noopener noreferrer"
+                    data-conversion="mobile_sales_whatsapp">WhatsApp</a>
+                <a href="{{ route('contact.show') }}"
+                    data-conversion="mobile_sales_quote">Get an estimate
+                    <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5" /></svg>
+                </a>
+            </aside>
+        @endif
     @else
     <div id="smooth-wrapper">
 
@@ -380,7 +475,7 @@
                                     <div class="wt-footer-widget-border"></div>
                                     <div class="wt-footer-widget-mail">
                                         <h6>email us</h6>
-                                        <a href="mailto:support@turancetechnologies.com">support@turancetechnologies.com</a>
+                                        <a href="mailto:{{ config('seo.email') }}">{{ config('seo.email') }}</a>
                                     </div>
                                     <div class="wt-footer-right-social">
                                         <ul>
@@ -428,7 +523,7 @@
                                                 <ul class="submenu">
                                                     <li><a href="{{ route('home') }}">Home</a></li>
                                                     <li><a href="{{ route('service.show') }}">Services</a></li>
-                                                    <li><a href="{{ url('about.html') }}">About</a></li>
+                                                    <li><a href="{{ route('home') }}#about">About</a></li>
                                                     <li><a href="{{ route('contact.show') }}">Contact</a></li>
                                                 </ul>
                                             </li>
@@ -570,13 +665,14 @@
                             </li>
                             <li>
                                 <i class="fas fa-envelope"></i>
-                                <a href="mailto:support@turancetechnologies.com">
-                                    <span class="__cf_email__">support@turancetechnologies.com</span>
+                                <a href="mailto:{{ config('seo.email') }}">
+                                    <span class="__cf_email__">{{ config('seo.email') }}</span>
                                 </a>
                             </li>
                             <li>
-                                <i class="fa-solid fa-phone-flip"></i>
-                                <a href="tel:+2349124948602">+2349124948602</a>
+                                <i class="fa-brands fa-whatsapp"></i>
+                                <a href="{{ config('seo.whatsapp_url') }}" target="_blank"
+                                    rel="noopener noreferrer">{{ config('seo.phone') }}</a>
                             </li>
                         </ul>
                     </div>

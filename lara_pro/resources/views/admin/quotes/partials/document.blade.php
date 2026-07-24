@@ -218,7 +218,7 @@
                             </td>
                             <td>
                                 <span>Contact</span>
-                                <strong>{{ $brand['contact_email'] ?? 'support@turancetechnologies.com' }}</strong>
+                                <strong>{{ $brand['contact_email'] ?? 'hello@turancetechnologies.com' }}</strong>
                             </td>
                         </tr>
                     </table>
@@ -296,7 +296,7 @@
                 </td>
                 <td>
                     <span class="quote-footer-label">Email</span>
-                    <strong>{{ $brand['contact_email'] ?? 'support@turancetechnologies.com' }}</strong>
+                    <strong>{{ $brand['contact_email'] ?? 'hello@turancetechnologies.com' }}</strong>
                 </td>
                 <td>
                     <span class="quote-footer-label">Prepared By</span>

@@ -1,4 +1,32 @@
+function anchorOffsetFor(target) {
+  if (target && target.id === "contact-form") {
+    return 0;
+  }
+
+  const header = document.querySelector(".tt-header");
+  return header ? header.getBoundingClientRect().height + 18 : 18;
+}
+
+function anchorPositionFor(target) {
+  if (target && target.id === "contact-form") {
+    return document.querySelector(".tt-contact-hero")
+      || target;
+  }
+
+  return target;
+}
+
+function syncHashState() {
+  return window.location.hash
+    ? document.getElementById(window.location.hash.slice(1))
+    : null;
+}
+
 document.addEventListener("DOMContentLoaded", function () {
+  syncHashState();
+
+  window.addEventListener("hashchange", syncHashState);
+
   const header = document.querySelector(".tt-header");
 
   if (!header) {
@@ -461,7 +489,11 @@ document.addEventListener("DOMContentLoaded", function () {
   const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const hasFinePointer = window.matchMedia("(pointer: fine)").matches;
 
-  if (prefersReducedMotion || !hasFinePointer) {
+  if (
+    prefersReducedMotion ||
+    !hasFinePointer ||
+    document.querySelector(".tt-detail, .tt-services-overview")
+  ) {
     return;
   }
 
@@ -537,6 +569,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const ring = document.querySelector("[data-orbit-ring]");
   const dots = Array.from(document.querySelectorAll("[data-orbit-dot]"));
   const spark = document.querySelector("[data-orbit-spark]");
+  const shock = document.querySelector("[data-orbit-shock]");
   const wobble = document.querySelector("[data-tilt-wobble]");
   const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -588,15 +621,25 @@ document.addEventListener("DOMContentLoaded", function () {
       }, 600);
     });
 
-    if (spark) {
+    if (spark || shock) {
       const x = (posA.x + posB.x) / 2;
       const y = (posA.y + posB.y) / 2;
 
-      spark.style.setProperty("--spark-x", x.toFixed(2) + "px");
-      spark.style.setProperty("--spark-y", y.toFixed(2) + "px");
-      spark.classList.remove("is-bursting");
-      void spark.offsetWidth;
-      spark.classList.add("is-bursting");
+      if (spark) {
+        spark.style.setProperty("--spark-x", x.toFixed(2) + "px");
+        spark.style.setProperty("--spark-y", y.toFixed(2) + "px");
+        spark.classList.remove("is-bursting");
+        void spark.offsetWidth;
+        spark.classList.add("is-bursting");
+      }
+
+      if (shock) {
+        shock.style.setProperty("--spark-x", x.toFixed(2) + "px");
+        shock.style.setProperty("--spark-y", y.toFixed(2) + "px");
+        shock.classList.remove("is-shocking");
+        void shock.offsetWidth;
+        shock.classList.add("is-shocking");
+      }
     }
 
     if (wobble) {
@@ -897,21 +940,122 @@ document.addEventListener("DOMContentLoaded", function () {
     return;
   }
 
+  const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const decodeCharset = "01ABCDEFGHIJKLMNOPQRSTUVWXYZ#$%&*+-/<>";
+
+  function decodeText(el, duration) {
+    if (!el) {
+      return;
+    }
+
+    if (!el.dataset.finalText) {
+      el.dataset.finalText = el.textContent;
+    }
+
+    const finalText = el.dataset.finalText;
+
+    if (prefersReducedMotion) {
+      el.textContent = finalText;
+      return;
+    }
+
+    const chars = finalText.split("");
+    const revealDelays = chars.map(function (_, index) {
+      return (index / chars.length) * duration * 0.75 + Math.random() * duration * 0.25;
+    });
+    let start = null;
+
+    el.classList.add("is-decoding");
+
+    function frame(timestamp) {
+      if (start === null) {
+        start = timestamp;
+      }
+      const elapsed = timestamp - start;
+      let output = "";
+
+      for (let i = 0; i < chars.length; i++) {
+        if (chars[i] === " ") {
+          output += " ";
+        } else if (elapsed >= revealDelays[i]) {
+          output += chars[i];
+        } else {
+          output += decodeCharset[Math.floor(Math.random() * decodeCharset.length)];
+        }
+      }
+
+      el.textContent = output;
+
+      if (elapsed < duration) {
+        window.requestAnimationFrame(frame);
+      } else {
+        el.textContent = finalText;
+        el.classList.remove("is-decoding");
+      }
+    }
+
+    window.requestAnimationFrame(frame);
+  }
+
+  function decodeSlide(slide) {
+    decodeText(slide.querySelector("blockquote [data-decode]"), 560);
+    decodeText(slide.querySelector("footer strong [data-decode]"), 420);
+  }
+
   let currentIndex = 0;
   let touchStartX = null;
+  let leaveTimer = null;
 
   function showSlide(nextIndex) {
-    currentIndex = (nextIndex + slides.length) % slides.length;
+    const total = slides.length;
+    const targetIndex = (nextIndex + total) % total;
 
-    slides.forEach(function (slide, index) {
-      const isActive = index === currentIndex;
-      slide.classList.toggle("is-active", isActive);
-      slide.setAttribute("aria-hidden", String(!isActive));
-      slide.inert = !isActive;
-    });
+    if (targetIndex === currentIndex) {
+      return;
+    }
 
+    let diff = targetIndex - currentIndex;
+    if (diff > total / 2) diff -= total;
+    if (diff < -total / 2) diff += total;
+    const forward = diff >= 0;
+
+    carousel.classList.toggle("tt-dir-next", forward);
+    carousel.classList.toggle("tt-dir-prev", !forward);
+
+    const outgoing = slides[currentIndex];
+    const incoming = slides[targetIndex];
+
+    if (leaveTimer !== null) {
+      window.clearTimeout(leaveTimer);
+      slides.forEach(function (slide) {
+        slide.classList.remove("is-leaving");
+      });
+    }
+
+    outgoing.classList.remove("is-active");
+    outgoing.classList.add("is-leaving");
+    outgoing.setAttribute("aria-hidden", "true");
+    outgoing.inert = true;
+
+    incoming.classList.remove("is-leaving");
+    incoming.classList.add("is-active");
+    incoming.setAttribute("aria-hidden", "false");
+    incoming.inert = false;
+
+    currentIndex = targetIndex;
     currentLabel.textContent = String(currentIndex + 1).padStart(2, "0");
+
+    decodeSlide(incoming);
+
+    leaveTimer = window.setTimeout(function () {
+      outgoing.classList.remove("is-leaving");
+      leaveTimer = null;
+    }, 650);
   }
+
+  slides.forEach(function (slide, index) {
+    slide.inert = index !== currentIndex;
+  });
 
   previousButton.addEventListener("click", function () {
     showSlide(currentIndex - 1);
@@ -954,8 +1098,6 @@ document.addEventListener("DOMContentLoaded", function () {
     },
     { passive: true }
   );
-
-  showSlide(0);
 });
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -971,11 +1113,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  function headerOffset() {
-    const header = document.querySelector(".tt-header");
-    return header ? header.getBoundingClientRect().height + 18 : 18;
-  }
-
   function easeInOutCubic(progress) {
     return progress < 0.5
       ? 4 * progress * progress * progress
@@ -984,13 +1121,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function scrollToTarget(target, hash) {
     cancelScroll();
+    window.history.pushState(null, "", hash);
+    syncHashState();
 
     const startY = window.scrollY;
     const documentHeight = document.documentElement.scrollHeight;
+    const positionTarget = anchorPositionFor(target);
     const destination = Math.max(
       0,
       Math.min(
-        target.getBoundingClientRect().top + startY - headerOffset(),
+        positionTarget.getBoundingClientRect().top + startY - anchorOffsetFor(target),
         documentHeight - window.innerHeight
       )
     );
@@ -998,7 +1138,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (prefersReducedMotion.matches || Math.abs(distance) < 2) {
       window.scrollTo(0, destination);
-      window.history.pushState(null, "", hash);
       return;
     }
 
@@ -1017,7 +1156,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
       animationFrame = null;
       document.documentElement.style.scrollBehavior = "";
-      window.history.pushState(null, "", hash);
     }
 
     animationFrame = window.requestAnimationFrame(step);
@@ -1060,30 +1198,61 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 window.addEventListener("load", function () {
-  if (!window.location.hash) {
-    return;
-  }
-
-  const target = document.querySelector(window.location.hash);
-  const header = document.querySelector(".tt-header");
-
-  if (!target) {
-    return;
-  }
-
-  const previousBehaviour = document.documentElement.style.scrollBehavior;
-  const headerOffset = header ? header.getBoundingClientRect().height + 18 : 0;
-  document.documentElement.style.scrollBehavior = "auto";
-  const targetTop = target.getBoundingClientRect().top + window.scrollY;
-  window.scrollTo(0, Math.max(0, targetTop - headerOffset));
-  const revealRoot = target.closest("[data-reveal]");
-  [target, revealRoot].concat(Array.from(target.querySelectorAll("[data-reveal]"))).filter(Boolean).forEach(function (element) {
-    if (element.hasAttribute && element.hasAttribute("data-reveal")) {
-      element.style.transitionDelay = "0ms";
-      element.classList.add("is-visible");
+  function applyHashTarget() {
+    const target = syncHashState();
+    if (!target) {
+      return;
     }
-  });
-  window.requestAnimationFrame(function () {
-    document.documentElement.style.scrollBehavior = previousBehaviour;
+
+    const previousBehaviour = document.documentElement.style.scrollBehavior;
+    document.documentElement.style.scrollBehavior = "auto";
+    const positionTarget = anchorPositionFor(target);
+    const targetTop = positionTarget.getBoundingClientRect().top + window.scrollY;
+    window.scrollTo(0, Math.max(0, targetTop - anchorOffsetFor(target)));
+    const revealRoot = target.closest("[data-reveal]");
+    [target, revealRoot].concat(Array.from(target.querySelectorAll("[data-reveal]"))).filter(Boolean).forEach(function (element) {
+      if (element.hasAttribute && element.hasAttribute("data-reveal")) {
+        element.style.transitionDelay = "0ms";
+        element.classList.add("is-visible");
+      }
+    });
+    window.requestAnimationFrame(function () {
+      document.documentElement.style.scrollBehavior = previousBehaviour;
+    });
+  }
+
+  applyHashTarget();
+
+  // Browsers can restore the native hash position after the load event. Re-apply
+  // once after that restoration so a fixed header never covers the contact hero.
+  window.setTimeout(applyHashTarget, 80);
+  window.setTimeout(applyHashTarget, 260);
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+  const mobileSalesBar = document.querySelector("[data-mobile-sales-bar]");
+
+  if (mobileSalesBar) {
+    const syncSalesBar = function () {
+      mobileSalesBar.classList.toggle("is-visible", window.scrollY > 420);
+    };
+
+    syncSalesBar();
+    window.addEventListener("scroll", syncSalesBar, { passive: true });
+  }
+
+  document.addEventListener("click", function (event) {
+    const conversionLink = event.target.closest("[data-conversion]");
+    if (!conversionLink) {
+      return;
+    }
+
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({
+      event: "conversion_intent",
+      conversion_name: conversionLink.getAttribute("data-conversion"),
+      destination: conversionLink.getAttribute("href") || "",
+      page_path: window.location.pathname,
+    });
   });
 });

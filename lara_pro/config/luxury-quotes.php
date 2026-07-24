@@ -11,7 +11,7 @@ return [
         'studio_name' => env('LUXURY_INVOICE_STUDIO_NAME', env('LUXURY_QUOTE_STUDIO_NAME', env('MAIL_FROM_NAME', 'Turance Technologies'))),
         'tagline' => env('LUXURY_INVOICE_TAGLINE', env('LUXURY_QUOTE_TAGLINE', 'Excellence Delivered')),
         'logo_path' => env('LUXURY_INVOICE_LOGO_PATH', env('LUXURY_QUOTE_LOGO_PATH', base_path('../assets/img/logo/logo.png'))),
-        'contact_email' => env('LUXURY_INVOICE_CONTACT_EMAIL', env('LUXURY_QUOTE_CONTACT_EMAIL', env('MAIL_FROM_ADDRESS', 'support@turancetechnologies.com'))),
+        'contact_email' => env('LUXURY_INVOICE_CONTACT_EMAIL', env('LUXURY_QUOTE_CONTACT_EMAIL', env('MAIL_FROM_ADDRESS', 'hello@turancetechnologies.com'))),
         'contact_phone' => env('LUXURY_INVOICE_CONTACT_PHONE', env('LUXURY_QUOTE_CONTACT_PHONE', '+2349124948602')),
         'website' => env('LUXURY_INVOICE_WEBSITE', env('LUXURY_QUOTE_WEBSITE', env('APP_URL', 'https://turancetechnologies.com'))),
         'currency' => env('LUXURY_INVOICE_CURRENCY', env('LUXURY_QUOTE_CURRENCY', 'NGN')),
