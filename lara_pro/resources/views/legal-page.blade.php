@@ -6,7 +6,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&amp;family=Hanken+Grotesk:wght@400;500;600;700&amp;display=swap">
-    <link rel="stylesheet" href="{{ asset('/assets/css/home-reference.css') }}?v=2.4">
+    <link rel="stylesheet" href="{{ asset('/assets/css/home-reference.css') }}?v=2.5">
     <link rel="stylesheet" href="{{ asset('/assets/css/home-sections.css') }}?v=2.1">
     <link rel="stylesheet" href="{{ asset('/assets/css/legal-reference.css') }}?v=1.1">
 @endpush

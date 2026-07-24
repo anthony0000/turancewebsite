@@ -349,6 +349,11 @@ body.tt-custom-cursor-active button {
   gap: 6px;
   width: 54px;
   height: 54px;
+  min-width: 54px;
+  min-height: 54px;
+  flex: 0 0 54px;
+  aspect-ratio: 1 / 1;
+  box-sizing: border-box;
   padding: 0;
   border: 1px solid rgba(201, 147, 33, 0.18);
   border-radius: 50%;
@@ -368,6 +373,9 @@ body.tt-custom-cursor-active button {
 .tt-header.is-scrolled .tt-menu-button {
   width: 48px;
   height: 48px;
+  min-width: 48px;
+  min-height: 48px;
+  flex-basis: 48px;
 }
 
 .tt-menu-button span {
@@ -1875,6 +1883,9 @@ body.tt-custom-cursor-active button {
     gap: 6px;
     width: 52px;
     height: 52px;
+    min-width: 52px;
+    min-height: 52px;
+    flex-basis: 52px;
   }
 
   .tt-menu-button span {
