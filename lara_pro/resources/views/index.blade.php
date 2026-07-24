@@ -140,7 +140,7 @@
             <div class="tt-hero__main">
                 <div class="tt-hero__content">
                     <div class="tt-hero__eyebrow tt-reveal tt-reveal--one">
-                        <span>Web design &amp; software development</span>
+                        <span>Web design & software development</span>
                         <i aria-hidden="true"></i>
                     </div>
 
