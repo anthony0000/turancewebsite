@@ -26,7 +26,6 @@ class ContactController extends Controller
     {
         $serviceTopic = config('contact.service_topics.'.(string) $request->query('service'));
         $anniversaryPromo = app(\App\Support\AnniversaryPromotion::class)->current();
-        $promoEndsAt = isset($anniversaryPromo['ends_at']) ? \Illuminate\Support\Carbon::parse($anniversaryPromo['ends_at']) : null;
 
         return view('contact', [
             'selectedTopic' => in_array($serviceTopic, config('contact.topics', []), true)
@@ -36,9 +35,8 @@ class ContactController extends Controller
                 'issued_at' => now()->timestamp,
                 'nonce' => Str::random(32),
             ], JSON_THROW_ON_ERROR)),
-            'promoClaimed' => ! empty($anniversaryPromo['enabled'])
-                && $promoEndsAt
-                && now()->lt($promoEndsAt)
+            'promoClaimed' => ! empty($anniversaryPromo['is_active'])
+                && filled($request->query('promo'))
                 && hash_equals((string) ($anniversaryPromo['code'] ?? ''), (string) $request->query('promo')),
         ]);
     }
@@ -53,11 +51,32 @@ class ContactController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255'],
             'topic' => ['required', 'string', Rule::in(config('contact.topics', []))],
+            'promo_code' => ['nullable', 'string', 'max:80'],
             'message' => ['required', 'string', 'min:10', 'max:5000'],
             'contact_context' => ['required', 'string', 'max:4096'],
             'company_fax' => ['nullable', 'string', 'max:0'],
             'cf-turnstile-response' => ['nullable', 'string', 'max:2048'],
         ]);
+
+        $anniversaryPromo = app(\App\Support\AnniversaryPromotion::class)->current();
+        $submittedPromoCode = trim((string) ($validated['promo_code'] ?? ''));
+
+        if ($submittedPromoCode !== '') {
+            if (empty($anniversaryPromo['is_active']) || ! hash_equals(
+                strtoupper((string) ($anniversaryPromo['code'] ?? '')),
+                strtoupper($submittedPromoCode),
+            )) {
+                throw ValidationException::withMessages([
+                    'promo_code' => 'That promo code is not valid or the offer has ended.',
+                ]);
+            }
+
+            $validated['promo_code'] = strtoupper($submittedPromoCode);
+            $validated['promo_discount_percent'] = $anniversaryPromo['discount_percent'];
+        } else {
+            $validated['promo_code'] = null;
+            $validated['promo_discount_percent'] = null;
+        }
 
         if (! $this->hasValidFormContext($validated['contact_context'])) {
             throw ValidationException::withMessages([

@@ -1285,7 +1285,19 @@ document.addEventListener("DOMContentLoaded", function () {
         seconds: totalSeconds % 60
       };
       Object.keys(fields).forEach(function (key) {
-        fields[key].textContent = String(values[key]).padStart(2, "0");
+        const field = fields[key];
+        const next = String(values[key]).padStart(2, "0");
+
+        if (field.textContent === next) {
+          return;
+        }
+
+        field.textContent = next;
+
+        // Restart the tick animation only on the units that actually changed.
+        field.classList.remove("is-ticking");
+        void field.offsetWidth;
+        field.classList.add("is-ticking");
       });
       if (remaining <= 0) {
         countdownRoot.closest(".tt-anniversary-promo").classList.add("is-expired");

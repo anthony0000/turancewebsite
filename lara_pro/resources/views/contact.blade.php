@@ -7,9 +7,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&amp;family=Hanken+Grotesk:wght@400;500;600;700&amp;display=swap">
-    <link rel="stylesheet" href="{{ asset('/assets/css/home-reference.css') }}?v=2.5">
-    <link rel="stylesheet" href="{{ asset('/assets/css/home-sections.css') }}?v=1.8">
-    <link rel="stylesheet" href="{{ asset('/assets/css/contact-reference.css') }}?v=1.3">
+    <link rel="stylesheet" href="{{ asset('/assets/css/home-reference.css') }}?v=2.7">
+    <link rel="stylesheet" href="{{ asset('/assets/css/home-sections.css') }}?v=2.4">
+    <link rel="stylesheet" href="{{ asset('/assets/css/contact-reference.css') }}?v=1.4">
 @endpush
 
 @section('content')
@@ -137,6 +137,19 @@
                             @error('topic')<small id="topic-error">{{ $message }}</small>@enderror
                         </div>
 
+                        @if (! empty($anniversaryPromo['is_active']))
+                            <div class="tt-contact-field {{ $errors->has('promo_code') ? 'has-error' : '' }}">
+                                <label for="promo_code">Anniversary promo code <span>(optional)</span></label>
+                                <input type="text" id="promo_code" name="promo_code"
+                                    value="{{ old('promo_code', request()->query('promo')) }}"
+                                    placeholder="{{ $anniversaryPromo['code'] }}" maxlength="80"
+                                    autocomplete="off"
+                                    aria-describedby="promo-code-guidance {{ $errors->has('promo_code') ? 'promo-code-error' : '' }}">
+                                <span class="tt-contact-field__guidance" id="promo-code-guidance">Enter {{ $anniversaryPromo['code'] }} to request the {{ $anniversaryPromo['discount_percent'] }}% anniversary discount.</span>
+                                @error('promo_code')<small id="promo-code-error">{{ $message }}</small>@enderror
+                            </div>
+                        @endif
+
                         <div class="tt-contact-field {{ $errors->has('message') ? 'has-error' : '' }}">
                             <label for="message">Project context</label>
                             <textarea name="message" rows="5" id="message"
@@ -212,6 +225,6 @@
     @if (config('contact.turnstile.enabled') && filled(config('contact.turnstile.site_key')))
         <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
     @endif
-    <script src="{{ asset('/assets/js/home-reference.js') }}?v=2.5" defer></script>
+    <script src="{{ asset('/assets/js/home-reference.js') }}?v=2.6" defer></script>
     <script src="{{ asset('/assets/js/contact-reference.js') }}?v=1.2" defer></script>
 @endpush

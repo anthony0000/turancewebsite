@@ -7,6 +7,9 @@
   --tt-gold-light: #e9c46a;
   --tt-gold-soft: #f8e7b4;
   --tt-gold-border: rgba(201, 147, 33, 0.25);
+  --tt-promo-red: #c8102e;
+  --tt-promo-red-deep: #9c0b23;
+  --tt-promo-red-soft: #fdecef;
   --tt-page-padding: clamp(24px, 5.55vw, 106px);
   --tt-body-font: "Hanken Grotesk", sans-serif;
   --tt-display-font: "Barlow Condensed", sans-serif;
@@ -441,13 +444,29 @@ body.tt-custom-cursor-active button {
   animation: tt-line-grow 800ms 420ms both cubic-bezier(0.2, 0.75, 0.25, 1);
 }
 
-.tt-hero__anniversary { display: inline-flex; align-items: center; gap: 12px; width: fit-content; margin-top: 22px; padding: 8px 12px 8px 8px; border: 1px solid rgba(201,147,33,.35); border-radius: 999px; background: rgba(255,255,255,.62); color: var(--tt-ink); transition: border-color 220ms ease, transform 220ms ease, box-shadow 220ms ease; }
+.tt-hero__anniversary { display: inline-flex; align-items: center; gap: 12px; width: fit-content; max-width: 100%; margin-top: 22px; padding: 7px 14px 7px 7px; border: 1px solid rgba(201,147,33,.35); border-radius: 999px; background: rgba(255,255,255,.78); color: var(--tt-navy); backdrop-filter: blur(6px); transition: border-color 220ms ease, transform 220ms ease, box-shadow 220ms ease; }
 .tt-hero__anniversary:hover { border-color: var(--tt-gold); box-shadow: 0 10px 28px rgba(7,20,38,.08); transform: translateY(-2px); }
-.tt-hero__anniversary-mark { display: grid; width: 38px; height: 38px; place-items: center; border-radius: 50%; background: var(--tt-gold); color: #fff; font-family: var(--tt-display-font); font-size: 18px; font-weight: 700; }
-.tt-hero__anniversary span:nth-child(2) { display: grid; gap: 1px; }
-.tt-hero__anniversary strong { color: var(--tt-ink); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
+.tt-hero__anniversary-mark { display: grid; flex: 0 0 auto; width: 38px; height: 38px; place-items: center; border-radius: 50%; background: linear-gradient(140deg, var(--tt-gold-light), var(--tt-gold)); color: #fff; font-family: var(--tt-display-font); font-size: 18px; font-weight: 700; box-shadow: 0 3px 10px rgba(201,147,33,.35); }
+.tt-hero__anniversary-copy { display: grid; min-width: 0; gap: 1px; }
+.tt-hero__anniversary strong { color: var(--tt-navy); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
 .tt-hero__anniversary small { color: var(--tt-muted); font-size: 11px; }
-.tt-hero__anniversary svg { width: 16px; margin-left: 5px; fill: none; stroke: var(--tt-gold); stroke-width: 1.5; }
+.tt-hero__anniversary svg { width: 16px; flex: 0 0 auto; fill: none; stroke: var(--tt-gold); stroke-width: 1.5; }
+
+/* Live-offer state: the discount is the reason to click, so it carries the
+   one red accent on an otherwise gold-and-ivory page. */
+.tt-hero__anniversary.is-offer { border-color: rgba(200,16,46,.28); padding-right: 8px; }
+.tt-hero__anniversary.is-offer:hover { border-color: var(--tt-promo-red); box-shadow: 0 12px 30px rgba(200,16,46,.16); }
+.tt-hero__anniversary.is-offer svg { stroke: var(--tt-promo-red); }
+.tt-hero__anniversary-offer { position: relative; display: inline-flex; flex: 0 0 auto; align-items: baseline; gap: 4px; margin-left: 2px; padding: 6px 12px; border-radius: 999px; background: linear-gradient(140deg, var(--tt-promo-red), var(--tt-promo-red-deep)); color: #fff; box-shadow: 0 4px 14px rgba(200,16,46,.34); }
+.tt-hero__anniversary-offer b { font-family: var(--tt-display-font); font-size: 20px; font-weight: 700; line-height: 1; letter-spacing: -.01em; }
+.tt-hero__anniversary-offer i { font-size: 10px; font-style: normal; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; opacity: .92; }
+.tt-hero__anniversary-offer::after { content: ""; position: absolute; inset: 0; border-radius: inherit; box-shadow: 0 0 0 0 rgba(200,16,46,.5); animation: tt-offer-pulse 2.4s ease-out infinite; pointer-events: none; }
+
+@keyframes tt-offer-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(200,16,46,.5); }
+  70% { box-shadow: 0 0 0 12px rgba(200,16,46,0); }
+  100% { box-shadow: 0 0 0 12px rgba(200,16,46,0); }
+}
 
 .tt-hero__title {
   margin: 0;
@@ -1882,6 +1901,12 @@ body.tt-custom-cursor-active button {
     font-size: clamp(50px, 6.8vw, 60px);
   }
 
+  /* Below this width the hero column squeezes the badge enough that the
+     tagline wraps to a second line, so drop it and keep the badge on one row. */
+  .tt-hero__anniversary small {
+    display: none;
+  }
+
   .tt-primary-button {
     min-width: 260px;
     height: 60px;
@@ -1940,6 +1965,37 @@ body.tt-custom-cursor-active button {
 
   html {
     scrollbar-gutter: auto;
+  }
+
+  .tt-hero__anniversary {
+    gap: 10px;
+    max-width: 100%;
+    margin-top: 18px;
+    padding: 6px 12px 6px 6px;
+  }
+
+  .tt-hero__anniversary.is-offer {
+    padding-right: 6px;
+  }
+
+  .tt-hero__anniversary-mark {
+    width: 34px;
+    height: 34px;
+    flex-basis: 34px;
+    font-size: 16px;
+  }
+
+  .tt-hero__anniversary strong {
+    font-size: 10.5px;
+    letter-spacing: .06em;
+  }
+
+  .tt-hero__anniversary-offer {
+    padding: 5px 10px;
+  }
+
+  .tt-hero__anniversary-offer b {
+    font-size: 18px;
   }
 
   .tt-reference-home {

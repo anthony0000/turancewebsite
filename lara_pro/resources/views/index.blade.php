@@ -7,8 +7,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&amp;family=Hanken+Grotesk:wght@400;500;600;700&amp;display=swap">
-    <link rel="stylesheet" href="{{ asset('/assets/css/home-reference.css') }}?v=2.5">
-    <link rel="stylesheet" href="{{ asset('/assets/css/home-sections.css') }}?v=2.2">
+    <link rel="stylesheet" href="{{ asset('/assets/css/home-reference.css') }}?v=2.7">
+    <link rel="stylesheet" href="{{ asset('/assets/css/home-sections.css') }}?v=2.4">
 @endpush
 
 @section('content')
@@ -148,9 +148,23 @@
                     </div>
 
                     @if (! empty($anniversaryPromo['years']))
-                        <a class="tt-hero__anniversary tt-reveal tt-reveal--one" href="{{ $promoIsActive ? '#anniversary-offer' : '#contact' }}">
-                            <span class="tt-hero__anniversary-mark">10</span>
-                            <span><strong>{{ $anniversaryPromo['years'] }} years of Turance</strong><small>Celebrating a decade of digital craftsmanship</small></span>
+                        <a class="tt-hero__anniversary tt-reveal tt-reveal--one {{ $promoIsActive ? 'is-offer' : '' }}"
+                            href="{{ $promoIsActive ? '#anniversary-offer' : '#contact' }}"
+                            @if ($promoIsActive) data-conversion="hero_anniversary_offer" @endif>
+                            <span class="tt-hero__anniversary-mark">{{ $anniversaryPromo['years'] }}</span>
+
+                            <span class="tt-hero__anniversary-copy">
+                                <strong>{{ $anniversaryPromo['years'] }} years of Turance</strong>
+                                <small>Celebrating a decade of digital craftsmanship</small>
+                            </span>
+
+                            @if ($promoIsActive)
+                                <span class="tt-hero__anniversary-offer">
+                                    <b>{{ $anniversaryPromo['discount_percent'] + 0 }}%</b>
+                                    <i>off</i>
+                                </span>
+                            @endif
+
                             <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 4v12M5 11l5 5 5-5" /></svg>
                         </a>
                     @endif
@@ -200,13 +214,29 @@
 
         @if ($promoIsActive)
             <section class="tt-anniversary-promo" id="anniversary-offer" aria-labelledby="anniversary-offer-title"
+                style="--promo-years: '{{ $anniversaryPromo['years'] }}'"
                 data-countdown-end="{{ $promoEndsAt->toIso8601String() }}">
                 <div class="tt-section__inner tt-anniversary-promo__inner">
-                    <div class="tt-anniversary-promo__copy" data-reveal>
-                        <p class="tt-section-heading__eyebrow"><i aria-hidden="true"></i>{{ $anniversaryPromo['years'] }} years of Turance</p>
-                        <h2 id="anniversary-offer-title">A decade of building what matters.</h2>
-                        <p>To celebrate {{ $anniversaryPromo['years'] }} years of digital craftsmanship, receive <strong>{{ $anniversaryPromo['discount_percent'] }}% off</strong> your new website, app, SaaS or branding engagement when you reserve your project before the offer ends.</p>
-                        <a class="tt-anniversary-promo__link" href="{{ route('contact.show', ['promo' => $anniversaryPromo['code']]) }}" data-conversion="anniversary_offer">Claim the anniversary offer <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5" /></svg></a>
+                    <div class="tt-anniversary-promo__copy">
+                        <p class="tt-section-heading__eyebrow" data-reveal>
+                            <i aria-hidden="true"></i>{{ $anniversaryPromo['years'] }} years of Turance
+                        </p>
+                        <h2 id="anniversary-offer-title" data-reveal>A decade of building what matters.</h2>
+
+                        <div class="tt-promo-figure" data-reveal>
+                            <span class="tt-promo-figure__value">
+                                {{ $anniversaryPromo['discount_percent'] + 0 }}<sup>%</sup>
+                            </span>
+                            <span class="tt-promo-figure__copy">
+                                <strong>off your new engagement</strong>
+                                <small>Websites, mobile apps, SaaS platforms and branding</small>
+                            </span>
+                        </div>
+
+                        <p data-reveal>To celebrate {{ $anniversaryPromo['years'] }} years of digital craftsmanship, reserve your
+                            project before the offer ends and we apply the discount to your entire engagement.</p>
+
+                        <a class="tt-anniversary-promo__link" href="{{ route('contact.show', ['promo' => $anniversaryPromo['code']]) }}" data-conversion="anniversary_offer" data-reveal>Claim the anniversary offer <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5" /></svg></a>
                     </div>
                     <div class="tt-anniversary-promo__timer" data-countdown aria-live="polite" data-reveal>
                         <span class="tt-anniversary-promo__timer-label">Offer closes in</span>
@@ -537,5 +567,5 @@
 @endsection
 
 @push('scripts')
-    <script src="{{ asset('/assets/js/home-reference.js') }}?v=2.5" defer></script>
+    <script src="{{ asset('/assets/js/home-reference.js') }}?v=2.6" defer></script>
 @endpush

@@ -6,19 +6,54 @@
 }
 
 .tt-anniversary-promo { position: relative; overflow: hidden; padding: 82px 0; background: linear-gradient(110deg, #102642 0%, #07172b 58%, #0f2b41 100%); color: #fff; }
-.tt-anniversary-promo::after { content: "10"; position: absolute; right: 5%; bottom: -28%; color: rgba(233,196,106,.05); font-family: var(--tt-display-font); font-size: 320px; font-weight: 700; line-height: 1; pointer-events: none; }
+.tt-anniversary-promo::after { content: var(--promo-years, "10"); position: absolute; right: 5%; bottom: -28%; color: rgba(233,196,106,.05); font-family: var(--tt-display-font); font-size: 320px; font-weight: 700; line-height: 1; pointer-events: none; animation: tt-promo-drift 16s ease-in-out infinite alternate; }
+@keyframes tt-promo-drift { from { transform: translate3d(0,0,0); } to { transform: translate3d(-26px,-14px,0); } }
 .tt-anniversary-promo__inner { position: relative; z-index: 1; display: grid; grid-template-columns: minmax(0,1.2fr) minmax(360px,.8fr); align-items: center; gap: clamp(50px,8vw,130px); }
 .tt-anniversary-promo__copy h2 { max-width: 700px; margin: 16px 0 18px; color: #fff; font-family: var(--tt-display-font); font-size: clamp(42px,5.2vw,76px); line-height: .95; letter-spacing: -.03em; }
 .tt-anniversary-promo__copy > p:not(.tt-section-heading__eyebrow) { max-width: 620px; margin: 0 0 28px; color: rgba(255,255,255,.68); font-size: 16px; line-height: 1.7; }
 .tt-anniversary-promo__copy > p strong { color: var(--tt-gold-light); }
+
+/* The discount is the offer. It gets the largest type in the section and the
+   only red on the page, so it reads before the headline copy. */
+.tt-promo-figure { position: relative; display: inline-flex; overflow: hidden; align-items: center; gap: 22px; margin: 0 0 28px; padding: 18px 30px 18px 24px; border-radius: 4px; background: linear-gradient(125deg, var(--tt-promo-red) 0%, var(--tt-promo-red-deep) 100%); box-shadow: 0 18px 46px rgba(200,16,46,.34); }
+
+/* The offer block lands with a little more weight than the copy around it. */
+.tt-promo-figure[data-reveal] { transform: translateY(28px) scale(.94); transition: opacity 640ms ease, transform 760ms cubic-bezier(.18,.89,.32,1.2); }
+.tt-promo-figure[data-reveal].is-visible { transform: translateY(0) scale(1); }
+
+/* A slow glint across the red, so the offer keeps catching the eye. */
+.tt-promo-figure::after { content: ""; position: absolute; inset: 0; background: linear-gradient(105deg, transparent 38%, rgba(255,255,255,.26) 50%, transparent 62%); background-size: 260% 100%; background-position: 190% 0; animation: tt-promo-shine 6s ease-in-out 1.4s infinite; pointer-events: none; }
+@keyframes tt-promo-shine { 0% { background-position: 190% 0; } 26%, 100% { background-position: -90% 0; } }
+.tt-promo-figure__value { display: inline-flex; align-items: flex-start; color: #fff; font-family: var(--tt-display-font); font-size: clamp(58px,7vw,92px); font-weight: 700; line-height: .85; letter-spacing: -.02em; }
+.tt-promo-figure__value sup { margin-top: .18em; font-size: .42em; font-weight: 700; }
+.tt-promo-figure__copy { display: grid; gap: 5px; }
+.tt-promo-figure__copy strong { color: #fff; font-size: 17px; font-weight: 700; line-height: 1.25; }
+.tt-promo-figure__copy small { color: rgba(255,255,255,.78); font-size: 13px; line-height: 1.45; }
+
+.tt-anniversary-promo__link { border-bottom: 1px solid rgba(255,255,255,.28); padding-bottom: 6px; transition: border-color 220ms ease, color 220ms ease; }
+.tt-anniversary-promo__link:hover { border-color: var(--tt-promo-red); }
 .tt-anniversary-promo__link { display: inline-flex; align-items: center; gap: 11px; color: #fff; font-size: 13px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
 .tt-anniversary-promo__link svg { width: 18px; fill: none; stroke: currentColor; stroke-width: 1.5; transition: transform 220ms ease; }
 .tt-anniversary-promo__link:hover svg { transform: translateX(4px); }
 .tt-anniversary-promo__timer { padding: 28px; border: 1px solid rgba(233,196,106,.28); background: rgba(255,255,255,.045); box-shadow: 0 22px 70px rgba(0,0,0,.16); }
-.tt-anniversary-promo__timer-label { display: block; margin-bottom: 20px; color: var(--tt-gold-light); font-size: 11px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; }
+.tt-anniversary-promo__timer-label { display: flex; align-items: center; gap: 9px; margin-bottom: 20px; color: var(--tt-gold-light); font-size: 11px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; }
+/* Live dot: signals the timer is counting, not a static graphic. */
+.tt-anniversary-promo__timer-label::before { content: ""; width: 7px; height: 7px; flex: 0 0 auto; border-radius: 50%; background: var(--tt-promo-red); animation: tt-promo-live 2s ease-out infinite; }
+@keyframes tt-promo-live {
+  0% { box-shadow: 0 0 0 0 rgba(200,16,46,.75); opacity: 1; }
+  70% { box-shadow: 0 0 0 8px rgba(200,16,46,0); opacity: .75; }
+  100% { box-shadow: 0 0 0 8px rgba(200,16,46,0); opacity: 1; }
+}
 .tt-countdown { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr; align-items: center; gap: 8px; }
 .tt-countdown > div { min-width: 55px; text-align: center; }
 .tt-countdown strong { display: block; color: #fff; font-family: var(--tt-display-font); font-size: clamp(34px,4vw,54px); line-height: 1; font-variant-numeric: tabular-nums; }
+/* Each unit rolls over as it changes, so the timer reads as live. */
+.tt-countdown strong.is-ticking { animation: tt-countdown-tick 560ms cubic-bezier(.2,.8,.2,1); }
+@keyframes tt-countdown-tick {
+  0% { opacity: 0; transform: translateY(-62%) scale(.94); filter: blur(1.5px); }
+  55% { opacity: 1; filter: blur(0); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
 .tt-countdown span { display: block; margin-top: 8px; color: rgba(255,255,255,.45); font-size: 9px; letter-spacing: .12em; text-transform: uppercase; }
 .tt-countdown > i { color: var(--tt-gold-light); font-size: 26px; font-style: normal; transform: translateY(-8px); animation: tt-countdown-pulse 1s steps(2,end) infinite; }
 .tt-anniversary-promo__timer small { display: block; margin-top: 24px; color: rgba(255,255,255,.52); font-size: 12px; }
@@ -29,6 +64,8 @@
   .tt-anniversary-promo { padding: 65px 0; }
   .tt-anniversary-promo__inner { grid-template-columns: 1fr; gap: 38px; }
   .tt-anniversary-promo__timer { padding: 22px 14px; }
+  .tt-promo-figure { display: flex; width: 100%; gap: 16px; padding: 14px 18px; }
+  .tt-promo-figure__value { font-size: clamp(48px,14vw,72px); }
   .tt-countdown { gap: 3px; }
   .tt-countdown > div { min-width: 0; }
   .tt-countdown strong { font-size: clamp(26px,9vw,42px); }
@@ -975,6 +1012,13 @@
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   [data-reveal] { opacity: 1; transform: none; transition: none; }
+  .tt-promo-figure[data-reveal],
+  .tt-promo-figure[data-reveal].is-visible { transform: none; transition: none; }
+  .tt-promo-figure::after,
+  .tt-anniversary-promo::after,
+  .tt-anniversary-promo__timer-label::before,
+  .tt-countdown strong.is-ticking,
+  .tt-countdown > i { animation: none; }
   .tt-project-ui,
   .tt-insight__visual span,
   .tt-insight__visual i,

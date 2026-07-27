@@ -870,7 +870,7 @@
                                 <div class="activity-item-header">
                                     <div>
                                         <strong>{{ $message->name }}</strong>
-                                        <span>{{ $message->topic }}</span>
+                                        <span>{{ $message->topic }}{{ $message->promo_code ? ' · '.$message->promo_code : '' }}</span>
                                     </div>
                                     <span>{{ optional($message->created_at)->format('M d') }}</span>
                                 </div>

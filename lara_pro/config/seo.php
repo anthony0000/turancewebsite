@@ -11,7 +11,7 @@ return [
         'years' => 10,
         'discount_percent' => 50,
         'code' => 'TURANCE10',
-        'ends_at' => env('ANNIVERSARY_PROMO_ENDS_AT', '2026-09-30T23:59:59+01:00'),
+        'ends_at' => env('ANNIVERSARY_PROMO_ENDS_AT', '2026-08-26T23:59:59+01:00'),
     ],
     'locale' => 'en_NG',
     'logo' => $siteUrl.'/assets/img/logo/logo.png',

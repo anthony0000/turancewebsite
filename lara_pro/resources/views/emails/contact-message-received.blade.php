@@ -10,6 +10,9 @@
     <p style="margin: 0 0 8px;"><strong>Name:</strong> {{ $contactMessage->name }}</p>
     <p style="margin: 0 0 8px;"><strong>Email:</strong> {{ $contactMessage->email }}</p>
     <p style="margin: 0 0 8px;"><strong>Topic:</strong> {{ $contactMessage->topic }}</p>
+    @if ($contactMessage->promo_code)
+        <p style="margin: 0 0 8px;"><strong>Promo code:</strong> {{ $contactMessage->promo_code }} ({{ $contactMessage->promo_discount_percent }}% discount)</p>
+    @endif
     <p style="margin: 0 0 8px;"><strong>Submitted:</strong> {{ $contactMessage->created_at?->format('F j, Y g:i A') }}</p>
 
     <h2 style="margin: 24px 0 12px; font-size: 18px;">Message</h2>
