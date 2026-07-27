@@ -587,3 +587,6 @@
   .tt-contact-submit,
   .tt-contact-submit svg { transition: none; }
 }
+.tt-contact-promo-note { display: grid; gap: 5px; max-width: 470px; margin: 24px 0 0; padding: 16px 18px; border-left: 2px solid var(--tt-gold-light); background: rgba(233,196,106,.08); }
+.tt-contact-promo-note strong { color: #8a641d; font-size: 13px; text-transform: uppercase; letter-spacing: .06em; }
+.tt-contact-promo-note span { color: var(--tt-muted); font-size: 13px; line-height: 1.5; }

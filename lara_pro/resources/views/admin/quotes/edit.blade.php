@@ -173,6 +173,12 @@
                             'exchangeRate' => $exchangeRateValue,
                         ])
 
+                        @include('admin.quotes.partials.discount-control', [
+                            'anniversaryPromo' => $anniversaryPromo ?? app(\App\Support\AnniversaryPromotion::class)->current(),
+                            'discountPercent' => old('discount_percent', $quote->discount_percent ?? 0),
+                            'promoCode' => old('promo_code', $quote->promo_code ?? ''),
+                        ])
+
                         <div class="field-full">
                             <label for="outcomes">Expected Outcomes</label>
                             <textarea id="outcomes" name="outcomes" data-rich-editor>{{ $outcomesValue }}</textarea>

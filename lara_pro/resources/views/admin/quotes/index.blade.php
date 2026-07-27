@@ -3,6 +3,7 @@
 @section('title', match (request()->route()?->getName()) {
     'admin.quotes.activity' => 'Activity | Admin',
     'admin.quotes.insights' => 'Insights | Admin',
+    'admin.quotes.promotion' => 'Promotion Control | Admin',
     'admin.quotes.create' => 'Invoice Builder | Admin',
     'admin.quotes.archive' => 'Invoice Archive | Admin',
     default => 'Dashboard | Admin',
@@ -83,78 +84,59 @@
         $showOverview = $adminSection === 'overview';
         $showActivity = $adminSection === 'activity';
         $showInsights = $adminSection === 'insights';
+        $showPromotion = $adminSection === 'promotion';
         $showBuilder = $adminSection === 'builder';
         $showArchive = $adminSection === 'archive';
+        $anniversaryPromo = $anniversaryPromo ?? config('seo.anniversary_promo', []);
+        $promoApplyDefault = old('discount_percent', $anniversaryPromo['is_active'] ?? false ? ($anniversaryPromo['discount_percent'] ?? 0) : 0);
     @endphp
 
     @if ($showOverview)
-    <section class="dashboard-command" id="dashboard-overview">
-        <div class="dashboard-command-main">
-            <span class="eyebrow">Command Center</span>
-            <h2>Executive overview for today's admin work.</h2>
-            <p>Start with the key numbers, then move into a focused workspace when you need more detail.</p>
+    <section class="dash-topline" id="dashboard-overview" aria-label="Workspace status">
+        <div class="status-chip-row">
+            <span class="status-chip status-chip--{{ $visitTrackingReady ? 'ok' : 'warn' }}">
+                <i aria-hidden="true"></i>
+                Tracking {{ $visitTrackingReady ? 'live' : 'pending setup' }}
+            </span>
 
-            <div class="dashboard-command-actions">
-                <a class="button" href="{{ route('admin.quotes.create') }}">Create Invoice</a>
-                @if ($quotes->isNotEmpty())
-                    <a class="ghost-button" href="{{ route('admin.quotes.show', $quotes->first()) }}">Open Latest</a>
-                @endif
-                <a class="ghost-button" href="{{ route('admin.quotes.activity') }}">View Activity</a>
-            </div>
+            @if (! empty($anniversaryPromo['is_active']))
+                <span class="status-chip status-chip--promo">
+                    <i aria-hidden="true"></i>
+                    {{ $anniversaryPromo['discount_percent'] }}% offer live
+                    <small>{{ $anniversaryPromo['code'] }} · ends {{ $anniversaryPromo['ends_at_formatted'] }}</small>
+                </span>
+            @endif
+
+            <span class="status-chip">
+                <i aria-hidden="true"></i>
+                {{ number_format($visitsThisMonth) }} visits this month
+            </span>
         </div>
 
-        <div class="dashboard-status-grid">
-            <div class="status-card">
-                <span class="metric-label">Tracking</span>
-                <strong>{{ $visitTrackingReady ? 'Live' : 'Pending setup' }}</strong>
-                <p>
-                    {{ $visitTrackingReady
-                        ? 'Public page visits are being captured.'
-                        : 'Run the page visits migration to enable traffic data.' }}
-                </p>
-            </div>
-
-            <div class="status-card">
-                <span class="metric-label">This Month</span>
-                <strong>{{ number_format($quotesThisMonth) }} invoices / {{ number_format($messagesThisMonth) }} leads</strong>
-                <p>{{ number_format($visitsThisMonth) }} tracked visits.</p>
-            </div>
+        <div class="dash-topline__actions">
+            @if ($quotes->isNotEmpty())
+                <a class="ghost-button" href="{{ route('admin.quotes.show', $quotes->first()) }}">Open latest</a>
+            @endif
+            <a class="ghost-button" href="{{ route('admin.quotes.activity') }}">View activity</a>
         </div>
     </section>
 
-    <section class="kpi-grid">
-        @foreach ($kpiCards as $card)
-            <article class="kpi-card kpi-card--{{ $card['tone'] }}">
-                <div class="kpi-top">
-                    <span class="metric-label">{{ $card['label'] }}</span>
-                    <span class="trend-pill trend-pill--{{ $card['trend']['direction'] }}">{{ $card['trend']['label'] }}</span>
-                </div>
-
-                <strong class="kpi-value">{{ $card['value'] }}</strong>
-                <p class="panel-copy">{{ $card['hint'] }}</p>
-                <span class="kpi-context">{{ $card['trend']['context'] }}</span>
-            </article>
-        @endforeach
-    </section>
+    @include('admin.quotes.partials.kpi-cards')
 
     <div class="dashboard-grid">
         <section class="panel panel-padded">
             <div class="panel-head">
-                <span class="eyebrow">Operating Priorities</span>
+                <span class="eyebrow">Operating priorities</span>
                 <h2>What needs attention</h2>
                 <p>A quick read before opening a detailed workspace.</p>
             </div>
 
-            <div class="bar-list">
+            <div class="stat-list stat-list--split">
                 @foreach ($dashboardHighlights as $highlight)
-                    <div class="bar-row">
-                        <div class="bar-header">
-                            <div>
-                                <strong>{{ $highlight['value'] }}</strong>
-                                <span class="bar-meta">{{ $highlight['label'] }}</span>
-                            </div>
-                        </div>
-                        <span class="bar-meta">{{ $highlight['meta'] }}</span>
+                    <div class="stat-row">
+                        <span class="stat-row__label">{{ $highlight['label'] }}</span>
+                        <strong class="stat-row__value">{{ $highlight['value'] }}</strong>
+                        <span class="stat-row__meta">{{ $highlight['meta'] }}</span>
                     </div>
                 @endforeach
             </div>
@@ -162,29 +144,69 @@
 
         <aside class="sticky-stack">
             <section class="panel panel-padded">
-                <span class="eyebrow">Shortcuts</span>
-                <h3 class="panel-title">Open a workspace</h3>
-                <div class="workspace-link-grid" style="margin-top: 14px;">
-                    <a href="{{ route('admin.quotes.activity') }}">Activity Center<span>Traffic, leads, invoices</span></a>
-                    <a href="{{ route('admin.quotes.insights') }}">Business Insights<span>Patterns and pipeline</span></a>
-                    <a href="{{ route('admin.quotes.create') }}">Invoice Builder<span>Guided creation flow</span></a>
-                    <a href="{{ route('admin.quotes.archive') }}">Invoice Archive<span>Saved documents</span></a>
+                <div class="panel-head panel-head--tight">
+                    <span class="eyebrow">Shortcuts</span>
+                    <h3 class="panel-title">Open a workspace</h3>
+                </div>
+
+                <div class="shortcut-grid">
+                    <a href="{{ route('admin.quotes.activity') }}">
+                        <span class="shortcut-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24"><path d="M4 17l5-5 4 4 7-8" /><path d="M4 19h16" /></svg>
+                        </span>
+                        <strong>Activity</strong>
+                        <span>Traffic and leads</span>
+                    </a>
+                    <a href="{{ route('admin.quotes.insights') }}">
+                        <span class="shortcut-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24"><path d="M12 3a7 7 0 0 0-4 12.75V18h8v-2.25A7 7 0 0 0 12 3z" /><path d="M9 21h6" /></svg>
+                        </span>
+                        <strong>Insights</strong>
+                        <span>Demand patterns</span>
+                    </a>
+                    <a href="{{ route('admin.quotes.create') }}">
+                        <span class="shortcut-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24"><path d="M7 3h10v18l-2-1-2 1-2-1-2 1-2-1z" /><path d="M9 8h6" /><path d="M9 12h6" /></svg>
+                        </span>
+                        <strong>Builder</strong>
+                        <span>Create an invoice</span>
+                    </a>
+                    <a href="{{ route('admin.quotes.archive') }}">
+                        <span class="shortcut-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24"><path d="M4 7h16v13H4z" /><path d="M4 7l2-4h12l2 4" /><path d="M9 12h6" /></svg>
+                        </span>
+                        <strong>Archive</strong>
+                        <span>Saved documents</span>
+                    </a>
                 </div>
             </section>
 
             <section class="panel panel-padded">
-                <span class="eyebrow">Latest Invoice</span>
-                <h3 class="panel-title">Recent output</h3>
-                <ul class="mini-list" style="margin-top: 14px;">
+                <div class="panel-head panel-head--tight panel-head--row">
+                    <div>
+                        <span class="eyebrow">Latest invoices</span>
+                        <h3 class="panel-title">Recent output</h3>
+                    </div>
+                    @if ($quotes->isNotEmpty())
+                        <a class="panel-head__link" href="{{ route('admin.quotes.archive') }}">View all</a>
+                    @endif
+                </div>
+
+                <ul class="record-list">
                     @forelse ($quotes->take(4) as $quote)
                         <li>
-                            <strong>{{ $quote->company_name }}</strong>
-                            <span>{{ $quote->quote_number }} / ${{ number_format((float) $quote->investment_amount, 0) }}</span>
+                            <a href="{{ route('admin.quotes.show', $quote) }}">
+                                <span class="record-list__main">
+                                    <strong>{{ $quote->company_name }}</strong>
+                                    <span>{{ $quote->quote_number }}</span>
+                                </span>
+                                <span class="record-list__amount">${{ number_format((float) $quote->investment_amount, 0) }}</span>
+                            </a>
                         </li>
                     @empty
-                        <li>
+                        <li class="record-list__empty">
                             <strong>No invoices yet</strong>
-                            <span>Create one from the invoice builder.</span>
+                            <span>Create your first one from the invoice builder.</span>
                         </li>
                     @endforelse
                 </ul>
@@ -203,54 +225,81 @@
         <span class="admin-pill">Live view</span>
     </div>
 
-    <section class="kpi-grid">
-        @foreach ($kpiCards as $card)
-            <article class="kpi-card kpi-card--{{ $card['tone'] }}">
-                <div class="kpi-top">
-                    <span class="metric-label">{{ $card['label'] }}</span>
-                    <span class="trend-pill trend-pill--{{ $card['trend']['direction'] }}">{{ $card['trend']['label'] }}</span>
-                </div>
-
-                <strong class="kpi-value">{{ $card['value'] }}</strong>
-                <p class="panel-copy">{{ $card['hint'] }}</p>
-                <span class="kpi-context">{{ $card['trend']['context'] }}</span>
-            </article>
-        @endforeach
-    </section>
+    @include('admin.quotes.partials.kpi-cards')
 
     <div class="analytics-grid">
         <section class="panel panel-padded">
-            <div class="panel-head">
-                <span class="eyebrow">Activity</span>
-                <h2>14-day snapshot</h2>
-                <p>Visits, leads, and invoices over the same window.</p>
+            <div class="panel-head panel-head--row">
+                <div>
+                    <span class="eyebrow">Activity</span>
+                    <h2>14-day snapshot</h2>
+                    <p>Visits, leads, and invoices over the same window.</p>
+                </div>
+
+                <div class="chart-legend">
+                    <span class="legend-item">
+                        <span class="legend-swatch legend-swatch--visits"></span>
+                        Visits
+                    </span>
+                    <span class="legend-item">
+                        <span class="legend-swatch legend-swatch--quotes"></span>
+                        Invoices
+                    </span>
+                    <span class="legend-item">
+                        <span class="legend-swatch legend-swatch--messages"></span>
+                        Leads
+                    </span>
+                </div>
             </div>
 
-            <div class="chart-legend">
-                <span class="legend-item">
-                    <span class="legend-swatch legend-swatch--visits"></span>
-                    Visits
-                </span>
-                <span class="legend-item">
-                    <span class="legend-swatch legend-swatch--quotes"></span>
-                    Invoices
-                </span>
-                <span class="legend-item">
-                    <span class="legend-swatch legend-swatch--messages"></span>
-                    Leads
-                </span>
-            </div>
+            @php($chart = $dailyOverview['chart'])
 
             <div class="line-chart-shell">
-                <svg class="line-chart" viewBox="0 0 640 220" role="img" aria-label="Fourteen day activity chart">
-                    <line class="chart-grid-line" x1="18" y1="18" x2="622" y2="18" />
-                    <line class="chart-grid-line" x1="18" y1="73" x2="622" y2="73" />
-                    <line class="chart-grid-line" x1="18" y1="128" x2="622" y2="128" />
-                    <line class="chart-grid-line" x1="18" y1="183" x2="622" y2="183" />
-                    <polyline class="chart-line chart-line--visits" points="{{ $dailyOverview['visit_points'] }}" />
-                    <polyline class="chart-line chart-line--quotes" points="{{ $dailyOverview['quote_points'] }}" />
-                    <polyline class="chart-line chart-line--messages" points="{{ $dailyOverview['message_points'] }}" />
+                <svg class="line-chart" viewBox="0 0 {{ $chart['width'] }} {{ $chart['height'] + 24 }}"
+                    role="img" aria-label="Daily visits, invoices and leads over the last 14 days">
+                    <defs>
+                        <linearGradient id="chart-fill-visits" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#111111" stop-opacity="0.14" />
+                            <stop offset="100%" stop-color="#111111" stop-opacity="0" />
+                        </linearGradient>
+                    </defs>
+
+                    @foreach ($chart['ticks'] as $tick)
+                        <line class="chart-grid-line" x1="{{ $chart['plot_left'] }}" y1="{{ $tick['y'] }}"
+                            x2="{{ $chart['plot_right'] }}" y2="{{ $tick['y'] }}" />
+                        <text class="chart-axis-label" x="{{ $chart['plot_left'] - 8 }}"
+                            y="{{ $tick['y'] + 3.5 }}" text-anchor="end">{{ number_format($tick['value']) }}</text>
+                    @endforeach
+
+                    <g class="chart-plot">
+                        <path class="chart-area" d="{{ $chart['series']['visits']['area'] }}"
+                            fill="url(#chart-fill-visits)" />
+
+                        <polyline class="chart-line chart-line--visits" points="{{ $chart['series']['visits']['line'] }}" />
+                        <polyline class="chart-line chart-line--quotes" points="{{ $chart['series']['quotes']['line'] }}" />
+                        <polyline class="chart-line chart-line--messages" points="{{ $chart['series']['messages']['line'] }}" />
+
+                        @foreach (['visits', 'quotes', 'messages'] as $seriesKey)
+                            @foreach ($chart['series'][$seriesKey]['points'] as $point)
+                                @if ($point['value'] > 0)
+                                    <circle class="chart-dot chart-dot--{{ $seriesKey }}"
+                                        cx="{{ $point['x'] }}" cy="{{ $point['y'] }}" r="3.2">
+                                        <title>{{ $point['label'] }} · {{ number_format($point['value']) }} {{ $seriesKey }}</title>
+                                    </circle>
+                                @endif
+                            @endforeach
+                        @endforeach
+                    </g>
+
+                    @foreach ($chart['x_labels'] as $label)
+                        <text class="chart-axis-label" x="{{ $label['x'] }}" y="{{ $chart['height'] + 14 }}"
+                            text-anchor="middle">{{ $label['full_label'] }}</text>
+                    @endforeach
                 </svg>
+
+                @unless ($chart['has_data'])
+                    <p class="chart-empty">No activity recorded in this window yet.</p>
+                @endunless
             </div>
 
             <div class="chart-summary-grid">
@@ -281,7 +330,7 @@
             </div>
 
             @if (! $visitTrackingReady)
-                <div class="data-note" style="margin-top: 18px;">
+                <div class="data-note">
                     Visit analytics will populate after the migration runs and new page views arrive.
                 </div>
             @endif
@@ -289,30 +338,30 @@
 
         <aside class="sticky-stack">
             <section class="panel panel-padded">
-                <span class="eyebrow">Signals</span>
-                <h3 class="panel-title">Current movement</h3>
+                <div class="panel-head panel-head--tight">
+                    <span class="eyebrow">Signals</span>
+                    <h3 class="panel-title">Current movement</h3>
+                </div>
 
-                <div class="bar-list" style="margin-top: 18px;">
+                <div class="stat-list">
                     @foreach ($dashboardHighlights as $highlight)
-                        <div class="bar-row">
-                            <div class="bar-header">
-                                <div>
-                                    <strong>{{ $highlight['value'] }}</strong>
-                                    <span class="bar-meta">{{ $highlight['label'] }}</span>
-                                </div>
-                            </div>
-                            <span class="bar-meta">{{ $highlight['meta'] }}</span>
+                        <div class="stat-row">
+                            <span class="stat-row__label">{{ $highlight['label'] }}</span>
+                            <strong class="stat-row__value">{{ $highlight['value'] }}</strong>
+                            <span class="stat-row__meta">{{ $highlight['meta'] }}</span>
                         </div>
                     @endforeach
                 </div>
             </section>
 
             <section class="panel panel-padded">
-                <span class="eyebrow">Top Pages</span>
-                <h3 class="panel-title">Last 30 days</h3>
+                <div class="panel-head panel-head--tight">
+                    <span class="eyebrow">Top pages</span>
+                    <h3 class="panel-title">Last 30 days</h3>
+                </div>
 
                 @if ($topPages !== [])
-                    <div class="bar-list" style="margin-top: 18px;">
+                    <div class="stat-list">
                         @foreach ($topPages as $page)
                             <div class="bar-row">
                                 <div class="bar-header">
@@ -320,19 +369,64 @@
                                         <strong>{{ $page['label'] }}</strong>
                                         <span class="bar-meta">{{ $page['meta'] }}</span>
                                     </div>
-                                    <strong>{{ number_format($page['count']) }}</strong>
+                                    <strong class="bar-count">{{ number_format($page['count']) }}</strong>
                                 </div>
                                 <div class="bar-track">
-                                    <div class="bar-fill" style="width: {{ max(10, $page['width']) }}%;"></div>
+                                    <div class="bar-fill" style="width: {{ max(3, $page['width']) }}%;"></div>
                                 </div>
                             </div>
                         @endforeach
                     </div>
                 @else
-                    <div class="data-note" style="margin-top: 18px;">
-                        No page-visit records yet.
-                    </div>
+                    <div class="data-note">No page-visit records yet.</div>
                 @endif
+            </section>
+        </aside>
+    </div>
+    @endif
+
+    @if ($showPromotion)
+    <div class="section-heading" id="promotion-control">
+        <div>
+            <span class="eyebrow">Landing Page</span>
+            <h2>Promotion control</h2>
+            <p>Manage the anniversary offer shown on the public landing page and used during invoice creation.</p>
+        </div>
+        <span class="admin-pill">Central control</span>
+    </div>
+
+    <div class="dashboard-grid promotion-control-grid">
+        <section class="panel panel-padded">
+            <div class="panel-head">
+                <span class="eyebrow">Anniversary campaign</span>
+                <h2>Offer settings</h2>
+                <p>Changes here update the landing-page message, prices, countdown, and default invoice discount.</p>
+            </div>
+            <form method="POST" action="{{ route('admin.quotes.promotion.update') }}" class="promotion-form">
+                @csrf
+                <div class="field-full promotion-form__status">
+                    <label class="admin-discount-toggle">
+                        <input type="checkbox" name="enabled" value="1" @checked($anniversaryPromo['enabled'] ?? false)>
+                        <span>Show this offer publicly</span>
+                    </label>
+                    <p class="field-hint">When disabled, the landing page hides the offer and countdown.</p>
+                </div>
+                <div class="promotion-form__grid">
+                    <div class="field"><label for="promotion_years">Years celebrated</label><input id="promotion_years" type="number" name="years" value="{{ old('years', $anniversaryPromo['years'] ?? 10) }}" min="1" max="100" required></div>
+                    <div class="field"><label for="promotion_discount">Discount percentage</label><input id="promotion_discount" type="number" name="discount_percent" value="{{ old('discount_percent', $anniversaryPromo['discount_percent'] ?? 50) }}" min="0" max="100" step="0.01" required></div>
+                    <div class="field"><label for="promotion_code">Promo code</label><input id="promotion_code" type="text" name="promo_code" value="{{ old('promo_code', $anniversaryPromo['code'] ?? 'TURANCE10') }}" maxlength="80" required></div>
+                    <div class="field"><label for="promotion_ends_at">Offer ends</label><input id="promotion_ends_at" type="datetime-local" name="ends_at" value="{{ old('ends_at', $anniversaryPromo['ends_at_input'] ?? '') }}" required></div>
+                </div>
+                <div class="wizard-actions"><span class="admin-pill">Current: {{ ($anniversaryPromo['is_active'] ?? false) ? 'Live' : 'Inactive' }}</span><button type="submit" class="button">Save promotion</button></div>
+            </form>
+        </section>
+        <aside class="sticky-stack">
+            <section class="panel panel-padded promotion-preview-card">
+                <span class="eyebrow">Public preview</span>
+                <strong class="promotion-preview-card__discount">{{ $anniversaryPromo['discount_percent'] ?? 50 }}% off</strong>
+                <h3>{{ $anniversaryPromo['years'] ?? 10 }} years of Turance</h3>
+                <p>Landing-page offer code <b>{{ $anniversaryPromo['code'] ?? 'TURANCE10' }}</b>.</p>
+                <span class="data-note">Ends {{ $anniversaryPromo['ends_at_formatted'] ?? 'Not set' }}</span>
             </section>
         </aside>
     </div>
@@ -350,11 +444,13 @@
 
     <div class="insight-grid" id="business-insights">
         <section class="panel panel-padded">
-            <span class="eyebrow">Templates</span>
-            <h3 class="panel-title">Most used styles</h3>
+            <div class="panel-head panel-head--tight">
+                <span class="eyebrow">Templates</span>
+                <h3 class="panel-title">Most used styles</h3>
+            </div>
 
             @if ($templateBreakdown !== [])
-                <div class="bar-list" style="margin-top: 18px;">
+                <div class="stat-list">
                     @foreach ($templateBreakdown as $template)
                         <div class="bar-row">
                             <div class="bar-header">
@@ -362,28 +458,28 @@
                                     <strong>{{ $template['label'] }}</strong>
                                     <span class="bar-meta">{{ $template['meta'] }}</span>
                                 </div>
-                                <strong>{{ number_format($template['count']) }}</strong>
+                                <strong class="bar-count">{{ number_format($template['count']) }}</strong>
                             </div>
                             <div class="bar-track">
                                 <div class="bar-fill bar-fill--quote"
-                                    style="width: {{ max(10, $template['width']) }}%;"></div>
+                                    style="width: {{ max(3, $template['width']) }}%;"></div>
                             </div>
                         </div>
                     @endforeach
                 </div>
             @else
-                <div class="data-note" style="margin-top: 18px;">
-                    Template rankings appear after invoices are stored.
-                </div>
+                <div class="data-note">Template rankings appear after invoices are stored.</div>
             @endif
         </section>
 
         <section class="panel panel-padded">
-            <span class="eyebrow">Categories</span>
-            <h3 class="panel-title">Demand mix</h3>
+            <div class="panel-head panel-head--tight">
+                <span class="eyebrow">Categories</span>
+                <h3 class="panel-title">Demand mix</h3>
+            </div>
 
             @if ($categoryBreakdown !== [])
-                <div class="bar-list" style="margin-top: 18px;">
+                <div class="stat-list">
                     @foreach ($categoryBreakdown as $category)
                         <div class="bar-row">
                             <div class="bar-header">
@@ -391,41 +487,40 @@
                                     <strong>{{ $category['label'] }}</strong>
                                     <span class="bar-meta">{{ $category['meta'] }}</span>
                                 </div>
-                                <strong>{{ number_format($category['count']) }}</strong>
+                                <strong class="bar-count">{{ number_format($category['count']) }}</strong>
                             </div>
                             <div class="bar-track">
                                 <div class="bar-fill bar-fill--lead"
-                                    style="width: {{ max(10, $category['width']) }}%;"></div>
+                                    style="width: {{ max(3, $category['width']) }}%;"></div>
                             </div>
                         </div>
                     @endforeach
                 </div>
             @else
-                <div class="data-note" style="margin-top: 18px;">
-                    Category data appears after invoices are stored.
-                </div>
+                <div class="data-note">Category data appears after invoices are stored.</div>
             @endif
         </section>
 
         <section class="panel panel-padded">
-            <span class="eyebrow">Pipeline</span>
-            <h3 class="panel-title">Monthly value</h3>
+            <div class="panel-head panel-head--tight">
+                <span class="eyebrow">Pipeline</span>
+                <h3 class="panel-title">Monthly value</h3>
+            </div>
 
             @if ($monthlyPipeline !== [])
                 <div class="mini-chart">
                     @foreach ($monthlyPipeline as $month)
                         <div class="month-bar">
                             <span>{{ $month['formatted_total'] }}</span>
-                            <div class="month-bar-column" style="height: {{ max(16, $month['height'] * 1.7) }}px;"></div>
+                            <div class="month-bar-column" style="height: {{ max(6, $month['height'] * 1.7) }}px;"></div>
                             <strong>{{ $month['label'] }}</strong>
-                            <span>{{ number_format($month['count']) }} invoices</span>
+                            <span>{{ number_format($month['count']) }}
+                                {{ \Illuminate\Support\Str::plural('invoice', $month['count']) }}</span>
                         </div>
                     @endforeach
                 </div>
             @else
-                <div class="data-note" style="margin-top: 18px;">
-                    Pipeline bars appear after invoice values accumulate.
-                </div>
+                <div class="data-note">Pipeline bars appear after invoice values accumulate.</div>
             @endif
         </section>
     </div>
@@ -640,6 +735,12 @@
                                 <textarea id="optional_addons" name="optional_addons" data-rich-editor>{{ $addonsDefault }}</textarea>
                                 <p class="field-hint">Optional extensions for the invoice.</p>
                             </div>
+
+                            @include('admin.quotes.partials.discount-control', [
+                                'anniversaryPromo' => $anniversaryPromo,
+                                'discountPercent' => $promoApplyDefault,
+                                'promoCode' => old('promo_code', $anniversaryPromo['code'] ?? ''),
+                            ])
                         </div>
 
                         <div class="wizard-actions">
@@ -678,6 +779,7 @@
                                     <article class="review-card">
                                         <strong>Commercial frame</strong>
                                         <span>Investment: <span data-review-field="investment_amount" data-review-fallback="Set investment">Set investment</span></span>
+                                        <span>Discount: <span data-review-field="discount_percent" data-review-fallback="None">None</span></span>
                                         <span>Naira total: <span data-review-field="naira_total" data-review-fallback="Set amount and rate">Set amount and rate</span></span>
                                         <span>Exchange rate: <span data-review-field="exchange_rate" data-review-fallback="Set rate">Set rate</span></span>
                                         <span>Timeline: <span data-review-field="timeline" data-review-fallback="Set timeline">Set timeline</span></span>
@@ -713,32 +815,41 @@
 
         <aside class="sticky-stack">
             <section class="panel panel-padded">
-                <span class="eyebrow">Snapshot</span>
-                <h3 class="panel-title">Before build</h3>
+                <div class="panel-head panel-head--tight">
+                    <span class="eyebrow">Snapshot</span>
+                    <h3 class="panel-title">Before build</h3>
+                </div>
 
-                <div class="meta-list" style="margin-top: 18px;">
+                <div class="stat-list">
                     @foreach ($sidebarStats as $stat)
-                        <div class="meta-item">
-                            <span>{{ $stat['label'] }}</span>
-                            <strong>{{ $stat['value'] }}</strong>
-                            <p>{{ $stat['meta'] }}</p>
+                        <div class="stat-row">
+                            <span class="stat-row__label">{{ $stat['label'] }}</span>
+                            <strong class="stat-row__value">{{ $stat['value'] }}</strong>
+                            <span class="stat-row__meta">{{ $stat['meta'] }}</span>
                         </div>
                     @endforeach
                 </div>
             </section>
 
             <section class="panel panel-padded">
-                <span class="eyebrow">Recent Invoices</span>
-                <h3 class="panel-title">Latest activity</h3>
+                <div class="panel-head panel-head--tight">
+                    <span class="eyebrow">Recent invoices</span>
+                    <h3 class="panel-title">Latest activity</h3>
+                </div>
 
-                <ul class="mini-list" style="margin-top: 18px;">
+                <ul class="record-list">
                     @forelse ($quotes->take(5) as $quote)
                         <li>
-                            <strong>{{ $quote->company_name }}</strong>
-                            <span>{{ $quote->quote_number }} / ${{ number_format((float) $quote->investment_amount, 0) }}</span>
+                            <a href="{{ route('admin.quotes.show', $quote) }}">
+                                <span class="record-list__main">
+                                    <strong>{{ $quote->company_name }}</strong>
+                                    <span>{{ $quote->quote_number }}</span>
+                                </span>
+                                <span class="record-list__amount">${{ number_format((float) $quote->investment_amount, 0) }}</span>
+                            </a>
                         </li>
                     @empty
-                        <li>
+                        <li class="record-list__empty">
                             <strong>No saved invoices yet</strong>
                             <span>Generated invoices appear here.</span>
                         </li>
@@ -747,11 +858,13 @@
             </section>
 
             <section class="panel panel-padded">
-                <span class="eyebrow">Recent Leads</span>
-                <h3 class="panel-title">Contact activity</h3>
+                <div class="panel-head panel-head--tight">
+                    <span class="eyebrow">Recent leads</span>
+                    <h3 class="panel-title">Contact activity</h3>
+                </div>
 
                 @if ($recentMessages->isNotEmpty())
-                    <div class="activity-feed" style="margin-top: 18px;">
+                    <div class="activity-feed">
                         @foreach ($recentMessages as $message)
                             <div class="activity-item">
                                 <div class="activity-item-header">
@@ -766,9 +879,7 @@
                         @endforeach
                     </div>
                 @else
-                    <div class="data-note" style="margin-top: 18px;">
-                        Contact enquiries will appear here.
-                    </div>
+                    <div class="data-note">Contact enquiries will appear here.</div>
                 @endif
             </section>
         </aside>
@@ -782,7 +893,8 @@
             <h2>Saved invoices</h2>
             <p>Preview, edit, export, or generate an MOU from one menu.</p>
         </div>
-        <span class="admin-pill">{{ $quoteCount }} saved invoices</span>
+        <span class="admin-pill">{{ number_format($quoteCount) }}
+            {{ \Illuminate\Support\Str::plural('invoice', $quoteCount) }} saved</span>
     </div>
 
     <section class="panel panel-padded" id="saved-quotes">
@@ -881,6 +993,13 @@
                     return total && rate ? `NGN ${(total * rate).toLocaleString(undefined, {
                         maximumFractionDigits: 0,
                     })}` : '';
+                }
+
+                if (name === 'discount_percent') {
+                    const enabled = getNamedControls('discount_enabled')[0];
+                    const value = getNamedControls('discount_percent')[0]?.value;
+
+                    return enabled?.checked && value ? `${Number(value).toLocaleString(undefined, { maximumFractionDigits: 2 })}%` : 'None';
                 }
 
                 const controls = getNamedControls(name);

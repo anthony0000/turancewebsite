@@ -9,9 +9,13 @@
         ])
         ->filter(fn ($item) => $item['amount'] > 0)
         ->values();
-    $investmentValue = $storedLineItems->isNotEmpty()
+    $subtotalValue = $storedLineItems->isNotEmpty()
         ? (float) $storedLineItems->sum('amount')
-        : (float) $quote->investment_amount;
+        : (float) $quote->investment_amount + (float) ($quote->discount_amount ?? 0);
+    $discountValue = (float) ($quote->discount_amount ?? 0);
+    $investmentValue = (float) $quote->investment_amount;
+    $subtotal = '$'.number_format($subtotalValue, 0);
+    $discount = '$'.number_format($discountValue, 0);
     $investment = '$'.number_format($investmentValue, 0);
     $exchangeRate = max(1, (float) ($quote->exchange_rate ?? 1370));
     $nairaInvestment = 'NGN '.number_format($investmentValue * $exchangeRate, 0);
@@ -226,6 +230,16 @@
                 <td class="quote-totals-cell">
                     <table class="quote-totals-table" role="presentation">
                         <tr>
+                            <td>Subtotal</td>
+                            <td>{{ $subtotal }}</td>
+                        </tr>
+                        @if ($discountValue > 0)
+                            <tr>
+                                <td>Discount{{ $quote->promo_code ? ' · '.$quote->promo_code : '' }}</td>
+                                <td>-{{ $discount }}</td>
+                            </tr>
+                        @endif
+                        <tr>
                             <td>Net amount</td>
                             <td>{{ $investment }}</td>
                         </tr>
@@ -292,7 +306,7 @@
             <tr>
                 <td>
                     <span class="quote-footer-label">Phone</span>
-                    <strong>{{ $brand['contact_phone'] ?? '+2349124948602' }}</strong>
+                    <strong>{{ $brand['contact_phone'] ?? '+2348061209440' }}</strong>
                 </td>
                 <td>
                     <span class="quote-footer-label">Email</span>

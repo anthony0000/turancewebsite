@@ -25,6 +25,8 @@ class ContactController extends Controller
     public function show(Request $request): View
     {
         $serviceTopic = config('contact.service_topics.'.(string) $request->query('service'));
+        $anniversaryPromo = app(\App\Support\AnniversaryPromotion::class)->current();
+        $promoEndsAt = isset($anniversaryPromo['ends_at']) ? \Illuminate\Support\Carbon::parse($anniversaryPromo['ends_at']) : null;
 
         return view('contact', [
             'selectedTopic' => in_array($serviceTopic, config('contact.topics', []), true)
@@ -34,6 +36,10 @@ class ContactController extends Controller
                 'issued_at' => now()->timestamp,
                 'nonce' => Str::random(32),
             ], JSON_THROW_ON_ERROR)),
+            'promoClaimed' => ! empty($anniversaryPromo['enabled'])
+                && $promoEndsAt
+                && now()->lt($promoEndsAt)
+                && hash_equals((string) ($anniversaryPromo['code'] ?? ''), (string) $request->query('promo')),
         ]);
     }
 

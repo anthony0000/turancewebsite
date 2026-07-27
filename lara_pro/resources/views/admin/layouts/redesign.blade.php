@@ -27,7 +27,7 @@
     --shadow: 0 14px 34px rgba(15, 23, 42, 0.07);
     --shadow-soft: 0 8px 20px rgba(15, 23, 42, 0.05);
     --radius: 8px;
-    --sidebar-width: 248px;
+    --sidebar-width: 272px;
     --sidebar-collapsed-width: 76px;
 }
 
@@ -176,15 +176,23 @@ summary::-webkit-details-marker {
     min-width: 0;
 }
 
-.admin-brand-copy strong {
+/*
+ * The full studio name does not fit the sidebar column on one line, so it
+ * wraps rather than truncating. Selector depth matches the base layer's
+ * `.admin-sidebar .admin-brand-copy strong`, which sets nowrap + ellipsis.
+ */
+.admin-brand-copy strong,
+.admin-sidebar .admin-brand-copy strong {
     display: block;
-    overflow: hidden;
+    overflow: visible;
     color: var(--text);
-    font-size: 13px;
+    font-size: 12.5px;
     font-weight: 800;
-    line-height: 1.2;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    letter-spacing: -0.01em;
+    line-height: 1.18;
+    overflow-wrap: break-word;
+    text-overflow: clip;
+    white-space: normal;
 }
 
 .admin-brand-copy span {
@@ -566,6 +574,35 @@ button.ghost-button {
     margin: 0 0 16px;
 }
 
+.panel-head--tight {
+    gap: 3px;
+    margin-bottom: 14px;
+}
+
+.panel-head--row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: start;
+    justify-content: space-between;
+    gap: 12px 18px;
+}
+
+.panel-head--row > div:first-child {
+    display: grid;
+    gap: 5px;
+}
+
+.panel-head__link {
+    color: var(--primary);
+    font-size: 12px;
+    font-weight: 740;
+    white-space: nowrap;
+}
+
+.panel-head__link:hover {
+    text-decoration: underline;
+}
+
 .panel-head h2,
 .panel-title,
 .section-heading h2,
@@ -611,19 +648,93 @@ button.ghost-button {
     text-transform: uppercase;
 }
 
+/*
+ * Overview topline: a single status band replacing the old full-height hero,
+ * so the KPI row sits within the first screen instead of below it.
+ */
+.dash-topline {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px 16px;
+    padding: 4px 0 0;
+}
+
+.status-chip-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.status-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 32px;
+    padding: 0 12px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--muted-strong);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.status-chip i {
+    width: 7px;
+    height: 7px;
+    flex: 0 0 auto;
+    border-radius: 999px;
+    background: var(--muted);
+}
+
+.status-chip small {
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.status-chip--ok i {
+    background: var(--success);
+    box-shadow: 0 0 0 3px rgba(22, 133, 86, 0.16);
+}
+
+.status-chip--warn i {
+    background: var(--warning);
+    box-shadow: 0 0 0 3px rgba(183, 121, 31, 0.16);
+}
+
+.status-chip--promo {
+    border-color: rgba(184, 134, 11, 0.28);
+    background: var(--primary-soft);
+    color: var(--primary-strong);
+}
+
+.status-chip--promo i {
+    background: var(--primary);
+    box-shadow: 0 0 0 3px rgba(184, 134, 11, 0.18);
+}
+
+.status-chip--promo small {
+    color: var(--primary-strong);
+    opacity: 0.78;
+}
+
+/* Still used by the proposal studio hero. */
 .dashboard-command {
     display: grid;
-    grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.75fr);
-    gap: 16px;
+    grid-template-columns: minmax(0, 1.5fr) minmax(300px, 0.7fr);
+    gap: 14px;
     align-items: stretch;
     padding-top: 4px;
 }
 
 .dashboard-command-main {
     display: grid;
-    gap: 16px;
+    gap: 12px;
     align-content: center;
-    padding: 24px;
+    padding: 20px;
     border: 1px solid var(--line);
     border-radius: var(--radius);
     background: var(--surface);
@@ -634,18 +745,19 @@ button.ghost-button {
     max-width: 760px;
     margin: 0;
     color: var(--text);
-    font-size: 34px;
+    font-size: 25px;
     font-weight: 840;
-    line-height: 1.04;
+    line-height: 1.12;
 }
 
 .dashboard-command-main p {
     max-width: 620px;
     margin: 0;
     color: var(--muted);
-    font-size: 14px;
+    font-size: 13.5px;
 }
 
+.dash-topline__actions,
 .dashboard-command-actions,
 .hero-actions {
     display: flex;
@@ -709,15 +821,26 @@ button.ghost-button {
     gap: 12px;
 }
 
+/*
+ * Fixed row track: the label sits on its own line and the figure row is the
+ * second track in every card, so the numbers share a baseline even when one
+ * label wraps.
+ */
 .kpi-card {
     display: grid;
-    gap: 12px;
-    min-height: 142px;
-    padding: 17px;
+    grid-template-rows: auto auto 1fr auto;
+    gap: 10px;
+    padding: 16px;
     border: 1px solid var(--line);
     border-radius: var(--radius);
     background: var(--surface);
     box-shadow: var(--shadow-soft);
+    transition: border-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.kpi-card:hover {
+    border-color: rgba(184, 134, 11, 0.3);
+    box-shadow: var(--shadow);
 }
 
 .kpi-top {
@@ -727,17 +850,36 @@ button.ghost-button {
     gap: 8px;
 }
 
+.kpi-figure {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 6px 10px;
+}
+
 .kpi-value {
     color: var(--text);
     font-family: var(--font-display);
-    font-size: 32px;
+    font-size: 30px;
     font-weight: 840;
+    font-variant-numeric: tabular-nums;
     line-height: 1;
+}
+
+.kpi-hint {
+    margin: 0;
+    color: var(--muted);
+    font-size: 12.5px;
+    line-height: 1.5;
 }
 
 .kpi-context {
     color: var(--muted);
-    font-size: 12px;
+    font-size: 11px;
+    font-weight: 650;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
 }
 
 .trend-pill--up,
@@ -767,10 +909,13 @@ button.ghost-button {
     align-items: start;
 }
 
+/* Panels size to their content instead of stretching to the tallest sibling.
+   The third column holds the monthly bar chart, so it gets the extra room. */
 .insight-grid {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.45fr);
     gap: 16px;
+    align-items: start;
 }
 
 .sticky-stack {
@@ -788,6 +933,18 @@ button.ghost-button {
     flex-wrap: wrap;
     gap: 10px;
     margin-bottom: 12px;
+}
+
+/* Sitting in the panel head, the legend must stay on one line. */
+.panel-head--row .chart-legend {
+    display: flex;
+    flex: 0 0 auto;
+    flex-wrap: nowrap;
+    margin-bottom: 0;
+}
+
+.panel-head--row .legend-item {
+    white-space: nowrap;
 }
 
 .legend-item {
@@ -818,7 +975,9 @@ button.ghost-button {
 }
 
 .line-chart-shell {
+    position: relative;
     overflow: hidden;
+    padding: 6px 4px 2px;
     border: 1px solid var(--line-soft);
     border-radius: var(--radius);
     background: linear-gradient(180deg, #ffffff, #fffdf8);
@@ -827,19 +986,65 @@ button.ghost-button {
 .line-chart {
     display: block;
     width: 100%;
-    min-height: 220px;
+    height: auto;
+    overflow: visible;
 }
 
 .chart-grid-line {
-    stroke: #e7edf4;
+    stroke: rgba(184, 134, 11, 0.14);
     stroke-width: 1;
+}
+
+.chart-axis-label {
+    fill: var(--muted);
+    font-family: var(--font-sans);
+    font-size: 10px;
+    font-weight: 650;
+    font-variant-numeric: tabular-nums;
+}
+
+.chart-area {
+    stroke: none;
 }
 
 .chart-line {
     fill: none;
-    stroke-width: 4;
+    stroke-width: 2.4;
     stroke-linecap: round;
     stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+}
+
+.chart-dot {
+    stroke: #ffffff;
+    stroke-width: 1.6;
+}
+
+.chart-dot--visits {
+    fill: var(--traffic);
+}
+
+.chart-dot--quotes {
+    fill: var(--quote);
+}
+
+.chart-dot--messages {
+    fill: var(--lead);
+}
+
+.chart-empty {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin: 0;
+    padding: 7px 14px;
+    transform: translate(-50%, -50%);
+    border: 1px solid var(--line-soft);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.92);
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 650;
 }
 
 .chart-line--visits {
@@ -859,6 +1064,42 @@ button.ghost-button {
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 10px;
     margin-top: 12px;
+}
+
+.chart-summary-grid + .data-note,
+.activity-feed + .data-note {
+    margin-top: 14px;
+}
+
+/*
+ * Keyboard focus was previously invisible on every control in the admin.
+ * One ring definition, applied wherever focus can land.
+ */
+.admin-nav-link:focus-visible,
+.admin-icon-button:focus-visible,
+.button:focus-visible,
+.ghost-button:focus-visible,
+.shortcut-grid a:focus-visible,
+.record-list > li > a:focus-visible,
+.workspace-link-grid a:focus-visible,
+.panel-head__link:focus-visible,
+.action-menu summary:focus-visible,
+.admin-profile-menu summary:focus-visible,
+.wizard-progress-button:focus-visible,
+.template-card:focus-within,
+.quote-table a:focus-visible,
+.rich-editor-toolbar button:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+.field input:focus-visible,
+.field select:focus-visible,
+.field textarea:focus-visible,
+.field-full input:focus-visible,
+.field-full select:focus-visible,
+.field-full textarea:focus-visible {
+    outline: none;
 }
 
 .mini-card,
@@ -956,27 +1197,217 @@ button.ghost-button {
     background: var(--lead);
 }
 
-.mini-chart {
-    display: grid;
-    grid-template-columns: repeat(6, minmax(56px, 1fr));
-    align-items: end;
-    gap: 10px;
-    min-height: 220px;
+.bar-count {
+    font-variant-numeric: tabular-nums;
 }
 
-.month-bar {
+/*
+ * Stat rows read label -> value -> context. The old markup led with the value,
+ * which put the answer before the question it belonged to.
+ */
+.stat-list {
     display: grid;
-    min-width: 0;
-    justify-items: center;
     gap: 8px;
+}
+
+.stat-row {
+    display: grid;
+    gap: 2px;
+    padding: 11px 12px;
+    border: 1px solid var(--line-soft);
+    border-radius: var(--radius);
+    background: var(--surface-soft);
+}
+
+.stat-row__label {
     color: var(--muted);
     font-size: 11px;
+    font-weight: 780;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+}
+
+.stat-row__value {
+    color: var(--text);
+    font-size: 17px;
+    font-weight: 780;
+    line-height: 1.25;
+}
+
+.stat-row__meta {
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+/* Two-up on the wide overview panel so four rows fill the column evenly. */
+.stat-list--split {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.shortcut-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.shortcut-grid a {
+    display: grid;
+    gap: 2px;
+    padding: 12px;
+    border: 1px solid var(--line-soft);
+    border-radius: var(--radius);
+    background: var(--surface-soft);
+    color: var(--text);
+    transition: background 0.16s ease, border-color 0.16s ease, color 0.16s ease;
+}
+
+.shortcut-grid a:hover {
+    border-color: rgba(184, 134, 11, 0.3);
+    background: var(--primary-soft);
+    color: var(--primary);
+}
+
+.shortcut-icon {
+    display: inline-grid;
+    width: 30px;
+    height: 30px;
+    margin-bottom: 6px;
+    place-items: center;
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--primary);
+    box-shadow: inset 0 0 0 1px var(--line-soft);
+}
+
+.shortcut-icon svg {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.9;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.shortcut-grid strong {
+    font-size: 13px;
+    font-weight: 780;
+    line-height: 1.2;
+}
+
+.shortcut-grid span:not(.shortcut-icon) {
+    color: var(--muted);
+    font-size: 11.5px;
+    line-height: 1.35;
+}
+
+.shortcut-grid a:hover span:not(.shortcut-icon) {
+    color: var(--primary-strong);
+}
+
+.record-list {
+    display: grid;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.record-list > li > a {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 12px;
+    border: 1px solid var(--line-soft);
+    border-radius: var(--radius);
+    background: var(--surface-soft);
+    color: var(--text);
+    transition: background 0.16s ease, border-color 0.16s ease;
+}
+
+.record-list > li > a:hover {
+    border-color: rgba(184, 134, 11, 0.3);
+    background: var(--primary-soft);
+}
+
+.record-list__main {
+    display: grid;
+    min-width: 0;
+    gap: 1px;
+}
+
+.record-list__main strong {
+    overflow: hidden;
+    font-size: 13px;
+    font-weight: 760;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.record-list__main span {
+    color: var(--muted);
+    font-size: 11.5px;
+}
+
+.record-list__amount {
+    flex: 0 0 auto;
+    color: var(--primary-strong);
+    font-size: 13px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+}
+
+.record-list__empty {
+    display: grid;
+    gap: 3px;
+    padding: 12px;
+    border: 1px dashed var(--line);
+    border-radius: var(--radius);
+    background: var(--surface-soft);
+}
+
+.record-list__empty strong {
+    font-size: 13px;
+    font-weight: 760;
+}
+
+.record-list__empty span {
+    color: var(--muted);
+    font-size: 12px;
+}
+
+/* Six month columns overflowed the panel; they now shrink first and scroll
+   only when the column is genuinely too narrow. */
+.mini-chart {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(42px, 1fr));
+    align-items: stretch;
+    gap: 8px;
+    min-height: 220px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+}
+
+/* Fixed row tracks keep the month names and counts on a shared baseline
+   regardless of how tall each bar is. */
+.month-bar {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto auto;
+    min-width: 0;
+    justify-items: center;
+    gap: 6px;
+    color: var(--muted);
+    font-size: 10.5px;
+    line-height: 1.3;
     text-align: center;
 }
 
 .month-bar-column {
     width: 100%;
     max-width: 36px;
+    align-self: end;
     border-radius: 7px 7px 0 0;
     background: linear-gradient(180deg, var(--primary), var(--accent));
 }
@@ -1645,6 +2076,12 @@ button.ghost-button {
         grid-template-columns: 1fr;
     }
 
+    /* Side panels sit beside each other once they stop being a rail. */
+    .sticky-stack {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        align-items: start;
+    }
+
     .sticky-stack .panel:first-child {
         position: static;
     }
@@ -1755,8 +2192,19 @@ button.ghost-button {
     .wizard-pane-grid,
     .form-grid,
     .review-grid,
-    .line-items-currency-grid {
+    .line-items-currency-grid,
+    .sticky-stack,
+    .stat-list--split {
         grid-template-columns: 1fr;
+    }
+
+    .dash-topline {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .dash-topline__actions .ghost-button {
+        flex: 1;
     }
 
     .wizard-progress {

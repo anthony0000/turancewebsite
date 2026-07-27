@@ -55,7 +55,11 @@
         </div>
 
         <div class="line-items-total">
-            <span>Total Due</span>
+            <span>Gross subtotal</span>
+            <strong data-line-item-subtotal-display>${{ number_format($lineItemTotal, 0) }}</strong>
+        </div>
+        <div class="line-items-total line-items-total--discount">
+            <span>Discounted total</span>
             <strong data-line-item-total-display>${{ number_format($lineItemTotal, 0) }}</strong>
         </div>
 

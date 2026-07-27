@@ -117,6 +117,9 @@
         ];
 
         $faqs = config('seo.home_faqs', []);
+        $anniversaryPromo = app(\App\Support\AnniversaryPromotion::class)->current();
+        $promoEndsAt = ! empty($anniversaryPromo['ends_at']) ? \Illuminate\Support\Carbon::parse($anniversaryPromo['ends_at']) : null;
+        $promoIsActive = $anniversaryPromo['is_active'];
     @endphp
 
     <a class="tt-skip-link" href="#main-content">Skip to main content</a>
@@ -143,6 +146,14 @@
                         <span>Web design &amp; software development</span>
                         <i aria-hidden="true"></i>
                     </div>
+
+                    @if (! empty($anniversaryPromo['years']))
+                        <a class="tt-hero__anniversary tt-reveal tt-reveal--one" href="{{ $promoIsActive ? '#anniversary-offer' : '#contact' }}">
+                            <span class="tt-hero__anniversary-mark">10</span>
+                            <span><strong>{{ $anniversaryPromo['years'] }} years of Turance</strong><small>Celebrating a decade of digital craftsmanship</small></span>
+                            <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 4v12M5 11l5 5 5-5" /></svg>
+                        </a>
+                    @endif
 
                     <h1 class="tt-hero__title tt-reveal tt-reveal--two" id="hero-title"
                         aria-label="Excellence Delivered">
@@ -186,6 +197,30 @@
                     subtitle="Scalable and future-ready" />
             </div>
         </section>
+
+        @if ($promoIsActive)
+            <section class="tt-anniversary-promo" id="anniversary-offer" aria-labelledby="anniversary-offer-title"
+                data-countdown-end="{{ $promoEndsAt->toIso8601String() }}">
+                <div class="tt-section__inner tt-anniversary-promo__inner">
+                    <div class="tt-anniversary-promo__copy" data-reveal>
+                        <p class="tt-section-heading__eyebrow"><i aria-hidden="true"></i>{{ $anniversaryPromo['years'] }} years of Turance</p>
+                        <h2 id="anniversary-offer-title">A decade of building what matters.</h2>
+                        <p>To celebrate {{ $anniversaryPromo['years'] }} years of digital craftsmanship, receive <strong>{{ $anniversaryPromo['discount_percent'] }}% off</strong> your new website, app, SaaS or branding engagement when you reserve your project before the offer ends.</p>
+                        <a class="tt-anniversary-promo__link" href="{{ route('contact.show', ['promo' => $anniversaryPromo['code']]) }}" data-conversion="anniversary_offer">Claim the anniversary offer <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5" /></svg></a>
+                    </div>
+                    <div class="tt-anniversary-promo__timer" data-countdown aria-live="polite" data-reveal>
+                        <span class="tt-anniversary-promo__timer-label">Offer closes in</span>
+                        <div class="tt-countdown" aria-label="Time remaining until the anniversary offer ends">
+                            <div><strong data-countdown-days>00</strong><span>Days</span></div><i>:</i>
+                            <div><strong data-countdown-hours>00</strong><span>Hours</span></div><i>:</i>
+                            <div><strong data-countdown-minutes>00</strong><span>Minutes</span></div><i>:</i>
+                            <div><strong data-countdown-seconds>00</strong><span>Seconds</span></div>
+                        </div>
+                        <small>Use code <b>{{ $anniversaryPromo['code'] }}</b> when you enquire.</small>
+                    </div>
+                </div>
+            </section>
+        @endif
 
         <section class="tt-section tt-about" id="about" aria-labelledby="about-title">
             <div class="tt-section__inner tt-about__grid">

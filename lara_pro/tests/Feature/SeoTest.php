@@ -37,7 +37,7 @@ it('presents a search focused homepage with direct conversion paths', function (
         ->assertSee('data-conversion="home_hero_quote"', false)
         ->assertSee('data-mobile-sales-bar', false)
         ->assertSee('data-conversion="mobile_sales_whatsapp"', false)
-        ->assertSee('https://wa.me/2349124948602', false)
+        ->assertSee('https://wa.me/2348061209440', false)
         ->assertSee('WhatsApp')
         ->assertDontSee('Call us')
         ->assertSee('"@type": "FAQPage"', false);

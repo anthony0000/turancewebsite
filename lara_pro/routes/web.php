@@ -107,6 +107,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/quotes', [AdminLuxuryQuoteController::class, 'index'])->name('quotes.index');
         Route::get('/quotes/activity', [AdminLuxuryQuoteController::class, 'activity'])->name('quotes.activity');
         Route::get('/quotes/insights', [AdminLuxuryQuoteController::class, 'insights'])->name('quotes.insights');
+        Route::get('/quotes/promotion', [AdminLuxuryQuoteController::class, 'promotion'])->name('quotes.promotion');
+        Route::post('/quotes/promotion', [AdminLuxuryQuoteController::class, 'updatePromotion'])->name('quotes.promotion.update');
         Route::get('/quotes/create', [AdminLuxuryQuoteController::class, 'create'])->name('quotes.create');
         Route::get('/quotes/archive', [AdminLuxuryQuoteController::class, 'archive'])->name('quotes.archive');
         Route::post('/quotes', [AdminLuxuryQuoteController::class, 'store'])->name('quotes.store');

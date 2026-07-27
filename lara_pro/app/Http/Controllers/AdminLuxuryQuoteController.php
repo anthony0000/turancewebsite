@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\ContactMessage;
 use App\Models\LuxuryQuote;
 use App\Models\PageVisit;
+use App\Models\PromotionSetting;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -50,6 +51,35 @@ class AdminLuxuryQuoteController extends Controller
     public function archive(): View
     {
         return $this->renderDashboardSection('archive');
+    }
+
+    public function promotion(): View
+    {
+        return $this->renderDashboardSection('promotion');
+    }
+
+    public function updatePromotion(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'enabled' => ['nullable', 'boolean'],
+            'years' => ['required', 'integer', 'min:1', 'max:100'],
+            'discount_percent' => ['required', 'numeric', 'min:0', 'max:100'],
+            'promo_code' => ['required', 'string', 'max:80'],
+            'ends_at' => ['required', 'date'],
+        ]);
+
+        PromotionSetting::query()->updateOrCreate(
+            ['key' => 'anniversary'],
+            [
+                'enabled' => $request->boolean('enabled'),
+                'years' => $validated['years'],
+                'discount_percent' => $validated['discount_percent'],
+                'promo_code' => strtoupper(trim($validated['promo_code'])),
+                'ends_at' => Carbon::parse($validated['ends_at']),
+            ],
+        );
+
+        return redirect()->route('admin.quotes.promotion')->with('status', 'Landing-page promotion updated.');
     }
 
     private function renderDashboardSection(string $section): View
@@ -216,14 +246,14 @@ class AdminLuxuryQuoteController extends Controller
                 'label' => 'Leading Template',
                 'value' => $topTemplate,
                 'meta' => $topTemplateCount > 0
-                    ? number_format($topTemplateCount).' invoices created'
+                    ? $this->countLabel($topTemplateCount, 'invoice').' created'
                     : 'No saved invoices yet',
             ],
             [
                 'label' => 'Strongest Category',
                 'value' => $topCategory,
                 'meta' => $topCategoryCount > 0
-                    ? number_format($topCategoryCount).' invoice requests'
+                    ? $this->countLabel($topCategoryCount, 'invoice').' requested'
                     : 'No category activity yet',
             ],
             [
@@ -246,8 +276,8 @@ class AdminLuxuryQuoteController extends Controller
             ],
             [
                 'label' => 'This Month',
-                'value' => number_format($quotesThisMonth).' invoices / '.number_format($messagesThisMonth).' leads',
-                'meta' => number_format($visitsThisMonth).' visits recorded this month',
+                'value' => $this->countLabel($quotesThisMonth, 'invoice').' · '.$this->countLabel($messagesThisMonth, 'lead'),
+                'meta' => $this->countLabel($visitsThisMonth, 'visit').' recorded this month',
             ],
             [
                 'label' => 'Peak Traffic Day',
@@ -263,6 +293,7 @@ class AdminLuxuryQuoteController extends Controller
             'categories' => $categories,
             'defaults' => $defaults,
             'brand' => $brand,
+            'anniversaryPromo' => $this->anniversaryPromo(),
             'quotes' => $quotes,
             'quoteCount' => $quoteCount,
             'contactCount' => $contactCount,
@@ -289,6 +320,11 @@ class AdminLuxuryQuoteController extends Controller
         ];
     }
 
+    private function anniversaryPromo(): array
+    {
+        return app(\App\Support\AnniversaryPromotion::class)->current();
+    }
+
     public function store(Request $request): RedirectResponse
     {
         $validated = $this->validateInvoiceRequest($request);
@@ -309,6 +345,7 @@ class AdminLuxuryQuoteController extends Controller
             'templates' => config('luxury-quotes.templates', []),
             'categories' => config('luxury-quotes.categories', []),
             'brand' => config('luxury-quotes.brand', []),
+            'anniversaryPromo' => $this->anniversaryPromo(),
             'priceBounds' => [
                 'min' => self::MIN_INVESTMENT_AMOUNT,
                 'max' => self::MAX_INVESTMENT_AMOUNT,
@@ -419,10 +456,16 @@ class AdminLuxuryQuoteController extends Controller
             'optional_addons' => ['nullable', 'string', 'max:5000'],
             'intro_message' => ['nullable', 'string', 'max:2000'],
             'closing_note' => ['nullable', 'string', 'max:2000'],
+            'discount_percent' => ['nullable', 'numeric', 'min:0', 'max:100'],
+            'promo_code' => ['nullable', 'string', 'max:80'],
         ]);
 
         $validated['line_items'] = $this->normalizeLineItems($validated['line_items']);
-        $validated['investment_amount'] = $this->sumLineItems($validated['line_items']);
+        $subtotal = $this->sumLineItems($validated['line_items']);
+        $discountPercent = round((float) ($validated['discount_percent'] ?? 0), 2);
+        $validated['discount_percent'] = $discountPercent;
+        $validated['discount_amount'] = round($subtotal * ($discountPercent / 100), 2);
+        $validated['investment_amount'] = round($subtotal - $validated['discount_amount'], 2);
 
         if ($validated['investment_amount'] < self::MIN_INVESTMENT_AMOUNT) {
             throw ValidationException::withMessages([
@@ -453,6 +496,9 @@ class AdminLuxuryQuoteController extends Controller
             'project_title' => $validated['project_title'],
             'executive_summary' => $this->sanitizeRichText($validated['executive_summary']),
             'investment_amount' => $validated['investment_amount'],
+            'discount_percent' => $validated['discount_percent'],
+            'discount_amount' => $validated['discount_amount'],
+            'promo_code' => filled($validated['promo_code'] ?? null) ? strtoupper(trim($validated['promo_code'])) : null,
             'exchange_rate' => round((float) $validated['exchange_rate'], 4),
             'timeline' => $validated['timeline'],
             'valid_until' => Carbon::parse($validated['valid_until']),
@@ -666,6 +712,11 @@ class AdminLuxuryQuoteController extends Controller
         ];
     }
 
+    private function countLabel(int $count, string $singular): string
+    {
+        return number_format($count).' '.Str::plural($singular, $count);
+    }
+
     private function formatTrend(float|int $current, float|int $previous, string $context): array
     {
         if ($current == 0 && $previous == 0) {
@@ -736,6 +787,9 @@ class AdminLuxuryQuoteController extends Controller
             ? $daysCollection->sortByDesc('visits')->first()
             : null;
 
+        // Round the axis ceiling up to a readable step so gridline labels are whole numbers.
+        $axisMax = $this->niceAxisMax($maxValue);
+
         return [
             'days' => $daysCollection->values()->all(),
             'totals' => [
@@ -744,9 +798,109 @@ class AdminLuxuryQuoteController extends Controller
                 'messages' => $daysCollection->sum('messages'),
             ],
             'peak' => $peakTrafficDay,
-            'visit_points' => $this->buildPolylinePoints($daysCollection, 'visits', $maxValue),
-            'quote_points' => $this->buildPolylinePoints($daysCollection, 'quotes', $maxValue),
-            'message_points' => $this->buildPolylinePoints($daysCollection, 'messages', $maxValue),
+            'chart' => $this->buildChartGeometry($daysCollection, $axisMax),
+        ];
+    }
+
+    /**
+     * Pick a ceiling divisible by the four gridlines so every axis label is a
+     * whole number, without leaving more headroom than the data needs.
+     */
+    private function niceAxisMax(int $maxValue): int
+    {
+        $step = max(1, (int) ceil(max(1, $maxValue) / 4));
+
+        if ($step > 10) {
+            $magnitude = 10 ** (strlen((string) $step) - 1);
+            $step = (int) (ceil($step / $magnitude) * $magnitude);
+        }
+
+        return $step * 4;
+    }
+
+    /**
+     * Resolve the plotted coordinates once so the view can draw the axes, the
+     * area fills and the point markers against the same geometry as the lines.
+     */
+    private function buildChartGeometry(
+        Collection $days,
+        int $axisMax,
+        int $width = 640,
+        int $height = 220,
+        int $paddingLeft = 46,
+        int $paddingRight = 14,
+        int $paddingY = 18
+    ): array {
+        $usableWidth = $width - $paddingLeft - $paddingRight;
+        $usableHeight = $height - ($paddingY * 2);
+        $divisor = max(1, $days->count() - 1);
+        $baseline = $height - $paddingY;
+
+        $series = [];
+
+        foreach (['visits' => 'visits', 'quotes' => 'quotes', 'messages' => 'messages'] as $key => $field) {
+            $points = $days->values()->map(function (array $day, int $index) use (
+                $axisMax,
+                $baseline,
+                $divisor,
+                $field,
+                $paddingLeft,
+                $usableHeight,
+                $usableWidth
+            ): array {
+                $ratio = $axisMax > 0 ? ($day[$field] / $axisMax) : 0;
+
+                return [
+                    'x' => round($paddingLeft + ($usableWidth * ($index / $divisor)), 2),
+                    'y' => round($baseline - ($usableHeight * $ratio), 2),
+                    'value' => $day[$field],
+                    'label' => $day['full_label'],
+                ];
+            })->all();
+
+            $line = collect($points)->map(fn (array $point): string => $point['x'].','.$point['y'])->implode(' ');
+            $first = $points[0] ?? null;
+            $last = $points[count($points) - 1] ?? null;
+
+            $series[$key] = [
+                'points' => $points,
+                'line' => $line,
+                'area' => $first && $last
+                    ? 'M'.$first['x'].','.$baseline.' L'.str_replace(' ', ' L', $line).' L'.$last['x'].','.$baseline.' Z'
+                    : '',
+            ];
+        }
+
+        $ticks = collect(range(0, 4))->map(fn (int $step): array => [
+            'value' => (int) round($axisMax * (1 - ($step / 4))),
+            'y' => round($paddingY + (($usableHeight / 4) * $step), 2),
+        ])->all();
+
+        // Thin the x labels so they never collide on narrow charts.
+        $labelEvery = (int) max(1, ceil($days->count() / 7));
+
+        $xLabels = collect($days->values())
+            ->map(fn (array $day, int $index): array => [
+                'label' => $day['label'],
+                'full_label' => $day['full_label'],
+                'x' => round($paddingLeft + ($usableWidth * ($index / $divisor)), 2),
+                'show' => $index % $labelEvery === 0 || $index === $days->count() - 1,
+            ])
+            ->filter(fn (array $label): bool => $label['show'])
+            ->values()
+            ->all();
+
+        return [
+            'width' => $width,
+            'height' => $height,
+            'baseline' => $baseline,
+            'plot_left' => $paddingLeft,
+            'plot_right' => $width - $paddingRight,
+            'max' => $axisMax,
+            'series' => $series,
+            'ticks' => $ticks,
+            'x_labels' => $xLabels,
+            'has_data' => $days->sum('visits') + $days->sum('quotes') + $days->sum('messages') > 0,
         ];
     }
 
@@ -760,37 +914,6 @@ class AdminLuxuryQuoteController extends Controller
             ->groupBy(DB::raw($dateExpression))
             ->pluck('aggregate', 'date_key')
             ->map(fn ($count): int => (int) $count);
-    }
-
-    private function buildPolylinePoints(
-        Collection $days,
-        string $key,
-        int $maxValue,
-        int $width = 640,
-        int $height = 220
-    ): string {
-        $paddingX = 18;
-        $paddingY = 18;
-        $usableWidth = $width - ($paddingX * 2);
-        $usableHeight = $height - ($paddingY * 2);
-        $divisor = max(1, $days->count() - 1);
-
-        return $days->values()->map(function (array $day, int $index) use (
-            $divisor,
-            $height,
-            $key,
-            $maxValue,
-            $paddingX,
-            $paddingY,
-            $usableHeight,
-            $usableWidth
-        ): string {
-            $x = $paddingX + ($usableWidth * ($index / $divisor));
-            $ratio = $maxValue > 0 ? ($day[$key] / $maxValue) : 0;
-            $y = $height - $paddingY - ($usableHeight * $ratio);
-
-            return number_format($x, 2, '.', '').','.number_format($y, 2, '.', '');
-        })->implode(' ');
     }
 
     private function buildQuoteBreakdown(
@@ -828,7 +951,7 @@ class AdminLuxuryQuoteController extends Controller
                 'count' => $count,
                 'meta' => $field === 'template'
                     ? ($templateMap[$value]['badge'] ?? 'Template')
-                    : ($count === 1 ? '1 invoice' : number_format($count).' invoices'),
+                    : $this->countLabel($count, 'invoice'),
                 'width' => round(($count / $maxCount) * 100, 1),
             ];
         })->values()->all();

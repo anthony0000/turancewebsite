@@ -19,6 +19,9 @@ class LuxuryQuote extends Model
         'project_title',
         'executive_summary',
         'investment_amount',
+        'discount_percent',
+        'discount_amount',
+        'promo_code',
         'exchange_rate',
         'timeline',
         'valid_until',
@@ -33,6 +36,8 @@ class LuxuryQuote extends Model
 
     protected $casts = [
         'investment_amount' => 'decimal:2',
+        'discount_percent' => 'decimal:2',
+        'discount_amount' => 'decimal:2',
         'exchange_rate' => 'decimal:4',
         'valid_until' => 'date',
         'scope_items' => 'array',

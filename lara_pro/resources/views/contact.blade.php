@@ -14,6 +14,7 @@
 
 @section('content')
     @php($topics = config('contact.topics', []))
+    @php($anniversaryPromo = app(\App\Support\AnniversaryPromotion::class)->current())
 
     <a class="tt-skip-link" href="#main-content">Skip to main content</a>
 
@@ -36,6 +37,13 @@
                     <span class="tt-section-heading__eyebrow" data-reveal><i aria-hidden="true"></i>Start a conversation</span>
                     <h1 id="contact-page-title" data-reveal>Get a clear project estimate.</h1>
                     <p data-reveal>Tell us what you need to build or improve. We will review the opportunity and recommend a practical scope, timeline and next step.</p>
+
+                    @if ($promoClaimed)
+                        <div class="tt-contact-promo-note" data-reveal role="status">
+                            <strong>{{ $anniversaryPromo['discount_percent'] }}% anniversary discount applied.</strong>
+                            <span>We will include the {{ $anniversaryPromo['years'] }}-year offer in your estimate.</span>
+                        </div>
+                    @endif
 
                     <dl class="tt-contact-hero__details" data-reveal>
                         <div>

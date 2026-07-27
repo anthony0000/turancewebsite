@@ -48,14 +48,14 @@
     $plans = [
         [
             'name' => 'Essential Presence',
-            'price' => 'From $500',
+            'price' => 500,
             'fit' => 'A focused, premium digital presence for founders and growing businesses.',
             'timeline' => '2–4 weeks',
             'items' => ['Discovery and direction', 'Landing page or focused website', 'Responsive build and enquiry flow', 'SEO foundation and launch support'],
         ],
         [
             'name' => 'Growth Build',
-            'price' => 'From $2,500',
+            'price' => 2500,
             'fit' => 'A custom product experience with deeper journeys, workflows or integrations.',
             'timeline' => '5–12 weeks',
             'featured' => true,
@@ -63,12 +63,16 @@
         ],
         [
             'name' => 'Flagship System',
-            'price' => 'From $6,500',
+            'price' => 6500,
             'fit' => 'An ambitious multi-surface platform or complete brand and product ecosystem.',
             'timeline' => '12+ weeks',
             'items' => ['End-to-end product direction', 'Advanced UX and technical architecture', 'Connected brand and digital systems', 'Priority launch and growth planning'],
         ],
     ];
+
+    $anniversaryPromo = app(\App\Support\AnniversaryPromotion::class)->current();
+    $promoEndsAt = ! empty($anniversaryPromo['ends_at']) ? \Illuminate\Support\Carbon::parse($anniversaryPromo['ends_at']) : null;
+    $promoIsActive = $anniversaryPromo['is_active'];
 
     $faqs = config('seo.services_faqs', []);
 @endphp
@@ -206,7 +210,7 @@
                         <p class="tt-services-overview-kicker">Starting points</p>
                         <h2 id="pricing-title">Flexible starting points for planning the investment.</h2>
                     </div>
-                    <p>These are starting prices, not fixed packages. Every proposal is shaped around the required scope, complexity, integrations and delivery timeline.</p>
+                        <p>These are starting prices, not fixed packages. Every proposal is shaped around the required scope, complexity, integrations and delivery timeline.</p>
                 </div>
 
                 <div class="tt-services-pricing__grid">
@@ -214,14 +218,22 @@
                         <article class="{{ ! empty($plan['featured']) ? 'is-featured' : '' }}" data-reveal>
                             @if (! empty($plan['featured']))<span class="tt-services-pricing__badge">Most requested</span>@endif
                             <small>{{ $plan['name'] }}</small>
-                            <h3>{{ $plan['price'] }}</h3>
+                            <h3>
+                                @if ($promoIsActive)
+                                    <del>From ${{ number_format($plan['price']) }}</del>
+                                    <span>From ${{ number_format($plan['price'] * (1 - ($anniversaryPromo['discount_percent'] / 100))) }}</span>
+                                @else
+                                    From ${{ number_format($plan['price']) }}
+                                @endif
+                            </h3>
+                            @if ($promoIsActive)<em class="tt-services-pricing__offer">{{ $anniversaryPromo['discount_percent'] }}% off for our {{ $anniversaryPromo['years'] }}-year anniversary</em>@endif
                             <p>{{ $plan['fit'] }}</p>
                             <ul>
                                 @foreach ($plan['items'] as $item)<li>{{ $item }}</li>@endforeach
                             </ul>
                             <div>
                                 <span>Typical timeline · {{ $plan['timeline'] }}</span>
-                                <a href="{{ route('contact.show') }}"
+                                <a href="{{ route('contact.show', $promoIsActive ? ['promo' => $anniversaryPromo['code']] : []) }}"
                                     data-conversion="pricing_{{ \Illuminate\Support\Str::slug($plan['name'], '_') }}">Discuss this scope
                                     <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5" /></svg>
                                 </a>

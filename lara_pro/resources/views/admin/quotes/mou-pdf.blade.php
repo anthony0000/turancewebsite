@@ -59,7 +59,7 @@
     $brandName = $brand['studio_name'] ?? 'Turance Technologies';
     $brandLogoSrc = DocumentBranding::logoSource($brand['logo_path'] ?? null);
     $brandEmail = $brand['contact_email'] ?? 'hello@turancetechnologies.com';
-    $brandPhone = $brand['contact_phone'] ?? '+2349124948602';
+    $brandPhone = $brand['contact_phone'] ?? '+2348061209440';
     $brandWebsite = $brand['website'] ?? config('app.url');
     $clientSigner = $quote->recipient_name ?: 'Authorized Client Representative';
     $clientTitle = $quote->recipient_title ?: ($quote->company_industry ?: 'Client Representative');

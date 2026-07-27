@@ -10,6 +10,7 @@
     $isProposalWorkspace = request()->routeIs('admin.proposals.*');
     $isQuoteActivity = request()->routeIs('admin.quotes.activity');
     $isQuoteInsights = request()->routeIs('admin.quotes.insights');
+    $isQuotePromotion = request()->routeIs('admin.quotes.promotion');
     $isQuoteBuilder = request()->routeIs('admin.quotes.create');
     $isQuoteArchive = request()->routeIs('admin.quotes.archive');
     $currentAdminView = match (true) {
@@ -20,6 +21,7 @@
         $isProposalDashboard => 'Proposal Studio',
         $isQuoteActivity => 'Activity Center',
         $isQuoteInsights => 'Business Insights',
+        $isQuotePromotion => 'Promotion Control',
         $isQuoteBuilder => 'Invoice Builder',
         $isQuoteArchive => 'Invoice Archive',
         default => 'Analytics Dashboard',
@@ -32,6 +34,7 @@
         $isProposalDashboard => 'Build, review, and export client proposals.',
         $isQuoteActivity => 'Review traffic, leads, and invoice movement.',
         $isQuoteInsights => 'Understand template, category, and pipeline patterns.',
+        $isQuotePromotion => 'Manage the live anniversary discount and landing-page campaign.',
         $isQuoteBuilder => 'Create an invoice through a focused step-by-step flow.',
         $isQuoteArchive => 'Find saved invoices and export documents.',
         default => 'Track demand and create the next invoice.',
@@ -44,6 +47,7 @@
         $isProposalDashboard => 'Proposal Studio',
         $isQuoteActivity => 'Activity',
         $isQuoteInsights => 'Insights',
+        $isQuotePromotion => 'Promotion Control',
         $isQuoteBuilder => 'Invoice Builder',
         $isQuoteArchive => 'Archive',
         default => 'Dashboard',
@@ -2098,6 +2102,36 @@
         @if ($isInvoicePreview)
             @include('admin.quotes.partials.document-styles')
         @endif
+    .admin-promo-status {
+        display: grid;
+        gap: 3px;
+        max-width: 420px;
+        margin-top: 22px;
+        padding: 14px 16px;
+        border-left: 2px solid var(--primary);
+        background: var(--primary-soft);
+    }
+
+    .admin-promo-status strong { font-size: 14px; }
+    .admin-promo-status > span:last-child { color: var(--muted); font-size: 12px; }
+    .admin-discount-control { padding: 18px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface-soft); }
+    .admin-discount-control__head { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; }
+    .admin-discount-control__head > div { min-width: 0; }
+    .admin-discount-control__grid { display: grid; grid-template-columns: auto minmax(150px, .5fr) minmax(180px, .8fr); align-items: end; gap: 16px; margin-top: 16px; }
+    .admin-discount-toggle { display: flex; align-items: center; gap: 9px; min-height: 42px; font-weight: 700; }
+    .admin-discount-toggle input { width: 17px; height: 17px; accent-color: var(--primary); }
+    .line-items-total--discount { margin-top: 0; border-top: 0; }
+    .promotion-form__status { padding: 16px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface-soft); }
+    .promotion-form__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin-top: 20px; }
+    .promotion-preview-card { background: linear-gradient(145deg, #fffdf8, #fff4d6); }
+    .promotion-preview-card__discount { display: block; margin: 24px 0 8px; color: var(--primary-strong); font-family: var(--font-display); font-size: 52px; line-height: 1; }
+    .promotion-preview-card h3 { margin: 0 0 12px; font-size: 20px; }
+    .promotion-preview-card p { color: var(--muted); }
+    @media (max-width: 760px) {
+        .admin-discount-control__head { flex-direction: column; }
+        .admin-discount-control__grid { grid-template-columns: 1fr; }
+        .promotion-form__grid { grid-template-columns: 1fr; }
+    }
     </style>
 </head>
 
@@ -2167,6 +2201,20 @@
                                 <div>
                                     <strong>Insights</strong>
                                     <span>Demand signals</span>
+                                </div>
+                            </a>
+
+                            <a class="admin-nav-link {{ request()->routeIs('admin.quotes.promotion') ? 'active' : '' }}"
+                                href="{{ route('admin.quotes.promotion') }}">
+                                <span class="admin-nav-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24">
+                                        <path d="M12 3v18M3 12h18" />
+                                        <circle cx="12" cy="12" r="8" />
+                                    </svg>
+                                </span>
+                                <div>
+                                    <strong>Promotion</strong>
+                                    <span>Landing offer</span>
                                 </div>
                             </a>
 
@@ -2583,19 +2631,26 @@
                 const rows = editor.querySelector('[data-line-item-rows]');
                 const template = editor.querySelector('[data-line-item-template]');
                 const addButton = editor.querySelector('[data-line-item-add]');
+                const subtotalDisplay = editor.querySelector('[data-line-item-subtotal-display]');
                 const totalDisplay = editor.querySelector('[data-line-item-total-display]');
                 const totalInput = editor.querySelector('[data-line-item-total-input]');
                 const exchangeRateInput = editor.querySelector('[data-exchange-rate]');
                 const nairaTotalDisplay = editor.querySelector('[data-naira-total-display]');
+                const discountEnabled = editor.closest('form')?.querySelector('[data-discount-enabled]');
+                const discountPercent = editor.closest('form')?.querySelector('[data-discount-percent]');
+                const discountCode = editor.closest('form')?.querySelector('[data-discount-code]');
 
-                if (!rows || !template || !totalDisplay || !totalInput) {
+                if (!rows || !template || !subtotalDisplay || !totalDisplay || !totalInput) {
                     return;
                 }
 
                 const recalculate = () => {
-                    const total = Array.from(rows.querySelectorAll('[data-line-item-amount]'))
+                    const subtotal = Array.from(rows.querySelectorAll('[data-line-item-amount]'))
                         .reduce((sum, input) => sum + (Number(input.value) || 0), 0);
+                    const percent = discountEnabled?.checked ? Math.min(100, Math.max(0, Number(discountPercent?.value) || 0)) : 0;
+                    const total = Math.max(0, subtotal - (subtotal * percent / 100));
 
+                    subtotalDisplay.textContent = formatCurrency(subtotal);
                     totalDisplay.textContent = formatCurrency(total);
                     totalInput.value = total.toFixed(2);
 
@@ -2636,6 +2691,13 @@
                 });
 
                 exchangeRateInput?.addEventListener('input', recalculate);
+                discountEnabled?.addEventListener('change', () => {
+                    [discountPercent, discountCode].forEach((field) => {
+                        if (field) field.disabled = !discountEnabled.checked;
+                    });
+                    recalculate();
+                });
+                discountPercent?.addEventListener('input', recalculate);
 
                 rows.addEventListener('click', (event) => {
                     const removeButton = event.target.closest('[data-line-item-remove]');
