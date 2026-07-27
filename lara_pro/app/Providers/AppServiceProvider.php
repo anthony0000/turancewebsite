@@ -35,6 +35,9 @@ class AppServiceProvider extends ServiceProvider
             $limits = [
                 Limit::perMinute(5)->by('contact-ip:'.hash('sha256', (string) $request->ip())),
                 Limit::perDay(25)->by('contact-ip-day:'.hash('sha256', (string) $request->ip())),
+                // A site-wide ceiling protects the SMTP account from distributed bots.
+                Limit::perHour(100)->by('contact-site-hourly'),
+                Limit::perDay(500)->by('contact-site-daily'),
             ];
 
             if ($email !== '') {
@@ -43,6 +46,15 @@ class AppServiceProvider extends ServiceProvider
             }
 
             return $limits;
+        });
+
+        RateLimiter::for('admin-login', function (Request $request): array {
+            $email = Str::lower(trim((string) $request->input('email')));
+
+            return [
+                Limit::perMinute(5)->by('admin-login-ip:'.hash('sha256', (string) $request->ip())),
+                Limit::perHour(20)->by('admin-login-email:'.hash('sha256', $email)),
+            ];
         });
     }
 }

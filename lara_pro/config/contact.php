@@ -13,6 +13,7 @@ return [
     ],
 
     'delivery' => [
+        'enabled' => (bool) env('CONTACT_MAIL_ENABLED', true),
         'queue' => (bool) env('CONTACT_QUEUE_MAIL', false),
         'queue_name' => env('CONTACT_MAIL_QUEUE', 'emails'),
     ],

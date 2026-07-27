@@ -100,7 +100,7 @@ class ContactController extends Controller
         $recipientAddress = config('contact.recipient.address');
         $mailDelivered = false;
 
-        if (filled($recipientAddress)) {
+        if (config('contact.delivery.enabled') && filled($recipientAddress)) {
             try {
                 $pendingMail = Mail::to(new Address(
                     (string) $recipientAddress,

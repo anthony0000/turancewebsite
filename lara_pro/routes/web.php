@@ -95,7 +95,9 @@ Route::get('/p/{token}', [AdminProposalController::class, 'share'])->name('propo
 
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/login', [AdminAuthController::class, 'create'])->name('login');
-    Route::post('/login', [AdminAuthController::class, 'store'])->name('login.store');
+    Route::post('/login', [AdminAuthController::class, 'store'])
+        ->middleware('throttle:admin-login')
+        ->name('login.store');
 
     Route::middleware(EnsureLuxuryQuoteAdminAuthenticated::class)->group(function () {
         Route::get('/', function () {
