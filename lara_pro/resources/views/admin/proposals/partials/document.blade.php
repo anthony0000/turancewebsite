@@ -68,7 +68,19 @@
         };
     };
 
-    $visibleSections = collect($sectionSource)->filter($hasSectionContent)->values();
+    $protectionConfig = config('proposals.protection', []);
+    $visibleSections = collect($sectionSource)
+        ->reject(fn ($section) => (string) ($section->type ?? 'custom') === 'proposal_protection')
+        ->filter($hasSectionContent)
+        ->values();
+
+    if (filled($protectionConfig['title'] ?? null)) {
+        $visibleSections->push((object) array_merge($protectionConfig, [
+            'layout_style' => 'legal',
+            'is_visible' => true,
+            'sort_order' => $visibleSections->count(),
+        ]));
+    }
 
     $splitText = function (?string $text, int $limit = 1150): array {
         $text = trim((string) preg_replace('/\s+/', ' ', (string) $text));
@@ -196,6 +208,18 @@
             continue;
         }
 
+        if ($sectionType === 'proposal_protection') {
+            $documentPages->push([
+                'kind' => 'proposal_protection',
+                'section' => $section,
+                'section_index' => $sectionIndex,
+                'section_type' => $sectionType,
+                'continuation' => false,
+            ]);
+
+            continue;
+        }
+
         $bodyChunks = collect($splitText($section->body ?? ''));
 
         foreach ($bodyChunks as $chunkIndex => $body) {
@@ -254,6 +278,8 @@
                                 <span>{{ $proposal->company_slogan ?: 'Business Proposal' }}</span>
                             </span>
                         </div>
+
+                        <span class="proposal-confidential-badge">Confidential / evaluation only</span>
 
                         <span class="proposal-cover-year">{{ optional($proposal->proposal_date)->format('Y') ?: now()->format('Y') }}</span>
 
@@ -486,6 +512,33 @@
                         @endif
                     @break
 
+                    @case('proposal_protection')
+                        <span class="proposal-section-eyebrow">{{ $section->eyebrow }}</span>
+                        <h2 class="proposal-section-title">{{ $section->title }}</h2>
+                        <p class="proposal-section-body proposal-protection-intro">{{ $section->body }}</p>
+
+                        <div class="proposal-protection-grid">
+                            @foreach (collect(data_get($section, 'payload.clauses', []))->chunk(2) as $clauseRow)
+                                <div class="proposal-protection-row">
+                                    @foreach ($clauseRow as $clause)
+                                        <article class="proposal-protection-clause">
+                                            <span>{{ str_pad((string) ($loop->parent->index * 2 + $loop->iteration), 2, '0', STR_PAD_LEFT) }}</span>
+                                            <div>
+                                                <h3>{{ $clause['title'] }}</h3>
+                                                <p>{{ $clause['body'] }}</p>
+                                            </div>
+                                        </article>
+                                    @endforeach
+                                </div>
+                            @endforeach
+                        </div>
+
+                        <aside class="proposal-protection-note">
+                            <strong>Legal basis</strong>
+                            <p>{{ data_get($section, 'payload.legal_note') }}</p>
+                        </aside>
+                    @break
+
                     @default
                         <div class="proposal-section-grid">
                             <div class="proposal-section-main">
@@ -528,6 +581,8 @@
 
                 <footer class="proposal-footer">
                     <span>
+                        Confidential / evaluation only
+                        <b aria-hidden="true">·</b>
                         {{ $proposal->company_name }}
                         @if ($proposal->contact_email)
                             / {{ $proposal->contact_email }}

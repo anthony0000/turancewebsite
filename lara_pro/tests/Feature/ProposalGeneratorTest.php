@@ -19,8 +19,10 @@ it('creates, previews, and exports a premium proposal', function () {
         ->withSession($session)
         ->get(route('admin.proposals.index'))
         ->assertOk()
-        ->assertSee('Proposal Generator')
-        ->assertSee('Corporate Green Proposal');
+        ->assertSee('Proposal Studio')
+        ->assertSee('Corporate Green Proposal')
+        ->assertSee('Always included in every export')
+        ->assertSee('mandatory-proposal-protection', false);
 
     $template = ProposalTemplate::query()->where('slug', 'corporate-green')->firstOrFail();
 
@@ -72,7 +74,10 @@ it('creates, previews, and exports a premium proposal', function () {
         ->assertSee('PDF Export')
         ->assertSee('data:image/png;base64,', false)
         ->assertSee('Turance Technologies logo')
-        ->assertSee('Enterprise Growth Proposal');
+        ->assertSee('Enterprise Growth Proposal')
+        ->assertSee('Proposal use &amp; intellectual property', false)
+        ->assertSee('Confidential / evaluation only')
+        ->assertSee('No reuse or implementation');
 
     $pdfResponse = $this
         ->withSession($session)
@@ -89,7 +94,9 @@ it('creates, previews, and exports a premium proposal', function () {
     $this
         ->get(route('proposals.share', $proposal->public_token))
         ->assertOk()
-        ->assertSee('Enterprise Growth Proposal');
+        ->assertSee('Enterprise Growth Proposal')
+        ->assertSee('Proposal use &amp; intellectual property', false)
+        ->assertSee('The Copyright Act, 2022 protects qualifying original expression');
 });
 
 it('embeds the default Turance logo when a proposal has no custom logo', function () {
@@ -125,5 +132,8 @@ it('embeds the default Turance logo when a proposal has no custom logo', functio
 
     expect($html)
         ->toContain('data:image/png;base64,')
-        ->toContain('Turance Technologies logo');
+        ->toContain('Turance Technologies logo')
+        ->toContain('Proposal use &amp; intellectual property')
+        ->toContain('Confidential / evaluation only')
+        ->toContain('No reuse or implementation');
 });

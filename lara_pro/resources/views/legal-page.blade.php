@@ -8,10 +8,12 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&amp;family=Hanken+Grotesk:wght@400;500;600;700&amp;display=swap">
     <link rel="stylesheet" href="{{ asset('/assets/css/home-reference.css') }}?v=2.7">
     <link rel="stylesheet" href="{{ asset('/assets/css/home-sections.css') }}?v=2.4">
-    <link rel="stylesheet" href="{{ asset('/assets/css/legal-reference.css') }}?v=1.1">
+    <link rel="stylesheet" href="{{ asset('/assets/css/legal-reference.css') }}?v=1.3">
 @endpush
 
 @section('content')
+    @php($warning = $legal['warning'] ?? null)
+
     <a class="tt-skip-link" href="#main-content">Skip to main content</a>
 
     <main class="tt-reference-home tt-legal-page" id="main-content">
@@ -57,19 +59,39 @@
             </div>
         </section>
 
+        @if ($warning)
+            <section class="tt-legal-warning" aria-labelledby="legal-warning-title">
+                <div class="tt-section__inner tt-legal-warning__inner">
+                    <span class="tt-legal-warning__icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24"><path d="M12 3 20 6v5c0 5.1-3.4 8.6-8 10-4.6-1.4-8-4.9-8-10V6l8-3Z"/><path d="M9.5 12.2 11.2 14l3.6-4"/></svg>
+                    </span>
+                    <div>
+                        <span class="tt-legal-warning__eyebrow">{{ $warning['eyebrow'] }}</span>
+                        <h2 id="legal-warning-title">{{ $warning['title'] }}</h2>
+                        <p>{{ $warning['body'] }}</p>
+                    </div>
+                    <a href="#{{ $warning['target'] }}">{{ $warning['link_label'] }}
+                        <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5" /></svg>
+                    </a>
+                </div>
+            </section>
+        @endif
+
         <section class="tt-legal-content tt-section" aria-label="{{ $legal['type'] }} details">
             <div class="tt-section__inner tt-legal-content__inner">
                 <aside class="tt-legal-index">
                     <span>On this page</span>
                     <ol>
                         @foreach ($legal['sections'] as $section)
-                            <li><a href="#legal-section-{{ $loop->iteration }}">{{ $section['title'] }}</a></li>
+                            @php($sectionId = $section['id'] ?? 'legal-section-'.$loop->iteration)
+                            <li><a href="#{{ $sectionId }}">{{ $section['title'] }}</a></li>
                         @endforeach
                     </ol>
                 </aside>
                 <article class="tt-legal-article">
                     @foreach ($legal['sections'] as $section)
-                        <section id="legal-section-{{ $loop->iteration }}" class="tt-legal-section" aria-labelledby="legal-section-title-{{ $loop->iteration }}">
+                        @php($sectionId = $section['id'] ?? 'legal-section-'.$loop->iteration)
+                        <section id="{{ $sectionId }}" class="tt-legal-section" aria-labelledby="legal-section-title-{{ $loop->iteration }}">
                             <span class="tt-legal-section__number">{{ str_pad($loop->iteration, 2, '0', STR_PAD_LEFT) }}</span>
                             <div>
                                 <h2 id="legal-section-title-{{ $loop->iteration }}">{{ $section['title'] }}</h2>

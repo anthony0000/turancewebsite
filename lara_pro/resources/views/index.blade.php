@@ -8,7 +8,7 @@
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&amp;family=Hanken+Grotesk:wght@400;500;600;700&amp;display=swap">
     <link rel="stylesheet" href="{{ asset('/assets/css/home-reference.css') }}?v=2.7">
-    <link rel="stylesheet" href="{{ asset('/assets/css/home-sections.css') }}?v=2.4">
+    <link rel="stylesheet" href="{{ asset('/assets/css/home-sections.css') }}?v=2.5">
 @endpush
 
 @section('content')
@@ -120,6 +120,7 @@
         $anniversaryPromo = app(\App\Support\AnniversaryPromotion::class)->current();
         $promoEndsAt = ! empty($anniversaryPromo['ends_at']) ? \Illuminate\Support\Carbon::parse($anniversaryPromo['ends_at']) : null;
         $promoIsActive = $anniversaryPromo['is_active'];
+        $proposalWarning = config('legal.terms.warning', []);
     @endphp
 
     <a class="tt-skip-link" href="#main-content">Skip to main content</a>
@@ -559,6 +560,21 @@
                         <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5" /></svg>
                     </a>
                 </div>
+                @if (filled($proposalWarning['title'] ?? null))
+                    <aside class="tt-contact-cta__notice" aria-labelledby="home-proposal-warning-title" data-reveal>
+                        <span class="tt-contact-cta__notice-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24"><path d="M12 3 20 6v5c0 5.1-3.4 8.6-8 10-4.6-1.4-8-4.9-8-10V6l8-3Z"/><path d="M9.5 12.2 11.2 14l3.6-4"/></svg>
+                        </span>
+                        <div>
+                            <span>{{ $proposalWarning['eyebrow'] }}</span>
+                            <h3 id="home-proposal-warning-title">{{ $proposalWarning['title'] }}</h3>
+                            <p>{{ $proposalWarning['body'] }}</p>
+                        </div>
+                        <a href="{{ route('terms.show') }}#{{ $proposalWarning['target'] }}">{{ $proposalWarning['link_label'] }}
+                            <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5" /></svg>
+                        </a>
+                    </aside>
+                @endif
             </div>
         </section>
 

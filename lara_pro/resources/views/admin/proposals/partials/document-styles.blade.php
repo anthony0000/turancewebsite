@@ -280,6 +280,22 @@
     width: 33.333%;
 }
 
+.proposal-confidential-badge {
+    position: absolute;
+    top: 34px;
+    right: 42px;
+    z-index: 2;
+    display: block;
+    padding: 7px 11px;
+    color: {{ $isDarkTheme ? '#ffffff' : '#111111' }};
+    border: 1px solid {{ $isDarkTheme ? 'rgba(255,255,255,0.34)' : 'rgba(0,0,0,0.24)' }};
+    border-radius: 999px;
+    font-size: 7px;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
 .proposal-page-header,
 .proposal-footer {
     display: table;
@@ -419,6 +435,80 @@
     color: {{ $muted }};
     font-size: 8px;
     font-weight: 900;
+}
+
+.proposal-protection-intro {
+    max-width: 680px;
+}
+
+.proposal-protection-grid {
+    display: table;
+    width: 100%;
+    margin-top: 18px;
+    table-layout: fixed;
+    border-collapse: collapse;
+}
+
+.proposal-protection-row {
+    display: table-row;
+}
+
+.proposal-protection-clause {
+    display: table-cell;
+    width: 50%;
+    padding: 11px 12px;
+    vertical-align: top;
+    border: 1px solid rgba(20, 20, 20, 0.1);
+    background: {{ $soft }};
+}
+
+.proposal-protection-clause > span,
+.proposal-protection-clause > div {
+    display: table-cell;
+    vertical-align: top;
+}
+
+.proposal-protection-clause > span {
+    width: 28px;
+    color: {{ $accent }};
+    font-size: 9px;
+    font-weight: 900;
+}
+
+.proposal-protection-clause h3 {
+    margin: 0 0 4px;
+    color: {{ $ink }};
+    font-size: 10px;
+    line-height: 1.25;
+}
+
+.proposal-protection-clause p {
+    margin: 0;
+    color: {{ $muted }};
+    font-size: 8px;
+    line-height: 1.42;
+}
+
+.proposal-protection-note {
+    margin-top: 7px;
+    padding: 10px 12px;
+    border-left: 3px solid {{ $accent }};
+    background: rgba(20, 20, 20, 0.035);
+}
+
+.proposal-protection-note strong {
+    display: block;
+    margin-bottom: 3px;
+    color: {{ $ink }};
+    font-size: 8px;
+    text-transform: uppercase;
+}
+
+.proposal-protection-note p {
+    margin: 0;
+    color: {{ $muted }};
+    font-size: 7.5px;
+    line-height: 1.4;
 }
 
 .proposal-toc-columns {
@@ -725,6 +815,12 @@
     word-wrap: break-word;
     overflow-wrap: break-word;
     white-space: normal;
+}
+
+.proposal-footer b {
+    display: inline;
+    padding: 0 4px;
+    color: {{ $accent }};
 }
 
 .proposal-watermark {

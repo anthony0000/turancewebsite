@@ -43,7 +43,14 @@ return [
         'eyebrow' => 'A clear basis for working together',
         'title' => 'The useful details, in plain language.',
         'intro' => 'These terms apply to your use of this website. A separate written proposal or service agreement will govern any project we accept.',
-        'updated' => '23 July 2026',
+        'updated' => '28 July 2026',
+        'warning' => [
+            'eyebrow' => 'Important use restriction',
+            'title' => 'Proposal materials are confidential.',
+            'body' => 'Redesign directions, wireframes, visual systems, strategies, copy and technical plans we share are for the named recipient’s evaluation only. Do not copy, forward, adapt, commission or implement them without our written permission or an accepted project agreement.',
+            'link_label' => 'Read the proposal-use terms',
+            'target' => 'proposal-design-rights',
+        ],
         'sections' => [
             [
                 'title' => 'Using this website',
@@ -56,6 +63,11 @@ return [
             [
                 'title' => 'Project enquiries',
                 'body' => 'Submitting an enquiry does not create a contract, reserve availability or guarantee a proposal. We may ask for more information before deciding whether a project is a suitable fit.',
+            ],
+            [
+                'id' => 'proposal-design-rights',
+                'title' => 'Proposals, concepts and design rights',
+                'body' => 'Every proposal, redesign direction, wireframe, interface layout, visual system, strategy, copy draft, technical plan, estimate and presentation we disclose is supplied confidentially for evaluation by its named recipient. Unless a signed written agreement expressly provides otherwise, receiving or reviewing those materials grants no right to copy, disclose, distribute, adapt, commission, implement or commercially use them. Client-supplied material remains the client’s property. Rights in final approved deliverables transfer or are licensed only as stated in the signed project agreement and after its payment conditions are met; rejected directions, working files, methods, reusable tools and pre-existing material remain ours. The Copyright Act, 2022 protects qualifying original expression rather than abstract ideas alone, so these confidentiality and limited-use obligations also apply separately to non-public concepts and commercial information.',
             ],
             [
                 'title' => 'External links',

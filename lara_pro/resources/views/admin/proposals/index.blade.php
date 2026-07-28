@@ -223,6 +223,24 @@
             opacity: 0.55;
         }
 
+        .proposal-section-item--locked {
+            margin-top: 8px;
+            border-style: dashed;
+            border-color: rgba(20, 61, 50, 0.3);
+            background: rgba(20, 61, 50, 0.055);
+            cursor: default;
+        }
+
+        .proposal-section-lock {
+            padding: 5px 7px;
+            border-radius: 999px;
+            background: #143d32;
+            color: #ffffff !important;
+            font-size: 8px !important;
+            font-weight: 800;
+            letter-spacing: 0.05em;
+        }
+
         .proposal-section-index {
             display: grid;
             place-items: center;
@@ -559,6 +577,49 @@
             font-size: 24px;
         }
 
+        .live-protection-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 8px;
+            margin-top: 20px;
+        }
+
+        .live-protection-clause {
+            display: grid;
+            grid-template-columns: 28px minmax(0, 1fr);
+            gap: 8px;
+            padding: 12px;
+            border: 1px solid rgba(20, 20, 20, 0.1);
+            background: var(--proposal-secondary, #f3f4f0);
+        }
+
+        .live-protection-clause > span {
+            color: var(--proposal-accent, #e8b51f);
+            font-size: 10px;
+            font-weight: 900;
+        }
+
+        .live-protection-clause h3 {
+            margin: 0 0 4px;
+            color: var(--proposal-primary, #111111);
+            font-size: 12px;
+        }
+
+        .live-protection-clause p,
+        .live-protection-note {
+            margin: 0;
+            color: #667085;
+            font-size: 10px;
+            line-height: 1.45;
+        }
+
+        .live-protection-note {
+            margin-top: 10px;
+            padding: 10px 12px;
+            border-left: 3px solid var(--proposal-accent, #e8b51f);
+            background: rgba(20, 20, 20, 0.035);
+        }
+
         .live-toc {
             columns: 2;
             margin: 22px 0 0;
@@ -877,6 +938,14 @@
                 </div>
                 <div class="proposal-builder-panel-body">
                     <div class="proposal-section-list" data-section-list></div>
+                    <div class="proposal-section-item proposal-section-item--locked" aria-label="Mandatory protected proposal section">
+                        <span class="proposal-section-index">{{ str_pad((string) (count($builderState['sections']) + 1), 2, '0', STR_PAD_LEFT) }}</span>
+                        <div>
+                            <strong>{{ config('proposals.protection.title') }}</strong>
+                            <span>Always included in every export</span>
+                        </div>
+                        <span class="proposal-section-lock">Locked</span>
+                    </div>
 
                     <div class="proposal-field" style="margin-top: 14px;">
                         <label for="section-library">Add Section</label>
@@ -1200,6 +1269,7 @@
 
             const templates = {{ Js::from($templateOptions) }};
             const defaults = {{ Js::from(config('proposals.sections', [])) }};
+            const proposalProtection = {{ Js::from(config('proposals.protection', [])) }};
             const state = {{ Js::from($builderState) }};
             const csrfToken = @json(csrf_token());
             const aiUrl = @json(route('admin.proposals.ai.improve'));
@@ -1451,7 +1521,14 @@
                 livePreview.style.setProperty('--proposal-accent', state.settings.accent_color);
                 livePreview.style.setProperty('--proposal-font', state.settings.font_family);
 
-                const visible = state.sections.filter((section) => section.is_visible !== false);
+                const visible = [
+                    ...state.sections.filter((section) => section.is_visible !== false),
+                    {
+                        ...proposalProtection,
+                        id: 'mandatory-proposal-protection',
+                        is_visible: true,
+                    },
+                ];
                 const total = pricingTotals();
                 const contact = [state.proposal.contact_email, state.proposal.phone_number, state.proposal.website].filter(Boolean).join(' / ');
                 const coverImage = state.asset_urls.cover_image ? `<img src="${escapeHtml(state.asset_urls.cover_image)}" alt="">` : '';
@@ -1554,6 +1631,32 @@
                                     ${state.team.slice(0, 3).map((item) => `<article class="live-card"><span class="live-card-avatar">${escapeHtml((item.name || 'T').slice(0, 1).toUpperCase())}</span><h3>${escapeHtml(item.name)}</h3><strong>${escapeHtml(item.role || '')}</strong><p>${escapeHtml(item.bio || '')}</p></article>`).join('')}
                                 </div>
                                 <footer class="live-footer">${escapeHtml(contact)}<span>${escapeHtml(state.proposal.company_name)}</span></footer>
+                            </section>
+                        `;
+                    }
+
+                    if (section.type === 'proposal_protection') {
+                        const clauses = section.payload?.clauses || [];
+
+                        return `
+                            <section class="live-page">
+                                <span class="live-page-kicker">${escapeHtml(state.proposal.company_name)} / ${String(index + 1).padStart(2, '0')}</span>
+                                <span class="live-eyebrow">${escapeHtml(section.eyebrow)}</span>
+                                <h2 class="live-title">${escapeHtml(section.title)}</h2>
+                                <p class="live-body">${escapeHtml(section.body)}</p>
+                                <div class="live-protection-grid">
+                                    ${clauses.map((clause, clauseIndex) => `
+                                        <article class="live-protection-clause">
+                                            <span>${String(clauseIndex + 1).padStart(2, '0')}</span>
+                                            <div>
+                                                <h3>${escapeHtml(clause.title)}</h3>
+                                                <p>${escapeHtml(clause.body)}</p>
+                                            </div>
+                                        </article>
+                                    `).join('')}
+                                </div>
+                                <p class="live-protection-note">${escapeHtml(section.payload?.legal_note || '')}</p>
+                                <footer class="live-footer">Confidential / evaluation only<span>${escapeHtml(state.proposal.company_name)}</span></footer>
                             </section>
                         `;
                     }

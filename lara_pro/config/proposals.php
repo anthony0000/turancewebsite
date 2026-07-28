@@ -6,6 +6,51 @@ return [
         'timeout' => (int) env('PROPOSAL_PDF_TIMEOUT', 90),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Mandatory proposal protection
+    |--------------------------------------------------------------------------
+    |
+    | This content is appended at render time so it protects existing proposals
+    | as well as new ones and cannot be removed through the proposal builder.
+    |
+    */
+    'protection' => [
+        'type' => 'proposal_protection',
+        'title' => 'Proposal use & intellectual property',
+        'eyebrow' => 'Confidential / evaluation only',
+        'body' => 'This proposal is supplied to the named recipient solely to evaluate a possible engagement with the presenting company. It contains original work and non-public commercial thinking. Acceptance, signature, or written authorization to begin work confirms agreement to the protections below.',
+        'payload' => [
+            'clauses' => [
+                [
+                    'title' => 'Confidential evaluation',
+                    'body' => 'The recipient may use this proposal only to assess the proposed engagement and must protect it with reasonable care. Disclosure is limited to personnel and professional advisers who need it for that assessment and are bound by equivalent confidentiality duties.',
+                ],
+                [
+                    'title' => 'Rights remain reserved',
+                    'body' => 'Except for client-supplied and third-party material, all rights in the proposal and its original expression—including strategy, redesign concepts, wireframes, interface layouts, visual systems, copy, technical architecture, estimates, and presentation materials—remain with the presenting company unless a signed written agreement expressly provides otherwise.',
+                ],
+                [
+                    'title' => 'No reuse or implementation',
+                    'body' => 'Receipt or review grants no licence to reproduce, distribute, publish, adapt, commission, implement, or commercially use any proposal material, in whole or in part. Those acts require prior written permission or the rights expressly granted after acceptance and payment under a signed project agreement.',
+                ],
+                [
+                    'title' => 'What transfers',
+                    'body' => 'Any transfer or licence applies only to final approved deliverables expressly identified in a signed project agreement and only when its payment conditions are satisfied. Rejected or unselected directions, working files, reusable tools, methods, know-how, and pre-existing materials remain reserved.',
+                ],
+                [
+                    'title' => 'Client and public material',
+                    'body' => 'The recipient keeps all rights in material it supplied. These restrictions do not apply to information the recipient can show was already lawfully known, independently developed without use of this proposal, publicly available other than through breach, or lawfully received from a third party without restriction.',
+                ],
+                [
+                    'title' => 'Law and priority',
+                    'body' => 'This protection is governed by the laws of the Federal Republic of Nigeria and survives rejection, expiry, or termination of the proposal. If a separately signed project agreement contains different confidentiality or intellectual-property terms, that signed agreement controls.',
+                ],
+            ],
+            'legal_note' => 'The Copyright Act, 2022 protects qualifying original expression fixed in these materials; abstract ideas alone are not copyright works. The confidentiality and limited-use obligations above separately protect non-public concepts and commercial information disclosed for evaluation.',
+        ],
+    ],
+
     'templates' => [
         'corporate-green' => [
             'name' => 'Corporate Green Proposal',
