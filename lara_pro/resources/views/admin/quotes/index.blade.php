@@ -412,9 +412,9 @@
                     <p class="field-hint">When disabled, the landing page hides the offer and countdown.</p>
                 </div>
                 <div class="promotion-form__grid">
-                    <div class="field"><label for="promotion_years">Years celebrated</label><input id="promotion_years" type="number" name="years" value="{{ old('years', $anniversaryPromo['years'] ?? 10) }}" min="1" max="100" required></div>
+                    <div class="field"><label for="promotion_years">Years celebrated</label><input id="promotion_years" type="number" name="years" value="{{ old('years', $anniversaryPromo['years'] ?? 7) }}" min="1" max="100" required></div>
                     <div class="field"><label for="promotion_discount">Discount percentage</label><input id="promotion_discount" type="number" name="discount_percent" value="{{ old('discount_percent', $anniversaryPromo['discount_percent'] ?? 50) }}" min="0" max="100" step="0.01" required></div>
-                    <div class="field"><label for="promotion_code">Promo code</label><input id="promotion_code" type="text" name="promo_code" value="{{ old('promo_code', $anniversaryPromo['code'] ?? 'TURANCE10') }}" maxlength="80" required></div>
+                    <div class="field"><label for="promotion_code">Promo code</label><input id="promotion_code" type="text" name="promo_code" value="{{ old('promo_code', $anniversaryPromo['code'] ?? 'TURANCE7') }}" maxlength="80" required></div>
                     <div class="field"><label for="promotion_ends_at">Offer ends</label><input id="promotion_ends_at" type="datetime-local" name="ends_at" value="{{ old('ends_at', $anniversaryPromo['ends_at_input'] ?? '') }}" required></div>
                 </div>
                 <div class="wizard-actions"><span class="admin-pill">Current: {{ ($anniversaryPromo['is_active'] ?? false) ? 'Live' : 'Inactive' }}</span><button type="submit" class="button">Save promotion</button></div>
@@ -424,8 +424,8 @@
             <section class="panel panel-padded promotion-preview-card">
                 <span class="eyebrow">Public preview</span>
                 <strong class="promotion-preview-card__discount">{{ $anniversaryPromo['discount_percent'] ?? 50 }}% off</strong>
-                <h3>{{ $anniversaryPromo['years'] ?? 10 }} years of Turance</h3>
-                <p>Landing-page offer code <b>{{ $anniversaryPromo['code'] ?? 'TURANCE10' }}</b>.</p>
+                <h3>{{ $anniversaryPromo['years'] ?? 7 }} years of Turance</h3>
+                <p>Landing-page offer code <b>{{ $anniversaryPromo['code'] ?? 'TURANCE7' }}</b>.</p>
                 <span class="data-note">Ends {{ $anniversaryPromo['ends_at_formatted'] ?? 'Not set' }}</span>
             </section>
         </aside>

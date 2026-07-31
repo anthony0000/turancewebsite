@@ -8,9 +8,9 @@ return [
     'tagline' => 'Excellence Delivered',
     'anniversary_promo' => [
         'enabled' => true,
-        'years' => 10,
+        'years' => 7,
         'discount_percent' => 50,
-        'code' => 'TURANCE10',
+        'code' => 'TURANCE7',
         'ends_at' => env('ANNIVERSARY_PROMO_ENDS_AT', '2026-08-26T23:59:59+01:00'),
     ],
     'locale' => 'en_NG',

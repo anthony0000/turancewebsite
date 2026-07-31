@@ -12,9 +12,9 @@ return new class extends Migration
             $table->id();
             $table->string('key')->unique();
             $table->boolean('enabled')->default(true);
-            $table->unsignedTinyInteger('years')->default(10);
+            $table->unsignedTinyInteger('years')->default(7);
             $table->decimal('discount_percent', 5, 2)->default(50);
-            $table->string('promo_code', 80)->default('TURANCE10');
+            $table->string('promo_code', 80)->default('TURANCE7');
             $table->dateTime('ends_at');
             $table->timestamps();
         });

@@ -156,7 +156,7 @@
 
                             <span class="tt-hero__anniversary-copy">
                                 <strong>{{ $anniversaryPromo['years'] }} years of Turance</strong>
-                                <small>Celebrating a decade of digital craftsmanship</small>
+                                <small>Celebrating {{ $anniversaryPromo['years'] }} years of digital craftsmanship</small>
                             </span>
 
                             @if ($promoIsActive)
@@ -222,7 +222,7 @@
                         <p class="tt-section-heading__eyebrow" data-reveal>
                             <i aria-hidden="true"></i>{{ $anniversaryPromo['years'] }} years of Turance
                         </p>
-                        <h2 id="anniversary-offer-title" data-reveal>A decade of building what matters.</h2>
+                        <h2 id="anniversary-offer-title" data-reveal>{{ $anniversaryPromo['years'] }} years of building what matters.</h2>
 
                         <div class="tt-promo-figure" data-reveal>
                             <span class="tt-promo-figure__value">

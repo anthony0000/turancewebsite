@@ -24,7 +24,7 @@
         </div>
         <div class="field">
             <label for="promo_code">Offer code</label>
-            <input id="promo_code" type="text" name="promo_code" value="{{ $promoCode ?? '' }}" maxlength="80" placeholder="TURANCE10" data-discount-code {{ $discountEnabled ? '' : 'disabled' }}>
+            <input id="promo_code" type="text" name="promo_code" value="{{ $promoCode ?? '' }}" maxlength="80" placeholder="TURANCE7" data-discount-code {{ $discountEnabled ? '' : 'disabled' }}>
         </div>
     </div>
     @if ($promoIsActive)
