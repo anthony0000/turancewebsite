@@ -5,8 +5,8 @@
     border: 1px solid #e4e0d5;
     border-radius: 3px;
     overflow: hidden;
-    font-family: "Plus Jakarta Sans", "Segoe UI", Arial, sans-serif;
-    font-size: 11px;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 10.5px;
     line-height: 1.45;
     box-shadow: 0 22px 58px rgba(21, 26, 36, 0.13);
 }
@@ -103,6 +103,18 @@
     font-weight: 800;
     letter-spacing: 0.04em;
     text-transform: uppercase;
+}
+
+.quote-brand-name,
+.quote-project-title,
+.quote-to-cell strong,
+.quote-total-box {
+    font-family: Georgia, "Times New Roman", serif;
+}
+
+.quote-brand-name,
+.quote-to-cell strong {
+    font-weight: 700;
 }
 
 .quote-brand-logo {
@@ -217,9 +229,9 @@
     display: block;
     margin-top: 7px;
     color: #141b25;
-    font-size: 15px;
+    font-size: 17px;
     line-height: 1.2;
-    font-weight: 800;
+    font-weight: 700;
 }
 
 .quote-project-copy {
@@ -298,6 +310,8 @@
 .quote-col-time {
     width: 17%;
     color: #5d6470;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    letter-spacing: 0.01em;
 }
 
 .quote-col-amount {

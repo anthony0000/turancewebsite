@@ -114,7 +114,10 @@ it('stores an invoice and exports invoice and mou pdfs', function () {
 
     expect($invoiceHtml)
         ->toContain('data:image/png;base64,')
-        ->toContain('Turance Technologies logo');
+        ->toContain('Turance Technologies logo')
+        ->toContain('1st week')
+        ->toContain('2nd week')
+        ->toContain('3rd week');
 
     $mouResponse = $this
         ->withSession([

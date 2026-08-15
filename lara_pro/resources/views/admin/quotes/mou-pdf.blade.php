@@ -128,7 +128,7 @@
             padding: 0;
             background: #ffffff;
             color: #20242c;
-            font-family: DejaVu Sans, Arial, sans-serif;
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
             font-size: 10.5px;
             line-height: 1.5;
         }
@@ -200,9 +200,10 @@
 
         h1 {
             margin: 8px 0 0;
+            font-family: Georgia, "Times New Roman", serif;
             font-size: 27px;
             line-height: 1.1;
-            font-weight: 800;
+            font-weight: 700;
         }
 
         .mou-ref {
@@ -303,8 +304,10 @@
         h2 {
             margin: 0 0 8px;
             color: #141b25;
+            font-family: Georgia, "Times New Roman", serif;
             font-size: 14px;
             line-height: 1.25;
+            font-weight: 700;
         }
 
         .mou-section p {

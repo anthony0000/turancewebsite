@@ -1,5 +1,6 @@
 @php
     use App\Support\DocumentBranding;
+    use App\Support\TimelineAllocator;
 
     $storedLineItems = collect($quote->line_items ?? [])
         ->filter(fn ($item) => is_array($item) && filled($item['description'] ?? null))
@@ -50,7 +51,6 @@
             ->map(fn (array $item, int $index): array => [
                 'qty' => str_pad((string) ($index + 1), 2, '0', STR_PAD_LEFT),
                 'description' => $item['description'],
-                'timeline' => $quote->timeline,
                 'amount' => '$'.number_format($item['amount'], 0),
             ])
             ->all();
@@ -70,11 +70,17 @@
             $lineItems[] = [
                 'qty' => str_pad((string) ($index + 1), 2, '0', STR_PAD_LEFT),
                 'description' => $item,
-                'timeline' => $quote->timeline,
                 'amount' => '$'.number_format($lineAmount, 0),
             ];
         }
     }
+
+    $timelineLabels = TimelineAllocator::forItems($quote->timeline, count($lineItems));
+    $lineItems = collect($lineItems)
+        ->map(fn (array $item, int $index): array => $item + [
+            'timeline' => $timelineLabels[$index] ?? $quote->timeline,
+        ])
+        ->all();
 
     $brandName = $brand['studio_name'] ?? 'Turance Technologies';
     $brandLogoSrc = DocumentBranding::logoSource($brand['logo_path'] ?? null);

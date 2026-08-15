@@ -18,7 +18,7 @@
     max-width: 100%;
     margin: 0 auto;
     color: {{ $ink }};
-    font-family: "{{ $fontFamily }}", "Segoe UI", Arial, sans-serif;
+    font-family: "{{ $fontFamily }}", "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 11px;
     line-height: 1.45;
     -webkit-print-color-adjust: exact;
@@ -54,6 +54,16 @@
 .proposal-page:last-child {
     break-after: auto;
     page-break-after: auto;
+}
+
+.proposal-cover-title h1,
+.proposal-section-title,
+.proposal-protection-clause h3,
+.proposal-timeline-item h3,
+.proposal-team-card h3,
+.proposal-split-card h3 {
+    font-family: Georgia, "Times New Roman", serif;
+    font-weight: 700;
 }
 
 .proposal-page--cover {

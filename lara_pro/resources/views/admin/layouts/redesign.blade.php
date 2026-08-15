@@ -2736,3 +2736,84 @@ body.is-auth .admin-main {
         min-height: 50px;
     }
 }
+
+/* Keep page-level overflow out of the viewport; wide data regions scroll locally. */
+body.is-admin {
+    overflow-x: hidden;
+    overflow-x: clip;
+}
+
+/* The admin loads 400, 500, 600, 700 and 800 only; avoid synthetic heavy faces. */
+body.is-admin .admin-sidebar .admin-brand-copy strong,
+body.is-admin .admin-sidebar .admin-nav-link strong,
+body.is-admin .admin-main strong,
+body.is-admin .admin-main b {
+    font-weight: 600;
+}
+
+body.is-admin .admin-main h1,
+body.is-admin .admin-main h2,
+body.is-admin .admin-main h3,
+body.is-admin .admin-pagebar h1,
+body.is-admin .admin-sidebar .admin-sidebar-meta strong {
+    font-family: var(--font-sans);
+    font-weight: 700;
+}
+
+body.is-admin .admin-sidebar .admin-nav-label,
+body.is-admin .admin-sidebar .admin-nav-link span:not(.admin-nav-icon),
+body.is-admin .admin-main .eyebrow,
+body.is-admin .admin-main .metric-label,
+body.is-admin .admin-main label,
+body.is-admin .admin-main .quote-table th,
+body.is-admin .admin-main .admin-pill,
+body.is-admin .admin-main .admin-date-pill {
+    font-weight: 600;
+}
+
+body.is-admin .admin-sidebar .admin-nav-link span:not(.admin-nav-icon) {
+    font-weight: 500;
+}
+
+body.is-admin .button,
+body.is-admin button.button,
+body.is-admin .ghost-button,
+body.is-admin button.ghost-button {
+    font-weight: 600;
+}
+
+/* Prevent the page header and editor grids from widening the document. */
+body.is-admin .admin-pagebar,
+body.is-admin .admin-pagebar-title,
+body.is-admin .admin-pagebar-title > div,
+body.is-admin .admin-pagebar-actions,
+body.is-admin .admin-main > *,
+body.is-admin .admin-main .dashboard-grid,
+body.is-admin .admin-main .dashboard-grid > *,
+body.is-admin .admin-main .hero-banner > *,
+body.is-admin .admin-main .panel,
+body.is-admin .admin-main .form-grid > *,
+body.is-admin .admin-main .template-grid > *,
+body.is-admin .admin-main .line-items-editor {
+    min-width: 0;
+}
+
+body.is-admin .admin-pagebar-title {
+    flex: 1 1 auto;
+}
+
+body.is-admin .admin-pagebar-actions {
+    flex: 0 1 auto;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+body.is-admin .admin-profile-copy span,
+body.is-admin .admin-main .hero-banner h1,
+body.is-admin .admin-main .hero-banner p,
+body.is-admin .admin-main .panel-head p,
+body.is-admin .admin-main .callout-card strong,
+body.is-admin .admin-main .stack-list strong,
+body.is-admin .admin-main .meta-item strong {
+    overflow-wrap: anywhere;
+}
