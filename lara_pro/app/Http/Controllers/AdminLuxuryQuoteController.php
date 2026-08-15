@@ -6,6 +6,7 @@ use App\Models\ContactMessage;
 use App\Models\LuxuryQuote;
 use App\Models\PageVisit;
 use App\Models\PromotionSetting;
+use App\Support\DocumentTypography;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -382,6 +383,7 @@ class AdminLuxuryQuoteController extends Controller
             'template' => $this->resolveTemplate($luxuryQuote->template),
             'brand' => config('luxury-quotes.brand', []),
         ])->setPaper('a4');
+        DocumentTypography::registerDompdfFonts($pdf->getDomPDF());
 
         $fileName = Str::slug($luxuryQuote->company_name.' '.$luxuryQuote->quote_number).'.pdf';
 
@@ -398,6 +400,7 @@ class AdminLuxuryQuoteController extends Controller
             'brand' => config('luxury-quotes.brand', []),
             'mouNumber' => $mouNumber,
         ])->setPaper('a4');
+        DocumentTypography::registerDompdfFonts($pdf->getDomPDF());
 
         $fileName = Str::slug($luxuryQuote->company_name.' '.$mouNumber).'.pdf';
 

@@ -4,7 +4,9 @@
     $primary = $settings?->primary_color ?? ($templatePalette['primary'] ?? '#111111');
     $secondary = $settings?->secondary_color ?? ($templatePalette['secondary'] ?? '#f3f4f0');
     $accent = $settings?->accent_color ?? ($templatePalette['accent'] ?? '#e8b51f');
-    $fontFamily = $settings?->font_family ?? ($proposal->template?->settings['font_family'] ?? 'Aptos');
+    $requestedFontFamily = $settings?->font_family ?? ($proposal->template?->settings['font_family'] ?? 'Urbanist');
+    $fontFamily = \App\Support\DocumentTypography::proposalFamily($requestedFontFamily);
+    $fontFamilyCss = "'{$fontFamily}'";
     $themeKey = $proposal->theme_key ?: ($proposal->template?->theme_key ?? 'gold');
     $isDarkTheme = in_array($themeKey, ['green', 'dark'], true);
     $paper = $isDarkTheme ? '#f7f8f4' : '#ffffff';
@@ -13,12 +15,14 @@
     $soft = $isDarkTheme ? '#eef3e8' : '#f5f5f2';
 @endphp
 
+@include('admin.partials.document-fonts')
+
 .proposal-document {
     width: 210mm;
     max-width: 100%;
     margin: 0 auto;
     color: {{ $ink }};
-    font-family: "{{ $fontFamily }}", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-family: {!! $fontFamilyCss !!}, sans-serif;
     font-size: 11px;
     line-height: 1.45;
     -webkit-print-color-adjust: exact;
@@ -62,7 +66,7 @@
 .proposal-timeline-item h3,
 .proposal-team-card h3,
 .proposal-split-card h3 {
-    font-family: Georgia, "Times New Roman", serif;
+    font-family: 'Urbanist', sans-serif;
     font-weight: 700;
 }
 

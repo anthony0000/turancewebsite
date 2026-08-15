@@ -66,7 +66,7 @@ return [
                 'ink' => '#f8fff5',
             ],
             'settings' => [
-                'font_family' => 'Aptos',
+                'font_family' => 'Urbanist',
                 'header_style' => 'Minimal bar',
                 'footer_style' => 'Reference footer',
             ],
@@ -85,7 +85,7 @@ return [
                 'ink' => '#171717',
             ],
             'settings' => [
-                'font_family' => 'Aptos Condensed',
+                'font_family' => 'Urbanist',
                 'header_style' => 'Editorial split',
                 'footer_style' => 'Gold folio',
             ],
@@ -104,7 +104,7 @@ return [
                 'ink' => '#20242a',
             ],
             'settings' => [
-                'font_family' => 'Segoe UI',
+                'font_family' => 'Urbanist',
                 'header_style' => 'Clean masthead',
                 'footer_style' => 'Thin line',
             ],
@@ -123,7 +123,7 @@ return [
                 'ink' => '#f9fafb',
             ],
             'settings' => [
-                'font_family' => 'Aptos',
+                'font_family' => 'Urbanist',
                 'header_style' => 'Dark executive',
                 'footer_style' => 'Luxury footer',
             ],
@@ -142,7 +142,7 @@ return [
                 'ink' => '#151515',
             ],
             'settings' => [
-                'font_family' => 'Inter',
+                'font_family' => 'Urbanist',
                 'header_style' => 'Agency grid',
                 'footer_style' => 'Project folio',
             ],

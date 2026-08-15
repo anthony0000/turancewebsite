@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Proposal;
 use App\Models\ProposalTemplate;
+use App\Support\DocumentTypography;
 use App\Support\ProposalPdfRenderer;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
@@ -589,7 +590,7 @@ class AdminProposalController extends Controller
                     'primary_color' => $palette['primary'] ?? '#111111',
                     'secondary_color' => $palette['secondary'] ?? '#f3f4f0',
                     'accent_color' => $palette['accent'] ?? '#e8b51f',
-                    'font_family' => $settings['font_family'] ?? 'Aptos',
+                    'font_family' => DocumentTypography::proposalFamily($settings['font_family'] ?? 'Urbanist'),
                     'header_style' => $settings['header_style'] ?? 'Editorial split',
                     'footer_style' => $settings['footer_style'] ?? 'Gold folio',
                     'page_numbering' => true,
@@ -625,7 +626,7 @@ class AdminProposalController extends Controller
                 'primary_color' => $proposal->settings?->primary_color ?? '#111111',
                 'secondary_color' => $proposal->settings?->secondary_color ?? '#f3f4f0',
                 'accent_color' => $proposal->settings?->accent_color ?? '#e8b51f',
-                'font_family' => $proposal->settings?->font_family ?? 'Aptos',
+                'font_family' => DocumentTypography::proposalFamily($proposal->settings?->font_family ?? 'Urbanist'),
                 'header_style' => $proposal->settings?->header_style ?? 'Editorial split',
                 'footer_style' => $proposal->settings?->footer_style ?? 'Gold folio',
                 'page_numbering' => (bool) ($proposal->settings?->page_numbering ?? true),

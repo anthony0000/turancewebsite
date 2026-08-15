@@ -1,3 +1,5 @@
+@include('admin.partials.document-fonts')
+
 .quote-document {
     width: 100%;
     background: #ffffff;
@@ -5,7 +7,7 @@
     border: 1px solid #e4e0d5;
     border-radius: 3px;
     overflow: hidden;
-    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-family: 'Urbanist', sans-serif;
     font-size: 10.5px;
     line-height: 1.45;
     box-shadow: 0 22px 58px rgba(21, 26, 36, 0.13);
@@ -109,7 +111,7 @@
 .quote-project-title,
 .quote-to-cell strong,
 .quote-total-box {
-    font-family: Georgia, "Times New Roman", serif;
+    font-family: 'Urbanist', sans-serif;
 }
 
 .quote-brand-name,
@@ -310,7 +312,7 @@
 .quote-col-time {
     width: 17%;
     color: #5d6470;
-    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-family: 'Urbanist', sans-serif;
     letter-spacing: 0.01em;
 }
 

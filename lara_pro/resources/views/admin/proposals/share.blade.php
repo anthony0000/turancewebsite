@@ -11,7 +11,7 @@
             margin: 0;
             background: #eceff1;
             color: #171717;
-            font-family: "Segoe UI", Arial, sans-serif;
+            font-family: 'Urbanist', sans-serif;
         }
 
         .share-shell {

@@ -114,6 +114,8 @@ it('stores an invoice and exports invoice and mou pdfs', function () {
 
     expect($invoiceHtml)
         ->toContain('data:image/png;base64,')
+        ->toContain("font-family: 'Urbanist'")
+        ->toContain('Urbanist-Regular.ttf')
         ->toContain('Turance Technologies logo')
         ->toContain('1st week')
         ->toContain('2nd week')
@@ -137,6 +139,8 @@ it('stores an invoice and exports invoice and mou pdfs', function () {
 
     expect($mouHtml)
         ->toContain('data:image/png;base64,')
+        ->toContain("font-family: 'Urbanist'")
+        ->toContain('Urbanist-Regular.ttf')
         ->toContain('Turance Technologies logo');
 });
 

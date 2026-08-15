@@ -25,7 +25,7 @@ return [
         'default_media_type' => 'screen',
         'default_paper_size' => 'a4',
         'default_paper_orientation' => 'portrait',
-        'default_font' => 'DejaVu Sans',
+        'default_font' => 'Urbanist',
         'dpi' => 96,
         'enable_php' => false,
         'enable_javascript' => true,

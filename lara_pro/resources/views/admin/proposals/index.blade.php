@@ -393,7 +393,7 @@
             border: 1px solid rgba(20, 20, 20, 0.08);
             box-shadow: 0 18px 44px rgba(16, 24, 40, 0.16);
             color: #171717;
-            font-family: var(--proposal-font, Aptos), "Segoe UI", Arial, sans-serif;
+            font-family: var(--proposal-font, Urbanist), Urbanist, sans-serif;
         }
 
         .live-page[contenteditable] {
@@ -1063,7 +1063,7 @@
                             <div class="proposal-field">
                                 <label for="font_family">Font</label>
                                 <select id="font_family" name="font_family" data-setting="font_family">
-                                    @foreach (['Aptos', 'Aptos Condensed', 'Segoe UI', 'Inter', 'Georgia'] as $font)
+                                    @foreach (['Urbanist'] as $font)
                                         <option value="{{ $font }}" @selected($builderState['settings']['font_family'] === $font)>{{ $font }}</option>
                                     @endforeach
                                 </select>

@@ -10,7 +10,7 @@
         body {
             margin: 0;
             background: #eef0f2;
-            font-family: "Segoe UI", Arial, sans-serif;
+            font-family: 'Urbanist', sans-serif;
         }
 
         .print-toolbar {
