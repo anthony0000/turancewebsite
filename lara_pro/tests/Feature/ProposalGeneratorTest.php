@@ -63,7 +63,8 @@ it('creates, previews, and exports a premium proposal', function () {
 
     expect($proposal)->not->toBeNull();
     expect($proposal->sections)->toHaveCount(count(config('proposals.sections')));
-    expect((float) $proposal->grand_total)->toBe(11500.0);
+    expect((float) $proposal->tax_total)->toBe(862.5);
+    expect((float) $proposal->grand_total)->toBe(12362.5);
 
     $response->assertRedirect(route('admin.proposals.show', $proposal));
 

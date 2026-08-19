@@ -174,10 +174,12 @@ return [
         ['type' => 'closing', 'title' => 'Closing Page', 'eyebrow' => 'Next Step', 'body' => 'We look forward to partnering with you and moving this project into a confident, well-managed execution phase.'],
     ],
 
+    'default_tax_rate' => 7.5,
+
     'pricing_items' => [
-        ['package' => 'Basic', 'service_name' => 'Discovery and strategic direction', 'description' => 'Project alignment, requirements review, and delivery plan.', 'quantity' => 1, 'unit_price' => 1500, 'discount' => 0, 'tax_rate' => 0],
-        ['package' => 'Standard', 'service_name' => 'Design and proposal implementation', 'description' => 'Core execution, review cycle, and polished handoff.', 'quantity' => 1, 'unit_price' => 3500, 'discount' => 0, 'tax_rate' => 0],
-        ['package' => 'Premium', 'service_name' => 'Premium delivery and launch support', 'description' => 'Advanced execution, stakeholder polish, and launch support.', 'quantity' => 1, 'unit_price' => 6500, 'discount' => 0, 'tax_rate' => 0],
+        ['package' => 'Basic', 'service_name' => 'Discovery and strategic direction', 'description' => 'Project alignment, requirements review, and delivery plan.', 'quantity' => 1, 'unit_price' => 1500, 'discount' => 0, 'tax_rate' => 7.5],
+        ['package' => 'Standard', 'service_name' => 'Design and proposal implementation', 'description' => 'Core execution, review cycle, and polished handoff.', 'quantity' => 1, 'unit_price' => 3500, 'discount' => 0, 'tax_rate' => 7.5],
+        ['package' => 'Premium', 'service_name' => 'Premium delivery and launch support', 'description' => 'Advanced execution, stakeholder polish, and launch support.', 'quantity' => 1, 'unit_price' => 6500, 'discount' => 0, 'tax_rate' => 7.5],
     ],
 
     'timeline' => [

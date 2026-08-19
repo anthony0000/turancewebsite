@@ -1146,6 +1146,7 @@
                 <div class="panel-head">
                     <span class="eyebrow">Pricing Table Builder</span>
                     <h2>Packages and service investment</h2>
+                    <p>VAT is applied at {{ number_format((float) config('proposals.default_tax_rate', 7.5), 2) }}% by default. Adjust the rate per item when needed.</p>
                 </div>
                 <div class="proposal-rows" data-pricing-rows></div>
                 <button type="button" class="ghost-button" style="margin-top: 12px;" data-add-pricing>Add Pricing Item</button>
@@ -1458,7 +1459,7 @@
                         <input type="number" step="0.01" value="${escapeHtml(item.quantity)}" data-pricing-field="quantity" data-index="${index}">
                         <input type="number" step="0.01" value="${escapeHtml(item.unit_price)}" data-pricing-field="unit_price" data-index="${index}">
                         <input type="number" step="0.01" value="${escapeHtml(item.discount || 0)}" data-pricing-field="discount" data-index="${index}">
-                        <input type="number" step="0.01" value="${escapeHtml(item.tax_rate || 0)}" data-pricing-field="tax_rate" data-index="${index}">
+                        <input type="number" step="0.01" value="${escapeHtml(item.tax_rate ?? 7.5)}" data-pricing-field="tax_rate" data-index="${index}">
                         <button type="button" class="proposal-icon-button" data-remove-pricing="${index}">X</button>
                     `;
                     wrap.append(row);
@@ -1850,7 +1851,7 @@
             });
 
             form.querySelector('[data-add-pricing]').addEventListener('click', () => {
-                state.pricing.push({ package: 'Custom', service_name: 'New service', description: '', quantity: 1, unit_price: 0, discount: 0, tax_rate: 0 });
+                state.pricing.push({ package: 'Custom', service_name: 'New service', description: '', quantity: 1, unit_price: 0, discount: 0, tax_rate: 7.5 });
                 renderAll();
             });
 

@@ -476,7 +476,7 @@ class AdminProposalController extends Controller
                 $unitPrice = max(0.0, (float) ($item['unit_price'] ?? 0));
                 $base = round($quantity * $unitPrice, 2);
                 $discount = min(max(0.0, (float) ($item['discount'] ?? 0)), $base);
-                $taxRate = max(0.0, (float) ($item['tax_rate'] ?? 0));
+                $taxRate = max(0.0, (float) ($item['tax_rate'] ?? config('proposals.default_tax_rate', 7.5)));
                 $tax = round(($base - $discount) * ($taxRate / 100), 2);
                 $lineTotal = round($base - $discount + $tax, 2);
 
