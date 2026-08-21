@@ -36,6 +36,7 @@ it('creates an invoice-linked staff contract with price terms and signing detail
         ->assertSee('Existing invoice')
         ->assertSee('TT-INV-STAFF-001')
         ->assertDontSee('Start the project record alongside the contract')
+        ->assertSee('data-rich-editor', false)
         ->assertDontSee('Signing section')
         ->assertDontSee('Company signatory')
         ->assertDontSee('Staff signatory')
@@ -55,8 +56,8 @@ it('creates an invoice-linked staff contract with price terms and signing detail
         'currency' => 'NGN',
         'agreed_fee' => '850000.50',
         'payment_terms' => '50% on signing and 50% after approved final handoff.',
-        'scope_of_work' => 'Create the product interface direction, responsive screens, and handoff documentation for the Northstar portal.',
-        'terms' => 'All project information is confidential. Work created for the project is assigned to the company after payment. Either party may terminate with seven days written notice.',
+        'scope_of_work' => '<p><strong>Create the product interface direction</strong>, responsive screens, and handoff documentation for the Northstar portal.</p><ul><li>Responsive interface delivery</li></ul>',
+        'terms' => '<p>All project information is confidential.</p><p>Work created for the project is assigned to the company after payment.</p>',
         'company_name' => 'Turance Technologies',
     ];
 
@@ -71,6 +72,7 @@ it('creates an invoice-linked staff contract with price terms and signing detail
     expect($contract)->not->toBeNull()
         ->and($contract->project_id)->toBe($project->id)
         ->and($contract->luxury_quote_id)->toBe($invoice->id)
+        ->and($contract->scope_of_work)->toContain('<strong>Create the product interface direction</strong>')
         ->and((float) $contract->agreed_fee)->toBe(850000.5)
         ->and($contract->status)->toBe('pending_signature');
 
@@ -83,6 +85,7 @@ it('creates an invoice-linked staff contract with price terms and signing detail
         ->assertSee('Contract Staff Agreement')
         ->assertSee('Northstar Client Portal')
         ->assertSee('NGN 850,000.50')
+        ->assertSee('Create the product interface direction')
         ->assertSee('RC No. 3646478')
         ->assertSee('Acceptance and signatures');
 

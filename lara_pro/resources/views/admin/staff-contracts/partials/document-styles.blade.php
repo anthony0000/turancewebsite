@@ -179,6 +179,26 @@
     white-space: pre-line;
 }
 
+.staff-contract-copy p,
+.staff-contract-copy div {
+    margin: 0 0 8px;
+}
+
+.staff-contract-copy p:last-child,
+.staff-contract-copy div:last-child {
+    margin-bottom: 0;
+}
+
+.staff-contract-copy ul,
+.staff-contract-copy ol {
+    margin: 0 0 8px;
+    padding-left: 20px;
+}
+
+.staff-contract-copy li + li {
+    margin-top: 4px;
+}
+
 .staff-contract-price {
     margin-top: 4px;
     color: #20242c;

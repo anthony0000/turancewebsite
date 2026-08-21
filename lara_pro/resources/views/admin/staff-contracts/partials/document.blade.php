@@ -3,6 +3,36 @@
 
     $brandLogoSrc = DocumentBranding::logoSource($brand['logo_path'] ?? null);
     $brandRcNumber = $brand['rc_number'] ?? '3646478';
+    $sanitizeRichText = function (?string $value): string {
+        $html = trim((string) $value);
+
+        if ($html === '') {
+            return '';
+        }
+
+        $html = preg_replace('/<(script|style)\b[^>]*>.*?<\/\1>/is', '', $html) ?? '';
+        $html = strip_tags($html, '<p><div><br><ul><ol><li><strong><b><em><i><u>');
+        $html = preg_replace('/<([a-z][a-z0-9]*)\b[^>]*>/i', '<$1>', $html) ?? $html;
+
+        return trim(str_ireplace(
+            ['<b>', '</b>', '<i>', '</i>', '<br/>', '<br />'],
+            ['<strong>', '</strong>', '<em>', '</em>', '<br>', '<br>'],
+            $html
+        ));
+    };
+    $renderRichText = function (?string $value) use ($sanitizeRichText): \Illuminate\Support\HtmlString {
+        $text = trim((string) $value);
+
+        if ($text === '') {
+            return new \Illuminate\Support\HtmlString('');
+        }
+
+        if ($text === strip_tags($text)) {
+            return new \Illuminate\Support\HtmlString(nl2br(e($text), false));
+        }
+
+        return new \Illuminate\Support\HtmlString($sanitizeRichText($text));
+    };
     $period = collect([
         optional($contract->starts_on)->format('M d, Y'),
         optional($contract->ends_on)->format('M d, Y'),
@@ -85,13 +115,13 @@
         <section class="staff-contract-section">
             <span class="staff-contract-section-label">02 / Scope of work</span>
             <h2>Responsibilities for this project</h2>
-            <p class="staff-contract-copy">{{ $contract->scope_of_work }}</p>
+            <div class="staff-contract-copy">{!! $renderRichText($contract->scope_of_work) !!}</div>
         </section>
 
         <section class="staff-contract-section">
             <span class="staff-contract-section-label">03 / Terms</span>
             <h2>Working terms and conditions</h2>
-            <p class="staff-contract-copy">{{ $contract->terms }}</p>
+            <div class="staff-contract-copy">{!! $renderRichText($contract->terms) !!}</div>
         </section>
 
         @if ($contract->notes)

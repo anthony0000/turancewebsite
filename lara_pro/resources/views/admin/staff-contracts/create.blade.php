@@ -170,11 +170,11 @@
             <div class="form-grid">
                 <div class="field-full">
                     <label for="scope_of_work">Scope of work</label>
-                    <textarea id="scope_of_work" name="scope_of_work" required maxlength="15000" placeholder="Describe the responsibilities, deliverables, and project expectations.">{{ old('scope_of_work', $contract?->scope_of_work) }}</textarea>
+                    <textarea id="scope_of_work" name="scope_of_work" required maxlength="15000" data-rich-editor placeholder="Describe the responsibilities, deliverables, and project expectations.">{{ old('scope_of_work', $contract?->scope_of_work) }}</textarea>
                 </div>
                 <div class="field-full">
                     <label for="terms">Terms and conditions</label>
-                    <textarea id="terms" name="terms" required maxlength="20000" placeholder="Include confidentiality, ownership, communication, termination, and other relevant terms.">{{ old('terms', $contract?->terms) }}</textarea>
+                    <textarea id="terms" name="terms" required maxlength="20000" data-rich-editor placeholder="Include confidentiality, ownership, communication, termination, and other relevant terms.">{{ old('terms', $contract?->terms) }}</textarea>
                 </div>
             </div>
         </section>

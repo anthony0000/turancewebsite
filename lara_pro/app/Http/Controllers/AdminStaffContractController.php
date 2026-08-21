@@ -188,8 +188,8 @@ class AdminStaffContractController extends Controller
             'currency' => strtoupper(trim($validated['currency'])),
             'agreed_fee' => round((float) $validated['agreed_fee'], 2),
             'payment_terms' => trim($validated['payment_terms']),
-            'scope_of_work' => trim($validated['scope_of_work']),
-            'terms' => trim($validated['terms']),
+            'scope_of_work' => $this->sanitizeRichText($validated['scope_of_work']),
+            'terms' => $this->sanitizeRichText($validated['terms']),
             'company_name' => $this->nullableTrim($validated['company_name'] ?? null)
                 ?: ($existing?->company_name ?: config('luxury-quotes.brand.studio_name', 'Turance Technologies')),
             'company_signatory_name' => $this->optionalContractString($validated, 'company_signatory_name', $existing?->company_signatory_name),
@@ -241,5 +241,24 @@ class AdminStaffContractController extends Controller
     private function nullableDate(?string $value): ?Carbon
     {
         return filled($value) ? Carbon::parse($value) : null;
+    }
+
+    private function sanitizeRichText(?string $value): string
+    {
+        $html = trim((string) $value);
+
+        if ($html === '') {
+            return '';
+        }
+
+        $html = preg_replace('/<(script|style)\b[^>]*>.*?<\/\1>/is', '', $html) ?? '';
+        $html = strip_tags($html, '<p><div><br><ul><ol><li><strong><b><em><i><u>');
+        $html = preg_replace('/<([a-z][a-z0-9]*)\b[^>]*>/i', '<$1>', $html) ?? $html;
+
+        return trim(str_ireplace(
+            ['<b>', '</b>', '<i>', '</i>', '<br/>', '<br />'],
+            ['<strong>', '</strong>', '<em>', '</em>', '<br>', '<br>'],
+            $html
+        ));
     }
 }
