@@ -76,6 +76,7 @@ it('creates, previews, and exports a premium proposal', function () {
         ->assertSee('data:image/png;base64,', false)
         ->assertSee('Turance Technologies logo')
         ->assertSee('Enterprise Growth Proposal')
+        ->assertSee('RC No. 3646478')
         ->assertSee('Proposal use &amp; intellectual property', false)
         ->assertSee('Confidential / evaluation only')
         ->assertSee('No reuse or implementation');
@@ -134,6 +135,7 @@ it('embeds the default Turance logo when a proposal has no custom logo', functio
     expect($html)
         ->toContain('data:image/png;base64,')
         ->toContain('Turance Technologies logo')
+        ->toContain('RC No. 3646478')
         ->toContain('Proposal use &amp; intellectual property')
         ->toContain('Confidential / evaluation only')
         ->toContain('No reuse or implementation');

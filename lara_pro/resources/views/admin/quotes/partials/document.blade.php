@@ -86,6 +86,7 @@
     $brandLogoSrc = DocumentBranding::logoSource($brand['logo_path'] ?? null);
     $brandLines = array_filter([
         $brand['tagline'] ?? null,
+        filled($brand['rc_number'] ?? null) ? 'RC No. '.$brand['rc_number'] : null,
         $brand['contact_phone'] ?? null,
         $brand['contact_email'] ?? null,
     ]);

@@ -15,6 +15,7 @@ return [
         'contact_phone' => env('LUXURY_INVOICE_CONTACT_PHONE', env('LUXURY_QUOTE_CONTACT_PHONE', '+2348061209440')),
         'website' => env('LUXURY_INVOICE_WEBSITE', env('LUXURY_QUOTE_WEBSITE', env('APP_URL', 'https://turancetechnologies.com'))),
         'currency' => env('LUXURY_INVOICE_CURRENCY', env('LUXURY_QUOTE_CURRENCY', 'NGN')),
+        'rc_number' => env('LUXURY_INVOICE_RC_NUMBER', env('LUXURY_QUOTE_RC_NUMBER', '3646478')),
     ],
 
     'categories' => [

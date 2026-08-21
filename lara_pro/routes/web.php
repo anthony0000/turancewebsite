@@ -3,6 +3,7 @@
 use App\Http\Controllers\AdminAuthController;
 use App\Http\Controllers\AdminLuxuryQuoteController;
 use App\Http\Controllers\AdminProposalController;
+use App\Http\Controllers\AdminStaffContractController;
 use App\Http\Controllers\ContactController;
 use App\Http\Middleware\EnsureLuxuryQuoteAdminAuthenticated;
 use Illuminate\Support\Facades\Route;
@@ -129,5 +130,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/proposals/{proposal}/pdf', [AdminProposalController::class, 'downloadPdf'])->name('proposals.pdf');
         Route::get('/proposals/{proposal}/word', [AdminProposalController::class, 'downloadWord'])->name('proposals.word');
         Route::get('/proposals/{proposal}/print', [AdminProposalController::class, 'print'])->name('proposals.print');
+
+        Route::get('/staff-contracts', [AdminStaffContractController::class, 'index'])->name('staff-contracts.index');
+        Route::get('/staff-contracts/create', [AdminStaffContractController::class, 'create'])->name('staff-contracts.create');
+        Route::post('/staff-contracts', [AdminStaffContractController::class, 'store'])->name('staff-contracts.store');
+        Route::get('/staff-contracts/{staffContract}/edit', [AdminStaffContractController::class, 'edit'])->name('staff-contracts.edit');
+        Route::put('/staff-contracts/{staffContract}', [AdminStaffContractController::class, 'update'])->name('staff-contracts.update');
+        Route::get('/staff-contracts/{staffContract}/pdf', [AdminStaffContractController::class, 'downloadPdf'])->name('staff-contracts.pdf');
+        Route::get('/staff-contracts/{staffContract}', [AdminStaffContractController::class, 'show'])->name('staff-contracts.show');
     });
 });

@@ -173,6 +173,16 @@
     font-weight: 800;
 }
 
+.proposal-brand-copy small {
+    display: block;
+    margin-top: 2px;
+    color: {{ $isDarkTheme ? 'rgba(255,255,255,0.64)' : 'rgba(0,0,0,0.48)' }};
+    font-size: 7px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
 .proposal-cover-title {
     position: absolute;
     left: 42px;

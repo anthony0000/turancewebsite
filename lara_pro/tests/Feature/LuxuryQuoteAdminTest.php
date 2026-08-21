@@ -117,6 +117,7 @@ it('stores an invoice and exports invoice and mou pdfs', function () {
         ->toContain("font-family: 'Urbanist'")
         ->toContain('Urbanist-Regular.ttf')
         ->toContain('Turance Technologies logo')
+        ->toContain('RC No. 3646478')
         ->toContain('1st week')
         ->toContain('2nd week')
         ->toContain('3rd week');
@@ -141,7 +142,8 @@ it('stores an invoice and exports invoice and mou pdfs', function () {
         ->toContain('data:image/png;base64,')
         ->toContain("font-family: 'Urbanist'")
         ->toContain('Urbanist-Regular.ttf')
-        ->toContain('Turance Technologies logo');
+        ->toContain('Turance Technologies logo')
+        ->toContain('RC No. 3646478');
 });
 
 it('allows small website upgrade invoices below the old premium floor', function () {

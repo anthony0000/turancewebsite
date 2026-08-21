@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class LuxuryQuote extends Model
 {
@@ -46,4 +47,9 @@ class LuxuryQuote extends Model
         'milestones' => 'array',
         'optional_addons' => 'array',
     ];
+
+    public function staffContracts(): HasMany
+    {
+        return $this->hasMany(StaffContract::class, 'luxury_quote_id');
+    }
 }

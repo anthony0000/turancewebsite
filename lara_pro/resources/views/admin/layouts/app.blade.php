@@ -8,6 +8,11 @@
     $isProposalPreview = request()->routeIs('admin.proposals.show');
     $isProposalEditor = request()->routeIs('admin.proposals.edit');
     $isProposalWorkspace = request()->routeIs('admin.proposals.*');
+    $isStaffContractDashboard = request()->routeIs('admin.staff-contracts.index');
+    $isStaffContractPreview = request()->routeIs('admin.staff-contracts.show');
+    $isStaffContractEditor = request()->routeIs('admin.staff-contracts.edit');
+    $isStaffContractBuilder = request()->routeIs('admin.staff-contracts.create');
+    $isStaffContractWorkspace = request()->routeIs('admin.staff-contracts.*');
     $isQuoteActivity = request()->routeIs('admin.quotes.activity');
     $isQuoteInsights = request()->routeIs('admin.quotes.insights');
     $isQuotePromotion = request()->routeIs('admin.quotes.promotion');
@@ -19,6 +24,10 @@
         $isProposalPreview => 'Proposal Preview',
         $isProposalEditor => 'Edit Proposal',
         $isProposalDashboard => 'Proposal Studio',
+        $isStaffContractPreview => 'Staff Contract Preview',
+        $isStaffContractEditor => 'Edit Staff Contract',
+        $isStaffContractDashboard => 'Staff Contracts',
+        $isStaffContractBuilder => 'Staff Contract Builder',
         $isQuoteActivity => 'Activity Center',
         $isQuoteInsights => 'Business Insights',
         $isQuotePromotion => 'Promotion Control',
@@ -32,6 +41,10 @@
         $isProposalPreview => 'Review the complete proposal, share it online, or export the PDF, Word, and printable versions.',
         $isProposalEditor => 'Edit proposal sections, styling, pricing, timeline, and team content before exporting again.',
         $isProposalDashboard => 'Build, review, and export client proposals.',
+        $isStaffContractPreview => 'Review the project-bound staff agreement, signing details, and contract PDF.',
+        $isStaffContractEditor => 'Update the project, commercial terms, staff details, and signing section.',
+        $isStaffContractDashboard => 'Track project-bound staff agreements and export signed-ready contract documents.',
+        $isStaffContractBuilder => 'Create a staff agreement with a required project, price, terms, and signing section.',
         $isQuoteActivity => 'Review traffic, leads, and invoice movement.',
         $isQuoteInsights => 'Understand template, category, and pipeline patterns.',
         $isQuotePromotion => 'Manage the live anniversary discount and landing-page campaign.',
@@ -45,6 +58,10 @@
         $isProposalPreview => 'Proposal Preview',
         $isProposalEditor => 'Edit Proposal',
         $isProposalDashboard => 'Proposal Studio',
+        $isStaffContractPreview => 'Staff Contract Preview',
+        $isStaffContractEditor => 'Edit Staff Contract',
+        $isStaffContractDashboard => 'Staff Contracts',
+        $isStaffContractBuilder => 'Staff Contract Builder',
         $isQuoteActivity => 'Activity',
         $isQuoteInsights => 'Insights',
         $isQuotePromotion => 'Promotion Control',
@@ -2250,6 +2267,23 @@
                                 </div>
                             </a>
 
+                            <a class="admin-nav-link {{ $isStaffContractWorkspace ? 'active' : '' }}"
+                                href="{{ route('admin.staff-contracts.index') }}">
+                                <span class="admin-nav-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24">
+                                        <path d="M6 3h9l3 3v15H6z" />
+                                        <path d="M14 3v4h4" />
+                                        <path d="M9 12h6" />
+                                        <path d="M9 16h4" />
+                                        <path d="M9 8h2" />
+                                    </svg>
+                                </span>
+                                <div>
+                                    <strong>Staff Contracts</strong>
+                                    <span>Project agreements</span>
+                                </div>
+                            </a>
+
                             <a class="admin-nav-link {{ request()->routeIs('admin.quotes.archive') ? 'active' : '' }}"
                                 href="{{ route('admin.quotes.archive') }}">
                                 <span class="admin-nav-icon" aria-hidden="true">
@@ -2265,7 +2299,7 @@
                                 </div>
                             </a>
 
-                            @if ($isInvoicePreview || $isInvoiceEditor || $isProposalPreview || $isProposalEditor)
+                            @if ($isInvoicePreview || $isInvoiceEditor || $isProposalPreview || $isProposalEditor || $isStaffContractPreview || $isStaffContractEditor)
                                 <span class="admin-nav-label">Current</span>
                                 <a class="admin-nav-link active" href="{{ url()->current() }}">
                                     <span class="admin-nav-icon" aria-hidden="true">
@@ -2278,7 +2312,7 @@
                                     </span>
                                     <div>
                                         <strong>{{ $currentAdminView }}</strong>
-                                        <span>{{ $isProposalWorkspace ? 'Proposal' : ($isInvoiceEditor ? 'Edit' : 'Preview') }}</span>
+                                        <span>{{ $isProposalWorkspace ? 'Proposal' : ($isStaffContractWorkspace ? 'Staff contract' : ($isInvoiceEditor ? 'Edit' : 'Preview')) }}</span>
                                     </div>
                                 </a>
                             @endif
@@ -2315,6 +2349,8 @@
                             <span class="admin-date-pill">{{ now()->format('M d, Y') }}</span>
                             @if ($isProposalWorkspace)
                                 <a class="button" href="{{ route('admin.proposals.index') }}">New Proposal</a>
+                            @elseif ($isStaffContractWorkspace)
+                                <a class="button" href="{{ route('admin.staff-contracts.create') }}">New Staff Contract</a>
                             @else
                                 <a class="button" href="{{ route('admin.quotes.create') }}">New Invoice</a>
                             @endif

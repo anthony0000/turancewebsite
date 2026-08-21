@@ -250,6 +250,7 @@
     $watermark = $settings?->watermark;
     $preparedFor = $proposal->client_company ?: $proposal->client_name ?: 'Client';
     $preparedBy = $proposal->prepared_by ?: $proposal->company_name;
+    $companyRcNumber = config('luxury-quotes.brand.rc_number', '3646478');
     $contactItems = collect([$proposal->contact_email, $proposal->phone_number, $proposal->website])->filter()->values();
 @endphp
 
@@ -276,6 +277,7 @@
                             <span class="proposal-brand-copy">
                                 <strong>{{ $proposal->company_name }}</strong>
                                 <span>{{ $proposal->company_slogan ?: 'Business Proposal' }}</span>
+                                <small>RC No. {{ $companyRcNumber }}</small>
                             </span>
                         </div>
 
@@ -583,7 +585,7 @@
                     <span>
                         Confidential / evaluation only
                         <b aria-hidden="true">·</b>
-                        {{ $proposal->company_name }}
+                        {{ $proposal->company_name }} / RC No. {{ $companyRcNumber }}
                         @if ($proposal->contact_email)
                             / {{ $proposal->contact_email }}
                         @endif

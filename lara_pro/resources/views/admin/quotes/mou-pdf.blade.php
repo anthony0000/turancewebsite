@@ -61,6 +61,7 @@
     $brandEmail = $brand['contact_email'] ?? 'hello@turancetechnologies.com';
     $brandPhone = $brand['contact_phone'] ?? '+2348061209440';
     $brandWebsite = $brand['website'] ?? config('app.url');
+    $brandRcNumber = $brand['rc_number'] ?? '3646478';
     $clientSigner = $quote->recipient_name ?: 'Authorized Client Representative';
     $clientTitle = $quote->recipient_title ?: ($quote->company_industry ?: 'Client Representative');
     $outcomes = collect($quote->outcomes ?? [])->filter(fn ($item) => filled($item))->values();
@@ -493,6 +494,7 @@
                         @endif
                         <strong class="mou-brand">{{ $brandName }}</strong>
                         <span class="mou-brand-line">{{ $brand['tagline'] ?? 'Excellence Delivered' }}</span>
+                        <span class="mou-brand-line">RC No. {{ $brandRcNumber }}</span>
                         <span class="mou-brand-line">{{ $brandEmail }}</span>
                         <span class="mou-brand-line">{{ $brandPhone }}</span>
                     </td>

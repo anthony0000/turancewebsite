@@ -1,0 +1,179 @@
+<?php
+
+use App\Models\Project;
+use App\Models\StaffContract;
+use App\Models\LuxuryQuote;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
+uses(RefreshDatabase::class);
+
+it('creates an invoice-linked staff contract with price terms and signing details', function () {
+    $sessionKey = config('luxury-quotes.admin.session_key', 'luxury_quote_admin_authenticated');
+    $session = [
+        $sessionKey => true,
+        'luxury_quote_admin_email' => 'admin@example.com',
+    ];
+
+    $invoice = LuxuryQuote::query()->create([
+        'quote_number' => 'TT-INV-STAFF-001',
+        'template' => 'obsidian',
+        'project_category' => 'Digital Product',
+        'company_name' => 'Asterion Holdings',
+        'recipient_name' => 'Nora Kelvin',
+        'project_title' => 'Northstar Client Portal',
+        'executive_summary' => 'A project engagement for the Northstar client portal.',
+        'investment_amount' => 1250000,
+        'timeline' => '8 weeks',
+        'valid_until' => '2026-09-30',
+        'scope_items' => ['Product interface direction and responsive delivery'],
+    ]);
+
+    $this
+        ->withSession($session)
+        ->get(route('admin.staff-contracts.create'))
+        ->assertOk()
+        ->assertSee('Create an invoice-linked staff contract')
+        ->assertSee('Existing invoice')
+        ->assertSee('TT-INV-STAFF-001')
+        ->assertDontSee('Start the project record alongside the contract')
+        ->assertDontSee('Signing section')
+        ->assertDontSee('Company signatory')
+        ->assertDontSee('Staff signatory')
+        ->assertDontSee('Company signed date')
+        ->assertDontSee('Staff signed date')
+        ->assertDontSee('Staff email')
+        ->assertDontSee('Staff phone')
+        ->assertDontSee('Engagement starts')
+        ->assertDontSee('Internal notes')
+        ->assertDontSee('Company / engaging party');
+
+    $payload = [
+        'luxury_quote_id' => $invoice->id,
+        'status' => 'pending_signature',
+        'staff_name' => 'Amina Stone',
+        'staff_role' => 'Product Designer',
+        'currency' => 'NGN',
+        'agreed_fee' => '850000.50',
+        'payment_terms' => '50% on signing and 50% after approved final handoff.',
+        'scope_of_work' => 'Create the product interface direction, responsive screens, and handoff documentation for the Northstar portal.',
+        'terms' => 'All project information is confidential. Work created for the project is assigned to the company after payment. Either party may terminate with seven days written notice.',
+        'company_name' => 'Turance Technologies',
+    ];
+
+    $response = $this
+        ->withSession($session)
+        ->post(route('admin.staff-contracts.store'), $payload);
+
+    $project = Project::query()->where('name', 'Northstar Client Portal')->first();
+    $contract = StaffContract::query()->where('staff_name', 'Amina Stone')->first();
+
+    expect($project)->not->toBeNull();
+    expect($contract)->not->toBeNull()
+        ->and($contract->project_id)->toBe($project->id)
+        ->and($contract->luxury_quote_id)->toBe($invoice->id)
+        ->and((float) $contract->agreed_fee)->toBe(850000.5)
+        ->and($contract->status)->toBe('pending_signature');
+
+    $response->assertRedirect(route('admin.staff-contracts.show', $contract));
+
+    $this
+        ->withSession($session)
+        ->get(route('admin.staff-contracts.show', $contract))
+        ->assertOk()
+        ->assertSee('Contract Staff Agreement')
+        ->assertSee('Northstar Client Portal')
+        ->assertSee('NGN 850,000.50')
+        ->assertSee('RC No. 3646478')
+        ->assertSee('Acceptance and signatures');
+
+    $this
+        ->withSession($session)
+        ->get(route('admin.staff-contracts.index'))
+        ->assertOk()
+        ->assertSee('Northstar Client Portal')
+        ->assertSee('Invoice-linked staff documents')
+        ->assertSee('Invoice TT-INV-STAFF-001');
+
+    $pdfResponse = $this
+        ->withSession($session)
+        ->get(route('admin.staff-contracts.pdf', $contract));
+
+    expect($pdfResponse->headers->get('content-type'))->toContain('application/pdf');
+    expect(substr($pdfResponse->getContent(), 0, 4))->toBe('%PDF');
+    expect(strlen($pdfResponse->getContent()))->toBeGreaterThan(1000);
+});
+
+it('updates a staff contract without losing its invoice and project relationships', function () {
+    $sessionKey = config('luxury-quotes.admin.session_key', 'luxury_quote_admin_authenticated');
+    $session = [
+        $sessionKey => true,
+        'luxury_quote_admin_email' => 'admin@example.com',
+    ];
+
+    $project = Project::query()->create([
+        'project_number' => 'TT-PRJ-TEST-001',
+        'name' => 'Existing Product Build',
+        'client_company' => 'Client Co',
+        'status' => 'active',
+    ]);
+
+    $invoice = LuxuryQuote::query()->create([
+        'quote_number' => 'TT-INV-STAFF-002',
+        'template' => 'obsidian',
+        'project_category' => 'Digital Product',
+        'company_name' => 'Client Co',
+        'project_title' => 'Existing Product Build',
+        'executive_summary' => 'A project engagement for an existing product build.',
+        'investment_amount' => 600000,
+        'timeline' => '6 weeks',
+        'valid_until' => '2026-09-30',
+        'scope_items' => ['Frontend build and review'],
+    ]);
+
+    $contract = StaffContract::query()->create([
+        'project_id' => $project->id,
+        'luxury_quote_id' => $invoice->id,
+        'contract_number' => 'TT-STAFF-TEST-001',
+        'status' => 'draft',
+        'staff_name' => 'Daniel Cole',
+        'staff_role' => 'Frontend Engineer',
+        'currency' => 'NGN',
+        'agreed_fee' => 250000,
+        'payment_terms' => 'Paid monthly after approved work is delivered.',
+        'scope_of_work' => 'Build and review the assigned frontend features for the project.',
+        'terms' => 'Confidentiality and intellectual property terms apply throughout the engagement.',
+        'company_name' => 'Turance Technologies',
+        'company_signatory_name' => 'Tony Stark',
+        'company_signed_date' => '2026-08-21',
+        'staff_signatory_name' => 'Daniel Cole',
+        'staff_signed_date' => '2026-08-22',
+    ]);
+
+    $payload = [
+        'luxury_quote_id' => $invoice->id,
+        'status' => 'active',
+        'staff_name' => 'Daniel Cole',
+        'staff_role' => 'Senior Frontend Engineer',
+        'currency' => 'NGN',
+        'agreed_fee' => '325000',
+        'payment_terms' => 'Paid monthly after approved work is delivered and accepted.',
+        'scope_of_work' => 'Build, test, and review the assigned frontend features for the project.',
+        'terms' => 'Confidentiality and intellectual property terms apply throughout the engagement and after completion.',
+        'company_name' => 'Turance Technologies',
+    ];
+
+    $this
+        ->withSession($session)
+        ->put(route('admin.staff-contracts.update', $contract), $payload)
+        ->assertRedirect(route('admin.staff-contracts.show', $contract));
+
+    $contract->refresh();
+
+    expect($contract->project_id)->toBe($project->id)
+        ->and($contract->luxury_quote_id)->toBe($invoice->id)
+        ->and($contract->contract_number)->toBe('TT-STAFF-TEST-001')
+        ->and($contract->staff_role)->toBe('Senior Frontend Engineer')
+        ->and((float) $contract->agreed_fee)->toBe(325000.0)
+        ->and($contract->company_signatory_name)->toBe('Tony Stark')
+        ->and($contract->staff_signatory_name)->toBe('Daniel Cole');
+});

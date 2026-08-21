@@ -1531,7 +1531,8 @@
                     },
                 ];
                 const total = pricingTotals();
-                const contact = [state.proposal.contact_email, state.proposal.phone_number, state.proposal.website].filter(Boolean).join(' / ');
+                const companyRcNumber = @json(config('luxury-quotes.brand.rc_number', '3646478'));
+                const contact = [state.proposal.contact_email, state.proposal.phone_number, state.proposal.website, `RC No. ${companyRcNumber}`].filter(Boolean).join(' / ');
                 const coverImage = state.asset_urls.cover_image ? `<img src="${escapeHtml(state.asset_urls.cover_image)}" alt="">` : '';
 
                 livePreview.innerHTML = visible.map((section, index) => {
@@ -1550,7 +1551,7 @@
                                         <div class="live-meta-item">
                                             <span>Prepared by</span>
                                             <strong>${escapeHtml(state.proposal.prepared_by || state.proposal.company_name)}</strong>
-                                            <small>${escapeHtml(state.proposal.company_name || '')}</small>
+                                            <small>${escapeHtml(state.proposal.company_name || '')} / RC No. ${escapeHtml(companyRcNumber)}</small>
                                         </div>
                                         <div class="live-meta-item">
                                             <span>Reference</span>
