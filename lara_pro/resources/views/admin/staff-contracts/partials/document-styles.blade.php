@@ -195,6 +195,33 @@
     padding-left: 20px;
 }
 
+.staff-contract-copy {
+    counter-reset: staff-contract-outline;
+}
+
+.staff-contract-copy > ol {
+    padding-left: 0;
+    list-style: none;
+}
+
+.staff-contract-copy > ol > li {
+    position: relative;
+    padding-left: 22px;
+    counter-increment: staff-contract-outline;
+}
+
+.staff-contract-copy > ol > li::before {
+    position: absolute;
+    top: 0;
+    left: 0;
+    content: counter(staff-contract-outline) '. ';
+    color: #20242c;
+}
+
+.staff-contract-copy > ol > li > p {
+    margin-bottom: 8px;
+}
+
 .staff-contract-copy li + li {
     margin-top: 4px;
 }
