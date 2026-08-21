@@ -28,6 +28,33 @@
             line-height: 1.65;
         }
 
+        .contract-form .rich-editor-body {
+            counter-reset: staff-contract-editor-outline;
+        }
+
+        .contract-form .rich-editor-body > ol {
+            padding-left: 0;
+            list-style: none;
+        }
+
+        .contract-form .rich-editor-body > ol > li {
+            position: relative;
+            padding-left: 22px;
+            counter-increment: staff-contract-editor-outline;
+        }
+
+        .contract-form .rich-editor-body > ol > li::before {
+            position: absolute;
+            top: 0;
+            left: 0;
+            content: counter(staff-contract-editor-outline) '. ';
+            color: var(--text);
+        }
+
+        .contract-form .rich-editor-body > ol > li > p {
+            margin-bottom: 8px;
+        }
+
         .form-help {
             margin: -2px 0 0;
             color: var(--muted);
