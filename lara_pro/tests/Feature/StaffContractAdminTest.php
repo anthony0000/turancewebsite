@@ -23,6 +23,7 @@ it('creates an invoice-linked staff contract with price terms and signing detail
         'project_title' => 'Northstar Client Portal',
         'executive_summary' => 'A project engagement for the Northstar client portal.',
         'investment_amount' => 1250000,
+        'exchange_rate' => 1400,
         'timeline' => '8 weeks',
         'valid_until' => '2026-09-30',
         'scope_items' => ['Product interface direction and responsive delivery'],
@@ -53,8 +54,8 @@ it('creates an invoice-linked staff contract with price terms and signing detail
         'status' => 'pending_signature',
         'staff_name' => 'Amina Stone',
         'staff_role' => 'Product Designer',
-        'currency' => 'NGN',
-        'agreed_fee' => '850000.50',
+        'currency' => 'USD',
+        'agreed_fee' => '583.94',
         'payment_terms' => '50% on signing and 50% after approved final handoff.',
         'scope_of_work' => '<p><strong>Create the product interface direction</strong>, responsive screens, and handoff documentation for the Northstar portal.</p><ul><li>Responsive interface delivery</li></ul>',
         'terms' => '<p>All project information is confidential.</p><p>Work created for the project is assigned to the company after payment.</p>',
@@ -73,7 +74,7 @@ it('creates an invoice-linked staff contract with price terms and signing detail
         ->and($contract->project_id)->toBe($project->id)
         ->and($contract->luxury_quote_id)->toBe($invoice->id)
         ->and($contract->scope_of_work)->toContain('<strong>Create the product interface direction</strong>')
-        ->and((float) $contract->agreed_fee)->toBe(850000.5)
+        ->and((float) $contract->agreed_fee)->toBe(583.94)
         ->and($contract->status)->toBe('pending_signature');
 
     $response->assertRedirect(route('admin.staff-contracts.show', $contract));
@@ -84,7 +85,9 @@ it('creates an invoice-linked staff contract with price terms and signing detail
         ->assertOk()
         ->assertSee('Contract Staff Agreement')
         ->assertSee('Northstar Client Portal')
-        ->assertSee('NGN 850,000.50')
+        ->assertSee('USD 583.94')
+        ->assertSee('Naira equivalent')
+        ->assertSee('NGN 817,516.00')
         ->assertSee('Create the product interface direction')
         ->assertSee('RC No. 3646478')
         ->assertSee('Acceptance and signatures');

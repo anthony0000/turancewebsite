@@ -234,6 +234,26 @@
     letter-spacing: -0.04em;
 }
 
+.staff-contract-price-conversion {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 8px;
+    margin-top: 7px;
+    color: #69717a;
+    font-size: 11px;
+}
+
+.staff-contract-price-conversion strong {
+    color: #20242c;
+    font-size: 14px;
+}
+
+.staff-contract-price-conversion small {
+    flex-basis: 100%;
+    color: #8b9299;
+}
+
 .staff-contract-price-note {
     margin-top: 4px;
     color: #69717a;

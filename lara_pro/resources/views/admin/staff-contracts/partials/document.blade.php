@@ -3,6 +3,10 @@
 
     $brandLogoSrc = DocumentBranding::logoSource($brand['logo_path'] ?? null);
     $brandRcNumber = $brand['rc_number'] ?? '3646478';
+    $contractCurrency = strtoupper((string) $contract->currency);
+    $agreedFee = (float) $contract->agreed_fee;
+    $exchangeRate = max(1, (float) ($contract->invoice?->exchange_rate ?? 1370));
+    $nairaEquivalent = $contractCurrency === 'NGN' ? $agreedFee : $agreedFee * $exchangeRate;
     $sanitizeRichText = function (?string $value): string {
         $html = trim((string) $value);
 
@@ -109,6 +113,13 @@
             <span class="staff-contract-section-label">01 / Price and payment</span>
             <h2>Agreed compensation</h2>
             <div class="staff-contract-price">{{ $contract->currency }} {{ number_format((float) $contract->agreed_fee, 2) }}</div>
+            <div class="staff-contract-price-conversion">
+                <span>Naira equivalent</span>
+                <strong>NGN {{ number_format($nairaEquivalent, 2) }}</strong>
+                @if ($contractCurrency !== 'NGN')
+                    <small>Based on 1 {{ $contractCurrency }} = NGN {{ number_format($exchangeRate, 2) }} from the linked invoice.</small>
+                @endif
+            </div>
             <p class="staff-contract-price-note">{{ $contract->payment_terms }}</p>
         </section>
 
