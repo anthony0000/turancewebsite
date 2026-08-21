@@ -33,7 +33,7 @@
             [
                 'name' => '3Hjobs', 'industry' => 'Local services', 'category' => 'Marketplace platform',
                 'summary' => 'A location-aware marketplace that helps people discover and engage trusted artisans around them.',
-                'services' => ['Service design', 'Mobile experience', 'Backend development'], 'year' => '2025',
+                'services' => ['Service design', 'Mobile experience', 'Backend development'], 'year' => '2026',
                 'outcome' => 'A clearer path from local discovery to service engagement.', 'visual' => 'marketplace',
                 'image' => null, 'link' => null,
             ],
