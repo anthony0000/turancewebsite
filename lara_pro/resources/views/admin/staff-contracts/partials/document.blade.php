@@ -158,7 +158,7 @@
                         <span class="staff-contract-signature-label">Signature date</span>
                     </td>
                     <td>
-                        <div class="staff-contract-signature-line">{{ $contract->staff_signatory_name ?: $contract->staff_name }}</div>
+                        <div class="staff-contract-signature-line">{{ $contract->staff_signatory_name }}</div>
                         <span class="staff-contract-signature-label">Contract staff</span>
                         <div class="staff-contract-signature-value">{{ $contract->staff_role }}</div>
                         <span class="staff-contract-signature-label">Role</span>

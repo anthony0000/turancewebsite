@@ -90,6 +90,7 @@ it('creates an invoice-linked staff contract with price terms and signing detail
         ->assertSee('NGN 817,516.00')
         ->assertSee('Create the product interface direction')
         ->assertSee('RC No. 3646478')
+        ->assertSee('Contract staff')
         ->assertSee('Acceptance and signatures');
 
     $this
