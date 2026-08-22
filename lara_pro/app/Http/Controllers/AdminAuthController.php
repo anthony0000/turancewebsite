@@ -2,16 +2,20 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
+use App\Support\AdminAccess;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class AdminAuthController extends Controller
 {
     public function create(Request $request): View|RedirectResponse
     {
         if ($request->session()->get($this->sessionKey())) {
-            return redirect()->route('admin.quotes.index');
+            return redirect()->route('admin.home');
         }
 
         return view('admin.auth.login', [
@@ -27,6 +31,28 @@ class AdminAuthController extends Controller
             'password' => ['required', 'string'],
         ]);
 
+        $email = Str::lower(trim($validated['email']));
+        $user = User::query()->where('email', $email)->first();
+
+        if ($user) {
+            if (! in_array($user->role, [AdminAccess::ROLE_ADMIN, AdminAccess::ROLE_SUBACCOUNT], true)
+                || ! $user->is_active
+                || ! Hash::check($validated['password'], (string) $user->password)) {
+                return back()
+                    ->withErrors([
+                        'email' => 'Those admin credentials did not match an active admin account.',
+                    ])
+                    ->onlyInput('email');
+            }
+
+            $request->session()->regenerate();
+            AdminAccess::signIn($request, $user);
+
+            return redirect()
+                ->route($user->role === AdminAccess::ROLE_ADMIN ? 'admin.quotes.index' : 'admin.home')
+                ->with('status', 'Welcome back, '.$user->name.'.');
+        }
+
         if (! $this->credentialsConfigured()) {
             return back()
                 ->withErrors([
@@ -38,7 +64,7 @@ class AdminAuthController extends Controller
         $configuredEmail = (string) config('luxury-quotes.admin.email');
         $configuredPassword = (string) config('luxury-quotes.admin.password');
 
-        $emailMatches = mb_strtolower($validated['email']) === mb_strtolower($configuredEmail);
+        $emailMatches = $email === mb_strtolower($configuredEmail);
         $passwordMatches = hash_equals($configuredPassword, $validated['password']);
 
         if (! $emailMatches || ! $passwordMatches) {
@@ -49,9 +75,17 @@ class AdminAuthController extends Controller
                 ->onlyInput('email');
         }
 
-        $request->session()->put($this->sessionKey(), true);
-        $request->session()->put('luxury_quote_admin_email', $configuredEmail);
+        $user = User::query()->create([
+            'name' => 'Administrator',
+            'email' => $email,
+            'password' => $validated['password'],
+            'role' => AdminAccess::ROLE_ADMIN,
+            'permissions' => AdminAccess::permissionKeys(),
+            'is_active' => true,
+        ]);
+
         $request->session()->regenerate();
+        AdminAccess::signIn($request, $user);
 
         return redirect()
             ->route('admin.quotes.index')
@@ -60,10 +94,7 @@ class AdminAuthController extends Controller
 
     public function destroy(Request $request): RedirectResponse
     {
-        $request->session()->forget([
-            $this->sessionKey(),
-            'luxury_quote_admin_email',
-        ]);
+        AdminAccess::signOut($request);
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 

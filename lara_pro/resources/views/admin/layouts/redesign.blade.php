@@ -1906,6 +1906,13 @@ button.ghost-button {
     box-shadow: var(--shadow);
 }
 
+.action-menu-panel.is-floating {
+    position: fixed;
+    top: 0;
+    right: auto;
+    z-index: 1000;
+}
+
 .action-menu-panel form {
     margin: 0;
 }

@@ -13,6 +13,16 @@
     $isStaffContractEditor = request()->routeIs('admin.staff-contracts.edit');
     $isStaffContractBuilder = request()->routeIs('admin.staff-contracts.create');
     $isStaffContractWorkspace = request()->routeIs('admin.staff-contracts.*');
+    $isAdminProfile = request()->routeIs('admin.profile');
+    $isSubaccountWorkspace = request()->routeIs('admin.subaccounts.*');
+    $canInvoices = \App\Support\AdminAccess::can('invoices');
+    $canProposals = \App\Support\AdminAccess::can('proposals');
+    $canStaffContracts = \App\Support\AdminAccess::can('staff-contracts');
+    $canActivity = \App\Support\AdminAccess::can('activity');
+    $canInsights = \App\Support\AdminAccess::can('insights');
+    $canPromotion = \App\Support\AdminAccess::can('promotion');
+    $canArchive = \App\Support\AdminAccess::can('archive');
+    $isFullAdmin = \App\Support\AdminAccess::isFullAdmin();
     $isQuoteActivity = request()->routeIs('admin.quotes.activity');
     $isQuoteInsights = request()->routeIs('admin.quotes.insights');
     $isQuotePromotion = request()->routeIs('admin.quotes.promotion');
@@ -26,6 +36,8 @@
         $isProposalDashboard => 'Proposal Studio',
         $isStaffContractPreview => 'Staff Contract Preview',
         $isStaffContractEditor => 'Edit Staff Contract',
+        $isSubaccountWorkspace => 'Sub-accounts',
+        $isAdminProfile => 'Profile & Settings',
         $isStaffContractDashboard => 'Staff Contracts',
         $isStaffContractBuilder => 'Staff Contract Builder',
         $isQuoteActivity => 'Activity Center',
@@ -43,6 +55,8 @@
         $isProposalDashboard => 'Build, review, and export client proposals.',
         $isStaffContractPreview => 'Review the project-bound staff agreement, signing details, and contract PDF.',
         $isStaffContractEditor => 'Update the project, commercial terms, staff details, and signing section.',
+        $isSubaccountWorkspace => 'Create team accounts and limit the parts of the admin workspace they can access.',
+        $isAdminProfile => 'Manage your admin identity, contact details, and account security.',
         $isStaffContractDashboard => 'Track project-bound staff agreements and export signed-ready contract documents.',
         $isStaffContractBuilder => 'Create a staff agreement with a required project, price, terms, and signing section.',
         $isQuoteActivity => 'Review traffic, leads, and invoice movement.',
@@ -60,6 +74,8 @@
         $isProposalDashboard => 'Proposal Studio',
         $isStaffContractPreview => 'Staff Contract Preview',
         $isStaffContractEditor => 'Edit Staff Contract',
+        $isSubaccountWorkspace => 'Sub-accounts',
+        $isAdminProfile => 'Profile & Settings',
         $isStaffContractDashboard => 'Staff Contracts',
         $isStaffContractBuilder => 'Staff Contract Builder',
         $isQuoteActivity => 'Activity',
@@ -2159,7 +2175,7 @@
                 <aside class="admin-sidebar" id="admin-sidebar" aria-label="Admin navigation">
                     <div class="admin-sidebar-inner">
                         <div class="admin-sidebar-top">
-                            <a class="admin-sidebar-brand" href="{{ route('admin.quotes.index') }}">
+                            <a class="admin-sidebar-brand" href="{{ route($canInvoices ? 'admin.quotes.index' : ($canProposals ? 'admin.proposals.index' : ($canStaffContracts ? 'admin.staff-contracts.index' : 'admin.profile'))) }}">
                                 <span class="admin-brand-mark">TT</span>
                                 <span class="admin-brand-copy">
                                     <strong>{{ $brandName }}</strong>
@@ -2177,8 +2193,9 @@
 
                         <nav class="admin-nav">
                             <span class="admin-nav-label">Monitor</span>
-                            <a class="admin-nav-link {{ request()->routeIs('admin.quotes.index') ? 'active' : '' }}"
-                                href="{{ route('admin.quotes.index') }}">
+                            @if ($canInvoices)
+                                <a class="admin-nav-link {{ request()->routeIs('admin.quotes.index') ? 'active' : '' }}"
+                                    href="{{ route('admin.quotes.index') }}">
                                 <span class="admin-nav-icon" aria-hidden="true">
                                     <svg viewBox="0 0 24 24">
                                         <path d="M4 5h7v7H4z" />
@@ -2191,10 +2208,12 @@
                                     <strong>Overview</strong>
                                     <span>Key metrics</span>
                                 </div>
-                            </a>
+                                </a>
+                            @endif
 
-                            <a class="admin-nav-link {{ request()->routeIs('admin.quotes.activity') ? 'active' : '' }}"
-                                href="{{ route('admin.quotes.activity') }}">
+                            @if ($canActivity)
+                                <a class="admin-nav-link {{ request()->routeIs('admin.quotes.activity') ? 'active' : '' }}"
+                                    href="{{ route('admin.quotes.activity') }}">
                                 <span class="admin-nav-icon" aria-hidden="true">
                                     <svg viewBox="0 0 24 24">
                                         <path d="M4 17l5-5 4 4 7-8" />
@@ -2205,10 +2224,12 @@
                                     <strong>Activity</strong>
                                     <span>Traffic and leads</span>
                                 </div>
-                            </a>
+                                </a>
+                            @endif
 
-                            <a class="admin-nav-link {{ request()->routeIs('admin.quotes.insights') ? 'active' : '' }}"
-                                href="{{ route('admin.quotes.insights') }}">
+                            @if ($canInsights)
+                                <a class="admin-nav-link {{ request()->routeIs('admin.quotes.insights') ? 'active' : '' }}"
+                                    href="{{ route('admin.quotes.insights') }}">
                                 <span class="admin-nav-icon" aria-hidden="true">
                                     <svg viewBox="0 0 24 24">
                                         <path d="M12 3a7 7 0 0 0-4 12.75V18h8v-2.25A7 7 0 0 0 12 3z" />
@@ -2219,10 +2240,12 @@
                                     <strong>Insights</strong>
                                     <span>Demand signals</span>
                                 </div>
-                            </a>
+                                </a>
+                            @endif
 
-                            <a class="admin-nav-link {{ request()->routeIs('admin.quotes.promotion') ? 'active' : '' }}"
-                                href="{{ route('admin.quotes.promotion') }}">
+                            @if ($canPromotion)
+                                <a class="admin-nav-link {{ request()->routeIs('admin.quotes.promotion') ? 'active' : '' }}"
+                                    href="{{ route('admin.quotes.promotion') }}">
                                 <span class="admin-nav-icon" aria-hidden="true">
                                     <svg viewBox="0 0 24 24">
                                         <path d="M12 3v18M3 12h18" />
@@ -2233,11 +2256,13 @@
                                     <strong>Promotion</strong>
                                     <span>Landing offer</span>
                                 </div>
-                            </a>
+                                </a>
+                            @endif
 
                             <span class="admin-nav-label">Create</span>
-                            <a class="admin-nav-link {{ request()->routeIs('admin.quotes.create') ? 'active' : '' }}"
-                                href="{{ route('admin.quotes.create') }}">
+                            @if ($canInvoices)
+                                <a class="admin-nav-link {{ request()->routeIs('admin.quotes.create') ? 'active' : '' }}"
+                                    href="{{ route('admin.quotes.create') }}">
                                 <span class="admin-nav-icon" aria-hidden="true">
                                     <svg viewBox="0 0 24 24">
                                         <path d="M7 3h10v18l-2-1-2 1-2-1-2 1-2-1z" />
@@ -2249,10 +2274,12 @@
                                     <strong>Invoices</strong>
                                     <span>Builder</span>
                                 </div>
-                            </a>
+                                </a>
+                            @endif
 
-                            <a class="admin-nav-link {{ $isProposalDashboard ? 'active' : '' }}"
-                                href="{{ route('admin.proposals.index') }}">
+                            @if ($canProposals)
+                                <a class="admin-nav-link {{ $isProposalDashboard ? 'active' : '' }}"
+                                    href="{{ route('admin.proposals.index') }}">
                                 <span class="admin-nav-icon" aria-hidden="true">
                                     <svg viewBox="0 0 24 24">
                                         <path d="M6 3h9l3 3v15H6z" />
@@ -2265,10 +2292,12 @@
                                     <strong>Proposals</strong>
                                     <span>Studio</span>
                                 </div>
-                            </a>
+                                </a>
+                            @endif
 
-                            <a class="admin-nav-link {{ $isStaffContractWorkspace ? 'active' : '' }}"
-                                href="{{ route('admin.staff-contracts.index') }}">
+                            @if ($canStaffContracts)
+                                <a class="admin-nav-link {{ $isStaffContractWorkspace ? 'active' : '' }}"
+                                    href="{{ route('admin.staff-contracts.index') }}">
                                 <span class="admin-nav-icon" aria-hidden="true">
                                     <svg viewBox="0 0 24 24">
                                         <path d="M6 3h9l3 3v15H6z" />
@@ -2282,10 +2311,12 @@
                                     <strong>Staff Contracts</strong>
                                     <span>Project agreements</span>
                                 </div>
-                            </a>
+                                </a>
+                            @endif
 
-                            <a class="admin-nav-link {{ request()->routeIs('admin.quotes.archive') ? 'active' : '' }}"
-                                href="{{ route('admin.quotes.archive') }}">
+                            @if ($canArchive)
+                                <a class="admin-nav-link {{ request()->routeIs('admin.quotes.archive') ? 'active' : '' }}"
+                                    href="{{ route('admin.quotes.archive') }}">
                                 <span class="admin-nav-icon" aria-hidden="true">
                                     <svg viewBox="0 0 24 24">
                                         <path d="M4 7h16v13H4z" />
@@ -2297,9 +2328,43 @@
                                     <strong>Archive</strong>
                                     <span>Saved work</span>
                                 </div>
+                                </a>
+                            @endif
+
+                            <span class="admin-nav-label">Account</span>
+                            <a class="admin-nav-link {{ $isAdminProfile ? 'active' : '' }}"
+                                href="{{ route('admin.profile') }}">
+                                <span class="admin-nav-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24">
+                                        <circle cx="12" cy="8" r="3" />
+                                        <path d="M5 20c1.2-3.4 3.6-5 7-5s5.8 1.6 7 5" />
+                                    </svg>
+                                </span>
+                                <div>
+                                    <strong>Profile & Settings</strong>
+                                    <span>Account details</span>
+                                </div>
                             </a>
 
-                            @if ($isInvoicePreview || $isInvoiceEditor || $isProposalPreview || $isProposalEditor || $isStaffContractPreview || $isStaffContractEditor)
+                            @if ($isFullAdmin)
+                                <a class="admin-nav-link {{ $isSubaccountWorkspace ? 'active' : '' }}"
+                                    href="{{ route('admin.subaccounts.index') }}">
+                                    <span class="admin-nav-icon" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24">
+                                            <circle cx="9" cy="8" r="3" />
+                                            <circle cx="17" cy="10" r="2" />
+                                            <path d="M3 20c.8-3.2 2.8-5 6-5s5.2 1.8 6 5" />
+                                            <path d="M15 16c2.8 0 4.8 1.2 6 4" />
+                                        </svg>
+                                    </span>
+                                    <div>
+                                        <strong>Sub-accounts</strong>
+                                        <span>Limited access</span>
+                                    </div>
+                                </a>
+                            @endif
+
+                            @if ($isInvoicePreview || $isInvoiceEditor || $isProposalPreview || $isProposalEditor || $isStaffContractPreview || $isStaffContractEditor || $isAdminProfile || $isSubaccountWorkspace)
                                 <span class="admin-nav-label">Current</span>
                                 <a class="admin-nav-link active" href="{{ url()->current() }}">
                                     <span class="admin-nav-icon" aria-hidden="true">
@@ -2312,7 +2377,7 @@
                                     </span>
                                     <div>
                                         <strong>{{ $currentAdminView }}</strong>
-                                        <span>{{ $isProposalWorkspace ? 'Proposal' : ($isStaffContractWorkspace ? 'Staff contract' : ($isInvoiceEditor ? 'Edit' : 'Preview')) }}</span>
+                                        <span>{{ $isProposalWorkspace ? 'Proposal' : ($isStaffContractWorkspace ? 'Staff contract' : ($isSubaccountWorkspace ? 'Account access' : ($isAdminProfile ? 'Account' : ($isInvoiceEditor ? 'Edit' : 'Preview')))) }}</span>
                                     </div>
                                 </a>
                             @endif
@@ -2347,11 +2412,17 @@
 
                         <div class="admin-pagebar-actions">
                             <span class="admin-date-pill">{{ now()->format('M d, Y') }}</span>
-                            @if ($isProposalWorkspace)
+                            @if ($isSubaccountWorkspace)
+                                <a class="button" href="{{ route('admin.subaccounts.create') }}">New Sub-account</a>
+                            @elseif ($isAdminProfile)
+                                @if ($isFullAdmin)
+                                    <a class="ghost-button" href="{{ route('admin.subaccounts.index') }}">Manage Sub-accounts</a>
+                                @endif
+                            @elseif ($isProposalWorkspace)
                                 <a class="button" href="{{ route('admin.proposals.index') }}">New Proposal</a>
                             @elseif ($isStaffContractWorkspace)
                                 <a class="button" href="{{ route('admin.staff-contracts.create') }}">New Staff Contract</a>
-                            @else
+                            @elseif ($canInvoices)
                                 <a class="button" href="{{ route('admin.quotes.create') }}">New Invoice</a>
                             @endif
                             <details class="admin-profile-menu">
@@ -2363,7 +2434,12 @@
                                     </span>
                                 </summary>
                                 <div class="admin-profile-panel">
-                                    <p>{{ session('luxury_quote_admin_email') }}</p>
+                                    <strong>{{ \App\Support\AdminAccess::displayName() }}</strong>
+                                    <p>{{ \App\Support\AdminAccess::email() }}</p>
+                                    <a class="ghost-button" href="{{ route('admin.profile') }}">Profile & Settings</a>
+                                    @if ($isFullAdmin)
+                                        <a class="ghost-button" href="{{ route('admin.subaccounts.index') }}">Manage Sub-accounts</a>
+                                    @endif
                                     <form method="POST" action="{{ route('admin.logout') }}">
                                         @csrf
                                         <button type="submit" class="ghost-button">Sign Out</button>
@@ -2416,6 +2492,72 @@
                     body.classList.remove('is-mobile-nav-open');
                 }
             });
+        })();
+
+        (() => {
+            const menus = Array.from(document.querySelectorAll('.action-menu'));
+            const edgePadding = 8;
+            const gap = 6;
+
+            const clearPosition = (menu) => {
+                const panel = menu.querySelector('.action-menu-panel');
+
+                if (!panel) {
+                    return;
+                }
+
+                panel.classList.remove('is-floating');
+                panel.style.removeProperty('left');
+                panel.style.removeProperty('top');
+                panel.style.removeProperty('right');
+            };
+
+            const positionMenu = (menu) => {
+                const summary = menu.querySelector('summary');
+                const panel = menu.querySelector('.action-menu-panel');
+
+                if (!menu.open || !summary || !panel) {
+                    return;
+                }
+
+                panel.classList.add('is-floating');
+
+                const summaryRect = summary.getBoundingClientRect();
+                const panelWidth = panel.offsetWidth;
+                const panelHeight = panel.offsetHeight;
+                const maxLeft = Math.max(edgePadding, window.innerWidth - panelWidth - edgePadding);
+                const maxTop = Math.max(edgePadding, window.innerHeight - panelHeight - edgePadding);
+                const left = Math.min(
+                    Math.max(edgePadding, summaryRect.right - panelWidth),
+                    maxLeft
+                );
+                const belowTop = summaryRect.bottom + gap;
+                const aboveTop = summaryRect.top - panelHeight - gap;
+                const top = belowTop + panelHeight <= window.innerHeight - edgePadding
+                    ? belowTop
+                    : Math.max(edgePadding, aboveTop);
+
+                panel.style.left = `${left}px`;
+                panel.style.top = `${Math.min(top, maxTop)}px`;
+                panel.style.right = 'auto';
+            };
+
+            menus.forEach((menu) => {
+                menu.addEventListener('toggle', () => {
+                    if (menu.open) {
+                        window.requestAnimationFrame(() => positionMenu(menu));
+                    } else {
+                        clearPosition(menu);
+                    }
+                });
+            });
+
+            const repositionOpenMenus = () => {
+                menus.filter((menu) => menu.open).forEach(positionMenu);
+            };
+
+            window.addEventListener('resize', repositionOpenMenus);
+            window.addEventListener('scroll', repositionOpenMenus, true);
         })();
 
         (() => {
