@@ -32,6 +32,20 @@ it('allows an admin to sign in to the invoice generator', function () {
         ->assertSessionHas('luxury_quote_admin_authenticated', true);
 });
 
+it('resolves the invoice archive route before the quote wildcard route', function () {
+    $sessionKey = config('luxury-quotes.admin.session_key', 'luxury_quote_admin_authenticated');
+
+    $this
+        ->withSession([
+            $sessionKey => true,
+            'luxury_quote_admin_email' => 'admin@example.com',
+        ])
+        ->get(route('admin.quotes.archive'))
+        ->assertOk()
+        ->assertSee('Invoice Archive')
+        ->assertSee('Saved invoices');
+});
+
 it('stores an invoice and exports invoice and mou pdfs', function () {
     $sessionKey = config('luxury-quotes.admin.session_key', 'luxury_quote_admin_authenticated');
 

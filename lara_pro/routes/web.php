@@ -131,6 +131,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/quotes', [AdminLuxuryQuoteController::class, 'index'])->name('quotes.index');
             Route::get('/quotes/create', [AdminLuxuryQuoteController::class, 'create'])->name('quotes.create');
             Route::post('/quotes', [AdminLuxuryQuoteController::class, 'store'])->name('quotes.store');
+            Route::get('/quotes/archive', [AdminLuxuryQuoteController::class, 'archive'])
+                ->middleware('admin.permission:archive')
+                ->name('quotes.archive');
             Route::get('/quotes/{luxuryQuote}/edit', [AdminLuxuryQuoteController::class, 'edit'])->name('quotes.edit');
             Route::put('/quotes/{luxuryQuote}', [AdminLuxuryQuoteController::class, 'update'])->name('quotes.update');
             Route::get('/quotes/{luxuryQuote}', [AdminLuxuryQuoteController::class, 'show'])->name('quotes.show');
@@ -150,9 +153,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/quotes/promotion', [AdminLuxuryQuoteController::class, 'updatePromotion'])
             ->middleware('admin.permission:promotion')
             ->name('quotes.promotion.update');
-        Route::get('/quotes/archive', [AdminLuxuryQuoteController::class, 'archive'])
-            ->middleware('admin.permission:archive')
-            ->name('quotes.archive');
 
         Route::middleware('admin.permission:proposals')->group(function () {
             Route::get('/proposals', [AdminProposalController::class, 'index'])->name('proposals.index');
