@@ -311,3 +311,28 @@ it('stores an automatically named private signed copy and locks the contract', f
 
     Storage::disk('local')->assertExists($firstPath);
 });
+
+it('does not lock a contract when its recorded signed file is missing', function () {
+    Storage::fake('local');
+
+    $contract = StaffContract::query()->create([
+        'project_id' => Project::query()->create([
+            'project_number' => 'TT-PRJ-MISSING-001',
+            'name' => 'Missing Signed File Project',
+            'status' => 'active',
+        ])->id,
+        'contract_number' => 'TT-STAFF-MISSING-001',
+        'status' => 'signed',
+        'staff_name' => 'Amina Stone',
+        'staff_role' => 'Product Designer',
+        'currency' => 'NGN',
+        'agreed_fee' => 250000,
+        'payment_terms' => 'Paid after each approved monthly delivery.',
+        'scope_of_work' => 'Design and review the assigned product interface work.',
+        'terms' => 'Confidentiality and ownership terms apply throughout the engagement.',
+        'company_name' => 'Turance Technologies',
+        'signed_document_path' => 'staff-contracts/signed-documents/missing.pdf',
+    ]);
+
+    expect($contract->hasSignedDocument())->toBeFalse();
+});

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Storage;
 
 class StaffContract extends Model
 {
@@ -47,7 +48,24 @@ class StaffContract extends Model
 
     public function hasSignedDocument(): bool
     {
-        return filled($this->signed_document_path);
+        if (! filled($this->signed_document_path)) {
+            return false;
+        }
+
+        $relativePath = ltrim((string) $this->signed_document_path, '/\\\\');
+        $disk = Storage::disk('local');
+
+        if ($disk->exists($relativePath)) {
+            return true;
+        }
+
+        foreach ([storage_path('app'), storage_path('app/private'), storage_path('app/public')] as $root) {
+            if (is_file($root.DIRECTORY_SEPARATOR.$relativePath)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public function project(): BelongsTo
