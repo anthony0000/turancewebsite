@@ -2,22 +2,28 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\LuxuryQuote;
 use App\Models\Project;
 use App\Models\StaffContract;
-use App\Models\LuxuryQuote;
 use App\Support\DocumentTypography;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Symfony\Component\HttpFoundation\StreamedResponse;
+use Throwable;
 
 class AdminStaffContractController extends Controller
 {
+    private const SIGNED_DOCUMENT_DIRECTORY = 'staff-contracts/signed-documents';
+
     private const STATUSES = [
         'draft',
         'pending_signature',
@@ -67,6 +73,10 @@ class AdminStaffContractController extends Controller
             ));
         });
 
+        if ($request->hasFile('signed_document')) {
+            $this->replaceSignedDocument($contract, $request->file('signed_document'));
+        }
+
         return redirect()
             ->route('admin.staff-contracts.show', $contract)
             ->with('status', "Staff contract {$contract->contract_number} created.");
@@ -103,6 +113,10 @@ class AdminStaffContractController extends Controller
             $staffContract,
         ));
 
+        if ($request->hasFile('signed_document')) {
+            $this->replaceSignedDocument($staffContract, $request->file('signed_document'));
+        }
+
         return redirect()
             ->route('admin.staff-contracts.show', $staffContract)
             ->with('status', "Staff contract {$staffContract->contract_number} updated.");
@@ -119,6 +133,20 @@ class AdminStaffContractController extends Controller
         DocumentTypography::registerDompdfFonts($pdf->getDomPDF());
 
         return $pdf->download(Str::slug($staffContract->contract_number.' '.$staffContract->staff_name).'.pdf');
+    }
+
+    public function downloadSignedDocument(StaffContract $staffContract): StreamedResponse
+    {
+        abort_unless($staffContract->hasSignedDocument(), 404);
+
+        $disk = Storage::disk('local');
+        abort_unless($disk->exists($staffContract->signed_document_path), 404);
+
+        return $disk->download(
+            $staffContract->signed_document_path,
+            $staffContract->signed_document_original_name ?: Str::slug($staffContract->contract_number).'.document',
+            ['Content-Type' => $staffContract->signed_document_mime ?: 'application/octet-stream'],
+        );
     }
 
     private function validateContractRequest(Request $request): array
@@ -143,8 +171,38 @@ class AdminStaffContractController extends Controller
             'company_signed_date' => ['nullable', 'date'],
             'staff_signatory_name' => ['nullable', 'string', 'max:255'],
             'staff_signed_date' => ['nullable', 'date'],
+            'signed_document' => ['nullable', 'file', 'max:20480', 'mimes:pdf,jpg,jpeg,png,webp,doc,docx'],
             'notes' => ['nullable', 'string', 'max:5000'],
         ]);
+    }
+
+    private function replaceSignedDocument(StaffContract $contract, UploadedFile $file): void
+    {
+        $disk = Storage::disk('local');
+        $path = $file->store(self::SIGNED_DOCUMENT_DIRECTORY, 'local');
+
+        if (! is_string($path) || $path === '') {
+            throw new \RuntimeException('The signed document could not be stored.');
+        }
+
+        $oldPath = $contract->signed_document_path;
+
+        try {
+            $contract->forceFill([
+                'signed_document_path' => $path,
+                'signed_document_original_name' => mb_substr(trim($file->getClientOriginalName()), 0, 255),
+                'signed_document_mime' => $file->getMimeType() ?: $file->getClientMimeType(),
+                'signed_document_size' => $file->getSize() ?: null,
+            ])->save();
+        } catch (Throwable $exception) {
+            $disk->delete($path);
+
+            throw $exception;
+        }
+
+        if (filled($oldPath) && $oldPath !== $path) {
+            $disk->delete($oldPath);
+        }
     }
 
     private function projectForInvoice(LuxuryQuote $invoice): Project
@@ -172,8 +230,7 @@ class AdminStaffContractController extends Controller
         LuxuryQuote $invoice,
         string $contractNumber,
         ?StaffContract $existing = null,
-    ): array
-    {
+    ): array {
         return [
             'project_id' => $project->id,
             'luxury_quote_id' => $invoice->id,

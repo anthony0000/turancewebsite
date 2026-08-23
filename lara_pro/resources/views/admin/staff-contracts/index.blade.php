@@ -131,6 +131,9 @@
                                         <a href="{{ route('admin.staff-contracts.show', $contract) }}">Preview</a>
                                         <a href="{{ route('admin.staff-contracts.edit', $contract) }}">Edit</a>
                                         <a href="{{ route('admin.staff-contracts.pdf', $contract) }}">Download PDF</a>
+                                        @if ($contract->hasSignedDocument())
+                                            <a href="{{ route('admin.staff-contracts.signed-document', $contract) }}">Download signed copy</a>
+                                        @endif
                                     </div>
                                 </details>
                             </td>

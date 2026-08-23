@@ -29,6 +29,10 @@ class StaffContract extends Model
         'company_signed_date',
         'staff_signatory_name',
         'staff_signed_date',
+        'signed_document_path',
+        'signed_document_original_name',
+        'signed_document_mime',
+        'signed_document_size',
         'notes',
     ];
 
@@ -38,7 +42,13 @@ class StaffContract extends Model
         'company_signed_date' => 'date',
         'staff_signed_date' => 'date',
         'agreed_fee' => 'decimal:2',
+        'signed_document_size' => 'integer',
     ];
+
+    public function hasSignedDocument(): bool
+    {
+        return filled($this->signed_document_path);
+    }
 
     public function project(): BelongsTo
     {

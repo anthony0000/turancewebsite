@@ -1,9 +1,11 @@
 <?php
 
+use App\Models\LuxuryQuote;
 use App\Models\Project;
 use App\Models\StaffContract;
-use App\Models\LuxuryQuote;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 
 uses(RefreshDatabase::class);
 
@@ -183,4 +185,106 @@ it('updates a staff contract without losing its invoice and project relationship
         ->and((float) $contract->agreed_fee)->toBe(325000.0)
         ->and($contract->company_signatory_name)->toBe('Tony Stark')
         ->and($contract->staff_signatory_name)->toBe('Daniel Cole');
+});
+
+it('stores a private signed proof copy and replaces it when a newer copy is uploaded', function () {
+    Storage::fake('local');
+
+    $sessionKey = config('luxury-quotes.admin.session_key', 'luxury_quote_admin_authenticated');
+    $session = [
+        $sessionKey => true,
+        'luxury_quote_admin_email' => 'admin@example.com',
+    ];
+
+    $project = Project::query()->create([
+        'project_number' => 'TT-PRJ-PROOF-001',
+        'name' => 'Signed Proof Project',
+        'status' => 'active',
+    ]);
+
+    $invoice = LuxuryQuote::query()->create([
+        'quote_number' => 'TT-INV-PROOF-001',
+        'template' => 'obsidian',
+        'project_category' => 'Digital Product',
+        'company_name' => 'Client Co',
+        'project_title' => 'Signed Proof Project',
+        'executive_summary' => 'A project engagement with a stored signed proof copy.',
+        'investment_amount' => 500000,
+        'timeline' => '4 weeks',
+        'valid_until' => '2026-09-30',
+        'scope_items' => ['Product design and delivery'],
+    ]);
+
+    $contract = StaffContract::query()->create([
+        'project_id' => $project->id,
+        'luxury_quote_id' => $invoice->id,
+        'contract_number' => 'TT-STAFF-PROOF-001',
+        'status' => 'signed',
+        'staff_name' => 'Amina Stone',
+        'staff_role' => 'Product Designer',
+        'currency' => 'NGN',
+        'agreed_fee' => 250000,
+        'payment_terms' => 'Paid after each approved monthly delivery.',
+        'scope_of_work' => 'Design and review the assigned product interface work.',
+        'terms' => 'Confidentiality and ownership terms apply throughout the engagement.',
+        'company_name' => 'Turance Technologies',
+    ]);
+
+    $payload = [
+        'luxury_quote_id' => $invoice->id,
+        'status' => 'signed',
+        'staff_name' => 'Amina Stone',
+        'staff_role' => 'Product Designer',
+        'currency' => 'NGN',
+        'agreed_fee' => '250000',
+        'payment_terms' => 'Paid after each approved monthly delivery.',
+        'scope_of_work' => 'Design and review the assigned product interface work.',
+        'terms' => 'Confidentiality and ownership terms apply throughout the engagement.',
+        'company_name' => 'Turance Technologies',
+    ];
+
+    $firstFile = UploadedFile::fake()->create('signed-staff-contract.pdf', 240, 'application/pdf');
+
+    $this
+        ->withSession($session)
+        ->put(route('admin.staff-contracts.update', $contract), [
+            ...$payload,
+            'signed_document' => $firstFile,
+        ])
+        ->assertRedirect(route('admin.staff-contracts.show', $contract));
+
+    $contract->refresh();
+    $firstPath = $contract->signed_document_path;
+
+    expect($contract->hasSignedDocument())->toBeTrue()
+        ->and($contract->signed_document_original_name)->toBe('signed-staff-contract.pdf')
+        ->and($contract->signed_document_mime)->toBe('application/pdf')
+        ->and($firstPath)->toStartWith('staff-contracts/signed-documents/');
+
+    Storage::disk('local')->assertExists($firstPath);
+    Storage::disk('public')->assertMissing($firstPath);
+
+    $this
+        ->withSession($session)
+        ->get(route('admin.staff-contracts.signed-document', $contract))
+        ->assertOk()
+        ->assertHeader('Content-Disposition', 'attachment; filename=signed-staff-contract.pdf');
+
+    $secondFile = UploadedFile::fake()->create('signed-staff-contract-v2.pdf', 280, 'application/pdf');
+
+    $this
+        ->withSession($session)
+        ->put(route('admin.staff-contracts.update', $contract), [
+            ...$payload,
+            'signed_document' => $secondFile,
+        ])
+        ->assertRedirect(route('admin.staff-contracts.show', $contract));
+
+    $contract->refresh();
+
+    expect($contract->signed_document_original_name)->toBe('signed-staff-contract-v2.pdf')
+        ->and($contract->signed_document_path)->not->toBe($firstPath);
+
+    Storage::disk('local')->assertMissing($firstPath);
+    Storage::disk('local')->assertExists($contract->signed_document_path);
 });

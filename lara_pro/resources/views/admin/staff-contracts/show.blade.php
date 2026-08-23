@@ -120,6 +120,24 @@
                     </li>
                 </ul>
             </section>
+
+            <section class="panel panel-padded">
+                <span class="eyebrow">Signed proof copy</span>
+                @if ($contract->hasSignedDocument())
+                    <h3 class="panel-title">{{ $contract->signed_document_original_name ?: 'Signed document' }}</h3>
+                    <p class="form-help" style="margin-top: 10px;">
+                        {{ $contract->signed_document_size ? number_format($contract->signed_document_size / 1024, 1).' KB' : 'Stored privately' }}
+                        @if ($contract->signed_document_mime)
+                            · {{ $contract->signed_document_mime }}
+                        @endif
+                    </p>
+                    <a class="button" href="{{ route('admin.staff-contracts.signed-document', $contract) }}" style="margin-top: 14px;">Download signed copy</a>
+                @else
+                    <h3 class="panel-title">No signed copy uploaded</h3>
+                    <p class="form-help" style="margin-top: 10px;">When the agreement is signed, upload the proof copy from Edit Contract so it remains attached to this project record.</p>
+                    <a class="ghost-button" href="{{ route('admin.staff-contracts.edit', $contract) }}" style="margin-top: 14px;">Upload signed copy</a>
+                @endif
+            </section>
         </aside>
     </div>
 @endsection

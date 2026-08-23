@@ -110,7 +110,7 @@
         </div>
     @endif
 
-    <form class="panel panel-padded contract-form" method="POST" action="{{ $formAction }}" style="margin-top: 24px;">
+    <form class="panel panel-padded contract-form" method="POST" action="{{ $formAction }}" enctype="multipart/form-data" style="margin-top: 24px;">
         @csrf
         @if ($editing)
             @method('PUT')
@@ -207,6 +207,24 @@
         </section>
 
         <input type="hidden" name="company_name" value="{{ $defaultCompany }}">
+
+        <section class="form-section">
+            <div>
+                <span class="eyebrow">05 / Signed proof</span>
+                <h2>Keep the signed copy with this contract</h2>
+                <p class="section-copy">Upload the signed agreement or supporting proof so it stays attached to the project record. The file is stored privately and is available only to authorised staff-contract admins.</p>
+            </div>
+            <div class="form-grid">
+                <div class="field-full">
+                    <label for="signed_document">Signed document</label>
+                    <input id="signed_document" type="file" name="signed_document" accept=".pdf,.jpg,.jpeg,.png,.webp,.doc,.docx">
+                    <p class="form-help">Optional. PDF, Word document, or image up to 20 MB. Uploading a new file replaces the current proof copy.</p>
+                    @if ($editing && $contract->hasSignedDocument())
+                        <p class="form-help">Current file: <a href="{{ route('admin.staff-contracts.signed-document', $contract) }}">{{ $contract->signed_document_original_name ?: 'Download current signed document' }}</a></p>
+                    @endif
+                </div>
+            </div>
+        </section>
 
         <div class="wizard-actions">
             <a class="ghost-button" href="{{ $editing ? route('admin.staff-contracts.show', $contract) : route('admin.staff-contracts.index') }}">Cancel</a>
