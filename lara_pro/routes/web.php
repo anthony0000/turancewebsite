@@ -127,20 +127,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::patch('/{user}/toggle', [AdminSubaccountController::class, 'toggle'])->name('toggle');
         });
 
-        Route::middleware('admin.permission:invoices')->group(function () {
-            Route::get('/quotes', [AdminLuxuryQuoteController::class, 'index'])->name('quotes.index');
-            Route::get('/quotes/create', [AdminLuxuryQuoteController::class, 'create'])->name('quotes.create');
-            Route::post('/quotes', [AdminLuxuryQuoteController::class, 'store'])->name('quotes.store');
-            Route::get('/quotes/archive', [AdminLuxuryQuoteController::class, 'archive'])
-                ->middleware('admin.permission:archive')
-                ->name('quotes.archive');
-            Route::get('/quotes/{luxuryQuote}/edit', [AdminLuxuryQuoteController::class, 'edit'])->name('quotes.edit');
-            Route::put('/quotes/{luxuryQuote}', [AdminLuxuryQuoteController::class, 'update'])->name('quotes.update');
-            Route::get('/quotes/{luxuryQuote}', [AdminLuxuryQuoteController::class, 'show'])->name('quotes.show');
-            Route::get('/quotes/{luxuryQuote}/pdf', [AdminLuxuryQuoteController::class, 'downloadPdf'])->name('quotes.pdf');
-            Route::get('/quotes/{luxuryQuote}/mou', [AdminLuxuryQuoteController::class, 'downloadMouPdf'])->name('quotes.mou');
-        });
-
+        // Keep named quote sections ahead of the {luxuryQuote} wildcard so
+        // values such as "activity" are not treated as invoice IDs.
         Route::get('/quotes/activity', [AdminLuxuryQuoteController::class, 'activity'])
             ->middleware('admin.permission:activity')
             ->name('quotes.activity');
@@ -153,6 +141,30 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/quotes/promotion', [AdminLuxuryQuoteController::class, 'updatePromotion'])
             ->middleware('admin.permission:promotion')
             ->name('quotes.promotion.update');
+
+        Route::middleware('admin.permission:invoices')->group(function () {
+            Route::get('/quotes', [AdminLuxuryQuoteController::class, 'index'])->name('quotes.index');
+            Route::get('/quotes/create', [AdminLuxuryQuoteController::class, 'create'])->name('quotes.create');
+            Route::post('/quotes', [AdminLuxuryQuoteController::class, 'store'])->name('quotes.store');
+            Route::get('/quotes/archive', [AdminLuxuryQuoteController::class, 'archive'])
+                ->middleware('admin.permission:archive')
+                ->name('quotes.archive');
+            Route::get('/quotes/{luxuryQuote}/edit', [AdminLuxuryQuoteController::class, 'edit'])
+                ->whereNumber('luxuryQuote')
+                ->name('quotes.edit');
+            Route::put('/quotes/{luxuryQuote}', [AdminLuxuryQuoteController::class, 'update'])
+                ->whereNumber('luxuryQuote')
+                ->name('quotes.update');
+            Route::get('/quotes/{luxuryQuote}', [AdminLuxuryQuoteController::class, 'show'])
+                ->whereNumber('luxuryQuote')
+                ->name('quotes.show');
+            Route::get('/quotes/{luxuryQuote}/pdf', [AdminLuxuryQuoteController::class, 'downloadPdf'])
+                ->whereNumber('luxuryQuote')
+                ->name('quotes.pdf');
+            Route::get('/quotes/{luxuryQuote}/mou', [AdminLuxuryQuoteController::class, 'downloadMouPdf'])
+                ->whereNumber('luxuryQuote')
+                ->name('quotes.mou');
+        });
 
         Route::middleware('admin.permission:proposals')->group(function () {
             Route::get('/proposals', [AdminProposalController::class, 'index'])->name('proposals.index');

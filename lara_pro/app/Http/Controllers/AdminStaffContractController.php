@@ -18,7 +18,6 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
-use Symfony\Component\HttpFoundation\StreamedResponse;
 use Throwable;
 
 class AdminStaffContractController extends Controller
@@ -148,35 +147,56 @@ class AdminStaffContractController extends Controller
         return $pdf->download(Str::slug($staffContract->contract_number.' '.$staffContract->staff_name).'.pdf');
     }
 
-    public function downloadSignedDocument(StaffContract $staffContract): StreamedResponse
+    public function downloadSignedDocument(StaffContract $staffContract): BinaryFileResponse
     {
-        abort_unless($staffContract->hasSignedDocument(), 404);
+        $absolutePath = $this->signedDocumentAbsolutePath($staffContract);
 
-        $disk = Storage::disk('local');
-        abort_unless($disk->exists($staffContract->signed_document_path), 404);
-
-        return $disk->download(
-            $staffContract->signed_document_path,
+        return response()->download(
+            $absolutePath,
             $staffContract->signed_document_original_name ?: Str::slug($staffContract->contract_number).'.document',
-            ['Content-Type' => $staffContract->signed_document_mime ?: 'application/octet-stream'],
+            [
+                'Content-Type' => $staffContract->signed_document_mime ?: 'application/octet-stream',
+                'X-Content-Type-Options' => 'nosniff',
+            ],
         );
     }
 
     public function previewSignedDocument(StaffContract $staffContract): BinaryFileResponse
     {
-        abort_unless($staffContract->hasSignedDocument(), 404);
-
-        $disk = Storage::disk('local');
-        abort_unless($disk->exists($staffContract->signed_document_path), 404);
+        $absolutePath = $this->signedDocumentAbsolutePath($staffContract);
 
         $filename = $staffContract->signed_document_original_name
             ?: Str::slug($staffContract->contract_number).'_signed-document';
 
-        return response()->file($disk->path($staffContract->signed_document_path), [
+        return response()->file($absolutePath, [
             'Content-Type' => $staffContract->signed_document_mime ?: 'application/octet-stream',
             'Content-Disposition' => 'inline; filename="'.addslashes($filename).'"',
             'X-Content-Type-Options' => 'nosniff',
         ]);
+    }
+
+    private function signedDocumentAbsolutePath(StaffContract $contract): string
+    {
+        abort_unless($contract->hasSignedDocument(), 404);
+
+        $relativePath = ltrim((string) $contract->signed_document_path, '/\\\\');
+        $disk = Storage::disk('local');
+
+        if ($disk->exists($relativePath)) {
+            return $disk->path($relativePath);
+        }
+
+        // Keep documents uploaded before the private local disk was enabled
+        // available after deployment if they remain under storage/app.
+        foreach ([storage_path('app'), storage_path('app/private'), storage_path('app/public')] as $root) {
+            $legacyPath = $root.DIRECTORY_SEPARATOR.$relativePath;
+
+            if (is_file($legacyPath)) {
+                return $legacyPath;
+            }
+        }
+
+        abort(404);
     }
 
     private function validateContractRequest(Request $request): array

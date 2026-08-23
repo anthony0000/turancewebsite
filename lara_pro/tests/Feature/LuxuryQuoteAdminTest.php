@@ -46,6 +46,20 @@ it('resolves the invoice archive route before the quote wildcard route', functio
         ->assertSee('Saved invoices');
 });
 
+it('resolves the activity route before the quote wildcard route', function () {
+    $sessionKey = config('luxury-quotes.admin.session_key', 'luxury_quote_admin_authenticated');
+
+    $this
+        ->withSession([
+            $sessionKey => true,
+            'luxury_quote_admin_email' => 'admin@example.com',
+        ])
+        ->get(route('admin.quotes.activity'))
+        ->assertOk()
+        ->assertSee('Activity')
+        ->assertSee('Activity at a glance');
+});
+
 it('stores an invoice and exports invoice and mou pdfs', function () {
     $sessionKey = config('luxury-quotes.admin.session_key', 'luxury_quote_admin_authenticated');
 
