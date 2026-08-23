@@ -9,12 +9,13 @@
         href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&amp;family=Hanken+Grotesk:wght@400;500;600;700&amp;display=swap">
     <link rel="stylesheet" href="{{ asset('/assets/css/home-reference.css') }}?v=2.7">
     <link rel="stylesheet" href="{{ asset('/assets/css/home-sections.css') }}?v=2.4">
-    <link rel="stylesheet" href="{{ asset('/assets/css/contact-reference.css') }}?v=1.4">
+    <link rel="stylesheet" href="{{ asset('/assets/css/contact-reference.css') }}?v=1.5">
 @endpush
 
 @section('content')
     @php($topics = config('contact.topics', []))
     @php($anniversaryPromo = app(\App\Support\AnniversaryPromotion::class)->current())
+    @php($turnstileRequired = (bool) config('contact.turnstile.enabled'))
 
     <a class="tt-skip-link" href="#main-content">Skip to main content</a>
 
@@ -95,7 +96,8 @@
                         </div>
                     @endif
 
-                    <form id="project-enquiry-form" action="{{ route('contact.store') }}" method="post">
+                    <form id="project-enquiry-form" action="{{ route('contact.store') }}" method="post"
+                        data-turnstile-required="{{ $turnstileRequired ? 'true' : 'false' }}">
                         @csrf
                         <input type="hidden" name="contact_context" value="{{ $contactContext }}">
                         <div class="tt-contact-trap" aria-hidden="true">
@@ -162,13 +164,19 @@
                         @if (config('contact.turnstile.enabled') && filled(config('contact.turnstile.site_key')))
                             <div class="tt-contact-turnstile">
                                 <div class="cf-turnstile" data-sitekey="{{ config('contact.turnstile.site_key') }}"
-                                    data-theme="light" data-response-field-name="cf-turnstile-response"></div>
+                                    data-theme="light" data-response-field-name="cf-turnstile-response"
+                                    data-callback="contactTurnstileSuccess"
+                                    data-expired-callback="contactTurnstileExpired"
+                                    data-error-callback="contactTurnstileError"
+                                    data-timeout-callback="contactTurnstileExpired"></div>
                                 @error('cf-turnstile-response')<small>{{ $message }}</small>@enderror
                             </div>
                         @endif
 
                         <div class="tt-contact-form__submit">
-                            <button class="tt-contact-submit" type="submit">
+                            <button class="tt-contact-submit" type="submit"
+                                {{ $turnstileRequired ? 'disabled' : '' }}
+                                aria-disabled="{{ $turnstileRequired ? 'true' : 'false' }}">
                                 <span>Request project estimate</span>
                                 <i aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12h14M14 7l5 5-5 5" /></svg></i>
                             </button>
@@ -223,8 +231,34 @@
 
 @push('scripts')
     @if (config('contact.turnstile.enabled') && filled(config('contact.turnstile.site_key')))
+        <script>
+            window.contactTurnstileState = function (token) {
+                const form = document.getElementById('project-enquiry-form');
+
+                if (!form) {
+                    return;
+                }
+
+                form.dataset.turnstileVerified = token ? 'true' : 'false';
+                form.dataset.turnstileToken = token || '';
+                form.dispatchEvent(new CustomEvent('contact-turnstile-state'));
+            };
+
+            window.contactTurnstileSuccess = function (token) {
+                window.contactTurnstileState(token);
+            };
+
+            window.contactTurnstileExpired = function () {
+                window.contactTurnstileState('');
+            };
+
+            window.contactTurnstileError = function () {
+                window.contactTurnstileState('');
+                return true;
+            };
+        </script>
         <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
     @endif
     <script src="{{ asset('/assets/js/home-reference.js') }}?v=2.6" defer></script>
-    <script src="{{ asset('/assets/js/contact-reference.js') }}?v=1.2" defer></script>
+    <script src="{{ asset('/assets/js/contact-reference.js') }}?v=1.3" defer></script>
 @endpush

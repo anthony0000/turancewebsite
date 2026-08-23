@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Throwable;
 
@@ -90,8 +91,14 @@ class AdminStaffContractController extends Controller
         ]);
     }
 
-    public function edit(StaffContract $staffContract): View
+    public function edit(StaffContract $staffContract): View|RedirectResponse
     {
+        if ($staffContract->hasSignedDocument()) {
+            return redirect()
+                ->route('admin.staff-contracts.show', $staffContract)
+                ->with('error', 'This contract is locked because its signed document has already been uploaded.');
+        }
+
         return view('admin.staff-contracts.create', [
             'invoices' => LuxuryQuote::query()->latest('created_at')->get(),
             'contract' => $staffContract->load(['project', 'invoice']),
@@ -102,6 +109,12 @@ class AdminStaffContractController extends Controller
 
     public function update(Request $request, StaffContract $staffContract): RedirectResponse
     {
+        if ($staffContract->hasSignedDocument()) {
+            return redirect()
+                ->route('admin.staff-contracts.show', $staffContract)
+                ->with('error', 'This contract is locked because its signed document has already been uploaded.');
+        }
+
         $validated = $this->validateContractRequest($request);
         $invoice = LuxuryQuote::query()->findOrFail($validated['luxury_quote_id']);
 
@@ -149,6 +162,23 @@ class AdminStaffContractController extends Controller
         );
     }
 
+    public function previewSignedDocument(StaffContract $staffContract): BinaryFileResponse
+    {
+        abort_unless($staffContract->hasSignedDocument(), 404);
+
+        $disk = Storage::disk('local');
+        abort_unless($disk->exists($staffContract->signed_document_path), 404);
+
+        $filename = $staffContract->signed_document_original_name
+            ?: Str::slug($staffContract->contract_number).'_signed-document';
+
+        return response()->file($disk->path($staffContract->signed_document_path), [
+            'Content-Type' => $staffContract->signed_document_mime ?: 'application/octet-stream',
+            'Content-Disposition' => 'inline; filename="'.addslashes($filename).'"',
+            'X-Content-Type-Options' => 'nosniff',
+        ]);
+    }
+
     private function validateContractRequest(Request $request): array
     {
         return $request->validate([
@@ -179,7 +209,8 @@ class AdminStaffContractController extends Controller
     private function replaceSignedDocument(StaffContract $contract, UploadedFile $file): void
     {
         $disk = Storage::disk('local');
-        $path = $file->store(self::SIGNED_DOCUMENT_DIRECTORY, 'local');
+        $filename = $this->signedDocumentFilename($contract, $file);
+        $path = $file->storeAs(self::SIGNED_DOCUMENT_DIRECTORY, $filename, 'local');
 
         if (! is_string($path) || $path === '') {
             throw new \RuntimeException('The signed document could not be stored.');
@@ -190,7 +221,7 @@ class AdminStaffContractController extends Controller
         try {
             $contract->forceFill([
                 'signed_document_path' => $path,
-                'signed_document_original_name' => mb_substr(trim($file->getClientOriginalName()), 0, 255),
+                'signed_document_original_name' => $filename,
                 'signed_document_mime' => $file->getMimeType() ?: $file->getClientMimeType(),
                 'signed_document_size' => $file->getSize() ?: null,
             ])->save();
@@ -203,6 +234,14 @@ class AdminStaffContractController extends Controller
         if (filled($oldPath) && $oldPath !== $path) {
             $disk->delete($oldPath);
         }
+    }
+
+    private function signedDocumentFilename(StaffContract $contract, UploadedFile $file): string
+    {
+        $extension = strtolower($file->getClientOriginalExtension() ?: $file->guessExtension() ?: 'document');
+        $extension = preg_replace('/[^a-z0-9]+/i', '', $extension) ?: 'document';
+
+        return Str::slug($contract->contract_number.' '.$contract->staff_name.' signed').'.'.$extension;
     }
 
     private function projectForInvoice(LuxuryQuote $invoice): Project

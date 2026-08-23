@@ -10,6 +10,11 @@ use Illuminate\Support\Str;
 
 uses(RefreshDatabase::class);
 
+beforeEach(function () {
+    Config::set('contact.turnstile.enabled', false);
+    Config::set('contact.delivery.enabled', true);
+});
+
 function contactFormContext(?int $issuedAt = null): string
 {
     return Crypt::encryptString(json_encode([
@@ -54,6 +59,19 @@ it('renders the encrypted form context and honeypot field', function () {
         ->assertOk()
         ->assertSee('name="contact_context"', false)
         ->assertSee('name="company_fax"', false);
+});
+
+it('keeps the contact submit button disabled until Turnstile is verified', function () {
+    Config::set('contact.turnstile.enabled', true);
+    Config::set('contact.turnstile.site_key', 'test-site-key');
+
+    $this->get(route('contact.show'))
+        ->assertOk()
+        ->assertSee('data-turnstile-required="true"', false)
+        ->assertSee('data-callback="contactTurnstileSuccess"', false)
+        ->assertSee('data-expired-callback="contactTurnstileExpired"', false)
+        ->assertSee('aria-disabled="true"', false)
+        ->assertSee('disabled', false);
 });
 
 it('silently discards honeypot submissions', function () {
@@ -163,6 +181,28 @@ it('validates turnstile server side when enabled', function () {
 
     Http::assertSent(fn ($request) => $request['secret'] === 'test-secret-key'
         && $request['response'] === 'invalid-token');
+    $this->assertDatabaseCount('contact_messages', 0);
+    Mail::assertNothingSent();
+});
+
+it('rejects contact submissions without a Turnstile token when enabled', function () {
+    Mail::fake();
+    Http::fake();
+
+    Config::set('contact.turnstile.enabled', true);
+    Config::set('contact.turnstile.secret_key', 'test-secret-key');
+
+    $this->postJson(route('contact.store'), [
+        'name' => 'Jane Doe',
+        'email' => 'jane@example.com',
+        'topic' => 'Web Development',
+        'message' => 'This submission has no completed challenge token.',
+        'contact_context' => contactFormContext(),
+    ])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors('cf-turnstile-response');
+
+    Http::assertNothingSent();
     $this->assertDatabaseCount('contact_messages', 0);
     Mail::assertNothingSent();
 });

@@ -13,14 +13,40 @@ document.addEventListener("DOMContentLoaded", function () {
     return;
   }
 
+  const button = form.querySelector("button[type='submit']");
+  const turnstileRequired = form.dataset.turnstileRequired === "true";
+
+  function setTurnstileState() {
+    if (!button) {
+      return;
+    }
+
+    const responseField = form.querySelector("input[name='cf-turnstile-response']");
+    const token = form.dataset.turnstileToken
+      || (responseField ? responseField.value : "");
+    const verified = !turnstileRequired || Boolean(token && token.trim());
+
+    form.dataset.turnstileVerified = verified ? "true" : "false";
+    button.disabled = !verified;
+    button.setAttribute("aria-disabled", verified ? "false" : "true");
+  }
+
+  form.addEventListener("contact-turnstile-state", setTurnstileState);
+  setTurnstileState();
+
   form.addEventListener("submit", function (event) {
     if (!form.checkValidity()) {
       return;
     }
 
-    const button = form.querySelector("button[type='submit']");
     if (!button || button.disabled) {
       event.preventDefault();
+      return;
+    }
+
+    if (turnstileRequired && form.dataset.turnstileVerified !== "true") {
+      event.preventDefault();
+      setTurnstileState();
       return;
     }
 

@@ -129,7 +129,11 @@
                                     <summary>Actions</summary>
                                     <div class="action-menu-panel">
                                         <a href="{{ route('admin.staff-contracts.show', $contract) }}">Preview</a>
-                                        <a href="{{ route('admin.staff-contracts.edit', $contract) }}">Edit</a>
+                                        @if ($contract->hasSignedDocument())
+                                            <span>Locked after signed upload</span>
+                                        @else
+                                            <a href="{{ route('admin.staff-contracts.edit', $contract) }}">Edit</a>
+                                        @endif
                                         <a href="{{ route('admin.staff-contracts.pdf', $contract) }}">Download PDF</a>
                                         @if ($contract->hasSignedDocument())
                                             <a href="{{ route('admin.staff-contracts.signed-document', $contract) }}">Download signed copy</a>

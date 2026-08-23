@@ -218,7 +218,7 @@
                 <div class="field-full">
                     <label for="signed_document">Signed document</label>
                     <input id="signed_document" type="file" name="signed_document" accept=".pdf,.jpg,.jpeg,.png,.webp,.doc,.docx">
-                    <p class="form-help">Optional. PDF, Word document, or image up to 20 MB. Uploading a new file replaces the current proof copy.</p>
+                    <p class="form-help">Optional. PDF, Word document, or image up to 20 MB. The first signed upload becomes the immutable copy and locks this contract.</p>
                     @if ($editing && $contract->hasSignedDocument())
                         <p class="form-help">Current file: <a href="{{ route('admin.staff-contracts.signed-document', $contract) }}">{{ $contract->signed_document_original_name ?: 'Download current signed document' }}</a></p>
                     @endif

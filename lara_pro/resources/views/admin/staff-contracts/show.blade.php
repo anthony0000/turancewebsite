@@ -34,6 +34,44 @@
             text-transform: uppercase;
         }
 
+        .contract-lock-notice {
+            display: inline-flex;
+            align-items: center;
+            padding: 10px 14px;
+            border: 1px solid rgba(47, 128, 84, 0.24);
+            border-radius: 999px;
+            background: rgba(47, 128, 84, 0.1);
+            color: var(--success);
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .signed-document-preview {
+            overflow: hidden;
+            margin-top: 18px;
+            border: 1px solid rgba(25, 31, 39, 0.12);
+            border-radius: 14px;
+            background: #f5f6f7;
+        }
+
+        .signed-document-preview iframe {
+            display: block;
+            width: 100%;
+            min-height: 760px;
+            border: 0;
+            background: #fff;
+        }
+
+        .signed-document-preview img {
+            display: block;
+            width: 100%;
+            max-height: 760px;
+            object-fit: contain;
+            background: #fff;
+        }
+
         @media (max-width: 1120px) {
             .staff-contract-preview-shell {
                 grid-template-columns: 1fr;
@@ -55,7 +93,11 @@
             </p>
             <div class="hero-actions">
                 <a class="button" href="{{ route('admin.staff-contracts.pdf', $contract) }}">Download Contract PDF</a>
-                <a class="ghost-button" href="{{ route('admin.staff-contracts.edit', $contract) }}">Edit Contract</a>
+                @if ($contract->hasSignedDocument())
+                    <span class="contract-lock-notice">Locked after signed upload</span>
+                @else
+                    <a class="ghost-button" href="{{ route('admin.staff-contracts.edit', $contract) }}">Edit Contract</a>
+                @endif
                 <a class="ghost-button" href="{{ route('admin.staff-contracts.index') }}">Back to Register</a>
             </div>
         </div>
@@ -79,6 +121,31 @@
                 'contract' => $contract,
                 'brand' => $brand,
             ])
+
+            @if ($contract->hasSignedDocument())
+                <section class="panel panel-padded" style="margin-top: 24px;">
+                    <span class="eyebrow">Uploaded signed version</span>
+                    <h2 class="panel-title">{{ $contract->signed_document_original_name }}</h2>
+                    <p class="form-help" style="margin-top: 10px;">
+                        This is the signed document attached to the contract. The contract is locked and can no longer be edited.
+                    </p>
+                    @if (str_starts_with((string) $contract->signed_document_mime, 'image/'))
+                        <div class="signed-document-preview">
+                            <img src="{{ route('admin.staff-contracts.signed-document.preview', $contract) }}" alt="Uploaded signed contract">
+                        </div>
+                    @elseif ($contract->signed_document_mime === 'application/pdf')
+                        <div class="signed-document-preview">
+                            <iframe src="{{ route('admin.staff-contracts.signed-document.preview', $contract) }}" title="Uploaded signed contract"></iframe>
+                        </div>
+                    @else
+                        <div class="signed-document-preview" style="padding: 24px;">
+                            <strong>Preview is unavailable for this file type.</strong>
+                            <p class="form-help" style="margin-top: 8px;">Download the uploaded Word document to view the signed version.</p>
+                        </div>
+                    @endif
+                    <a class="button" href="{{ route('admin.staff-contracts.signed-document', $contract) }}" style="margin-top: 14px;">Download signed version</a>
+                </section>
+            @endif
         </section>
 
         <aside class="sticky-stack">

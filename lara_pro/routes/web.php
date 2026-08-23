@@ -175,6 +175,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/staff-contracts/{staffContract}/edit', [AdminStaffContractController::class, 'edit'])->name('staff-contracts.edit');
             Route::put('/staff-contracts/{staffContract}', [AdminStaffContractController::class, 'update'])->name('staff-contracts.update');
             Route::get('/staff-contracts/{staffContract}/pdf', [AdminStaffContractController::class, 'downloadPdf'])->name('staff-contracts.pdf');
+            Route::get('/staff-contracts/{staffContract}/signed-document/preview', [AdminStaffContractController::class, 'previewSignedDocument'])->name('staff-contracts.signed-document.preview');
             Route::get('/staff-contracts/{staffContract}/signed-document', [AdminStaffContractController::class, 'downloadSignedDocument'])->name('staff-contracts.signed-document');
             Route::get('/staff-contracts/{staffContract}', [AdminStaffContractController::class, 'show'])->name('staff-contracts.show');
         });

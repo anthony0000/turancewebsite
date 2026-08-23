@@ -187,7 +187,7 @@ it('updates a staff contract without losing its invoice and project relationship
         ->and($contract->staff_signatory_name)->toBe('Daniel Cole');
 });
 
-it('stores a private signed proof copy and replaces it when a newer copy is uploaded', function () {
+it('stores an automatically named private signed copy and locks the contract', function () {
     Storage::fake('local');
 
     $sessionKey = config('luxury-quotes.admin.session_key', 'luxury_quote_admin_authenticated');
@@ -257,7 +257,7 @@ it('stores a private signed proof copy and replaces it when a newer copy is uplo
     $firstPath = $contract->signed_document_path;
 
     expect($contract->hasSignedDocument())->toBeTrue()
-        ->and($contract->signed_document_original_name)->toBe('signed-staff-contract.pdf')
+        ->and($contract->signed_document_original_name)->toBe('tt-staff-proof-001-amina-stone-signed.pdf')
         ->and($contract->signed_document_mime)->toBe('application/pdf')
         ->and($firstPath)->toStartWith('staff-contracts/signed-documents/');
 
@@ -266,9 +266,31 @@ it('stores a private signed proof copy and replaces it when a newer copy is uplo
 
     $this
         ->withSession($session)
+        ->get(route('admin.staff-contracts.show', $contract))
+        ->assertOk()
+        ->assertSee('Uploaded signed version')
+        ->assertSee('tt-staff-proof-001-amina-stone-signed.pdf')
+        ->assertSee('Locked after signed upload')
+        ->assertDontSee('Edit Contract');
+
+    $this
+        ->withSession($session)
         ->get(route('admin.staff-contracts.signed-document', $contract))
         ->assertOk()
-        ->assertHeader('Content-Disposition', 'attachment; filename=signed-staff-contract.pdf');
+        ->assertHeader('Content-Disposition', 'attachment; filename=tt-staff-proof-001-amina-stone-signed.pdf');
+
+    $this
+        ->withSession($session)
+        ->get(route('admin.staff-contracts.signed-document.preview', $contract))
+        ->assertOk()
+        ->assertHeader('Content-Type', 'application/pdf')
+        ->assertHeader('Content-Disposition', 'inline; filename="tt-staff-proof-001-amina-stone-signed.pdf"');
+
+    $this
+        ->withSession($session)
+        ->get(route('admin.staff-contracts.edit', $contract))
+        ->assertRedirect(route('admin.staff-contracts.show', $contract))
+        ->assertSessionHas('error', 'This contract is locked because its signed document has already been uploaded.');
 
     $secondFile = UploadedFile::fake()->create('signed-staff-contract-v2.pdf', 280, 'application/pdf');
 
@@ -276,15 +298,16 @@ it('stores a private signed proof copy and replaces it when a newer copy is uplo
         ->withSession($session)
         ->put(route('admin.staff-contracts.update', $contract), [
             ...$payload,
+            'staff_role' => 'Changed after signing',
             'signed_document' => $secondFile,
         ])
         ->assertRedirect(route('admin.staff-contracts.show', $contract));
 
     $contract->refresh();
 
-    expect($contract->signed_document_original_name)->toBe('signed-staff-contract-v2.pdf')
-        ->and($contract->signed_document_path)->not->toBe($firstPath);
+    expect($contract->staff_role)->toBe('Product Designer')
+        ->and($contract->signed_document_original_name)->toBe('tt-staff-proof-001-amina-stone-signed.pdf')
+        ->and($contract->signed_document_path)->toBe($firstPath);
 
-    Storage::disk('local')->assertMissing($firstPath);
-    Storage::disk('local')->assertExists($contract->signed_document_path);
+    Storage::disk('local')->assertExists($firstPath);
 });
