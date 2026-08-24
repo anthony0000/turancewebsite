@@ -142,6 +142,7 @@
 
         .letter-preview-sheet .letter-document {
             width: 100%;
+            height: auto;
             min-height: 0;
             aspect-ratio: 210 / 297;
             font-size: 1.35vw;

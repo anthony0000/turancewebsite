@@ -1266,6 +1266,68 @@ button.ghost-button {
     min-height: 92px;
 }
 
+.project-index-upload-form {
+    display: grid;
+    grid-template-columns: minmax(180px, 0.8fr) minmax(220px, 1fr);
+    gap: 14px 18px;
+    margin-top: 20px;
+}
+
+.project-index-upload-form .field-full,
+.project-index-upload-form__actions {
+    grid-column: 1 / -1;
+}
+
+.project-index-upload-form input[type="file"] {
+    width: 100%;
+    padding: 9px;
+    border: 1px dashed var(--line);
+    border-radius: 10px;
+    background: var(--surface-soft);
+    color: var(--muted-strong);
+    font-size: 12px;
+}
+
+.project-index-upload-form textarea {
+    min-height: 76px;
+}
+
+.project-index-upload-form__actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding-top: 2px;
+}
+
+.project-index-upload-form__actions .form-help {
+    margin: 0;
+}
+
+.project-upload-empty {
+    display: grid;
+    justify-items: start;
+    gap: 7px;
+    margin-top: 20px;
+    padding: 18px;
+    border: 1px dashed var(--line);
+    border-radius: var(--radius);
+    background: var(--surface-soft);
+}
+
+.project-upload-empty strong {
+    color: var(--text);
+    font-size: 15px;
+}
+
+.project-upload-empty p {
+    max-width: 760px;
+    margin: 0 0 7px;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.6;
+}
+
 .form-error {
     margin: 0;
     color: var(--danger);
@@ -2505,6 +2567,20 @@ button.ghost-button {
 }
 
 @media (max-width: 760px) {
+    .project-index-upload-form {
+        grid-template-columns: 1fr;
+    }
+
+    .project-index-upload-form .field-full,
+    .project-index-upload-form__actions {
+        grid-column: auto;
+    }
+
+    .project-index-upload-form__actions {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
     .admin-workspace--with-sidebar .admin-main {
         gap: 16px;
         padding: 0 14px 24px;

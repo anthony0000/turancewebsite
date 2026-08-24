@@ -39,6 +39,8 @@ it('shows project portfolio charts and the file workspace entry point', function
         ->assertOk()
         ->assertSee('Projects by status')
         ->assertSee('Files by project')
+        ->assertSee('Upload a file for the project team')
+        ->assertSee('Choose a project')
         ->assertSee('Northstar Client Portal');
 
     $this
@@ -46,6 +48,33 @@ it('shows project portfolio charts and the file workspace entry point', function
         ->get(route('admin.projects.show', $project))
         ->assertOk()
         ->assertSee('Create share link');
+});
+
+it('uploads an external project file from the project register', function () {
+    Storage::fake('local');
+
+    $project = Project::query()->create([
+        'project_number' => 'TT-PRJ-EXTERNAL-001',
+        'name' => 'External Files Project',
+        'status' => 'active',
+    ]);
+
+    $this
+        ->withSession(projectAdminSession())
+        ->post(route('admin.projects.files.external.store'), [
+            'project_id' => $project->id,
+            'file' => UploadedFile::fake()->create('client-reference.docx', 64, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'),
+            'description' => 'Reference material for the staff handoff.',
+        ])
+        ->assertRedirect(route('admin.projects.show', $project));
+
+    $projectFile = ProjectFile::query()->firstOrFail();
+
+    expect($projectFile->project_id)->toBe($project->id)
+        ->and($projectFile->original_name)->toBe('client-reference.docx')
+        ->and($projectFile->description)->toBe('Reference material for the staff handoff.');
+
+    Storage::disk('local')->assertExists($projectFile->path);
 });
 
 it('stores project files privately, shares one file, and can revoke the link', function () {

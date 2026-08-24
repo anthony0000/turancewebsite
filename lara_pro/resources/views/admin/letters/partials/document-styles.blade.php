@@ -3,6 +3,7 @@
 .letter-document {
     position: relative;
     width: 210mm;
+    height: 297mm;
     min-height: 297mm;
     overflow: hidden;
     color: #17202b;
@@ -24,11 +25,14 @@
     inset: 0;
     width: 100%;
     height: 100%;
-    object-fit: fill;
+    display: block;
+    object-fit: contain;
+    object-position: center top;
 }
 
 .letter-content {
-    position: relative;
+    position: absolute;
+    inset: 0;
     z-index: 1;
     padding: 68mm 20mm 48mm;
 }

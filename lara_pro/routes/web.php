@@ -130,6 +130,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::middleware('admin.permission:projects')->prefix('projects')->name('projects.')->group(function () {
             Route::get('/', [AdminProjectController::class, 'index'])->name('index');
+            Route::post('/files', [AdminProjectController::class, 'storeExternalFile'])->name('files.external.store');
             Route::get('/{project}', [AdminProjectController::class, 'show'])->name('show');
             Route::post('/{project}/files', [AdminProjectController::class, 'storeFile'])->name('files.store');
             Route::get('/files/{projectFile}/download', [AdminProjectController::class, 'downloadFile'])->name('files.download');

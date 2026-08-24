@@ -114,7 +114,7 @@
                 <h2 class="panel-title">Upload a file</h2>
                 <p class="form-help">Private by default. Maximum 50 MB. PDF, Office files, images, text, and ZIP files are supported.</p>
 
-                <form class="project-file-upload-form" method="POST" action="{{ route('admin.projects.files.store', $project) }}" enctype="multipart/form-data">
+                <form id="project-file-upload" class="project-file-upload-form" method="POST" action="{{ route('admin.projects.files.store', $project) }}" enctype="multipart/form-data">
                     @csrf
                     <label for="project-file">File</label>
                     <input id="project-file" type="file" name="file" required accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.ppt,.pptx,.txt,.rtf,.jpg,.jpeg,.png,.webp,.zip">

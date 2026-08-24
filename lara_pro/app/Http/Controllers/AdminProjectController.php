@@ -89,28 +89,48 @@ class AdminProjectController extends Controller
             'description' => ['nullable', 'string', 'max:500'],
         ]);
 
-        $file = $validated['file'];
+        $this->createProjectFile($project, $validated['file'], $validated['description'] ?? null);
+
+        return redirect()
+            ->route('admin.projects.show', $project)
+            ->with('status', 'File added to the project workspace.');
+    }
+
+    public function storeExternalFile(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'project_id' => ['required', 'integer', 'exists:projects,id'],
+            'file' => ['required', 'file', 'max:51200', 'mimes:'.implode(',', self::FILE_MIMES)],
+            'description' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        $project = Project::query()->findOrFail($validated['project_id']);
+        $this->createProjectFile($project, $validated['file'], $validated['description'] ?? null);
+
+        return redirect()
+            ->route('admin.projects.show', $project)
+            ->with('status', 'External file added to the project workspace.');
+    }
+
+    private function createProjectFile(Project $project, UploadedFile $file, ?string $description): ProjectFile
+    {
         $path = $this->storeProjectFile($project, $file);
 
         try {
-            ProjectFile::query()->create([
+            return ProjectFile::query()->create([
                 'project_id' => $project->id,
                 'uploaded_by' => AdminAccess::currentUser()?->id,
                 'original_name' => $this->originalName($file),
                 'path' => $path,
                 'mime_type' => $file->getMimeType() ?: $file->getClientMimeType(),
                 'size' => $file->getSize(),
-                'description' => filled($validated['description'] ?? null) ? trim($validated['description']) : null,
+                'description' => filled($description) ? trim($description) : null,
             ]);
         } catch (\Throwable $exception) {
             Storage::disk('local')->delete($path);
 
             throw $exception;
         }
-
-        return redirect()
-            ->route('admin.projects.show', $project)
-            ->with('status', 'File added to the project workspace.');
     }
 
     public function downloadFile(ProjectFile $projectFile): BinaryFileResponse
