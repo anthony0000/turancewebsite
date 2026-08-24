@@ -6,7 +6,9 @@
     <div class="auth-grid">
         <section class="auth-brand-panel" aria-labelledby="auth-title">
             <div class="auth-brand-lockup">
-                <span class="admin-brand-mark">TT</span>
+                <span class="admin-brand-mark">
+                    <img src="{{ asset('/assets/img/logo/favicon.png') }}" alt="" aria-hidden="true">
+                </span>
                 <div class="auth-brand-copy">
                     <strong>{{ config('luxury-quotes.brand.studio_name', 'Turance Technologies') }}</strong>
                     <span>Invoice Admin</span>

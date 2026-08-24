@@ -172,6 +172,13 @@ summary::-webkit-details-marker {
     letter-spacing: 0.08em;
 }
 
+.admin-brand-mark img {
+    display: block;
+    width: 76%;
+    height: 76%;
+    object-fit: contain;
+}
+
 .admin-brand-copy {
     min-width: 0;
 }

@@ -7,7 +7,7 @@
         .pm-shell { display: grid; gap: 18px; }
         .pm-subnav { display: flex; flex-wrap: wrap; gap: 7px; padding: 8px; border: 1px solid var(--line); border-radius: 16px; background: rgba(255,255,255,.78); }
         .pm-subnav a { display: inline-flex; min-height: 34px; align-items: center; padding: 0 11px; border-radius: 9px; color: var(--muted); font-size: 12px; font-weight: 700; }
-        .pm-subnav a:hover, .pm-subnav a.active { background: var(--panel-soft); color: var(--accent-soft); }
+        .pm-subnav a:hover, .pm-subnav a.active { background: var(--panel-soft); color: var(--muted-strong); }
         .pm-hero { display: flex; align-items: flex-end; justify-content: space-between; gap: 22px; padding: 24px; }
         .pm-hero h2 { max-width: 760px; margin: 6px 0 0; font-size: clamp(24px, 3vw, 36px); line-height: 1.1; }
         .pm-hero p { max-width: 700px; margin: 12px 0 0; color: var(--muted); line-height: 1.6; }

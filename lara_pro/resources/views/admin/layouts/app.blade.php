@@ -2197,7 +2197,9 @@
                     <div class="admin-sidebar-inner">
                         <div class="admin-sidebar-top">
                             <a class="admin-sidebar-brand" href="{{ route($canInvoices ? 'admin.quotes.index' : ($canProposals ? 'admin.proposals.index' : ($canStaffContracts ? 'admin.staff-contracts.index' : ($canProjects ? 'admin.projects.index' : 'admin.profile')))) }}">
-                                <span class="admin-brand-mark">TT</span>
+                                <span class="admin-brand-mark">
+                                    <img src="{{ asset('/assets/img/logo/favicon.png') }}" alt="" aria-hidden="true">
+                                </span>
                                 <span class="admin-brand-copy">
                                     <strong>{{ $brandName }}</strong>
                                     <span>Admin</span>
