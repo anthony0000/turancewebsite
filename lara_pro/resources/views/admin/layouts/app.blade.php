@@ -13,6 +13,9 @@
     $isStaffContractEditor = request()->routeIs('admin.staff-contracts.edit');
     $isStaffContractBuilder = request()->routeIs('admin.staff-contracts.create');
     $isStaffContractWorkspace = request()->routeIs('admin.staff-contracts.*');
+    $isProjectDashboard = request()->routeIs('admin.projects.index');
+    $isProjectPreview = request()->routeIs('admin.projects.show');
+    $isProjectWorkspace = request()->routeIs('admin.projects.*');
     $isLetterBuilder = request()->routeIs('admin.letters.create');
     $isLetterWorkspace = request()->routeIs('admin.letters.*');
     $isAdminProfile = request()->routeIs('admin.profile');
@@ -20,6 +23,7 @@
     $canInvoices = \App\Support\AdminAccess::can('invoices');
     $canProposals = \App\Support\AdminAccess::can('proposals');
     $canStaffContracts = \App\Support\AdminAccess::can('staff-contracts');
+    $canProjects = \App\Support\AdminAccess::can('projects');
     $canLetters = \App\Support\AdminAccess::can('letters');
     $canActivity = \App\Support\AdminAccess::can('activity');
     $canInsights = \App\Support\AdminAccess::can('insights');
@@ -39,6 +43,8 @@
         $isProposalDashboard => 'Proposal Studio',
         $isStaffContractPreview => 'Staff Contract Preview',
         $isStaffContractEditor => 'Edit Staff Contract',
+        $isProjectPreview => 'Project Workspace',
+        $isProjectDashboard => 'Projects & Files',
         $isLetterBuilder => 'Letter Generator',
         $isSubaccountWorkspace => 'Sub-accounts',
         $isAdminProfile => 'Profile & Settings',
@@ -59,6 +65,8 @@
         $isProposalDashboard => 'Build, review, and export client proposals.',
         $isStaffContractPreview => 'Review the project-bound staff agreement, signing details, and contract PDF.',
         $isStaffContractEditor => 'Update the project, commercial terms, staff details, and signing section.',
+        $isProjectPreview => 'Keep project files private by default, then create a secure link for the right handoff.',
+        $isProjectDashboard => 'Review project health, handoff activity, and the files attached to each engagement.',
         $isLetterBuilder => 'Write letters and basic company documents on the Turance letterhead, then export them as PDF.',
         $isSubaccountWorkspace => 'Create team accounts and limit the parts of the admin workspace they can access.',
         $isAdminProfile => 'Manage your admin identity, contact details, and account security.',
@@ -79,6 +87,8 @@
         $isProposalDashboard => 'Proposal Studio',
         $isStaffContractPreview => 'Staff Contract Preview',
         $isStaffContractEditor => 'Edit Staff Contract',
+        $isProjectPreview => 'Project Workspace',
+        $isProjectDashboard => 'Projects & Files',
         $isLetterBuilder => 'Letter Generator',
         $isSubaccountWorkspace => 'Sub-accounts',
         $isAdminProfile => 'Profile & Settings',
@@ -2181,7 +2191,7 @@
                 <aside class="admin-sidebar" id="admin-sidebar" aria-label="Admin navigation">
                     <div class="admin-sidebar-inner">
                         <div class="admin-sidebar-top">
-                            <a class="admin-sidebar-brand" href="{{ route($canInvoices ? 'admin.quotes.index' : ($canProposals ? 'admin.proposals.index' : ($canStaffContracts ? 'admin.staff-contracts.index' : 'admin.profile'))) }}">
+                            <a class="admin-sidebar-brand" href="{{ route($canInvoices ? 'admin.quotes.index' : ($canProposals ? 'admin.proposals.index' : ($canStaffContracts ? 'admin.staff-contracts.index' : ($canProjects ? 'admin.projects.index' : 'admin.profile')))) }}">
                                 <span class="admin-brand-mark">TT</span>
                                 <span class="admin-brand-copy">
                                     <strong>{{ $brandName }}</strong>
@@ -2320,6 +2330,22 @@
                                 </a>
                             @endif
 
+                            @if ($canProjects)
+                                <a class="admin-nav-link {{ $isProjectWorkspace ? 'active' : '' }}"
+                                    href="{{ route('admin.projects.index') }}">
+                                <span class="admin-nav-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24">
+                                        <path d="M3 7h7l2 2h9v10H3z" />
+                                        <path d="M3 7V5h7l2 2" />
+                                    </svg>
+                                </span>
+                                <div>
+                                    <strong>Projects & Files</strong>
+                                    <span>Secure handoffs</span>
+                                </div>
+                                </a>
+                            @endif
+
                             @if ($canLetters)
                                 <a class="admin-nav-link {{ $isLetterWorkspace ? 'active' : '' }}"
                                     href="{{ route('admin.letters.create') }}">
@@ -2444,6 +2470,8 @@
                                 @endif
                             @elseif ($isProposalWorkspace)
                                 <a class="button" href="{{ route('admin.proposals.index') }}">New Proposal</a>
+                            @elseif ($isProjectPreview)
+                                <a class="ghost-button" href="{{ route('admin.projects.index') }}">Back to Projects</a>
                             @elseif ($isStaffContractWorkspace)
                                 <a class="button" href="{{ route('admin.staff-contracts.create') }}">New Staff Contract</a>
                             @elseif ($isLetterWorkspace)

@@ -35,11 +35,22 @@ class AdminStaffContractController extends Controller
 
     public function index(): View
     {
+        $contracts = StaffContract::query()
+            ->with(['project', 'invoice'])
+            ->latest('updated_at')
+            ->get();
+
+        $statusBreakdown = collect(self::STATUSES)
+            ->map(fn (string $status) => [
+                'label' => Str::headline($status),
+                'count' => $contracts->where('status', $status)->count(),
+            ])
+            ->filter(fn (array $status) => $status['count'] > 0)
+            ->values();
+
         return view('admin.staff-contracts.index', [
-            'contracts' => StaffContract::query()
-                ->with(['project', 'invoice'])
-                ->latest('updated_at')
-                ->get(),
+            'contracts' => $contracts,
+            'statusBreakdown' => $statusBreakdown,
             'invoiceCount' => LuxuryQuote::query()->count(),
             'activeCount' => StaffContract::query()->whereIn('status', ['pending_signature', 'signed', 'active'])->count(),
             'signedCount' => StaffContract::query()->where('status', 'signed')->count(),

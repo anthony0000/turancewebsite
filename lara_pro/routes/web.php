@@ -5,6 +5,7 @@ use App\Http\Controllers\AdminLuxuryQuoteController;
 use App\Http\Controllers\AdminLetterController;
 use App\Http\Controllers\AdminProposalController;
 use App\Http\Controllers\AdminProfileController;
+use App\Http\Controllers\AdminProjectController;
 use App\Http\Controllers\AdminStaffContractController;
 use App\Http\Controllers\AdminSubaccountController;
 use App\Http\Controllers\ContactController;
@@ -97,6 +98,10 @@ Route::redirect('/privacy-policy', '/privacy', 301);
 Route::redirect('/terms-of-service', '/terms', 301);
 Route::redirect('/terms-and-conditions', '/terms', 301);
 Route::get('/p/{token}', [AdminProposalController::class, 'share'])->name('proposals.share');
+Route::get('/shared/project-files/{projectFile:share_token}', [AdminProjectController::class, 'sharedFile'])
+    ->name('project-files.share');
+Route::get('/shared/project-files/{projectFile:share_token}/download', [AdminProjectController::class, 'downloadSharedFile'])
+    ->name('project-files.download');
 
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/login', [AdminAuthController::class, 'create'])->name('login');
@@ -112,7 +117,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
                     ? 'admin.proposals.index'
                     : (AdminAccess::can('staff-contracts')
                         ? 'admin.staff-contracts.index'
-                        : (AdminAccess::can('letters') ? 'admin.letters.create' : 'admin.profile')));
+                        : (AdminAccess::can('projects')
+                            ? 'admin.projects.index'
+                            : (AdminAccess::can('letters') ? 'admin.letters.create' : 'admin.profile'))));
 
             return redirect()->route($route);
         })->name('home');
@@ -120,6 +127,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::get('/profile', [AdminProfileController::class, 'edit'])->name('profile');
         Route::put('/profile', [AdminProfileController::class, 'update'])->name('profile.update');
+
+        Route::middleware('admin.permission:projects')->prefix('projects')->name('projects.')->group(function () {
+            Route::get('/', [AdminProjectController::class, 'index'])->name('index');
+            Route::get('/{project}', [AdminProjectController::class, 'show'])->name('show');
+            Route::post('/{project}/files', [AdminProjectController::class, 'storeFile'])->name('files.store');
+            Route::get('/files/{projectFile}/download', [AdminProjectController::class, 'downloadFile'])->name('files.download');
+            Route::get('/files/{projectFile}/preview', [AdminProjectController::class, 'previewFile'])->name('files.preview');
+            Route::post('/files/{projectFile}/share', [AdminProjectController::class, 'toggleShare'])->name('files.share');
+            Route::delete('/files/{projectFile}', [AdminProjectController::class, 'destroyFile'])->name('files.destroy');
+        });
 
         Route::prefix('subaccounts')->name('subaccounts.')->middleware('admin.permission:subaccounts')->group(function () {
             Route::get('/', [AdminSubaccountController::class, 'index'])->name('index');

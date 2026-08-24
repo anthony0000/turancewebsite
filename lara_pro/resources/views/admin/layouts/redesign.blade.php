@@ -918,6 +918,360 @@ button.ghost-button {
     align-items: start;
 }
 
+.project-analytics-grid,
+.project-detail-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 16px;
+    align-items: start;
+}
+
+.project-status-chart-wrap {
+    display: grid;
+    grid-template-columns: minmax(170px, 0.8fr) minmax(0, 1fr);
+    align-items: center;
+    gap: 24px;
+    min-height: 238px;
+}
+
+.project-status-chart {
+    display: grid;
+    width: min(210px, 100%);
+    aspect-ratio: 1;
+    place-items: center;
+    margin: 0 auto;
+    border-radius: 50%;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.7);
+}
+
+.project-status-chart__centre {
+    display: grid;
+    width: 56%;
+    aspect-ratio: 1;
+    place-content: center;
+    border: 1px solid var(--line-soft);
+    border-radius: 50%;
+    background: var(--surface);
+    text-align: center;
+}
+
+.project-status-chart__centre strong {
+    color: var(--text);
+    font-family: var(--font-display);
+    font-size: 27px;
+    line-height: 1;
+}
+
+.project-status-chart__centre span {
+    margin-top: 5px;
+    color: var(--muted);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.project-status-legend {
+    display: grid;
+    gap: 13px;
+}
+
+.project-status-legend__item {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+}
+
+.project-status-legend__dot {
+    width: 9px;
+    height: 9px;
+    flex: 0 0 9px;
+    margin-top: 4px;
+    border-radius: 50%;
+}
+
+.project-status-legend__dot--0 { background: #b8860b; }
+.project-status-legend__dot--1 { background: #2f8054; }
+.project-status-legend__dot--2 { background: #6f5015; }
+.project-status-legend__dot--3 { background: #c08a4a; }
+.project-status-legend__dot--4 { background: #343b48; }
+.project-status-legend__dot--5 { background: #b94a3d; }
+
+.project-status-legend__item strong,
+.project-status-legend__item small {
+    display: block;
+}
+
+.project-status-legend__item strong {
+    color: var(--muted-strong);
+    font-size: 12px;
+}
+
+.project-status-legend__item small {
+    margin-top: 2px;
+    color: var(--muted);
+    font-size: 11px;
+}
+
+.project-file-bars {
+    display: grid;
+    gap: 17px;
+    padding-top: 8px;
+}
+
+.project-file-bar {
+    display: grid;
+    gap: 8px;
+}
+
+.project-file-bar .bar-header {
+    margin: 0;
+}
+
+.project-empty-chart,
+.project-files-empty {
+    display: grid;
+    justify-items: start;
+    align-content: center;
+    min-height: 218px;
+    padding: 24px;
+    border: 1px dashed var(--line);
+    border-radius: var(--radius);
+    background: var(--surface-soft);
+}
+
+.project-empty-chart__icon,
+.project-files-empty__icon {
+    display: grid;
+    width: 38px;
+    height: 38px;
+    place-items: center;
+    border-radius: 12px;
+    background: var(--primary-soft);
+    color: var(--primary-strong);
+    font-size: 20px;
+    font-weight: 500;
+}
+
+.project-empty-chart strong,
+.project-files-empty h3 {
+    margin-top: 14px;
+    color: var(--text);
+    font-size: 15px;
+}
+
+.project-empty-chart p,
+.project-files-empty p {
+    max-width: 400px;
+    margin: 5px 0 0;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.project-status-badge,
+.file-share-badge,
+.file-private-badge {
+    display: inline-flex;
+    align-items: center;
+    min-height: 26px;
+    padding: 4px 9px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+}
+
+.project-status-badge,
+.file-private-badge {
+    background: var(--surface-soft);
+    color: var(--muted-strong);
+}
+
+.file-share-badge {
+    background: #eaf7f1;
+    color: var(--success);
+}
+
+.project-detail-grid {
+    grid-template-columns: minmax(0, 1.55fr) minmax(300px, 0.7fr);
+}
+
+.project-file-list {
+    display: grid;
+    gap: 12px;
+}
+
+.project-file-card {
+    display: grid;
+    grid-template-columns: 42px minmax(0, 1fr);
+    gap: 13px;
+    padding: 15px;
+    border: 1px solid var(--line-soft);
+    border-radius: var(--radius);
+    background: linear-gradient(135deg, var(--surface), var(--surface-soft));
+}
+
+.project-file-card__icon {
+    display: grid;
+    width: 42px;
+    height: 42px;
+    place-items: center;
+    border-radius: 12px;
+    background: var(--primary-soft);
+    color: var(--primary-strong);
+    font-size: 11px;
+    font-weight: 800;
+}
+
+.project-file-card__body,
+.project-file-card__heading,
+.project-file-card__heading > div {
+    min-width: 0;
+}
+
+.project-file-card__heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.project-file-card h3 {
+    margin: 0;
+    overflow-wrap: anywhere;
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.3;
+}
+
+.project-file-card__heading p,
+.project-file-card__description {
+    margin: 5px 0 0;
+    color: var(--muted);
+    font-size: 11px;
+    line-height: 1.5;
+}
+
+.project-file-card__description {
+    padding: 9px 10px;
+    border-left: 2px solid var(--line);
+    background: rgba(255, 255, 255, 0.55);
+}
+
+.project-file-card__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-top: 13px;
+}
+
+.project-file-card__actions .button,
+.project-file-card__actions .ghost-button {
+    min-height: 34px;
+    padding: 0 11px;
+    border-radius: 9px;
+    font-size: 11px;
+}
+
+.project-file-card__actions form {
+    margin: 0;
+}
+
+.file-delete-button {
+    min-height: 34px;
+    padding: 0 5px;
+    border: 0;
+    background: transparent;
+    color: var(--danger);
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.project-share-link {
+    display: grid;
+    gap: 6px;
+    margin-top: 13px;
+    padding: 11px;
+    border: 1px solid rgba(47, 128, 84, 0.18);
+    border-radius: 10px;
+    background: #f4fbf7;
+}
+
+.project-share-link label,
+.project-share-link small {
+    color: var(--muted);
+    font-size: 10px;
+}
+
+.project-share-link label {
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.project-share-link > div {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 7px;
+}
+
+.project-share-link input {
+    min-width: 0;
+    height: 34px;
+    padding: 0 9px;
+    border: 1px solid rgba(47, 128, 84, 0.2);
+    border-radius: 8px;
+    background: #fff;
+    color: var(--muted-strong);
+    font-size: 11px;
+}
+
+.project-share-link .ghost-button {
+    min-height: 34px;
+    padding-inline: 11px;
+    border-color: rgba(47, 128, 84, 0.22);
+    color: var(--success);
+}
+
+.project-file-upload-form {
+    display: grid;
+    gap: 9px;
+    margin-top: 18px;
+}
+
+.project-file-upload-form label {
+    margin-top: 5px;
+}
+
+.project-file-upload-form label span {
+    color: var(--muted);
+    font-weight: 500;
+}
+
+.project-file-upload-form input[type="file"] {
+    width: 100%;
+    padding: 9px;
+    border: 1px dashed var(--line);
+    border-radius: 10px;
+    background: var(--surface-soft);
+    color: var(--muted-strong);
+    font-size: 12px;
+}
+
+.project-file-upload-form textarea {
+    min-height: 92px;
+}
+
+.form-error {
+    margin: 0;
+    color: var(--danger);
+    font-size: 12px;
+}
+
 .sticky-stack {
     display: grid;
     gap: 16px;
@@ -2079,6 +2433,8 @@ button.ghost-button {
 
     .analytics-grid,
     .dashboard-grid,
+    .project-analytics-grid,
+    .project-detail-grid,
     .dashboard-command {
         grid-template-columns: 1fr;
     }
@@ -2188,6 +2544,10 @@ button.ghost-button {
         flex-direction: column;
     }
 
+    .project-status-chart-wrap {
+        grid-template-columns: minmax(150px, 0.75fr) minmax(0, 1fr);
+    }
+
     .section-heading {
         display: grid;
     }
@@ -2229,6 +2589,14 @@ button.ghost-button {
 
     .mini-chart {
         grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .project-status-chart-wrap {
+        grid-template-columns: 1fr;
+    }
+
+    .project-status-chart {
+        width: min(180px, 60%);
     }
 
     .panel-padded {

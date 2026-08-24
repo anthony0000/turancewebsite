@@ -25,6 +25,10 @@ final class AdminAccess
             'label' => 'Staff contracts',
             'description' => 'Create, edit, review, and export staff contracts.',
         ],
+        'projects' => [
+            'label' => 'Projects & files',
+            'description' => 'Review project records and securely share project files.',
+        ],
         'letters' => [
             'label' => 'Letterhead',
             'description' => 'Write and export letters and basic company documents.',

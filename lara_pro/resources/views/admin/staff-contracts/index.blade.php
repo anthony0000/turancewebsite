@@ -81,6 +81,37 @@
     </section>
 
     <section class="panel panel-padded" style="margin-top: 24px;">
+        <div class="panel-head panel-head--tight">
+            <span class="eyebrow">Signature flow</span>
+            <h2 class="panel-title">Contract status mix</h2>
+            <p>Use the distribution to see where agreements are waiting before opening the register.</p>
+        </div>
+
+        @if ($statusBreakdown->isNotEmpty())
+            @php($maxStatusCount = max(1, (int) $statusBreakdown->max('count')))
+            <div class="stat-list">
+                @foreach ($statusBreakdown as $status)
+                    <div class="bar-row">
+                        <div class="bar-header">
+                            <div>
+                                <strong>{{ $status['label'] }}</strong>
+                                <span class="bar-meta">{{ $status['count'] === 1 ? 'One agreement' : number_format($status['count']).' agreements' }}</span>
+                            </div>
+                            <strong class="bar-count">{{ number_format($status['count']) }}</strong>
+                        </div>
+                        <div class="bar-track" role="progressbar" aria-label="{{ $status['label'] }} contracts"
+                            aria-valuenow="{{ $status['count'] }}" aria-valuemin="0" aria-valuemax="{{ $maxStatusCount }}">
+                            <div class="bar-fill bar-fill--quote" style="width: {{ max(5, round(($status['count'] / $maxStatusCount) * 100, 1)) }}%;"></div>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        @else
+            <div class="data-note">The status mix will appear after the first staff agreement is created.</div>
+        @endif
+    </section>
+
+    <section class="panel panel-padded" style="margin-top: 24px;">
         <div class="panel-head">
             <span class="eyebrow">Contract register</span>
             <h2>Invoice-linked staff documents</h2>

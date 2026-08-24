@@ -27,4 +27,9 @@ class Project extends Model
     {
         return $this->hasMany(StaffContract::class);
     }
+
+    public function files(): HasMany
+    {
+        return $this->hasMany(ProjectFile::class);
+    }
 }
