@@ -16,7 +16,11 @@ return new class extends Migration
             $table->string('phone', 80)->nullable();
             $table->text('notes')->nullable();
             $table->timestamps();
-            $table->index(['name', 'company']);
+            // A composite 191 + 191 character index exceeds MySQL's 1000-byte
+            // limit when the table uses utf8mb4. Keep both fields searchable
+            // without reducing the supported length of either field.
+            $table->index('name');
+            $table->index('company');
         });
 
         Schema::table('projects', function (Blueprint $table): void {
