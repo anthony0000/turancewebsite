@@ -12,7 +12,9 @@
                 client engagement.
             </p>
             <div class="hero-actions">
-                <a class="button" href="#project-file-upload">Upload Project File</a>
+                @if ($canManageProjectFiles)
+                    <a class="button" href="#project-file-upload">Upload Project File</a>
+                @endif
                 <a class="ghost-button" href="{{ route('admin.staff-contracts.index') }}">Open Staff Contracts</a>
                 <a class="ghost-button" href="{{ route('admin.quotes.index') }}">View Invoices</a>
             </div>
@@ -20,13 +22,23 @@
         <div class="hero-callout">
             <div class="callout-card">
                 <span class="metric-label">Shared handoffs</span>
-                <strong>{{ number_format($sharedFileCount) }}</strong>
-                <p>Files currently available through secure share links.</p>
+                @if ($canManageProjectFiles)
+                    <strong>{{ number_format($sharedFileCount) }}</strong>
+                    <p>Files currently available through secure share links.</p>
+                @else
+                    <strong>Limited</strong>
+                    <p>File access is limited for this account.</p>
+                @endif
             </div>
             <div class="callout-card">
                 <span class="metric-label">Project coverage</span>
-                <strong>{{ $projectCount > 0 ? number_format(($fileCount / $projectCount), 1) : '0.0' }}</strong>
-                <p>Average files attached to each project record.</p>
+                @if ($canManageProjectFiles)
+                    <strong>{{ $projectCount > 0 ? number_format(($fileCount / $projectCount), 1) : '0.0' }}</strong>
+                    <p>Average files attached to each project record.</p>
+                @else
+                    <strong>Limited</strong>
+                    <p>File metrics are hidden for this account.</p>
+                @endif
             </div>
         </div>
     </section>
@@ -44,67 +56,84 @@
         </article>
         <article class="panel kpi-card kpi-card--pipeline">
             <span class="metric-label">Project files</span>
-            <strong class="kpi-value">{{ number_format($fileCount) }}</strong>
-            <span class="kpi-meta">Private files stored against a project record.</span>
+            @if ($canManageProjectFiles)
+                <strong class="kpi-value">{{ number_format($fileCount) }}</strong>
+                <span class="kpi-meta">Private files stored against a project record.</span>
+            @else
+                <strong class="kpi-value">—</strong>
+                <span class="kpi-meta">File access is limited for this account.</span>
+            @endif
         </article>
         <article class="panel kpi-card kpi-card--traffic">
             <span class="metric-label">Shared files</span>
-            <strong class="kpi-value">{{ number_format($sharedFileCount) }}</strong>
-            <span class="kpi-meta">Links ready for client or team handoff.</span>
+            @if ($canManageProjectFiles)
+                <strong class="kpi-value">{{ number_format($sharedFileCount) }}</strong>
+                <span class="kpi-meta">Links ready for client or team handoff.</span>
+            @else
+                <strong class="kpi-value">—</strong>
+                <span class="kpi-meta">File access is limited for this account.</span>
+            @endif
         </article>
     </section>
 
     <section id="project-file-upload" class="panel panel-padded project-upload-panel" style="margin-top: 24px;">
-        <div class="panel-head panel-head--row">
-            <div>
-                <span class="eyebrow">External project files</span>
-                <h2>Upload a file for the project team</h2>
-                <p>Attach briefs, references, approvals, or delivery files to a project. Files stay private until you create a share link for the staff assigned to that project.</p>
+        @if ($canManageProjectFiles)
+            <div class="panel-head panel-head--row">
+                <div>
+                    <span class="eyebrow">External project files</span>
+                    <h2>Upload a file for the project team</h2>
+                    <p>Attach briefs, references, approvals, or delivery files to a project. Files stay private until you create a share link for the project handoff.</p>
+                </div>
+                <span class="admin-pill">Private by default</span>
             </div>
-            <span class="admin-pill">Private by default</span>
-        </div>
 
-        @if ($projects->isNotEmpty())
-            <form class="project-index-upload-form" method="POST" action="{{ route('admin.projects.files.external.store') }}" enctype="multipart/form-data">
-                @csrf
-                <div class="field">
-                    <label for="external-project-id">Project</label>
-                    <select id="external-project-id" name="project_id" required>
-                        <option value="">Choose a project</option>
-                        @foreach ($projects as $project)
-                            <option value="{{ $project->id }}" @selected((string) old('project_id') === (string) $project->id)>
-                                {{ $project->name }} · {{ $project->project_number }}
-                            </option>
-                        @endforeach
-                    </select>
+            @if ($projects->isNotEmpty())
+                <form class="project-index-upload-form" method="POST" action="{{ route('admin.projects.files.external.store') }}" enctype="multipart/form-data">
+                    @csrf
+                    <div class="field">
+                        <label for="external-project-id">Project</label>
+                        <select id="external-project-id" name="project_id" required>
+                            <option value="">Choose a project</option>
+                            @foreach ($projects as $project)
+                                <option value="{{ $project->id }}" @selected((string) old('project_id') === (string) $project->id)>
+                                    {{ $project->name }} · {{ $project->project_number }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="external-project-file">File</label>
+                        <input id="external-project-file" type="file" name="file" required accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.ppt,.pptx,.txt,.rtf,.jpg,.jpeg,.png,.webp,.zip">
+                    </div>
+                    <div class="field-full">
+                        <label for="external-project-description">Description <span class="field-optional">Optional</span></label>
+                        <textarea id="external-project-description" name="description" rows="3" maxlength="500" placeholder="What should the project team know about this file?">{{ old('description') }}</textarea>
+                    </div>
+                    @error('project_id')
+                        <p class="form-error">{{ $message }}</p>
+                    @enderror
+                    @error('file')
+                        <p class="form-error">{{ $message }}</p>
+                    @enderror
+                    @error('description')
+                        <p class="form-error">{{ $message }}</p>
+                    @enderror
+                    <div class="project-index-upload-form__actions">
+                        <p class="form-help">Maximum 50 MB. PDF, Office files, images, text, and ZIP files are supported.</p>
+                        <button class="button" type="submit">Upload to Project</button>
+                    </div>
+                </form>
+            @else
+                <div class="project-upload-empty">
+                    <strong>Create a project workspace before uploading files.</strong>
+                    <p>Projects are created automatically when you create an invoice-linked staff contract. The file area then becomes available at the project level.</p>
+                    <a class="ghost-button" href="{{ route('admin.staff-contracts.create') }}">Create Staff Contract</a>
                 </div>
-                <div class="field">
-                    <label for="external-project-file">File</label>
-                    <input id="external-project-file" type="file" name="file" required accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.ppt,.pptx,.txt,.rtf,.jpg,.jpeg,.png,.webp,.zip">
-                </div>
-                <div class="field-full">
-                    <label for="external-project-description">Description <span class="field-optional">Optional</span></label>
-                    <textarea id="external-project-description" name="description" rows="3" maxlength="500" placeholder="What should the project team know about this file?">{{ old('description') }}</textarea>
-                </div>
-                @error('project_id')
-                    <p class="form-error">{{ $message }}</p>
-                @enderror
-                @error('file')
-                    <p class="form-error">{{ $message }}</p>
-                @enderror
-                @error('description')
-                    <p class="form-error">{{ $message }}</p>
-                @enderror
-                <div class="project-index-upload-form__actions">
-                    <p class="form-help">Maximum 50 MB. PDF, Office files, images, text, and ZIP files are supported.</p>
-                    <button class="button" type="submit">Upload to Project</button>
-                </div>
-            </form>
+            @endif
         @else
             <div class="project-upload-empty">
-                <strong>Create a project workspace before uploading files.</strong>
-                <p>Projects are created automatically when you create an invoice-linked staff contract. The project file area then becomes available to every staff agreement tied to that project.</p>
-                <a class="ghost-button" href="{{ route('admin.staff-contracts.create') }}">Create Staff Contract</a>
+                <strong>Project file access is limited for this account.</strong>
+                <p>You can review project records, but upload, download, preview, delete, and secure-share actions require the Project files permission.</p>
             </div>
         @endif
     </section>
@@ -152,7 +181,12 @@
                 <p>Projects with the most attached files, so handoff-heavy work stays visible.</p>
             </div>
 
-            @if ($fileLeaders->isNotEmpty())
+            @if (!$canManageProjectFiles)
+                <div class="project-upload-empty">
+                    <strong>File activity is restricted.</strong>
+                    <p>A full admin can grant this account the Project files permission without granting broader admin access.</p>
+                </div>
+            @elseif ($fileLeaders->isNotEmpty())
                 <div class="project-file-bars">
                     @foreach ($fileLeaders as $projectFileLeader)
                         <div class="project-file-bar">
@@ -217,8 +251,13 @@
                                 @endif
                             </td>
                             <td>
-                                <strong>{{ number_format($project->files_count) }}</strong>
-                                <span>{{ number_format($project->shared_files_count) }} shared</span>
+                                @if ($canManageProjectFiles)
+                                    <strong>{{ number_format($project->files_count) }}</strong>
+                                    <span>{{ number_format($project->shared_files_count) }} shared</span>
+                                @else
+                                    <strong>Restricted</strong>
+                                    <span>File access limited</span>
+                                @endif
                             </td>
                             <td>
                                 <strong>{{ number_format($project->staff_contracts_count) }}</strong>

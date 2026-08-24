@@ -28,106 +28,124 @@
             </div>
             <div class="callout-card">
                 <span class="metric-label">File handoff</span>
-                <strong>{{ number_format($sharedFileCount) }} shared</strong>
-                <p>{{ number_format($files->count()) }} total project {{ \Illuminate\Support\Str::plural('file', $files->count()) }}</p>
+                @if ($canManageProjectFiles)
+                    <strong>{{ number_format($sharedFileCount) }} shared</strong>
+                    <p>{{ number_format($files->count()) }} total project {{ \Illuminate\Support\Str::plural('file', $files->count()) }}</p>
+                @else
+                    <strong>Restricted</strong>
+                    <p>Project file access is limited for this account.</p>
+                @endif
             </div>
         </div>
     </section>
 
     <div class="project-detail-grid" style="margin-top: 24px;">
         <section class="panel panel-padded">
-            <div class="panel-head panel-head--row">
-                <div>
-                    <span class="eyebrow">Project files</span>
-                    <h2>Share the right file at the right moment</h2>
-                    <p>Files remain private until you explicitly create a secure share link.</p>
+            @if ($canManageProjectFiles)
+                <div class="panel-head panel-head--row">
+                    <div>
+                        <span class="eyebrow">Project files</span>
+                        <h2>Share the right file at the right moment</h2>
+                        <p>Files remain private until you explicitly create a secure share link.</p>
+                    </div>
+                    <span class="admin-pill">{{ number_format($files->count()) }} files</span>
                 </div>
-                <span class="admin-pill">{{ number_format($files->count()) }} files</span>
-            </div>
 
-            @if ($files->isNotEmpty())
-                <div class="project-file-list">
-                    @foreach ($files as $file)
-                        <article class="project-file-card">
-                            <div class="project-file-card__icon" aria-hidden="true">{{ strtoupper(substr($file->fileKind(), 0, 1)) }}</div>
-                            <div class="project-file-card__body">
-                                <div class="project-file-card__heading">
-                                    <div>
-                                        <h3>{{ $file->original_name }}</h3>
-                                        <p>{{ $file->fileKind() }} · {{ $file->sizeLabel() }} · Added {{ optional($file->created_at)->format('M d, Y') }}</p>
-                                    </div>
-                                    @if ($file->is_shared)
-                                        <span class="file-share-badge">Shared</span>
-                                    @else
-                                        <span class="file-private-badge">Private</span>
-                                    @endif
-                                </div>
-
-                                @if ($file->description)
-                                    <p class="project-file-card__description">{{ $file->description }}</p>
-                                @endif
-
-                                <div class="project-file-card__actions">
-                                    @if (in_array($file->mime_type, $previewableMimes, true))
-                                        <a class="ghost-button" href="{{ route('admin.projects.files.preview', $file) }}" target="_blank" rel="noopener">Preview</a>
-                                    @endif
-                                    <a class="ghost-button" href="{{ route('admin.projects.files.download', $file) }}">Download</a>
-                                    <form method="POST" action="{{ route('admin.projects.files.share', $file) }}">
-                                        @csrf
-                                        <button class="{{ $file->is_shared ? 'ghost-button' : 'button' }}" type="submit">
-                                            {{ $file->is_shared ? 'Revoke link' : 'Create share link' }}
-                                        </button>
-                                    </form>
-                                    <form method="POST" action="{{ route('admin.projects.files.destroy', $file) }}" onsubmit="return confirm('Remove this file from the project?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button class="file-delete-button" type="submit">Remove</button>
-                                    </form>
-                                </div>
-
-                                @if ($file->is_shared)
-                                    <div class="project-share-link" data-share-link-row>
-                                        <label for="share-link-{{ $file->id }}">Secure share link</label>
+                @if ($files->isNotEmpty())
+                    <div class="project-file-list">
+                        @foreach ($files as $file)
+                            <article class="project-file-card">
+                                <div class="project-file-card__icon" aria-hidden="true">{{ strtoupper(substr($file->fileKind(), 0, 1)) }}</div>
+                                <div class="project-file-card__body">
+                                    <div class="project-file-card__heading">
                                         <div>
-                                            <input id="share-link-{{ $file->id }}" type="text" readonly value="{{ route('project-files.share', $file->share_token) }}" data-share-url>
-                                            <button class="ghost-button" type="button" data-copy-share>Copy</button>
+                                            <h3>{{ $file->original_name }}</h3>
+                                            <p>{{ $file->fileKind() }} · {{ $file->sizeLabel() }} · Added {{ optional($file->created_at)->format('M d, Y') }}</p>
                                         </div>
-                                        <small>Anyone with this link can download this file. Revoke it when the handoff is complete.</small>
+                                        @if ($file->is_shared)
+                                            <span class="file-share-badge">Shared</span>
+                                        @else
+                                            <span class="file-private-badge">Private</span>
+                                        @endif
                                     </div>
-                                @endif
-                            </div>
-                        </article>
-                    @endforeach
-                </div>
+
+                                    @if ($file->description)
+                                        <p class="project-file-card__description">{{ $file->description }}</p>
+                                    @endif
+
+                                    <div class="project-file-card__actions">
+                                        @if (in_array($file->mime_type, $previewableMimes, true))
+                                            <a class="ghost-button" href="{{ route('admin.projects.files.preview', $file) }}" target="_blank" rel="noopener">Preview</a>
+                                        @endif
+                                        <a class="ghost-button" href="{{ route('admin.projects.files.download', $file) }}">Download</a>
+                                        <form method="POST" action="{{ route('admin.projects.files.share', $file) }}">
+                                            @csrf
+                                            <button class="{{ $file->is_shared ? 'ghost-button' : 'button' }}" type="submit">
+                                                {{ $file->is_shared ? 'Revoke link' : 'Create share link' }}
+                                            </button>
+                                        </form>
+                                        <form method="POST" action="{{ route('admin.projects.files.destroy', $file) }}" onsubmit="return confirm('Remove this file from the project?');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button class="file-delete-button" type="submit">Remove</button>
+                                        </form>
+                                    </div>
+
+                                    @if ($file->is_shared)
+                                        <div class="project-share-link" data-share-link-row>
+                                            <label for="share-link-{{ $file->id }}">Secure share link</label>
+                                            <div>
+                                                <input id="share-link-{{ $file->id }}" type="text" readonly value="{{ route('project-files.share', $file->share_token) }}" data-share-url>
+                                                <button class="ghost-button" type="button" data-copy-share>Copy</button>
+                                            </div>
+                                            <small>Anyone with this link can download this file. Revoke it when the handoff is complete.</small>
+                                        </div>
+                                    @endif
+                                </div>
+                            </article>
+                        @endforeach
+                    </div>
+                @else
+                    <div class="project-files-empty">
+                        <span class="project-files-empty__icon" aria-hidden="true">↗</span>
+                        <h3>Your first project file will appear here.</h3>
+                        <p>Add a brief, reference file, signed document, or final delivery below. Nothing is shared until you choose to create a link.</p>
+                    </div>
+                @endif
             @else
-                <div class="project-files-empty">
-                    <span class="project-files-empty__icon" aria-hidden="true">↗</span>
-                    <h3>Your first project file will appear here.</h3>
-                    <p>Add a brief, reference file, signed document, or final delivery below. Nothing is shared until you choose to create a link.</p>
+                <div class="project-upload-empty">
+                    <strong>Project file access is limited for this account.</strong>
+                    <p>This project record remains available, but file upload, download, preview, delete, and secure-share actions require the Project files permission.</p>
                 </div>
             @endif
         </section>
 
         <aside class="sticky-stack project-detail-sidebar">
             <section class="panel panel-padded">
-                <span class="eyebrow">Add to project</span>
-                <h2 class="panel-title">Upload a file</h2>
-                <p class="form-help">Private by default. Maximum 50 MB. PDF, Office files, images, text, and ZIP files are supported.</p>
+                @if ($canManageProjectFiles)
+                    <span class="eyebrow">Add to project</span>
+                    <h2 class="panel-title">Upload a file</h2>
+                    <p class="form-help">Private by default. Maximum 50 MB. PDF, Office files, images, text, and ZIP files are supported.</p>
 
-                <form id="project-file-upload" class="project-file-upload-form" method="POST" action="{{ route('admin.projects.files.store', $project) }}" enctype="multipart/form-data">
-                    @csrf
-                    <label for="project-file">File</label>
-                    <input id="project-file" type="file" name="file" required accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.ppt,.pptx,.txt,.rtf,.jpg,.jpeg,.png,.webp,.zip">
-                    <label for="project-file-description">Description <span>(optional)</span></label>
-                    <textarea id="project-file-description" name="description" rows="4" maxlength="500" placeholder="e.g. Approved homepage references for the design handoff.">{{ old('description') }}</textarea>
-                    @error('file')
-                        <p class="form-error">{{ $message }}</p>
-                    @enderror
-                    @error('description')
-                        <p class="form-error">{{ $message }}</p>
-                    @enderror
-                    <button class="button" type="submit">Upload private file</button>
-                </form>
+                    <form id="project-file-upload" class="project-file-upload-form" method="POST" action="{{ route('admin.projects.files.store', $project) }}" enctype="multipart/form-data">
+                        @csrf
+                        <label for="project-file">File</label>
+                        <input id="project-file" type="file" name="file" required accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.ppt,.pptx,.txt,.rtf,.jpg,.jpeg,.png,.webp,.zip">
+                        <label for="project-file-description">Description <span>(optional)</span></label>
+                        <textarea id="project-file-description" name="description" rows="4" maxlength="500" placeholder="e.g. Approved homepage references for the design handoff.">{{ old('description') }}</textarea>
+                        @error('file')
+                            <p class="form-error">{{ $message }}</p>
+                        @enderror
+                        @error('description')
+                            <p class="form-error">{{ $message }}</p>
+                        @enderror
+                        <button class="button" type="submit">Upload private file</button>
+                    </form>
+                @else
+                    <span class="eyebrow">Project files</span>
+                    <h2 class="panel-title">File access is limited</h2>
+                    <p class="form-help">A full admin can grant the Project files permission without granting access to unrelated admin areas.</p>
+                @endif
             </section>
 
             <section class="panel panel-padded">

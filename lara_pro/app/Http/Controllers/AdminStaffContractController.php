@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\LuxuryQuote;
 use App\Models\Project;
 use App\Models\StaffContract;
-use App\Support\AdminAccess;
 use App\Support\DocumentTypography;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Contracts\View\View;
@@ -100,10 +99,6 @@ class AdminStaffContractController extends Controller
 
         return view('admin.staff-contracts.show', [
             'contract' => $contract,
-            'projectFiles' => AdminAccess::can('projects')
-                ? $contract->project->files()->latest()->get()
-                : collect(),
-            'canManageProjectFiles' => AdminAccess::can('projects'),
             'brand' => config('luxury-quotes.brand', []),
         ]);
     }

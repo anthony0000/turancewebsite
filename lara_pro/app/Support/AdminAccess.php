@@ -26,8 +26,12 @@ final class AdminAccess
             'description' => 'Create, edit, review, and export staff contracts.',
         ],
         'projects' => [
-            'label' => 'Projects & files',
-            'description' => 'Review project records and securely share project files.',
+            'label' => 'Projects',
+            'description' => 'Review project records and project-to-invoice relationships.',
+        ],
+        'project-files' => [
+            'label' => 'Project files',
+            'description' => 'Upload, download, preview, and securely share external project files.',
         ],
         'letters' => [
             'label' => 'Letterhead',

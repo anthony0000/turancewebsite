@@ -182,3 +182,59 @@ it('removes the stored project file and keeps project access permission scoped',
     expect(ProjectFile::query()->find($projectFile->id))->toBeNull();
     Storage::disk('local')->assertMissing($path);
 });
+
+it('lets subaccounts view projects while limiting project file access separately', function () {
+    Storage::fake('local');
+
+    $project = Project::query()->create([
+        'project_number' => 'TT-PRJ-LIMIT-001',
+        'name' => 'Limited File Access Project',
+        'status' => 'active',
+    ]);
+
+    $path = 'projects/files/'.$project->id.'/restricted.pdf';
+    Storage::disk('local')->put($path, 'restricted project file');
+    $projectFile = ProjectFile::query()->create([
+        'project_id' => $project->id,
+        'original_name' => 'restricted.pdf',
+        'path' => $path,
+        'mime_type' => 'application/pdf',
+        'size' => 24,
+    ]);
+
+    $limitedSession = [
+        config('luxury-quotes.admin.session_key', 'luxury_quote_admin_authenticated') => true,
+        'luxury_quote_admin_email' => 'subaccount@example.com',
+        'admin_role' => 'subaccount',
+        'admin_permissions' => ['projects'],
+    ];
+
+    $this
+        ->withSession($limitedSession)
+        ->get(route('admin.projects.index'))
+        ->assertOk()
+        ->assertSee('Project file access is limited for this account.')
+        ->assertSee('Limited File Access Project')
+        ->assertDontSee('Upload a file for the project team');
+
+    $this
+        ->withSession($limitedSession)
+        ->get(route('admin.projects.show', $project))
+        ->assertOk()
+        ->assertSee('Project file access is limited for this account.')
+        ->assertDontSee('restricted.pdf')
+        ->assertDontSee('Upload a file');
+
+    $this
+        ->withSession($limitedSession)
+        ->post(route('admin.projects.files.external.store'), [
+            'project_id' => $project->id,
+            'file' => UploadedFile::fake()->create('blocked.pdf', 10, 'application/pdf'),
+        ])
+        ->assertForbidden();
+
+    $this
+        ->withSession($limitedSession)
+        ->get(route('admin.projects.files.download', $projectFile))
+        ->assertForbidden();
+});

@@ -2,7 +2,6 @@
 
 use App\Models\LuxuryQuote;
 use App\Models\Project;
-use App\Models\ProjectFile;
 use App\Models\StaffContract;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -94,7 +93,8 @@ it('creates an invoice-linked staff contract with price terms and signing detail
         ->assertSee('Create the product interface direction')
         ->assertSee('RC No. 3646478')
         ->assertSee('Contract staff')
-        ->assertSee('Acceptance and signatures');
+        ->assertSee('Acceptance and signatures')
+        ->assertDontSee('Shared project workspace');
 
     $this
         ->withSession($session)
@@ -186,68 +186,6 @@ it('updates a staff contract without losing its invoice and project relationship
         ->and((float) $contract->agreed_fee)->toBe(325000.0)
         ->and($contract->company_signatory_name)->toBe('Tony Stark')
         ->and($contract->staff_signatory_name)->toBe('Daniel Cole');
-});
-
-it('shows external project files from every staff agreement tied to the project', function () {
-    $sessionKey = config('luxury-quotes.admin.session_key', 'luxury_quote_admin_authenticated');
-    $session = [
-        $sessionKey => true,
-        'luxury_quote_admin_email' => 'admin@example.com',
-    ];
-
-    $project = Project::query()->create([
-        'project_number' => 'TT-PRJ-FILES-001',
-        'name' => 'Shared Files Project',
-        'status' => 'active',
-    ]);
-
-    $invoice = LuxuryQuote::query()->create([
-        'quote_number' => 'TT-INV-FILES-001',
-        'template' => 'obsidian',
-        'project_category' => 'Digital Product',
-        'company_name' => 'Client Co',
-        'project_title' => 'Shared Files Project',
-        'executive_summary' => 'A shared project workspace.',
-        'investment_amount' => 1000,
-        'timeline' => '4 weeks',
-        'valid_until' => '2026-09-30',
-        'scope_items' => ['Project delivery'],
-    ]);
-
-    $contract = StaffContract::query()->create([
-        'project_id' => $project->id,
-        'luxury_quote_id' => $invoice->id,
-        'contract_number' => 'TT-STAFF-FILES-001',
-        'status' => 'active',
-        'staff_name' => 'Maya Cole',
-        'staff_role' => 'Product Designer',
-        'currency' => 'USD',
-        'agreed_fee' => 1000,
-        'payment_terms' => 'Paid after approved project delivery.',
-        'scope_of_work' => 'Design the project interface and handoff materials.',
-        'terms' => 'Project information remains confidential.',
-        'company_name' => 'Turance Technologies',
-    ]);
-
-    ProjectFile::query()->create([
-        'project_id' => $project->id,
-        'original_name' => 'staff-handoff-brief.pdf',
-        'path' => 'projects/files/'.$project->id.'/staff-handoff-brief.pdf',
-        'mime_type' => 'application/pdf',
-        'size' => 2048,
-        'description' => 'Brief for every staff member assigned to the project.',
-        'is_shared' => true,
-        'share_token' => str_repeat('a', 64),
-    ]);
-
-    $this
-        ->withSession($session)
-        ->get(route('admin.staff-contracts.show', $contract))
-        ->assertOk()
-        ->assertSee('Shared project workspace')
-        ->assertSee('Files available to this project team')
-        ->assertSee('staff-handoff-brief.pdf')
-        ->assertSee('Open share page');
 });
 
 it('stores an automatically named private signed copy and locks the contract', function () {

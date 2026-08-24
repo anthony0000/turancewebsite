@@ -24,12 +24,18 @@ class AdminProjectController extends Controller
 
     public function index(): View
     {
-        $projects = Project::query()
-            ->withCount([
-                'staffContracts',
+        $canManageProjectFiles = AdminAccess::can('project-files');
+        $projectsQuery = Project::query()
+            ->withCount('staffContracts');
+
+        if ($canManageProjectFiles) {
+            $projectsQuery->withCount([
                 'files',
                 'files as shared_files_count' => fn ($query) => $query->where('is_shared', true),
-            ])
+            ]);
+        }
+
+        $projects = $projectsQuery
             ->latest('updated_at')
             ->get();
 
@@ -64,21 +70,31 @@ class AdminProjectController extends Controller
             'activeCount' => $projects->whereIn('status', ['active', 'in_progress'])->count(),
             'fileCount' => (int) $projects->sum('files_count'),
             'sharedFileCount' => (int) $projects->sum('shared_files_count'),
+            'canManageProjectFiles' => $canManageProjectFiles,
         ]);
     }
 
     public function show(Project $project): View
     {
+        $canManageProjectFiles = AdminAccess::can('project-files');
         $project->load([
-            'files' => fn ($query) => $query->with('uploader')->latest(),
             'staffContracts' => fn ($query) => $query->with('invoice')->latest('updated_at'),
         ]);
+
+        if ($canManageProjectFiles) {
+            $project->load([
+                'files' => fn ($query) => $query->with('uploader')->latest(),
+            ]);
+        } else {
+            $project->setRelation('files', collect());
+        }
 
         return view('admin.projects.show', [
             'project' => $project,
             'files' => $project->files,
             'contracts' => $project->staffContracts,
             'sharedFileCount' => $project->files->where('is_shared', true)->count(),
+            'canManageProjectFiles' => $canManageProjectFiles,
         ]);
     }
 

@@ -130,13 +130,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::middleware('admin.permission:projects')->prefix('projects')->name('projects.')->group(function () {
             Route::get('/', [AdminProjectController::class, 'index'])->name('index');
-            Route::post('/files', [AdminProjectController::class, 'storeExternalFile'])->name('files.external.store');
             Route::get('/{project}', [AdminProjectController::class, 'show'])->name('show');
-            Route::post('/{project}/files', [AdminProjectController::class, 'storeFile'])->name('files.store');
-            Route::get('/files/{projectFile}/download', [AdminProjectController::class, 'downloadFile'])->name('files.download');
-            Route::get('/files/{projectFile}/preview', [AdminProjectController::class, 'previewFile'])->name('files.preview');
-            Route::post('/files/{projectFile}/share', [AdminProjectController::class, 'toggleShare'])->name('files.share');
-            Route::delete('/files/{projectFile}', [AdminProjectController::class, 'destroyFile'])->name('files.destroy');
+
+            Route::middleware('admin.permission:project-files')->group(function () {
+                Route::post('/files', [AdminProjectController::class, 'storeExternalFile'])->name('files.external.store');
+                Route::post('/{project}/files', [AdminProjectController::class, 'storeFile'])->name('files.store');
+                Route::get('/files/{projectFile}/download', [AdminProjectController::class, 'downloadFile'])->name('files.download');
+                Route::get('/files/{projectFile}/preview', [AdminProjectController::class, 'previewFile'])->name('files.preview');
+                Route::post('/files/{projectFile}/share', [AdminProjectController::class, 'toggleShare'])->name('files.share');
+                Route::delete('/files/{projectFile}', [AdminProjectController::class, 'destroyFile'])->name('files.destroy');
+            });
         });
 
         Route::prefix('subaccounts')->name('subaccounts.')->middleware('admin.permission:subaccounts')->group(function () {
