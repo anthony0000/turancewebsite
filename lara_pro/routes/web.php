@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AdminAuthController;
 use App\Http\Controllers\AdminLuxuryQuoteController;
+use App\Http\Controllers\AdminLetterController;
 use App\Http\Controllers\AdminProposalController;
 use App\Http\Controllers\AdminProfileController;
 use App\Http\Controllers\AdminStaffContractController;
@@ -109,7 +110,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 ? 'admin.quotes.index'
                 : (AdminAccess::can('proposals')
                     ? 'admin.proposals.index'
-                    : (AdminAccess::can('staff-contracts') ? 'admin.staff-contracts.index' : 'admin.profile'));
+                    : (AdminAccess::can('staff-contracts')
+                        ? 'admin.staff-contracts.index'
+                        : (AdminAccess::can('letters') ? 'admin.letters.create' : 'admin.profile')));
 
             return redirect()->route($route);
         })->name('home');
@@ -190,6 +193,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/staff-contracts/{staffContract}/signed-document/preview', [AdminStaffContractController::class, 'previewSignedDocument'])->name('staff-contracts.signed-document.preview');
             Route::get('/staff-contracts/{staffContract}/signed-document', [AdminStaffContractController::class, 'downloadSignedDocument'])->name('staff-contracts.signed-document');
             Route::get('/staff-contracts/{staffContract}', [AdminStaffContractController::class, 'show'])->name('staff-contracts.show');
+        });
+
+        Route::middleware('admin.permission:letters')->prefix('letters')->name('letters.')->group(function () {
+            Route::get('/create', [AdminLetterController::class, 'create'])->name('create');
+            Route::post('/pdf', [AdminLetterController::class, 'downloadPdf'])->name('pdf');
         });
     });
 });

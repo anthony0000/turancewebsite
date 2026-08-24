@@ -25,6 +25,10 @@ final class AdminAccess
             'label' => 'Staff contracts',
             'description' => 'Create, edit, review, and export staff contracts.',
         ],
+        'letters' => [
+            'label' => 'Letterhead',
+            'description' => 'Write and export letters and basic company documents.',
+        ],
         'activity' => [
             'label' => 'Activity',
             'description' => 'Review traffic, leads, and invoice movement.',

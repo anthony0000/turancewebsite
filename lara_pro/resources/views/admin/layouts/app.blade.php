@@ -13,11 +13,14 @@
     $isStaffContractEditor = request()->routeIs('admin.staff-contracts.edit');
     $isStaffContractBuilder = request()->routeIs('admin.staff-contracts.create');
     $isStaffContractWorkspace = request()->routeIs('admin.staff-contracts.*');
+    $isLetterBuilder = request()->routeIs('admin.letters.create');
+    $isLetterWorkspace = request()->routeIs('admin.letters.*');
     $isAdminProfile = request()->routeIs('admin.profile');
     $isSubaccountWorkspace = request()->routeIs('admin.subaccounts.*');
     $canInvoices = \App\Support\AdminAccess::can('invoices');
     $canProposals = \App\Support\AdminAccess::can('proposals');
     $canStaffContracts = \App\Support\AdminAccess::can('staff-contracts');
+    $canLetters = \App\Support\AdminAccess::can('letters');
     $canActivity = \App\Support\AdminAccess::can('activity');
     $canInsights = \App\Support\AdminAccess::can('insights');
     $canPromotion = \App\Support\AdminAccess::can('promotion');
@@ -36,6 +39,7 @@
         $isProposalDashboard => 'Proposal Studio',
         $isStaffContractPreview => 'Staff Contract Preview',
         $isStaffContractEditor => 'Edit Staff Contract',
+        $isLetterBuilder => 'Letter Generator',
         $isSubaccountWorkspace => 'Sub-accounts',
         $isAdminProfile => 'Profile & Settings',
         $isStaffContractDashboard => 'Staff Contracts',
@@ -55,6 +59,7 @@
         $isProposalDashboard => 'Build, review, and export client proposals.',
         $isStaffContractPreview => 'Review the project-bound staff agreement, signing details, and contract PDF.',
         $isStaffContractEditor => 'Update the project, commercial terms, staff details, and signing section.',
+        $isLetterBuilder => 'Write letters and basic company documents on the Turance letterhead, then export them as PDF.',
         $isSubaccountWorkspace => 'Create team accounts and limit the parts of the admin workspace they can access.',
         $isAdminProfile => 'Manage your admin identity, contact details, and account security.',
         $isStaffContractDashboard => 'Track project-bound staff agreements and export signed-ready contract documents.',
@@ -74,6 +79,7 @@
         $isProposalDashboard => 'Proposal Studio',
         $isStaffContractPreview => 'Staff Contract Preview',
         $isStaffContractEditor => 'Edit Staff Contract',
+        $isLetterBuilder => 'Letter Generator',
         $isSubaccountWorkspace => 'Sub-accounts',
         $isAdminProfile => 'Profile & Settings',
         $isStaffContractDashboard => 'Staff Contracts',
@@ -2314,6 +2320,24 @@
                                 </a>
                             @endif
 
+                            @if ($canLetters)
+                                <a class="admin-nav-link {{ $isLetterWorkspace ? 'active' : '' }}"
+                                    href="{{ route('admin.letters.create') }}">
+                                <span class="admin-nav-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24">
+                                        <path d="M6 3h9l3 3v15H6z" />
+                                        <path d="M14 3v4h4" />
+                                        <path d="M9 12h6" />
+                                        <path d="M9 16h5" />
+                                    </svg>
+                                </span>
+                                <div>
+                                    <strong>Letterhead</strong>
+                                    <span>Company documents</span>
+                                </div>
+                                </a>
+                            @endif
+
                             @if ($canArchive)
                                 <a class="admin-nav-link {{ request()->routeIs('admin.quotes.archive') ? 'active' : '' }}"
                                     href="{{ route('admin.quotes.archive') }}">
@@ -2364,7 +2388,7 @@
                                 </a>
                             @endif
 
-                            @if ($isInvoicePreview || $isInvoiceEditor || $isProposalPreview || $isProposalEditor || $isStaffContractPreview || $isStaffContractEditor || $isAdminProfile || $isSubaccountWorkspace)
+                            @if ($isInvoicePreview || $isInvoiceEditor || $isProposalPreview || $isProposalEditor || $isStaffContractPreview || $isStaffContractEditor || $isLetterWorkspace || $isAdminProfile || $isSubaccountWorkspace)
                                 <span class="admin-nav-label">Current</span>
                                 <a class="admin-nav-link active" href="{{ url()->current() }}">
                                     <span class="admin-nav-icon" aria-hidden="true">
@@ -2377,7 +2401,7 @@
                                     </span>
                                     <div>
                                         <strong>{{ $currentAdminView }}</strong>
-                                        <span>{{ $isProposalWorkspace ? 'Proposal' : ($isStaffContractWorkspace ? 'Staff contract' : ($isSubaccountWorkspace ? 'Account access' : ($isAdminProfile ? 'Account' : ($isInvoiceEditor ? 'Edit' : 'Preview')))) }}</span>
+                                        <span>{{ $isProposalWorkspace ? 'Proposal' : ($isStaffContractWorkspace ? 'Staff contract' : ($isLetterWorkspace ? 'Letterhead' : ($isSubaccountWorkspace ? 'Account access' : ($isAdminProfile ? 'Account' : ($isInvoiceEditor ? 'Edit' : 'Preview'))))) }}</span>
                                     </div>
                                 </a>
                             @endif
@@ -2422,6 +2446,8 @@
                                 <a class="button" href="{{ route('admin.proposals.index') }}">New Proposal</a>
                             @elseif ($isStaffContractWorkspace)
                                 <a class="button" href="{{ route('admin.staff-contracts.create') }}">New Staff Contract</a>
+                            @elseif ($isLetterWorkspace)
+                                <a class="button" href="{{ route('admin.letters.create') }}">New Letter</a>
                             @elseif ($canInvoices)
                                 <a class="button" href="{{ route('admin.quotes.create') }}">New Invoice</a>
                             @endif
