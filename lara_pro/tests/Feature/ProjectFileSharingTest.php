@@ -50,7 +50,7 @@ it('shows project portfolio charts and the file workspace entry point', function
         ->assertSee('Create share link');
 });
 
-it('uploads an external project file from the project register', function () {
+it('uploads an external project file with ajax even when the project has no staff contract', function () {
     Storage::fake('local');
 
     $project = Project::query()->create([
@@ -61,12 +61,14 @@ it('uploads an external project file from the project register', function () {
 
     $this
         ->withSession(projectAdminSession())
-        ->post(route('admin.projects.files.external.store'), [
+        ->postJson(route('admin.projects.files.external.store'), [
             'project_id' => $project->id,
             'file' => UploadedFile::fake()->create('client-reference.docx', 64, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'),
             'description' => 'Reference material for the staff handoff.',
         ])
-        ->assertRedirect(route('admin.projects.show', $project));
+        ->assertCreated()
+        ->assertJsonPath('data.project_id', $project->id)
+        ->assertJsonPath('data.original_name', 'client-reference.docx');
 
     $projectFile = ProjectFile::query()->firstOrFail();
 

@@ -88,7 +88,7 @@
             </div>
 
             @if ($projects->isNotEmpty())
-                <form class="project-index-upload-form" method="POST" action="{{ route('admin.projects.files.external.store') }}" enctype="multipart/form-data">
+                <form class="project-index-upload-form" method="POST" action="{{ route('admin.projects.files.external.store') }}" enctype="multipart/form-data" data-project-file-upload>
                     @csrf
                     <div class="field">
                         <label for="external-project-id">Project</label>
@@ -120,14 +120,15 @@
                     @enderror
                     <div class="project-index-upload-form__actions">
                         <p class="form-help">Maximum 50 MB. PDF, Office files, images, text, and ZIP files are supported.</p>
-                        <button class="button" type="submit">Upload to Project</button>
+                        <button class="button" type="submit" data-project-file-submit>Upload to Project</button>
                     </div>
+                    <p class="form-help" data-project-file-status role="status" aria-live="polite"></p>
                 </form>
             @else
                 <div class="project-upload-empty">
                     <strong>Create a project workspace before uploading files.</strong>
-                    <p>Projects are created automatically when you create an invoice-linked staff contract. The file area then becomes available at the project level.</p>
-                    <a class="ghost-button" href="{{ route('admin.staff-contracts.create') }}">Create Staff Contract</a>
+                    <p>Create a project workspace from Project Management or a staff contract before uploading files.</p>
+                    <a class="ghost-button" href="{{ route('admin.project-management.projects.create') }}">Create Project</a>
                 </div>
             @endif
         @else
@@ -220,7 +221,7 @@
             <div>
                 <span class="eyebrow">Project register</span>
                 <h2>Every engagement, ready for handoff</h2>
-                <p>Projects are created from invoice-linked staff agreements and keep their files independent from contracts.</p>
+                <p>Projects can be created from staff agreements or project management, and keep their files independent from contracts.</p>
             </div>
             <span class="admin-pill">{{ number_format($projectCount) }} records</span>
         </div>
@@ -270,7 +271,7 @@
                         <tr>
                             <td colspan="6">
                                 <strong>No project records yet.</strong>
-                                <span>Create an invoice-linked staff contract to start a project workspace, then upload external files above.</span>
+                                <span>Create a project workspace from Project Management or a staff contract, then upload external files above.</span>
                             </td>
                         </tr>
                     @endforelse
@@ -279,3 +280,67 @@
         </div>
     </section>
 @endsection
+
+@push('scripts')
+    <script>
+        (() => {
+            const form = document.querySelector('[data-project-file-upload]');
+
+            if (!form) {
+                return;
+            }
+
+            const submit = form.querySelector('[data-project-file-submit]');
+            const status = form.querySelector('[data-project-file-status]');
+            const defaultLabel = submit?.textContent || 'Upload to Project';
+
+            form.addEventListener('submit', async (event) => {
+                event.preventDefault();
+
+                if (!submit) {
+                    return;
+                }
+
+                submit.disabled = true;
+                submit.textContent = 'Uploading…';
+                if (status) {
+                    status.textContent = 'Uploading file…';
+                    status.classList.remove('form-error');
+                }
+
+                try {
+                    const response = await fetch(form.action, {
+                        method: 'POST',
+                        body: new FormData(form),
+                        headers: {
+                            Accept: 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest',
+                        },
+                    });
+                    const payload = await response.json().catch(() => ({}));
+
+                    if (!response.ok) {
+                        const validationMessage = Object.values(payload.errors || {})
+                            .flat()
+                            .find((message) => typeof message === 'string');
+
+                        throw new Error(validationMessage || payload.message || 'The file could not be uploaded.');
+                    }
+
+                    form.reset();
+                    if (status) {
+                        status.textContent = payload.message || 'File uploaded successfully.';
+                    }
+                } catch (error) {
+                    if (status) {
+                        status.textContent = error.message || 'The file could not be uploaded.';
+                        status.classList.add('form-error');
+                    }
+                } finally {
+                    submit.disabled = false;
+                    submit.textContent = defaultLabel;
+                }
+            });
+        })();
+    </script>
+@endpush

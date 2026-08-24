@@ -6,6 +6,7 @@ use App\Models\Project;
 use App\Models\ProjectFile;
 use App\Support\AdminAccess;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
@@ -112,7 +113,7 @@ class AdminProjectController extends Controller
             ->with('status', 'File added to the project workspace.');
     }
 
-    public function storeExternalFile(Request $request): RedirectResponse
+    public function storeExternalFile(Request $request): RedirectResponse|JsonResponse
     {
         $validated = $request->validate([
             'project_id' => ['required', 'integer', 'exists:projects,id'],
@@ -121,7 +122,23 @@ class AdminProjectController extends Controller
         ]);
 
         $project = Project::query()->findOrFail($validated['project_id']);
-        $this->createProjectFile($project, $validated['file'], $validated['description'] ?? null);
+        $projectFile = $this->createProjectFile($project, $validated['file'], $validated['description'] ?? null);
+
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'message' => 'External file added to the project workspace.',
+                'data' => [
+                    'id' => $projectFile->id,
+                    'project_id' => $projectFile->project_id,
+                    'original_name' => $projectFile->original_name,
+                    'description' => $projectFile->description,
+                    'file_kind' => $projectFile->fileKind(),
+                    'size_label' => $projectFile->sizeLabel(),
+                    'download_url' => route('admin.projects.files.download', $projectFile),
+                    'preview_url' => route('admin.projects.files.preview', $projectFile),
+                ],
+            ], 201);
+        }
 
         return redirect()
             ->route('admin.projects.show', $project)

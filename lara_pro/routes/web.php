@@ -6,6 +6,8 @@ use App\Http\Controllers\AdminLetterController;
 use App\Http\Controllers\AdminProposalController;
 use App\Http\Controllers\AdminProfileController;
 use App\Http\Controllers\AdminProjectController;
+use App\Http\Controllers\AdminProjectManagementController;
+use App\Http\Controllers\ProjectManagementApiController;
 use App\Http\Controllers\AdminStaffContractController;
 use App\Http\Controllers\AdminSubaccountController;
 use App\Http\Controllers\ContactController;
@@ -118,7 +120,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
                     : (AdminAccess::can('staff-contracts')
                         ? 'admin.staff-contracts.index'
                         : (AdminAccess::can('projects')
-                            ? 'admin.projects.index'
+                            ? 'admin.project-management.dashboard'
                             : (AdminAccess::can('letters') ? 'admin.letters.create' : 'admin.profile'))));
 
             return redirect()->route($route);
@@ -140,6 +142,89 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::post('/files/{projectFile}/share', [AdminProjectController::class, 'toggleShare'])->name('files.share');
                 Route::delete('/files/{projectFile}', [AdminProjectController::class, 'destroyFile'])->name('files.destroy');
             });
+        });
+
+        Route::middleware('admin.permission:projects')->prefix('project-management')->name('project-management.')->group(function () {
+            Route::prefix('api')->name('api.')->group(function () {
+                Route::get('/projects', [ProjectManagementApiController::class, 'projects'])->name('projects');
+                Route::post('/projects', [ProjectManagementApiController::class, 'storeProject'])->name('projects.store');
+                Route::get('/projects/{project}', [ProjectManagementApiController::class, 'project'])->name('projects.show');
+                Route::get('/projects/{project}/members', [ProjectManagementApiController::class, 'members'])->name('members');
+                Route::post('/projects/{project}/members', [ProjectManagementApiController::class, 'addMember'])->name('members.store');
+                Route::delete('/projects/{project}/members/{user}', [ProjectManagementApiController::class, 'removeMember'])->name('members.destroy');
+                Route::get('/projects/{project}/columns', [ProjectManagementApiController::class, 'columns'])->name('columns');
+                Route::post('/projects/{project}/columns', [ProjectManagementApiController::class, 'storeColumn'])->name('columns.store');
+                Route::put('/columns/{column}', [ProjectManagementApiController::class, 'updateColumn'])->name('columns.update');
+                Route::delete('/columns/{column}', [ProjectManagementApiController::class, 'deleteColumn'])->name('columns.destroy');
+                Route::get('/projects/{project}/comments', [ProjectManagementApiController::class, 'comments'])->name('comments');
+                Route::post('/projects/{project}/comments', [ProjectManagementApiController::class, 'storeComment'])->name('comments.store');
+                Route::get('/projects/{project}/tasks/{task}/comments', [ProjectManagementApiController::class, 'comments'])->name('tasks.comments');
+                Route::post('/projects/{project}/tasks/{task}/comments', [ProjectManagementApiController::class, 'storeComment'])->name('tasks.comments.store');
+                Route::post('/projects/{project}/tasks', [ProjectManagementApiController::class, 'storeTask'])->name('tasks.store');
+                Route::post('/projects/{project}/milestones', [ProjectManagementApiController::class, 'storeMilestone'])->name('milestones.store');
+                Route::post('/projects/{project}/sprints', [ProjectManagementApiController::class, 'storeSprint'])->name('sprints.store');
+                Route::get('/projects/{project}/activity', [ProjectManagementApiController::class, 'activity'])->name('activity');
+                Route::patch('/tasks/{task}', [ProjectManagementApiController::class, 'updateTask'])->name('tasks.update');
+                Route::patch('/tasks/{task}/move', [ProjectManagementApiController::class, 'moveTask'])->name('tasks.move');
+                Route::post('/tasks/{task}/time', [ProjectManagementApiController::class, 'storeTimeEntry'])->name('tasks.time.store');
+                Route::post('/tasks/{task}/checklists', [ProjectManagementApiController::class, 'storeChecklist'])->name('tasks.checklists.store');
+                Route::post('/tasks/{task}/checklist-items', [ProjectManagementApiController::class, 'storeChecklistItem'])->name('tasks.checklist-items.store');
+                Route::get('/tasks/{task}/attachments', [ProjectManagementApiController::class, 'attachments'])->name('tasks.attachments');
+                Route::post('/tasks/{task}/attachments', [ProjectManagementApiController::class, 'storeAttachment'])->name('tasks.attachments.store');
+                Route::get('/notifications', [ProjectManagementApiController::class, 'notifications'])->name('notifications');
+                Route::patch('/notifications/{notification}/read', [ProjectManagementApiController::class, 'markNotification'])->name('notifications.read');
+                Route::get('/search', [ProjectManagementApiController::class, 'search'])->name('search');
+                Route::get('/reports', [ProjectManagementApiController::class, 'reports'])->name('reports');
+            });
+            Route::get('/', [AdminProjectManagementController::class, 'dashboard'])->name('dashboard');
+            Route::get('/projects', [AdminProjectManagementController::class, 'projects'])->name('projects');
+            Route::get('/projects/create', [AdminProjectManagementController::class, 'createProject'])->name('projects.create');
+            Route::post('/projects', [AdminProjectManagementController::class, 'storeProject'])->name('projects.store');
+            Route::get('/projects/archived', [AdminProjectManagementController::class, 'projects'])->name('archived');
+            Route::get('/projects/{project}', [AdminProjectManagementController::class, 'showProject'])->name('projects.show');
+            Route::put('/projects/{project}', [AdminProjectManagementController::class, 'updateProject'])->name('projects.update');
+            Route::patch('/projects/{project}/archive', [AdminProjectManagementController::class, 'archiveProject'])->name('projects.archive');
+            Route::patch('/projects/{project}/restore', [AdminProjectManagementController::class, 'restoreProject'])->name('projects.restore');
+            Route::delete('/projects/{project}', [AdminProjectManagementController::class, 'destroyProject'])->name('projects.destroy');
+            Route::get('/projects/{project}/board', [AdminProjectManagementController::class, 'board'])->name('board');
+            Route::get('/projects/{project}/backlog', [AdminProjectManagementController::class, 'backlog'])->name('backlog');
+            Route::get('/projects/{project}/sprints', [AdminProjectManagementController::class, 'sprints'])->name('sprints');
+            Route::get('/projects/{project}/settings', [AdminProjectManagementController::class, 'settings'])->name('settings');
+            Route::get('/calendar', [AdminProjectManagementController::class, 'calendar'])->name('calendar');
+            Route::get('/team', [AdminProjectManagementController::class, 'team'])->name('team');
+            Route::get('/reports', [AdminProjectManagementController::class, 'reports'])->name('reports');
+            Route::get('/search', [AdminProjectManagementController::class, 'search'])->name('search');
+            Route::get('/notifications', [AdminProjectManagementController::class, 'notifications'])->name('notifications');
+            Route::post('/filters', [AdminProjectManagementController::class, 'storeSavedFilter'])->name('filters.store');
+            Route::delete('/filters/{savedFilter}', [AdminProjectManagementController::class, 'destroySavedFilter'])->name('filters.destroy');
+            Route::patch('/notifications/{notification}/read', [AdminProjectManagementController::class, 'markNotification'])->name('notifications.read');
+
+            Route::post('/projects/{project}/tasks', [AdminProjectManagementController::class, 'storeTask'])->name('tasks.store');
+            Route::get('/tasks/{task}', [AdminProjectManagementController::class, 'task'])->name('tasks.show');
+            Route::put('/tasks/{task}', [AdminProjectManagementController::class, 'updateTask'])->name('tasks.update');
+            Route::patch('/tasks/{task}/move', [AdminProjectManagementController::class, 'moveTask'])->name('tasks.move');
+            Route::patch('/tasks/{task}/sprint', [AdminProjectManagementController::class, 'assignTaskSprint'])->name('tasks.sprint');
+            Route::post('/projects/{project}/tasks/{task}/comments', [AdminProjectManagementController::class, 'storeComment'])->name('tasks.comments.store');
+            Route::post('/tasks/{task}/time', [AdminProjectManagementController::class, 'storeTimeEntry'])->name('tasks.time.store');
+            Route::post('/tasks/{task}/timer/start', [AdminProjectManagementController::class, 'startTimer'])->name('tasks.timer.start');
+            Route::post('/tasks/{task}/timer/stop', [AdminProjectManagementController::class, 'stopTimer'])->name('tasks.timer.stop');
+            Route::post('/tasks/{task}/attachments', [AdminProjectManagementController::class, 'storeAttachment'])->name('tasks.attachments.store');
+            Route::post('/tasks/{task}/checklists', [AdminProjectManagementController::class, 'storeChecklist'])->name('tasks.checklists.store');
+            Route::post('/tasks/{task}/checklist-items', [AdminProjectManagementController::class, 'storeChecklistItem'])->name('tasks.checklist-items.store');
+            Route::patch('/checklist-items/{item}', [AdminProjectManagementController::class, 'toggleChecklistItem'])->name('checklist-items.toggle');
+            Route::get('/attachments/{attachment}/download', [AdminProjectManagementController::class, 'downloadAttachment'])->name('attachments.download');
+
+            Route::post('/projects/{project}/columns', [AdminProjectManagementController::class, 'storeColumn'])->name('columns.store');
+            Route::put('/columns/{column}', [AdminProjectManagementController::class, 'updateColumn'])->name('columns.update');
+            Route::delete('/columns/{column}', [AdminProjectManagementController::class, 'deleteColumn'])->name('columns.destroy');
+            Route::post('/projects/{project}/labels', [AdminProjectManagementController::class, 'storeLabel'])->name('labels.store');
+            Route::post('/projects/{project}/milestones', [AdminProjectManagementController::class, 'storeMilestone'])->name('milestones.store');
+            Route::post('/projects/{project}/sprints', [AdminProjectManagementController::class, 'storeSprint'])->name('sprints.store');
+            Route::patch('/sprints/{sprint}/start', [AdminProjectManagementController::class, 'startSprint'])->name('sprints.start');
+            Route::patch('/sprints/{sprint}/complete', [AdminProjectManagementController::class, 'completeSprint'])->name('sprints.complete');
+            Route::post('/projects/{project}/members', [AdminProjectManagementController::class, 'storeMember'])->name('members.store');
+            Route::delete('/projects/{project}/members/{user}', [AdminProjectManagementController::class, 'removeMember'])->name('members.destroy');
+            Route::post('/projects/{project}/comments', [AdminProjectManagementController::class, 'storeComment'])->name('comments.store');
         });
 
         Route::prefix('subaccounts')->name('subaccounts.')->middleware('admin.permission:subaccounts')->group(function () {

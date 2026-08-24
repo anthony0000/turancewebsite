@@ -16,6 +16,7 @@
     $isProjectDashboard = request()->routeIs('admin.projects.index');
     $isProjectPreview = request()->routeIs('admin.projects.show');
     $isProjectWorkspace = request()->routeIs('admin.projects.*');
+    $isProjectManagementWorkspace = request()->routeIs('admin.project-management.*');
     $isLetterBuilder = request()->routeIs('admin.letters.create');
     $isLetterWorkspace = request()->routeIs('admin.letters.*');
     $isAdminProfile = request()->routeIs('admin.profile');
@@ -43,6 +44,7 @@
         $isProposalDashboard => 'Proposal Studio',
         $isStaffContractPreview => 'Staff Contract Preview',
         $isStaffContractEditor => 'Edit Staff Contract',
+        $isProjectManagementWorkspace => 'Project Management',
         $isProjectPreview => 'Project Workspace',
         $isProjectDashboard => 'Projects & Files',
         $isLetterBuilder => 'Letter Generator',
@@ -65,6 +67,7 @@
         $isProposalDashboard => 'Build, review, and export client proposals.',
         $isStaffContractPreview => 'Review the project-bound staff agreement, signing details, and contract PDF.',
         $isStaffContractEditor => 'Update the project, commercial terms, staff details, and signing section.',
+        $isProjectManagementWorkspace => 'Plan projects, move work across the board, and keep delivery visible to the team.',
         $isProjectPreview => 'Keep project files private by default, then create a secure link for the right handoff.',
         $isProjectDashboard => 'Review project health, handoff activity, and the files attached to each engagement.',
         $isLetterBuilder => 'Write letters and basic company documents on the Turance letterhead, then export them as PDF.',
@@ -87,6 +90,7 @@
         $isProposalDashboard => 'Proposal Studio',
         $isStaffContractPreview => 'Staff Contract Preview',
         $isStaffContractEditor => 'Edit Staff Contract',
+        $isProjectManagementWorkspace => 'Project Management',
         $isProjectPreview => 'Project Workspace',
         $isProjectDashboard => 'Projects & Files',
         $isLetterBuilder => 'Letter Generator',
@@ -2182,6 +2186,7 @@
         .promotion-form__grid { grid-template-columns: 1fr; }
     }
     </style>
+    @stack('styles')
 </head>
 
 <body class="{{ $isAuthenticated ? 'is-admin' : 'is-auth' }}">
@@ -2331,8 +2336,8 @@
                             @endif
 
                             @if ($canProjects)
-                                <a class="admin-nav-link {{ $isProjectWorkspace ? 'active' : '' }}"
-                                    href="{{ route('admin.projects.index') }}">
+                                <a class="admin-nav-link {{ $isProjectWorkspace || $isProjectManagementWorkspace ? 'active' : '' }}"
+                                    href="{{ route('admin.project-management.dashboard') }}">
                                 <span class="admin-nav-icon" aria-hidden="true">
                                     <svg viewBox="0 0 24 24">
                                         <path d="M3 7h7l2 2h9v10H3z" />
@@ -2340,8 +2345,8 @@
                                     </svg>
                                 </span>
                                 <div>
-                                    <strong>Projects & Files</strong>
-                                    <span>Secure handoffs</span>
+                                    <strong>Projects</strong>
+                                    <span>Delivery workspace</span>
                                 </div>
                                 </a>
                             @endif
@@ -2414,7 +2419,7 @@
                                 </a>
                             @endif
 
-                            @if ($isInvoicePreview || $isInvoiceEditor || $isProposalPreview || $isProposalEditor || $isStaffContractPreview || $isStaffContractEditor || $isLetterWorkspace || $isAdminProfile || $isSubaccountWorkspace)
+                            @if ($isInvoicePreview || $isInvoiceEditor || $isProposalPreview || $isProposalEditor || $isStaffContractPreview || $isStaffContractEditor || $isLetterWorkspace || $isAdminProfile || $isSubaccountWorkspace || $isProjectManagementWorkspace)
                                 <span class="admin-nav-label">Current</span>
                                 <a class="admin-nav-link active" href="{{ url()->current() }}">
                                     <span class="admin-nav-icon" aria-hidden="true">
@@ -2427,7 +2432,7 @@
                                     </span>
                                     <div>
                                         <strong>{{ $currentAdminView }}</strong>
-                                        <span>{{ $isProposalWorkspace ? 'Proposal' : ($isStaffContractWorkspace ? 'Staff contract' : ($isLetterWorkspace ? 'Letterhead' : ($isSubaccountWorkspace ? 'Account access' : ($isAdminProfile ? 'Account' : ($isInvoiceEditor ? 'Edit' : 'Preview'))))) }}</span>
+                                        <span>{{ $isProjectManagementWorkspace ? 'Delivery' : ($isProposalWorkspace ? 'Proposal' : ($isStaffContractWorkspace ? 'Staff contract' : ($isLetterWorkspace ? 'Letterhead' : ($isSubaccountWorkspace ? 'Account access' : ($isAdminProfile ? 'Account' : ($isInvoiceEditor ? 'Edit' : 'Preview')))))) }}</span>
                                     </div>
                                 </a>
                             @endif
@@ -2470,9 +2475,11 @@
                                 @endif
                             @elseif ($isProposalWorkspace)
                                 <a class="button" href="{{ route('admin.proposals.index') }}">New Proposal</a>
-                            @elseif ($isProjectPreview)
-                                <a class="ghost-button" href="{{ route('admin.projects.index') }}">Back to Projects</a>
-                            @elseif ($isStaffContractWorkspace)
+                              @elseif ($isProjectPreview)
+                                  <a class="ghost-button" href="{{ route('admin.projects.index') }}">Back to Projects</a>
+                              @elseif ($isProjectManagementWorkspace)
+                                  <a class="button" href="{{ route('admin.project-management.projects.create') }}">New Project</a>
+                              @elseif ($isStaffContractWorkspace)
                                 <a class="button" href="{{ route('admin.staff-contracts.create') }}">New Staff Contract</a>
                             @elseif ($isLetterWorkspace)
                                 <a class="button" href="{{ route('admin.letters.create') }}">New Letter</a>
