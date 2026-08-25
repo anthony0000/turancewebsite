@@ -76,8 +76,22 @@
         .pm-inline-form { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; }
         .pm-inline-form .field { flex: 1 1 150px; }
         .pm-callout { padding: 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel-soft); color: var(--muted-strong); font-size: 12px; line-height: 1.5; }
-        .pm-icon-link { color: var(--accent-soft); font-size: 12px; font-weight: 750; }
-        .pm-icon-link:hover { text-decoration: underline; }
+        .pm-icon-link {
+            display: inline-flex;
+            min-height: 24px;
+            align-items: center;
+            justify-content: center;
+            padding: 4px 0;
+            border: 0;
+            background: transparent;
+            color: var(--primary-strong);
+            cursor: pointer;
+            font: inherit;
+            font-size: 12px;
+            font-weight: 750;
+            text-decoration: none;
+        }
+        .pm-icon-link:hover { color: var(--primary); text-decoration: underline; }
         .pm-chart-bars { display: grid; gap: 9px; }
         .pm-chart-bar { display: grid; grid-template-columns: 100px minmax(0,1fr) 32px; align-items: center; gap: 8px; font-size: 11px; }
         .pm-chart-bar > span:first-child { color: var(--muted); }
