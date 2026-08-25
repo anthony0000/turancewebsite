@@ -889,6 +889,16 @@ button.ghost-button {
     text-transform: uppercase;
 }
 
+.kpi-grid--compact .kpi-card {
+    grid-template-rows: auto auto auto;
+    gap: 8px;
+    min-height: 0;
+}
+
+.kpi-grid--compact .kpi-context {
+    align-self: end;
+}
+
 .trend-pill--up,
 .trend-pill--positive {
     color: var(--success);
@@ -914,6 +924,44 @@ button.ghost-button {
     grid-template-columns: minmax(0, 1.7fr) minmax(300px, 0.72fr);
     gap: 16px;
     align-items: start;
+}
+
+.dashboard-overview-chart-panel {
+    min-width: 0;
+}
+
+.dashboard-overview-chart-panel .line-chart-shell {
+    min-height: 280px;
+}
+
+.dashboard-signal-strip {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.dashboard-signal {
+    display: grid;
+    gap: 5px;
+    min-width: 0;
+    padding: 11px 12px;
+    border: 1px solid var(--line-soft);
+    border-radius: var(--radius);
+    background: var(--surface-soft);
+}
+
+.dashboard-signal strong {
+    overflow: hidden;
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 700;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.mini-chart--dashboard {
+    min-height: 190px;
 }
 
 /* Panels size to their content instead of stretching to the tallest sibling.
@@ -1813,6 +1861,10 @@ button.ghost-button {
     padding-bottom: 4px;
 }
 
+.mini-chart.mini-chart--dashboard {
+    min-height: 190px;
+}
+
 /* Fixed row tracks keep the month names and counts on a shared baseline
    regardless of how tall each bar is. */
 .month-bar {
@@ -2638,6 +2690,7 @@ button.ghost-button {
     .kpi-grid,
     .insight-grid,
     .chart-summary-grid,
+    .dashboard-signal-strip,
     .template-grid,
     .wizard-pane-grid,
     .form-grid,
@@ -2646,6 +2699,10 @@ button.ghost-button {
     .sticky-stack,
     .stat-list--split {
         grid-template-columns: 1fr;
+    }
+
+    .dashboard-signal-strip {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
     .dash-topline {

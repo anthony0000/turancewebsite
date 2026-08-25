@@ -121,22 +121,30 @@
         </div>
     </section>
 
-    @include('admin.quotes.partials.kpi-cards')
+    @include('admin.quotes.partials.kpi-cards', ['compactKpi' => true])
 
-    <div class="dashboard-grid">
-        <section class="panel panel-padded">
-            <div class="panel-head">
-                <span class="eyebrow">Operating priorities</span>
-                <h2>What needs attention</h2>
-                <p>A quick read before opening a detailed workspace.</p>
+    <div class="dashboard-grid dashboard-overview-grid">
+        <section class="panel panel-padded dashboard-overview-chart-panel">
+            <div class="panel-head panel-head--row">
+                <div>
+                    <span class="eyebrow">Performance</span>
+                    <h2>Activity trend</h2>
+                </div>
+
+                <div class="chart-legend" aria-label="Chart legend">
+                    <span class="legend-item"><span class="legend-swatch legend-swatch--visits"></span>Visits</span>
+                    <span class="legend-item"><span class="legend-swatch legend-swatch--quotes"></span>Invoices</span>
+                    <span class="legend-item"><span class="legend-swatch legend-swatch--messages"></span>Leads</span>
+                </div>
             </div>
 
-            <div class="stat-list stat-list--split">
+            @include('admin.quotes.partials.activity-chart', ['chartSummaryCompact' => true])
+
+            <div class="dashboard-signal-strip" aria-label="Business signals">
                 @foreach ($dashboardHighlights as $highlight)
-                    <div class="stat-row">
-                        <span class="stat-row__label">{{ $highlight['label'] }}</span>
-                        <strong class="stat-row__value">{{ $highlight['value'] }}</strong>
-                        <span class="stat-row__meta">{{ $highlight['meta'] }}</span>
+                    <div class="dashboard-signal" title="{{ $highlight['meta'] }}">
+                        <span class="metric-label">{{ $highlight['label'] }}</span>
+                        <strong>{{ $highlight['value'] }}</strong>
                     </div>
                 @endforeach
             </div>
@@ -145,38 +153,48 @@
         <aside class="sticky-stack">
             <section class="panel panel-padded">
                 <div class="panel-head panel-head--tight">
+                    <span class="eyebrow">Pipeline</span>
+                    <h3 class="panel-title">Monthly value</h3>
+                </div>
+
+                @if ($monthlyPipeline !== [])
+                    <div class="mini-chart mini-chart--dashboard">
+                        @foreach ($monthlyPipeline as $month)
+                            <div class="month-bar">
+                                <span>{{ $month['formatted_total'] }}</span>
+                                <div class="month-bar-column" style="height: {{ max(6, $month['height'] * 1.7) }}px;"></div>
+                                <strong>{{ $month['label'] }}</strong>
+                                <span>{{ number_format($month['count']) }}</span>
+                            </div>
+                        @endforeach
+                    </div>
+                @else
+                    <div class="data-note">Pipeline data will appear after the first invoice.</div>
+                @endif
+            </section>
+
+            <section class="panel panel-padded">
+                <div class="panel-head panel-head--tight">
                     <span class="eyebrow">Shortcuts</span>
-                    <h3 class="panel-title">Open a workspace</h3>
+                    <h3 class="panel-title">Workspaces</h3>
                 </div>
 
                 <div class="shortcut-grid">
                     <a href="{{ route('admin.quotes.activity') }}">
-                        <span class="shortcut-icon" aria-hidden="true">
-                            <svg viewBox="0 0 24 24"><path d="M4 17l5-5 4 4 7-8" /><path d="M4 19h16" /></svg>
-                        </span>
+                        <span class="shortcut-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 17l5-5 4 4 7-8" /><path d="M4 19h16" /></svg></span>
                         <strong>Activity</strong>
-                        <span>Traffic and leads</span>
                     </a>
                     <a href="{{ route('admin.quotes.insights') }}">
-                        <span class="shortcut-icon" aria-hidden="true">
-                            <svg viewBox="0 0 24 24"><path d="M12 3a7 7 0 0 0-4 12.75V18h8v-2.25A7 7 0 0 0 12 3z" /><path d="M9 21h6" /></svg>
-                        </span>
+                        <span class="shortcut-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3a7 7 0 0 0-4 12.75V18h8v-2.25A7 7 0 0 0 12 3z" /><path d="M9 21h6" /></svg></span>
                         <strong>Insights</strong>
-                        <span>Demand patterns</span>
                     </a>
                     <a href="{{ route('admin.quotes.create') }}">
-                        <span class="shortcut-icon" aria-hidden="true">
-                            <svg viewBox="0 0 24 24"><path d="M7 3h10v18l-2-1-2 1-2-1-2 1-2-1z" /><path d="M9 8h6" /><path d="M9 12h6" /></svg>
-                        </span>
+                        <span class="shortcut-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 3h10v18l-2-1-2 1-2-1-2 1-2-1z" /><path d="M9 8h6" /><path d="M9 12h6" /></svg></span>
                         <strong>Builder</strong>
-                        <span>Create an invoice</span>
                     </a>
                     <a href="{{ route('admin.quotes.archive') }}">
-                        <span class="shortcut-icon" aria-hidden="true">
-                            <svg viewBox="0 0 24 24"><path d="M4 7h16v13H4z" /><path d="M4 7l2-4h12l2 4" /><path d="M9 12h6" /></svg>
-                        </span>
+                        <span class="shortcut-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 7h16v13H4z" /><path d="M4 7l2-4h12l2 4" /><path d="M9 12h6" /></svg></span>
                         <strong>Archive</strong>
-                        <span>Saved documents</span>
                     </a>
                 </div>
             </section>
@@ -206,7 +224,7 @@
                     @empty
                         <li class="record-list__empty">
                             <strong>No invoices yet</strong>
-                            <span>Create your first one from the invoice builder.</span>
+                            <span>Create one from the builder.</span>
                         </li>
                     @endforelse
                 </ul>

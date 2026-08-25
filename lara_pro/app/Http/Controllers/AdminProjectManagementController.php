@@ -36,7 +36,13 @@ class AdminProjectManagementController extends Controller
 
     public function dashboard(Request $request): View
     {
-        $projects = $this->visibleProjects()->where('status', '!=', 'archived')->get();
+        $projects = $this->visibleProjects()
+            ->where('status', '!=', 'archived')
+            ->withCount([
+                'tasks' => fn (Builder $tasks) => ProjectManagementAccess::scopeVisibleTasks($tasks)->whereNull('archived_at'),
+                'tasks as completed_tasks_count' => fn (Builder $tasks) => ProjectManagementAccess::scopeVisibleTasks($tasks)->whereNull('archived_at')->whereNotNull('completed_at'),
+            ])
+            ->get();
         $projectIds = $projects->modelKeys();
         $tasks = $this->filteredTasks($request, $projectIds)->get();
         $activeProjects = $projects->whereIn('status', ['planning', 'active', 'on_hold']);
@@ -46,10 +52,19 @@ class AdminProjectManagementController extends Controller
         $weekStart = now()->startOfWeek();
         $completedThisWeek = $tasks->filter(fn (Task $task) => $task->completed_at?->greaterThanOrEqualTo($weekStart));
 
-        $recentActivity = DB::table('activity_logs')
+        $recentActivityQuery = DB::table('activity_logs')
             ->leftJoin('users', 'users.id', '=', 'activity_logs.actor_id')
             ->leftJoin('projects', 'projects.id', '=', 'activity_logs.project_id')
-            ->whereIn('activity_logs.project_id', $projectIds ?: [0])
+            ->whereIn('activity_logs.project_id', $projectIds ?: [0]);
+
+        if (ProjectManagementAccess::isLimitedMember()) {
+            $recentActivityQuery->where(function ($activity) use ($tasks): void {
+                $activity->whereNull('activity_logs.task_id')
+                    ->orWhereIn('activity_logs.task_id', $tasks->modelKeys() ?: [0]);
+            });
+        }
+
+        $recentActivity = $recentActivityQuery
             ->latest('activity_logs.created_at')
             ->limit(10)
             ->get([
@@ -85,6 +100,7 @@ class AdminProjectManagementController extends Controller
             'filters' => $request->only(['project_id', 'assignee_id', 'priority', 'status', 'date_from', 'date_to']),
             'members' => $this->availableUsers(),
             'savedFilters' => SavedFilter::query()->where('user_id', ProjectManagementAccess::user()?->id)->latest()->get(),
+            'canManageWorkspace' => AdminAccess::isFullAdmin(),
         ]);
     }
 
@@ -108,9 +124,9 @@ class AdminProjectManagementController extends Controller
     {
         $query = $this->visibleProjects()
             ->with(['client', 'projectManager'])
-            ->withCount(['tasks' => fn (Builder $tasks) => $tasks->whereNull('archived_at'), 'members'])
-            ->withCount(['tasks as completed_tasks_count' => fn (Builder $tasks) => $tasks->whereNotNull('completed_at')])
-            ->withCount(['tasks as overdue_tasks_count' => fn (Builder $tasks) => $tasks->whereNull('completed_at')->whereDate('due_on', '<', today())]);
+            ->withCount(['tasks' => fn (Builder $tasks) => ProjectManagementAccess::scopeVisibleTasks($tasks)->whereNull('archived_at'), 'members'])
+            ->withCount(['tasks as completed_tasks_count' => fn (Builder $tasks) => ProjectManagementAccess::scopeVisibleTasks($tasks)->whereNull('archived_at')->whereNotNull('completed_at')])
+            ->withCount(['tasks as overdue_tasks_count' => fn (Builder $tasks) => ProjectManagementAccess::scopeVisibleTasks($tasks)->whereNull('archived_at')->whereNull('completed_at')->whereDate('due_on', '<', today())]);
 
         if ($search = trim((string) $request->string('q'))) {
             $query->where(fn (Builder $projects) => $projects
@@ -131,11 +147,14 @@ class AdminProjectManagementController extends Controller
             'members' => $this->availableUsers(),
             'statuses' => self::STATUSES,
             'priorities' => self::PRIORITIES,
+            'canManageWorkspace' => AdminAccess::isFullAdmin(),
         ]);
     }
 
     public function createProject(): View
     {
+        abort_unless(AdminAccess::isFullAdmin(), 403);
+
         return view('admin.project-management.create', [
             'clients' => Client::query()->orderBy('name')->get(),
             'members' => $this->availableUsers(),
@@ -146,6 +165,8 @@ class AdminProjectManagementController extends Controller
 
     public function storeProject(Request $request): RedirectResponse
     {
+        abort_unless(AdminAccess::isFullAdmin(), 403);
+
         $validated = $request->validate($this->projectRules());
         $client = ! empty($validated['client_id']) ? Client::query()->find($validated['client_id']) : null;
 
@@ -193,27 +214,36 @@ class AdminProjectManagementController extends Controller
         ProjectManagementAccess::ensureVisible($project);
         ProjectManagementAccess::ensureDefaultColumns($project);
         $project->load(['client', 'projectManager', 'members', 'boardColumns', 'labels', 'milestones', 'sprints']);
-        $project->loadCount(['tasks' => fn (Builder $tasks) => $tasks->whereNull('archived_at'), 'tasks as completed_tasks_count' => fn (Builder $tasks) => $tasks->whereNull('archived_at')->whereNotNull('completed_at')]);
+        $project->loadCount(['tasks' => fn (Builder $tasks) => ProjectManagementAccess::scopeVisibleTasks($tasks)->whereNull('archived_at'), 'tasks as completed_tasks_count' => fn (Builder $tasks) => ProjectManagementAccess::scopeVisibleTasks($tasks)->whereNull('archived_at')->whereNotNull('completed_at')]);
 
-        $tasks = $project->tasks()
+        $tasks = $this->visibleProjectTasks($project)
             ->with(['project', 'assignee', 'labels'])
             ->withCount(['subtasks', 'subtasks as completed_subtasks_count', 'comments', 'attachments'])
             ->whereNull('archived_at')
             ->orderBy('position')
             ->get();
 
+        $activityQuery = $project->activityLogs()->with('actor');
+        if (ProjectManagementAccess::isLimitedMember()) {
+            $activityQuery->where(function (Builder $activity) use ($tasks): void {
+                $activity->whereNull('task_id')
+                    ->orWhereIn('task_id', $tasks->modelKeys() ?: [0]);
+            });
+        }
+
         return view('admin.project-management.project', [
             'project' => $project,
             'tasks' => $tasks,
             'members' => $this->availableUsers(),
-            'recentActivity' => $project->activityLogs()->with('actor')->latest()->limit(12)->get(),
+            'recentActivity' => $activityQuery->latest()->limit(12)->get(),
             'comments' => $project->comments()->whereNull('task_id')->with('user')->latest()->limit(8)->get(),
+            'canManageWorkspace' => AdminAccess::isFullAdmin(),
         ]);
     }
 
     public function updateProject(Request $request, Project $project): RedirectResponse
     {
-        ProjectManagementAccess::ensureVisible($project);
+        abort_unless(ProjectManagementAccess::canManage($project), 403);
         $validated = $request->validate($this->projectRules($project));
         $old = $project->only(['name', 'status', 'priority', 'ends_on', 'project_manager_id', 'progress_mode', 'progress_override']);
         $client = ! empty($validated['client_id']) ? Client::query()->find($validated['client_id']) : null;
@@ -254,7 +284,7 @@ class AdminProjectManagementController extends Controller
 
     public function archiveProject(Project $project): RedirectResponse
     {
-        ProjectManagementAccess::ensureVisible($project);
+        abort_unless(ProjectManagementAccess::canManage($project), 403);
         $project->update(['status' => 'archived', 'archived_at' => now()]);
         ProjectManagementAccess::log($project, 'project.archived', Project::class, $project->id);
 
@@ -263,7 +293,7 @@ class AdminProjectManagementController extends Controller
 
     public function restoreProject(Project $project): RedirectResponse
     {
-        ProjectManagementAccess::ensureVisible($project);
+        abort_unless(ProjectManagementAccess::canManage($project), 403);
         $project->update(['status' => 'active', 'archived_at' => null]);
         ProjectManagementAccess::log($project, 'project.restored', Project::class, $project->id);
 
@@ -284,7 +314,7 @@ class AdminProjectManagementController extends Controller
         ProjectManagementAccess::ensureVisible($project);
         ProjectManagementAccess::ensureDefaultColumns($project);
         $project->load(['client', 'boardColumns', 'members', 'labels', 'milestones', 'sprints']);
-        $tasks = $project->tasks()
+        $tasks = $this->visibleProjectTasks($project)
             ->whereNull('archived_at')
             ->with(['project', 'assignee', 'reporter', 'labels'])
             ->withCount(['subtasks', 'subtasks as completed_subtasks_count', 'comments', 'attachments'])
@@ -300,9 +330,10 @@ class AdminProjectManagementController extends Controller
             'labels' => $project->labels,
             'milestones' => $project->milestones,
             'sprints' => $project->sprints,
-            'parentTasks' => $project->tasks()->whereNull('parent_task_id')->whereNull('archived_at')->with('project')->orderBy('task_number')->get(),
+            'parentTasks' => $this->visibleProjectTasks($project)->whereNull('parent_task_id')->whereNull('archived_at')->with('project')->orderBy('task_number')->get(),
             'taskTypes' => self::TASK_TYPES,
             'priorities' => self::PRIORITIES,
+            'canManageWorkspace' => AdminAccess::isFullAdmin(),
         ]);
     }
 
@@ -313,22 +344,23 @@ class AdminProjectManagementController extends Controller
 
         return view('admin.project-management.backlog', [
             'project' => $project,
-            'tasks' => $project->tasks()->whereNull('sprint_id')->whereNull('archived_at')->with(['assignee', 'labels'])->orderBy('position')->paginate(30),
+            'tasks' => $this->visibleProjectTasks($project)->whereNull('sprint_id')->whereNull('archived_at')->with(['assignee', 'labels'])->orderBy('position')->paginate(30),
             'sprints' => $project->sprints()->latest('starts_on')->get(),
+            'canManageWorkspace' => AdminAccess::isFullAdmin(),
         ]);
     }
 
     public function sprints(Project $project): View
     {
         ProjectManagementAccess::ensureVisible($project);
-        $sprints = $project->sprints()->withCount('tasks')->with(['tasks' => fn ($query) => $query->whereNotNull('completed_at')])->latest('starts_on')->get();
+        $sprints = $project->sprints()->withCount(['tasks' => fn (Builder $tasks) => ProjectManagementAccess::scopeVisibleTasks($tasks)])->with(['tasks' => fn (Builder $tasks) => ProjectManagementAccess::scopeVisibleTasks($tasks)->whereNotNull('completed_at')])->latest('starts_on')->get();
 
-        return view('admin.project-management.sprints', ['project' => $project, 'sprints' => $sprints]);
+        return view('admin.project-management.sprints', ['project' => $project, 'sprints' => $sprints, 'canManageWorkspace' => AdminAccess::isFullAdmin()]);
     }
 
     public function assignTaskSprint(Request $request, Task $task): RedirectResponse
     {
-        ProjectManagementAccess::ensureVisible($task->project);
+        abort_unless(ProjectManagementAccess::canManage($task->project), 403);
         $validated = $request->validate(['sprint_id' => ['nullable', 'integer', Rule::exists('sprints', 'id')->where('project_id', $task->project_id)]]);
         $task->update(['sprint_id' => $validated['sprint_id'] ?? null]);
 
@@ -350,7 +382,7 @@ class AdminProjectManagementController extends Controller
             'week' => today()->endOfWeek(),
             default => today()->addDays(60),
         };
-        $tasks = Task::query()->whereIn('project_id', $projectIds ?: [0])->whereNotNull('due_on')->whereNull('archived_at')->whereBetween('due_on', [$from, $to])->with(['project', 'assignee'])->orderBy('due_on')->limit(200)->get();
+        $tasks = ProjectManagementAccess::scopeVisibleTasks(Task::query())->whereIn('project_id', $projectIds ?: [0])->whereNotNull('due_on')->whereNull('archived_at')->whereBetween('due_on', [$from, $to])->with(['project', 'assignee'])->orderBy('due_on')->limit(200)->get();
         $milestones = Milestone::query()->whereIn('project_id', $projectIds ?: [0])->whereBetween('due_on', [$from, $to])->with('project')->orderBy('due_on')->get();
 
         return view('admin.project-management.calendar', ['projects' => $projects, 'tasks' => $tasks, 'milestones' => $milestones, 'view' => $view, 'rangeLabel' => $from->format('M d').' – '.$to->format('M d, Y')]);
@@ -359,7 +391,7 @@ class AdminProjectManagementController extends Controller
     public function team(): View
     {
         $projects = $this->visibleProjects()->with(['members', 'projectManager'])->get();
-        $tasks = Task::query()->whereIn('project_id', $projects->modelKeys() ?: [0])->whereNull('archived_at')->with('assignee')->get();
+        $tasks = ProjectManagementAccess::scopeVisibleTasks(Task::query())->whereIn('project_id', $projects->modelKeys() ?: [0])->whereNull('archived_at')->with('assignee')->get();
 
         return view('admin.project-management.team', ['projects' => $projects, 'members' => $this->availableUsers(), 'workload' => $tasks->whereNotNull('assignee_id')->groupBy('assignee_id')->map->count()]);
     }
@@ -384,7 +416,7 @@ class AdminProjectManagementController extends Controller
 
     public function settings(Project $project): View
     {
-        ProjectManagementAccess::ensureVisible($project);
+        abort_unless(ProjectManagementAccess::canManage($project), 403);
         ProjectManagementAccess::ensureDefaultColumns($project);
 
         return view('admin.project-management.settings', ['project' => $project->load(['boardColumns', 'labels'])]);
@@ -393,7 +425,7 @@ class AdminProjectManagementController extends Controller
     public function task(Task $task): View
     {
         $project = $task->project;
-        ProjectManagementAccess::ensureVisible($project);
+        ProjectManagementAccess::ensureTaskVisible($task);
         $task->load(['project', 'column', 'assignee', 'reporter', 'milestone', 'sprint', 'labels', 'subtasks.assignee', 'comments.user', 'attachments.uploader', 'timeEntries.user', 'checklists.items']);
 
         return view('admin.project-management.task', [
@@ -406,12 +438,13 @@ class AdminProjectManagementController extends Controller
             'sprints' => $project->sprints()->get(),
             'taskTypes' => self::TASK_TYPES,
             'priorities' => self::PRIORITIES,
+            'canManageWorkspace' => AdminAccess::isFullAdmin(),
         ]);
     }
 
     public function storeTask(Request $request, Project $project): RedirectResponse|JsonResponse
     {
-        ProjectManagementAccess::ensureVisible($project);
+        abort_unless(ProjectManagementAccess::canManage($project), 403);
         $validated = $request->validate($this->taskRules($project));
         $task = DB::transaction(function () use ($validated, $project): Task {
             $lockedProject = Project::query()->whereKey($project->id)->lockForUpdate()->firstOrFail();
@@ -446,7 +479,7 @@ class AdminProjectManagementController extends Controller
     public function updateTask(Request $request, Task $task): RedirectResponse|JsonResponse
     {
         $project = $task->project;
-        ProjectManagementAccess::ensureVisible($project);
+        abort_unless(ProjectManagementAccess::canManage($project), 403);
         $validated = $request->validate($this->taskRules($project, $task));
         $old = $task->only(['title', 'priority', 'assignee_id', 'due_on', 'status', 'sprint_id', 'milestone_id']);
         $task->fill($this->taskPayload($validated));
@@ -472,7 +505,7 @@ class AdminProjectManagementController extends Controller
     public function moveTask(Request $request, Task $task): JsonResponse
     {
         $project = $task->project;
-        ProjectManagementAccess::ensureVisible($project);
+        abort_unless(ProjectManagementAccess::canManage($project), 403);
         $validated = $request->validate([
             'board_column_id' => ['required', 'integer', Rule::exists('board_columns', 'id')->where('project_id', $project->id)],
             'position' => ['required', 'integer', 'min:0'],
@@ -499,7 +532,7 @@ class AdminProjectManagementController extends Controller
 
     public function storeColumn(Request $request, Project $project): RedirectResponse
     {
-        ProjectManagementAccess::ensureVisible($project);
+        abort_unless(ProjectManagementAccess::canManage($project), 403);
         $validated = $request->validate(['name' => ['required', 'string', 'max:80'], 'color' => ['required', 'string', 'max:20'], 'is_done' => ['nullable', 'boolean']]);
         $column = $project->boardColumns()->create([...$validated, 'position' => (int) ($project->boardColumns()->max('position') ?? -1) + 1, 'is_done' => (bool) ($validated['is_done'] ?? false)]);
         ProjectManagementAccess::log($project, 'board-column.created', BoardColumn::class, $column->id);
@@ -509,7 +542,7 @@ class AdminProjectManagementController extends Controller
 
     public function updateColumn(Request $request, BoardColumn $column): RedirectResponse
     {
-        ProjectManagementAccess::ensureVisible($column->project);
+        abort_unless(ProjectManagementAccess::canManage($column->project), 403);
         $validated = $request->validate(['name' => ['required', 'string', 'max:80'], 'color' => ['required', 'string', 'max:20'], 'is_done' => ['nullable', 'boolean']]);
         $column->update([...$validated, 'is_done' => (bool) ($validated['is_done'] ?? false)]);
 
@@ -518,7 +551,7 @@ class AdminProjectManagementController extends Controller
 
     public function deleteColumn(BoardColumn $column): RedirectResponse
     {
-        ProjectManagementAccess::ensureVisible($column->project);
+        abort_unless(ProjectManagementAccess::canManage($column->project), 403);
         abort_if($column->tasks()->exists(), 422, 'Move the column tasks before deleting this column.');
         abort_if($column->project->boardColumns()->count() <= 1, 422, 'A project must keep at least one board column.');
         $column->delete();
@@ -528,7 +561,7 @@ class AdminProjectManagementController extends Controller
 
     public function storeLabel(Request $request, Project $project): RedirectResponse
     {
-        ProjectManagementAccess::ensureVisible($project);
+        abort_unless(ProjectManagementAccess::canManage($project), 403);
         $validated = $request->validate(['name' => ['required', 'string', 'max:60'], 'color' => ['required', 'string', 'max:20']]);
         $project->labels()->create($validated);
 
@@ -537,7 +570,7 @@ class AdminProjectManagementController extends Controller
 
     public function storeMilestone(Request $request, Project $project): RedirectResponse
     {
-        ProjectManagementAccess::ensureVisible($project);
+        abort_unless(ProjectManagementAccess::canManage($project), 403);
         $validated = $request->validate(['title' => ['required', 'string', 'max:160'], 'description' => ['nullable', 'string', 'max:2000'], 'due_on' => ['nullable', 'date'], 'owner_id' => ['nullable', 'integer', 'exists:users,id']]);
         $project->milestones()->create([...$validated, 'description' => ProjectManagementAccess::sanitize($validated['description'] ?? null)]);
 
@@ -546,7 +579,7 @@ class AdminProjectManagementController extends Controller
 
     public function storeSprint(Request $request, Project $project): RedirectResponse
     {
-        ProjectManagementAccess::ensureVisible($project);
+        abort_unless(ProjectManagementAccess::canManage($project), 403);
         $validated = $request->validate(['name' => ['required', 'string', 'max:160'], 'goal' => ['nullable', 'string', 'max:2000'], 'starts_on' => ['nullable', 'date'], 'ends_on' => ['nullable', 'date', 'after_or_equal:starts_on']]);
         $project->sprints()->create([...$validated, 'goal' => ProjectManagementAccess::sanitize($validated['goal'] ?? null)]);
 
@@ -555,7 +588,7 @@ class AdminProjectManagementController extends Controller
 
     public function startSprint(Sprint $sprint): RedirectResponse
     {
-        ProjectManagementAccess::ensureVisible($sprint->project);
+        abort_unless(ProjectManagementAccess::canManage($sprint->project), 403);
         abort_if($sprint->project->sprints()->where('status', 'active')->where('id', '!=', $sprint->id)->exists(), 422, 'Only one active sprint is allowed per project.');
         $sprint->update(['status' => 'active', 'starts_on' => $sprint->starts_on ?: today()]);
 
@@ -564,7 +597,7 @@ class AdminProjectManagementController extends Controller
 
     public function completeSprint(Request $request, Sprint $sprint): RedirectResponse
     {
-        ProjectManagementAccess::ensureVisible($sprint->project);
+        abort_unless(ProjectManagementAccess::canManage($sprint->project), 403);
         $validated = $request->validate(['move_to_sprint_id' => ['nullable', 'integer', Rule::exists('sprints', 'id')->where('project_id', $sprint->project_id)] ]);
         $sprint->tasks()->whereNull('completed_at')->update(['sprint_id' => $validated['move_to_sprint_id'] ?? null]);
         $sprint->update(['status' => 'completed', 'ends_on' => $sprint->ends_on ?: today()]);
@@ -574,7 +607,7 @@ class AdminProjectManagementController extends Controller
 
     public function storeMember(Request $request, Project $project): RedirectResponse
     {
-        ProjectManagementAccess::ensureVisible($project);
+        abort_unless(ProjectManagementAccess::canManage($project), 403);
         $validated = $request->validate(['user_id' => ['required', 'integer', 'exists:users,id'], 'role' => ['required', Rule::in(['manager', 'member', 'viewer'])]]);
         $project->members()->syncWithoutDetaching([$validated['user_id'] => ['role' => $validated['role']]]);
         ProjectManagementAccess::notify($project, 'project.invitation', 'You were added to '.$project->name, route('admin.project-management.projects.show', $project), ProjectManagementAccess::user()?->id);
@@ -584,7 +617,7 @@ class AdminProjectManagementController extends Controller
 
     public function removeMember(Project $project, User $user): RedirectResponse
     {
-        ProjectManagementAccess::ensureVisible($project);
+        abort_unless(ProjectManagementAccess::canManage($project), 403);
         $project->members()->detach($user->id);
 
         return back()->with('status', 'Team member removed.');
@@ -592,9 +625,10 @@ class AdminProjectManagementController extends Controller
 
     public function storeComment(Request $request, Project $project, ?Task $task = null): RedirectResponse
     {
-        ProjectManagementAccess::ensureVisible($project);
+        abort_unless(ProjectManagementAccess::canManage($project), 403);
         if ($task) {
             abort_unless((int) $task->project_id === (int) $project->id, 404);
+            ProjectManagementAccess::ensureTaskVisible($task);
         }
         $validated = $request->validate(['body' => ['required', 'string', 'max:10000'], 'parent_id' => ['nullable', 'integer', 'exists:comments,id']]);
         $comment = Comment::query()->create(['project_id' => $project->id, 'task_id' => $task?->id, 'user_id' => ProjectManagementAccess::user()?->id, 'parent_id' => $validated['parent_id'] ?? null, 'body' => ProjectManagementAccess::sanitize($validated['body'])]);
@@ -608,7 +642,7 @@ class AdminProjectManagementController extends Controller
 
     public function storeTimeEntry(Request $request, Task $task): RedirectResponse
     {
-        ProjectManagementAccess::ensureVisible($task->project);
+        abort_unless(ProjectManagementAccess::canManage($task->project), 403);
         $validated = $request->validate(['minutes' => ['required', 'integer', 'min:1', 'max:1440'], 'description' => ['nullable', 'string', 'max:1000'], 'started_at' => ['nullable', 'date']]);
         TimeEntry::query()->create(['project_id' => $task->project_id, 'task_id' => $task->id, 'user_id' => ProjectManagementAccess::user()?->id, 'started_at' => $validated['started_at'] ?? now()->subMinutes($validated['minutes']), 'ended_at' => now(), 'minutes' => $validated['minutes'], 'description' => ProjectManagementAccess::sanitize($validated['description'] ?? null)]);
         ProjectManagementAccess::log($task->project, 'time-entry.created', TimeEntry::class, null, taskId: $task->id);
@@ -618,7 +652,7 @@ class AdminProjectManagementController extends Controller
 
     public function startTimer(Task $task): RedirectResponse
     {
-        ProjectManagementAccess::ensureVisible($task->project);
+        abort_unless(ProjectManagementAccess::canManage($task->project), 403);
         abort_if(TimeEntry::query()->where('user_id', ProjectManagementAccess::user()?->id)->whereNull('ended_at')->exists(), 422, 'Stop your active timer before starting another one.');
         TimeEntry::query()->create(['project_id' => $task->project_id, 'task_id' => $task->id, 'user_id' => ProjectManagementAccess::user()?->id, 'started_at' => now(), 'minutes' => 0]);
 
@@ -627,7 +661,7 @@ class AdminProjectManagementController extends Controller
 
     public function stopTimer(Task $task): RedirectResponse
     {
-        ProjectManagementAccess::ensureVisible($task->project);
+        abort_unless(ProjectManagementAccess::canManage($task->project), 403);
         $entry = TimeEntry::query()->where('task_id', $task->id)->where('user_id', ProjectManagementAccess::user()?->id)->whereNull('ended_at')->latest('started_at')->firstOrFail();
         $entry->update(['ended_at' => now(), 'minutes' => max(1, $entry->started_at->diffInMinutes(now()))]);
 
@@ -636,7 +670,7 @@ class AdminProjectManagementController extends Controller
 
     public function storeAttachment(Request $request, Task $task): RedirectResponse
     {
-        ProjectManagementAccess::ensureVisible($task->project);
+        abort_unless(ProjectManagementAccess::canManage($task->project), 403);
         $validated = $request->validate(['file' => ['required', 'file', 'max:51200', 'mimes:pdf,doc,docx,xls,xlsx,csv,ppt,pptx,txt,jpg,jpeg,png,webp,zip']]);
         /** @var UploadedFile $file */
         $file = $validated['file'];
@@ -648,7 +682,7 @@ class AdminProjectManagementController extends Controller
 
     public function downloadAttachment(ProjectAttachment $attachment): BinaryFileResponse
     {
-        ProjectManagementAccess::ensureVisible($attachment->project);
+        ProjectManagementAccess::ensureTaskVisible($attachment->task);
         abort_unless(Storage::disk('local')->exists($attachment->path), 404);
 
         return response()->download(Storage::disk('local')->path($attachment->path), $attachment->original_name, ['X-Content-Type-Options' => 'nosniff']);
@@ -656,7 +690,7 @@ class AdminProjectManagementController extends Controller
 
     public function storeChecklistItem(Request $request, Task $task): RedirectResponse
     {
-        ProjectManagementAccess::ensureVisible($task->project);
+        abort_unless(ProjectManagementAccess::canManage($task->project), 403);
         $validated = $request->validate(['checklist_id' => ['required', 'integer', Rule::exists('checklists', 'id')->where('task_id', $task->id)], 'content' => ['required', 'string', 'max:500']]);
         $checklist = $task->checklists()->findOrFail($validated['checklist_id']);
         $checklist->items()->create(['content' => trim($validated['content']), 'position' => (int) ($checklist->items()->max('position') ?? -1) + 1]);
@@ -666,7 +700,7 @@ class AdminProjectManagementController extends Controller
 
     public function storeChecklist(Request $request, Task $task): RedirectResponse
     {
-        ProjectManagementAccess::ensureVisible($task->project);
+        abort_unless(ProjectManagementAccess::canManage($task->project), 403);
         $validated = $request->validate(['title' => ['required', 'string', 'max:120']]);
         $task->checklists()->create(['title' => trim($validated['title']), 'position' => (int) ($task->checklists()->max('position') ?? -1) + 1]);
 
@@ -675,7 +709,7 @@ class AdminProjectManagementController extends Controller
 
     public function toggleChecklistItem(\App\Models\ChecklistItem $item): RedirectResponse
     {
-        ProjectManagementAccess::ensureVisible($item->checklist->task->project);
+        abort_unless(ProjectManagementAccess::canManage($item->checklist->task->project), 403);
         $item->update(['is_complete' => ! $item->is_complete]);
 
         return back();
@@ -699,7 +733,7 @@ class AdminProjectManagementController extends Controller
     {
         $term = trim((string) $request->string('q'));
         $projects = $this->visibleProjects()->when($term !== '', fn (Builder $query) => $query->where(fn (Builder $q) => $q->where('name', 'like', '%'.$term.'%')->orWhere('project_number', 'like', '%'.$term.'%')->orWhere('client_name', 'like', '%'.$term.'%')))->limit(25)->get();
-        $tasks = Task::query()->whereIn('project_id', $this->visibleProjects()->pluck('projects.id')->all() ?: [0])->when($term !== '', fn (Builder $query) => $query->where(fn (Builder $q) => $q->where('title', 'like', '%'.$term.'%')->orWhere('description', 'like', '%'.$term.'%')))->with('project')->limit(50)->get();
+        $tasks = ProjectManagementAccess::scopeVisibleTasks(Task::query())->whereIn('project_id', $this->visibleProjects()->pluck('projects.id')->all() ?: [0])->when($term !== '', fn (Builder $query) => $query->where(fn (Builder $q) => $q->where('title', 'like', '%'.$term.'%')->orWhere('description', 'like', '%'.$term.'%')))->with('project')->limit(50)->get();
 
         return view('admin.project-management.search', compact('term', 'projects', 'tasks'));
     }
@@ -709,9 +743,14 @@ class AdminProjectManagementController extends Controller
         return ProjectManagementAccess::scopeVisible(Project::query());
     }
 
+    private function visibleProjectTasks(Project $project): Builder
+    {
+        return ProjectManagementAccess::scopeVisibleTasks(Task::query()->where('project_id', $project->id));
+    }
+
     private function filteredTasks(Request $request, array $projectIds): Builder
     {
-        return Task::query()->whereIn('project_id', $projectIds ?: [0])->whereNull('archived_at')->with(['assignee', 'project'])->when($request->filled('project_id'), fn (Builder $query) => $query->where('project_id', (int) $request->input('project_id')))->when($request->filled('assignee_id'), fn (Builder $query) => $query->where('assignee_id', (int) $request->input('assignee_id')))->when($request->filled('priority'), fn (Builder $query) => $query->where('priority', $request->input('priority')))->when($request->filled('status'), fn (Builder $query) => $query->where('status', $request->input('status')))->when($request->filled('date_from'), fn (Builder $query) => $query->whereDate('due_on', '>=', $request->input('date_from')))->when($request->filled('date_to'), fn (Builder $query) => $query->whereDate('due_on', '<=', $request->input('date_to')));
+        return ProjectManagementAccess::scopeVisibleTasks(Task::query())->whereIn('project_id', $projectIds ?: [0])->whereNull('archived_at')->with(['assignee', 'project'])->when($request->filled('project_id'), fn (Builder $query) => $query->where('project_id', (int) $request->input('project_id')))->when($request->filled('assignee_id'), fn (Builder $query) => $query->where('assignee_id', (int) $request->input('assignee_id')))->when($request->filled('priority'), fn (Builder $query) => $query->where('priority', $request->input('priority')))->when($request->filled('status'), fn (Builder $query) => $query->where('status', $request->input('status')))->when($request->filled('date_from'), fn (Builder $query) => $query->whereDate('due_on', '>=', $request->input('date_from')))->when($request->filled('date_to'), fn (Builder $query) => $query->whereDate('due_on', '<=', $request->input('date_to')));
     }
 
     private function availableUsers()

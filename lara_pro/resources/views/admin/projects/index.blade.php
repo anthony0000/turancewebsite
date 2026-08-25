@@ -22,9 +22,9 @@
         <div class="hero-callout">
             <div class="callout-card">
                 <span class="metric-label">Shared handoffs</span>
-                @if ($canManageProjectFiles)
+                @if ($canViewProjectFiles)
                     <strong>{{ number_format($sharedFileCount) }}</strong>
-                    <p>Files currently available through secure share links.</p>
+                    <p>Shared files available to this account.</p>
                 @else
                     <strong>Limited</strong>
                     <p>File access is limited for this account.</p>
@@ -35,6 +35,9 @@
                 @if ($canManageProjectFiles)
                     <strong>{{ $projectCount > 0 ? number_format(($fileCount / $projectCount), 1) : '0.0' }}</strong>
                     <p>Average files attached to each project record.</p>
+                @elseif ($canViewProjectFiles)
+                    <strong>{{ number_format($sharedFileCount) }}</strong>
+                    <p>Shared files across projects.</p>
                 @else
                     <strong>Limited</strong>
                     <p>File metrics are hidden for this account.</p>
@@ -56,9 +59,9 @@
         </article>
         <article class="panel kpi-card kpi-card--pipeline">
             <span class="metric-label">Project files</span>
-            @if ($canManageProjectFiles)
+            @if ($canViewProjectFiles)
                 <strong class="kpi-value">{{ number_format($fileCount) }}</strong>
-                <span class="kpi-meta">Private files stored against a project record.</span>
+                <span class="kpi-meta">{{ $canManageProjectFiles ? 'Private and shared files.' : 'Shared files only.' }}</span>
             @else
                 <strong class="kpi-value">—</strong>
                 <span class="kpi-meta">File access is limited for this account.</span>
@@ -66,7 +69,7 @@
         </article>
         <article class="panel kpi-card kpi-card--traffic">
             <span class="metric-label">Shared files</span>
-            @if ($canManageProjectFiles)
+            @if ($canViewProjectFiles)
                 <strong class="kpi-value">{{ number_format($sharedFileCount) }}</strong>
                 <span class="kpi-meta">Links ready for client or team handoff.</span>
             @else
@@ -124,6 +127,11 @@
                     </div>
                     <p class="form-help" data-project-file-status role="status" aria-live="polite"></p>
                 </form>
+            @elseif ($canViewProjectFiles && ! $canManageProjectFiles)
+                <div class="project-upload-empty">
+                    <strong>Shared project files</strong>
+                    <p>This account can view shared files only. Upload and sharing controls stay with full admins.</p>
+                </div>
             @else
                 <div class="project-upload-empty">
                     <strong>Create a project workspace before uploading files.</strong>
@@ -182,7 +190,7 @@
                 <p>Projects with the most attached files, so handoff-heavy work stays visible.</p>
             </div>
 
-            @if (!$canManageProjectFiles)
+            @if (!$canViewProjectFiles)
                 <div class="project-upload-empty">
                     <strong>File activity is restricted.</strong>
                     <p>A full admin can grant this account the Project files permission without granting broader admin access.</p>
@@ -252,7 +260,7 @@
                                 @endif
                             </td>
                             <td>
-                                @if ($canManageProjectFiles)
+                                @if ($canViewProjectFiles)
                                     <strong>{{ number_format($project->files_count) }}</strong>
                                     <span>{{ number_format($project->shared_files_count) }} shared</span>
                                 @else

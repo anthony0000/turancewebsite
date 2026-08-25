@@ -28,7 +28,7 @@
             </div>
             <div class="callout-card">
                 <span class="metric-label">File handoff</span>
-                @if ($canManageProjectFiles)
+                @if ($canViewProjectFiles)
                     <strong>{{ number_format($sharedFileCount) }} shared</strong>
                     <p>{{ number_format($files->count()) }} total project {{ \Illuminate\Support\Str::plural('file', $files->count()) }}</p>
                 @else
@@ -41,12 +41,17 @@
 
     <div class="project-detail-grid" style="margin-top: 24px;">
         <section class="panel panel-padded">
-            @if ($canManageProjectFiles)
+            @if ($canViewProjectFiles)
                 <div class="panel-head panel-head--row">
                     <div>
                         <span class="eyebrow">Project files</span>
-                        <h2>Share the right file at the right moment</h2>
-                        <p>Files remain private until you explicitly create a secure share link.</p>
+                        @if ($canManageProjectFiles)
+                            <h2>Share the right file at the right moment</h2>
+                            <p>Files remain private until you explicitly create a secure share link.</p>
+                        @else
+                            <h2>Shared project files</h2>
+                            <p>Files shared with everyone in this workspace.</p>
+                        @endif
                     </div>
                     <span class="admin-pill">{{ number_format($files->count()) }} files</span>
                 </div>
@@ -78,6 +83,7 @@
                                             <a class="ghost-button" href="{{ route('admin.projects.files.preview', $file) }}" target="_blank" rel="noopener">Preview</a>
                                         @endif
                                         <a class="ghost-button" href="{{ route('admin.projects.files.download', $file) }}">Download</a>
+                                        @if ($canManageProjectFiles)
                                         <form method="POST" action="{{ route('admin.projects.files.share', $file) }}">
                                             @csrf
                                             <button class="{{ $file->is_shared ? 'ghost-button' : 'button' }}" type="submit">
@@ -89,6 +95,7 @@
                                             @method('DELETE')
                                             <button class="file-delete-button" type="submit">Remove</button>
                                         </form>
+                                        @endif
                                     </div>
 
                                     @if ($file->is_shared)
@@ -141,6 +148,10 @@
                         @enderror
                         <button class="button" type="submit">Upload private file</button>
                     </form>
+                @elseif ($canViewProjectFiles)
+                    <span class="eyebrow">Project files</span>
+                    <h2 class="panel-title">Shared files only</h2>
+                    <p class="form-help">Upload, delete, and sharing controls are available to full admins.</p>
                 @else
                     <span class="eyebrow">Project files</span>
                     <h2 class="panel-title">File access is limited</h2>

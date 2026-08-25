@@ -1,6 +1,7 @@
 @extends('admin.project-management.layout', ['title' => $project->name])
 
 @section('project-content')
+    <div class="pm-project-view" data-read-only="{{ $canManageWorkspace ? '0' : '1' }}">
     <section class="panel pm-hero"><div><span class="eyebrow">{{ $project->project_number }} · {{ Str::headline($project->status) }}</span><h2>{{ $project->name }}</h2><p>{{ $project->description ?: 'A shared delivery workspace for the project team.' }}</p><div class="pm-project-meta" style="margin-top:14px"><span>{{ $project->client_company ?: $project->client_name ?: 'Internal project' }}</span><span>·</span><span>Manager: {{ $project->projectManager?->name ?: 'Unassigned' }}</span><span>·</span><span>Due {{ optional($project->ends_on)->format('M d, Y') ?: 'not set' }}</span></div></div><div class="pm-actions"><a class="button" href="{{ route('admin.project-management.board', $project) }}">Open board</a><a class="ghost-button" href="{{ route('admin.project-management.projects') }}">All projects</a></div></section>
 
     <div class="pm-stat-row"><div class="panel pm-stat"><strong>{{ $project->progress_percentage }}%</strong><span>Project progress</span></div><div class="panel pm-stat"><strong>{{ $project->tasks_count }}</strong><span>Total tasks</span></div><div class="panel pm-stat"><strong>{{ $project->completed_tasks_count }}</strong><span>Completed tasks</span></div></div>
@@ -20,4 +21,5 @@
     </div>
 
     <section class="panel pm-panel"><div class="pm-panel-head"><div><h3>Project settings</h3><p>Authorized managers can adjust delivery metadata and the progress calculation.</p></div><a class="button" href="{{ route('admin.project-management.settings', $project) }}">Edit settings</a></div><div class="pm-callout">{{ $project->project_brief ?: 'Add a project brief in Settings so the team has a durable source of truth for scope and delivery constraints.' }}</div></section>
+    </div>
 @endsection

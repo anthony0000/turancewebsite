@@ -11,6 +11,7 @@ use App\Models\ProjectAttachment;
 use App\Models\Sprint;
 use App\Models\Task;
 use App\Models\TimeEntry;
+use App\Support\AdminAccess;
 use App\Support\ProjectManagementAccess;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
@@ -27,7 +28,7 @@ class ProjectManagementApiController extends Controller
         $projects = ProjectManagementAccess::scopeVisible(Project::query())
             ->where('status', '!=', 'archived')
             ->with(['client', 'projectManager'])
-            ->withCount(['tasks' => fn (Builder $tasks) => $tasks->whereNull('archived_at'), 'tasks as completed_tasks_count' => fn (Builder $tasks) => $tasks->whereNull('archived_at')->whereNotNull('completed_at')])
+            ->withCount(['tasks' => fn (Builder $tasks) => ProjectManagementAccess::scopeVisibleTasks($tasks)->whereNull('archived_at'), 'tasks as completed_tasks_count' => fn (Builder $tasks) => ProjectManagementAccess::scopeVisibleTasks($tasks)->whereNull('archived_at')->whereNotNull('completed_at')])
             ->when($request->filled('q'), fn (Builder $query) => $query->where(fn (Builder $q) => $q->where('name', 'like', '%'.$request->input('q').'%')->orWhere('project_number', 'like', '%'.$request->input('q').'%')))
             ->latest('updated_at')
             ->paginate(min(100, max(1, (int) $request->input('per_page', 25))))
@@ -41,13 +42,15 @@ class ProjectManagementApiController extends Controller
         ProjectManagementAccess::ensureVisible($project);
         ProjectManagementAccess::ensureDefaultColumns($project);
         $project->load(['client', 'projectManager', 'members', 'boardColumns', 'labels', 'milestones', 'sprints']);
-        $project->loadCount(['tasks' => fn (Builder $tasks) => $tasks->whereNull('archived_at'), 'tasks as completed_tasks_count' => fn (Builder $tasks) => $tasks->whereNull('archived_at')->whereNotNull('completed_at')]);
+        $project->loadCount(['tasks' => fn (Builder $tasks) => ProjectManagementAccess::scopeVisibleTasks($tasks)->whereNull('archived_at'), 'tasks as completed_tasks_count' => fn (Builder $tasks) => ProjectManagementAccess::scopeVisibleTasks($tasks)->whereNull('archived_at')->whereNotNull('completed_at')]);
 
         return response()->json(['data' => $this->projectData($project, true)]);
     }
 
     public function storeProject(Request $request): JsonResponse
     {
+        abort_unless(AdminAccess::isFullAdmin(), 403);
+
         $validated = $request->validate(['project_key' => ['required', 'string', 'max:30', 'alpha_dash', 'unique:projects,project_number'], 'name' => ['required', 'string', 'max:255'], 'client_id' => ['nullable', 'integer', 'exists:clients,id'], 'status' => ['required', Rule::in(['planning', 'active', 'on_hold', 'completed', 'cancelled'])], 'priority' => ['required', Rule::in(['low', 'medium', 'high', 'urgent'])], 'starts_on' => ['nullable', 'date'], 'ends_on' => ['nullable', 'date', 'after_or_equal:starts_on'], 'project_manager_id' => ['nullable', 'integer', 'exists:users,id'], 'description' => ['nullable', 'string', 'max:10000']]);
         $project = DB::transaction(function () use ($validated): Project {
             $project = Project::query()->create(['project_number' => strtoupper(trim($validated['project_key'])), 'name' => trim($validated['name']), 'client_id' => $validated['client_id'] ?? null, 'status' => $validated['status'], 'priority' => $validated['priority'], 'starts_on' => $validated['starts_on'] ?? null, 'ends_on' => $validated['ends_on'] ?? null, 'project_manager_id' => $validated['project_manager_id'] ?? null, 'description' => ProjectManagementAccess::sanitize($validated['description'] ?? null)]);
@@ -72,7 +75,7 @@ class ProjectManagementApiController extends Controller
 
     public function addMember(Request $request, Project $project): JsonResponse
     {
-        ProjectManagementAccess::ensureVisible($project);
+        abort_unless(ProjectManagementAccess::canManage($project), 403);
         $validated = $request->validate(['user_id' => ['required', 'integer', 'exists:users,id'], 'role' => ['required', Rule::in(['manager', 'member', 'viewer'])]]);
         $project->members()->syncWithoutDetaching([$validated['user_id'] => ['role' => $validated['role']]]);
 
@@ -81,7 +84,7 @@ class ProjectManagementApiController extends Controller
 
     public function removeMember(Project $project, \App\Models\User $user): JsonResponse
     {
-        ProjectManagementAccess::ensureVisible($project);
+        abort_unless(ProjectManagementAccess::canManage($project), 403);
         $project->members()->detach($user->id);
 
         return response()->json(['data' => null, 'message' => 'Member removed.']);
@@ -97,7 +100,7 @@ class ProjectManagementApiController extends Controller
 
     public function storeColumn(Request $request, Project $project): JsonResponse
     {
-        ProjectManagementAccess::ensureVisible($project);
+        abort_unless(ProjectManagementAccess::canManage($project), 403);
         $validated = $request->validate(['name' => ['required', 'string', 'max:80'], 'color' => ['required', 'string', 'max:20'], 'is_done' => ['nullable', 'boolean']]);
         $column = $project->boardColumns()->create([...$validated, 'position' => (int) ($project->boardColumns()->max('position') ?? -1) + 1, 'is_done' => (bool) ($validated['is_done'] ?? false)]);
 
@@ -106,7 +109,7 @@ class ProjectManagementApiController extends Controller
 
     public function updateColumn(Request $request, BoardColumn $column): JsonResponse
     {
-        ProjectManagementAccess::ensureVisible($column->project);
+        abort_unless(ProjectManagementAccess::canManage($column->project), 403);
         $validated = $request->validate(['name' => ['required', 'string', 'max:80'], 'color' => ['required', 'string', 'max:20'], 'is_done' => ['nullable', 'boolean']]);
         $column->update([...$validated, 'is_done' => (bool) ($validated['is_done'] ?? false)]);
 
@@ -115,7 +118,7 @@ class ProjectManagementApiController extends Controller
 
     public function deleteColumn(BoardColumn $column): JsonResponse
     {
-        ProjectManagementAccess::ensureVisible($column->project);
+        abort_unless(ProjectManagementAccess::canManage($column->project), 403);
         abort_if($column->tasks()->exists(), 422, 'Move tasks before deleting this column.');
         $column->delete();
 
@@ -124,7 +127,7 @@ class ProjectManagementApiController extends Controller
 
     public function storeTask(Request $request, Project $project): JsonResponse
     {
-        ProjectManagementAccess::ensureVisible($project);
+        abort_unless(ProjectManagementAccess::canManage($project), 403);
         $validated = $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'type' => ['required', Rule::in(['task', 'feature', 'bug', 'improvement', 'research', 'design', 'meeting', 'support'])],
@@ -162,7 +165,7 @@ class ProjectManagementApiController extends Controller
 
     public function updateTask(Request $request, Task $task): JsonResponse
     {
-        ProjectManagementAccess::ensureVisible($task->project);
+        abort_unless(ProjectManagementAccess::canManage($task->project), 403);
         $validated = $request->validate(['title' => ['sometimes', 'required', 'string', 'max:255'], 'priority' => ['sometimes', Rule::in(['low', 'medium', 'high', 'urgent'])], 'assignee_id' => ['nullable', 'integer', 'exists:users,id'], 'due_on' => ['nullable', 'date'], 'description' => ['nullable', 'string', 'max:20000'], 'parent_task_id' => ['nullable', 'integer', Rule::exists('tasks', 'id')->where('project_id', $task->project_id)->where('id', '!=', $task->id)] ]);
         $task->fill($validated);
         if (array_key_exists('description', $validated)) {
@@ -185,6 +188,7 @@ class ProjectManagementApiController extends Controller
         ProjectManagementAccess::ensureVisible($project);
         if ($task) {
             abort_unless((int) $task->project_id === (int) $project->id, 404);
+            ProjectManagementAccess::ensureTaskVisible($task);
         }
 
         return response()->json(['data' => Comment::query()->where('project_id', $project->id)->when($task, fn (Builder $query) => $query->where('task_id', $task->id))->with('user')->latest()->paginate(30)]);
@@ -192,9 +196,10 @@ class ProjectManagementApiController extends Controller
 
     public function storeComment(Request $request, Project $project, ?Task $task = null): JsonResponse
     {
-        ProjectManagementAccess::ensureVisible($project);
+        abort_unless(ProjectManagementAccess::canManage($project), 403);
         if ($task) {
             abort_unless((int) $task->project_id === (int) $project->id, 404);
+            ProjectManagementAccess::ensureTaskVisible($task);
         }
         $validated = $request->validate(['body' => ['required', 'string', 'max:10000'], 'parent_id' => ['nullable', 'integer', 'exists:comments,id']]);
         $comment = Comment::query()->create(['project_id' => $project->id, 'task_id' => $task?->id, 'user_id' => ProjectManagementAccess::user()?->id, 'parent_id' => $validated['parent_id'] ?? null, 'body' => ProjectManagementAccess::sanitize($validated['body'])]);
@@ -205,7 +210,7 @@ class ProjectManagementApiController extends Controller
 
     public function storeMilestone(Request $request, Project $project): JsonResponse
     {
-        ProjectManagementAccess::ensureVisible($project);
+        abort_unless(ProjectManagementAccess::canManage($project), 403);
         $validated = $request->validate(['title' => ['required', 'string', 'max:160'], 'description' => ['nullable', 'string', 'max:2000'], 'due_on' => ['nullable', 'date'], 'owner_id' => ['nullable', 'integer', 'exists:users,id']]);
         $milestone = $project->milestones()->create([...$validated, 'description' => ProjectManagementAccess::sanitize($validated['description'] ?? null)]);
 
@@ -214,7 +219,7 @@ class ProjectManagementApiController extends Controller
 
     public function storeSprint(Request $request, Project $project): JsonResponse
     {
-        ProjectManagementAccess::ensureVisible($project);
+        abort_unless(ProjectManagementAccess::canManage($project), 403);
         $validated = $request->validate(['name' => ['required', 'string', 'max:160'], 'goal' => ['nullable', 'string', 'max:2000'], 'starts_on' => ['nullable', 'date'], 'ends_on' => ['nullable', 'date', 'after_or_equal:starts_on']]);
         $sprint = $project->sprints()->create([...$validated, 'goal' => ProjectManagementAccess::sanitize($validated['goal'] ?? null)]);
 
@@ -223,7 +228,7 @@ class ProjectManagementApiController extends Controller
 
     public function storeTimeEntry(Request $request, Task $task): JsonResponse
     {
-        ProjectManagementAccess::ensureVisible($task->project);
+        abort_unless(ProjectManagementAccess::canManage($task->project), 403);
         $validated = $request->validate(['minutes' => ['required', 'integer', 'min:1', 'max:1440'], 'description' => ['nullable', 'string', 'max:1000'], 'started_at' => ['nullable', 'date']]);
         $entry = TimeEntry::query()->create(['project_id' => $task->project_id, 'task_id' => $task->id, 'user_id' => ProjectManagementAccess::user()?->id, 'started_at' => $validated['started_at'] ?? now()->subMinutes($validated['minutes']), 'ended_at' => now(), 'minutes' => $validated['minutes'], 'description' => ProjectManagementAccess::sanitize($validated['description'] ?? null)]);
 
@@ -232,7 +237,7 @@ class ProjectManagementApiController extends Controller
 
     public function storeChecklist(Request $request, Task $task): JsonResponse
     {
-        ProjectManagementAccess::ensureVisible($task->project);
+        abort_unless(ProjectManagementAccess::canManage($task->project), 403);
         $validated = $request->validate(['title' => ['required', 'string', 'max:120']]);
         $checklist = $task->checklists()->create(['title' => trim($validated['title']), 'position' => (int) ($task->checklists()->max('position') ?? -1) + 1]);
 
@@ -241,7 +246,7 @@ class ProjectManagementApiController extends Controller
 
     public function storeChecklistItem(Request $request, Task $task): JsonResponse
     {
-        ProjectManagementAccess::ensureVisible($task->project);
+        abort_unless(ProjectManagementAccess::canManage($task->project), 403);
         $validated = $request->validate(['checklist_id' => ['required', 'integer', Rule::exists('checklists', 'id')->where('task_id', $task->id)], 'content' => ['required', 'string', 'max:500']]);
         $checklist = $task->checklists()->findOrFail($validated['checklist_id']);
         $item = $checklist->items()->create(['content' => trim($validated['content']), 'position' => (int) ($checklist->items()->max('position') ?? -1) + 1]);
@@ -251,14 +256,14 @@ class ProjectManagementApiController extends Controller
 
     public function attachments(Task $task): JsonResponse
     {
-        ProjectManagementAccess::ensureVisible($task->project);
+        ProjectManagementAccess::ensureTaskVisible($task);
 
         return response()->json(['data' => $task->attachments()->with('uploader')->get()->map(fn ($attachment) => ['id' => $attachment->id, 'name' => $attachment->original_name, 'size' => $attachment->size, 'mime_type' => $attachment->mime_type, 'download_url' => route('admin.project-management.attachments.download', $attachment)])->values()]);
     }
 
     public function storeAttachment(Request $request, Task $task): JsonResponse
     {
-        ProjectManagementAccess::ensureVisible($task->project);
+        abort_unless(ProjectManagementAccess::canManage($task->project), 403);
         $validated = $request->validate(['file' => ['required', 'file', 'max:51200', 'mimes:pdf,doc,docx,xls,xlsx,csv,ppt,pptx,txt,jpg,jpeg,png,webp,zip']]);
         $file = $validated['file'];
         $path = $file->storeAs('project-management/'.$task->project_id.'/'.$task->id, Str::uuid().'.'.strtolower($file->getClientOriginalExtension() ?: 'file'), 'local');
@@ -286,7 +291,7 @@ class ProjectManagementApiController extends Controller
         $term = trim((string) $request->input('q', ''));
         $projectIds = ProjectManagementAccess::scopeVisible(Project::query())->pluck('projects.id')->all();
         $projects = Project::query()->whereIn('id', $projectIds ?: [0])->where(fn (Builder $query) => $query->where('name', 'like', '%'.$term.'%')->orWhere('project_number', 'like', '%'.$term.'%')->orWhere('client_name', 'like', '%'.$term.'%'))->limit(25)->get()->map(fn (Project $project) => ['id' => $project->id, 'key' => $project->project_number, 'name' => $project->name]);
-        $tasks = Task::query()->whereIn('project_id', $projectIds ?: [0])->where(fn (Builder $query) => $query->where('title', 'like', '%'.$term.'%')->orWhere('description', 'like', '%'.$term.'%'))->with('project')->limit(50)->get()->map(fn (Task $task) => ['id' => $task->id, 'key' => $task->task_key, 'title' => $task->title, 'project' => $task->project->name]);
+        $tasks = ProjectManagementAccess::scopeVisibleTasks(Task::query())->whereIn('project_id', $projectIds ?: [0])->where(fn (Builder $query) => $query->where('title', 'like', '%'.$term.'%')->orWhere('description', 'like', '%'.$term.'%'))->with('project')->limit(50)->get()->map(fn (Task $task) => ['id' => $task->id, 'key' => $task->task_key, 'title' => $task->title, 'project' => $task->project->name]);
 
         return response()->json(['data' => ['projects' => $projects->values(), 'tasks' => $tasks->values()]]);
     }
@@ -301,7 +306,7 @@ class ProjectManagementApiController extends Controller
     public function reports(Request $request): JsonResponse
     {
         $projectIds = ProjectManagementAccess::scopeVisible(Project::query())->pluck('projects.id')->all();
-        $tasks = Task::query()->whereIn('project_id', $projectIds ?: [0])->whereNull('archived_at')->when($request->filled('project_id'), fn (Builder $query) => $query->where('project_id', $request->integer('project_id')))->get();
+        $tasks = ProjectManagementAccess::scopeVisibleTasks(Task::query())->whereIn('project_id', $projectIds ?: [0])->whereNull('archived_at')->when($request->filled('project_id'), fn (Builder $query) => $query->where('project_id', $request->integer('project_id')))->get();
 
         return response()->json(['data' => ['task_count' => $tasks->count(), 'completed_count' => $tasks->whereNotNull('completed_at')->count(), 'status' => $tasks->groupBy('status')->map->count(), 'priority' => $tasks->groupBy('priority')->map->count(), 'estimated_hours' => round((float) $tasks->sum('estimated_hours'), 2)]]);
     }
@@ -316,7 +321,7 @@ class ProjectManagementApiController extends Controller
             $data['labels'] = $project->labels->map->only(['id', 'name', 'color'])->values();
             $data['milestones'] = $project->milestones->map->only(['id', 'title', 'due_on', 'status'])->values();
             $data['sprints'] = $project->sprints->map->only(['id', 'name', 'starts_on', 'ends_on', 'status'])->values();
-            $data['tasks'] = $project->tasks()->whereNull('archived_at')->with(['project', 'column', 'assignee', 'labels'])->orderBy('position')->get()->map(fn (Task $task) => ['id' => $task->id, 'key' => $task->task_key, 'title' => $task->title, 'status' => $task->status, 'priority' => $task->priority, 'column_id' => $task->board_column_id, 'assignee' => $task->assignee?->only(['id', 'name']), 'labels' => $task->labels->map->only(['id', 'name', 'color'])->values()])->values();
+            $data['tasks'] = ProjectManagementAccess::scopeVisibleTasks(Task::query()->where('project_id', $project->id))->whereNull('archived_at')->with(['project', 'column', 'assignee', 'labels'])->orderBy('position')->get()->map(fn (Task $task) => ['id' => $task->id, 'key' => $task->task_key, 'title' => $task->title, 'status' => $task->status, 'priority' => $task->priority, 'column_id' => $task->board_column_id, 'assignee' => $task->assignee?->only(['id', 'name']), 'labels' => $task->labels->map->only(['id', 'name', 'color'])->values()])->values();
         }
 
         return $data;

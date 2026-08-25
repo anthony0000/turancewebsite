@@ -15,7 +15,7 @@
     $isStaffContractWorkspace = request()->routeIs('admin.staff-contracts.*');
     $isProjectDashboard = request()->routeIs('admin.projects.index');
     $isProjectPreview = request()->routeIs('admin.projects.show');
-    $isProjectWorkspace = request()->routeIs('admin.projects.*');
+    $isProjectFileWorkspace = request()->routeIs('admin.projects.*');
     $isProjectManagementWorkspace = request()->routeIs('admin.project-management.*');
     $isLetterBuilder = request()->routeIs('admin.letters.create');
     $isLetterWorkspace = request()->routeIs('admin.letters.*');
@@ -2338,7 +2338,7 @@
                             @endif
 
                             @if ($canProjects)
-                                <a class="admin-nav-link {{ $isProjectWorkspace || $isProjectManagementWorkspace ? 'active' : '' }}"
+                                <a class="admin-nav-link {{ $isProjectManagementWorkspace ? 'active' : '' }}"
                                     href="{{ route('admin.project-management.dashboard') }}">
                                 <span class="admin-nav-icon" aria-hidden="true">
                                     <svg viewBox="0 0 24 24">
@@ -2349,6 +2349,22 @@
                                 <div>
                                     <strong>Projects</strong>
                                     <span>Delivery workspace</span>
+                                </div>
+                                </a>
+
+                                <a class="admin-nav-link {{ $isProjectFileWorkspace ? 'active' : '' }}"
+                                    href="{{ route('admin.projects.index') }}">
+                                <span class="admin-nav-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24">
+                                        <path d="M4 6h6l2 2h8v11H4z" />
+                                        <path d="M4 6V4h6l2 2" />
+                                        <path d="M8 12h8" />
+                                        <path d="M8 15h5" />
+                                    </svg>
+                                </span>
+                                <div>
+                                    <strong>Project Files</strong>
+                                    <span>Secure handoffs</span>
                                 </div>
                                 </a>
                             @endif

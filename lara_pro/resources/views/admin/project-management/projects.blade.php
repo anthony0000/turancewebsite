@@ -1,7 +1,8 @@
 @extends('admin.project-management.layout', ['title' => $includeArchived ? 'Archived Projects' : 'Projects'])
 
 @section('project-content')
-    <section class="panel pm-hero"><div><span class="eyebrow">{{ $includeArchived ? 'History' : 'Portfolio' }}</span><h2>{{ $includeArchived ? 'Archived projects stay searchable.' : 'Projects with a clear next move.' }}</h2><p>{{ $includeArchived ? 'Restore a project when delivery resumes, or keep the record for reference.' : 'Create an internal or client project, assign a manager, and bring the team into the same delivery rhythm.' }}</p></div><div class="pm-actions"><a class="button" href="{{ route('admin.project-management.projects.create') }}">New project</a><a class="ghost-button" href="{{ route('admin.projects.index') }}">Legacy files</a></div></section>
+    <div class="pm-project-list" data-read-only="{{ $canManageWorkspace ? '0' : '1' }}">
+    <section class="panel pm-hero"><div><span class="eyebrow">{{ $includeArchived ? 'History' : 'Portfolio' }}</span><h2>{{ $includeArchived ? 'Archived projects stay searchable.' : 'Projects with a clear next move.' }}</h2><p>{{ $includeArchived ? 'Restore a project when delivery resumes, or keep the record for reference.' : 'Create an internal or client project, assign a manager, and bring the team into the same delivery rhythm.' }}</p></div><div class="pm-actions"><a class="button" href="{{ route('admin.project-management.projects.create') }}">New project</a><a class="ghost-button" href="{{ route('admin.projects.index') }}">Project files</a></div></section>
     <form class="panel pm-panel" method="GET" action="{{ route('admin.project-management.projects') }}"><div class="pm-inline-form"><div class="field"><label for="project-search">Search</label><input id="project-search" name="q" value="{{ request('q') }}" placeholder="Project key, name, or client"></div><div class="field"><label for="project-status">Status</label><select id="project-status" name="status"><option value="">All statuses</option>@foreach ($statuses as $status)<option value="{{ $status }}" @selected(request('status') === $status)>{{ Str::headline($status) }}</option>@endforeach</select></div><button class="button" type="submit">Search</button><a class="ghost-button" href="{{ $includeArchived ? route('admin.project-management.archived') : route('admin.project-management.projects') }}">Reset</a></div></form>
     <section class="pm-grid-wide">
         @forelse ($projects as $project)
@@ -11,4 +12,5 @@
         @endforelse
     </section>
     <div>{{ $projects->links() }}</div>
+    </div>
 @endsection

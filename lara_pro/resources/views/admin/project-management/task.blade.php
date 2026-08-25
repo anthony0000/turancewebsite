@@ -1,6 +1,7 @@
 @extends('admin.project-management.layout', ['title' => $task->task_key])
 
 @section('project-content')
+    <div class="pm-task-view" data-read-only="{{ $canManageWorkspace ? '0' : '1' }}">
     <section class="panel pm-hero"><div><span class="eyebrow">{{ $task->task_key }} · {{ Str::headline($task->type) }}</span><h2>{{ $task->title }}</h2><p>{{ $project->name }} · {{ $task->column?->name ?: Str::headline($task->status) }}</p></div><div class="pm-actions"><a class="ghost-button" href="{{ route('admin.project-management.board', $project) }}">Back to board</a>@if ($task->completed_at)<span class="pm-chip pm-chip--success">Completed {{ $task->completed_at->format('M d, Y') }}</span>@endif</div></section>
 
     <div class="pm-detail-grid">
@@ -16,4 +17,5 @@
         </aside>
     </div>
     <section class="panel pm-panel"><div class="pm-panel-head"><div><h3>Create a subtask</h3><p>This task will remain the parent for progress tracking.</p></div></div><form method="POST" action="{{ route('admin.project-management.tasks.store', $project) }}">@csrf<input type="hidden" name="parent_task_id" value="{{ $task->id }}"><input type="hidden" name="board_column_id" value="{{ $task->board_column_id }}"><div class="pm-inline-form"><div class="field"><label for="subtask-title">Title</label><input id="subtask-title" name="title" required></div><div class="field"><label for="subtask-type">Type</label><select id="subtask-type" name="type"><option value="task">Task</option><option value="bug">Bug</option><option value="improvement">Improvement</option></select></div><div class="field"><label for="subtask-priority">Priority</label><select id="subtask-priority" name="priority"><option value="low">Low</option><option value="medium" selected>Medium</option><option value="high">High</option></select></div><button class="ghost-button" type="submit">Create subtask</button></div></form></section>
+    </div>
 @endsection

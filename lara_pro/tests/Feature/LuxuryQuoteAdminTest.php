@@ -362,10 +362,10 @@ it('renders the admin dashboard with aggregated activity data', function () {
         ])
         ->get(route('admin.quotes.index'))
         ->assertOk()
-        ->assertSee('Performance Overview')
+        ->assertSee('Activity trend')
+        ->assertSee('Monthly value')
         ->assertSee('data-rich-editor', false)
         ->assertSee('data-rich-command="bold"', false)
         ->assertSee('data-exchange-rate', false)
-        ->assertSee('Asterion Holdings')
-        ->assertSee('Landing Page');
+        ->assertSee('Asterion Holdings');
 });

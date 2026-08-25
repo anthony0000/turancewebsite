@@ -8,6 +8,36 @@
         .pm-subnav { display: flex; flex-wrap: wrap; gap: 7px; padding: 8px; border: 1px solid var(--line); border-radius: 16px; background: rgba(255,255,255,.78); }
         .pm-subnav a { display: inline-flex; min-height: 34px; align-items: center; padding: 0 11px; border-radius: 9px; color: var(--muted); font-size: 12px; font-weight: 700; }
         .pm-subnav a:hover, .pm-subnav a.active { background: var(--panel-soft); color: var(--muted-strong); }
+        .pm-subnav-more { position: relative; }
+        .pm-subnav-more summary { display: inline-flex; min-height: 34px; align-items: center; padding: 0 11px; border-radius: 9px; color: var(--muted); cursor: pointer; font-size: 12px; font-weight: 700; list-style: none; }
+        .pm-subnav-more summary::-webkit-details-marker { display: none; }
+        .pm-subnav-more summary::after { content: '⌄'; margin-left: 6px; font-size: 11px; }
+        .pm-subnav-more[open] summary, .pm-subnav-more summary:hover { background: var(--panel-soft); color: var(--muted-strong); }
+        .pm-subnav-more__items { display: flex; flex-wrap: wrap; gap: 7px; }
+        .pm-dashboard .pm-panel-head p { display: none; }
+        .pm-dashboard .pm-panel-head { margin-bottom: 10px; }
+        .pm-dashboard .pm-kpi small { display: none; }
+        .pm-board-view .pm-hero h2 { font-size: 0; }
+        .pm-board-view .pm-hero h2::after { content: 'Move work forward.'; display: block; font-size: clamp(24px, 3vw, 36px); }
+        .pm-board-view .pm-hero p { display: none; }
+        .pm-board-view[data-read-only="1"] .pm-hero .button,
+        .pm-board-view[data-read-only="1"] .pm-task-card { cursor: default; }
+        .pm-board-view[data-read-only="1"] .pm-task-card [data-keyboard-move] { display: none; }
+        .pm-read-only-note { display: flex; justify-content: space-between; gap: 12px; color: var(--muted); }
+        .pm-read-only-note strong { color: var(--text); }
+        .pm-project-view .pm-panel-head p { display: none; }
+        .pm-project-view[data-read-only="1"] form { display: none; }
+        .pm-project-view[data-read-only="1"] .pm-tabs a[href*="settings"] { display: none; }
+        .pm-project-view[data-read-only="1"] > section.panel.pm-panel:last-child { display: none; }
+        .pm-task-view .pm-panel-head p { display: none; }
+        .pm-task-view[data-read-only="1"] form:not(.pm-list-item) { display: none; }
+        .pm-task-view[data-read-only="1"] form.pm-list-item { pointer-events: none; }
+        .pm-task-view[data-read-only="1"] form.pm-list-item input { visibility: hidden; }
+        .pm-project-list[data-read-only="1"] .pm-hero .button,
+        .pm-project-list[data-read-only="1"] .pm-empty a { display: none; }
+        .pm-backlog-view[data-read-only="1"] form { display: none; }
+        .pm-sprints-view[data-read-only="1"] form { display: none; }
+        .pm-sprints-view[data-read-only="1"] > .pm-grid > section:last-child { display: none; }
         .pm-hero { display: flex; align-items: flex-end; justify-content: space-between; gap: 22px; padding: 24px; }
         .pm-hero h2 { max-width: 760px; margin: 6px 0 0; font-size: clamp(24px, 3vw, 36px); line-height: 1.1; }
         .pm-hero p { max-width: 700px; margin: 12px 0 0; color: var(--muted); line-height: 1.6; }
@@ -103,24 +133,32 @@
 
 @section('content')
     <div class="pm-shell">
+        @php
+            $moreNavActive = request()->routeIs('admin.project-management.search', 'admin.project-management.calendar', 'admin.project-management.team', 'admin.project-management.reports', 'admin.project-management.archived', 'admin.project-management.notifications', 'admin.project-management.settings');
+        @endphp
         <nav class="pm-subnav" aria-label="Project management navigation">
-            <a class="{{ request()->routeIs('admin.project-management.dashboard') ? 'active' : '' }}" href="{{ route('admin.project-management.dashboard') }}">Overview</a>
-            <a class="{{ request()->routeIs('admin.project-management.dashboard') && request('assignee_id') ? 'active' : '' }}" href="{{ route('admin.project-management.dashboard', ['assignee_id' => \App\Support\ProjectManagementAccess::user()?->id]) }}">My Tasks</a>
-            <a class="{{ request()->routeIs('admin.project-management.search') ? 'active' : '' }}" href="{{ route('admin.project-management.search') }}">Search</a>
+            <a class="{{ request()->routeIs('admin.project-management.dashboard') && ! request('assignee_id') ? 'active' : '' }}" href="{{ route('admin.project-management.dashboard') }}">Overview</a>
+            <a class="{{ request()->routeIs('admin.project-management.dashboard') && request('assignee_id') ? 'active' : '' }}" href="{{ route('admin.project-management.dashboard', ['assignee_id' => \App\Support\ProjectManagementAccess::user()?->id]) }}">My tasks</a>
             <a class="{{ request()->routeIs('admin.project-management.projects*') && ! request()->routeIs('admin.project-management.archived') ? 'active' : '' }}" href="{{ route('admin.project-management.projects') }}">Projects</a>
             @if (isset($project) && $project)
                 <a class="{{ request()->routeIs('admin.project-management.board') ? 'active' : '' }}" href="{{ route('admin.project-management.board', $project) }}">Board</a>
                 <a class="{{ request()->routeIs('admin.project-management.backlog') ? 'active' : '' }}" href="{{ route('admin.project-management.backlog', $project) }}">Backlog</a>
                 <a class="{{ request()->routeIs('admin.project-management.sprints') ? 'active' : '' }}" href="{{ route('admin.project-management.sprints', $project) }}">Sprints</a>
             @endif
-            <a class="{{ request()->routeIs('admin.project-management.calendar') ? 'active' : '' }}" href="{{ route('admin.project-management.calendar') }}">Calendar</a>
-            <a class="{{ request()->routeIs('admin.project-management.team') ? 'active' : '' }}" href="{{ route('admin.project-management.team') }}">Team</a>
-            <a class="{{ request()->routeIs('admin.project-management.reports') ? 'active' : '' }}" href="{{ route('admin.project-management.reports') }}">Reports</a>
-            <a class="{{ request()->routeIs('admin.project-management.archived') ? 'active' : '' }}" href="{{ route('admin.project-management.archived') }}">Archived</a>
-            @if (isset($project) && $project)
-                <a class="{{ request()->routeIs('admin.project-management.settings') ? 'active' : '' }}" href="{{ route('admin.project-management.settings', $project) }}">Settings</a>
-            @endif
-            <a class="{{ request()->routeIs('admin.project-management.notifications') ? 'active' : '' }}" href="{{ route('admin.project-management.notifications') }}">Notifications</a>
+            <details class="pm-subnav-more" @if ($moreNavActive) open @endif>
+                <summary class="{{ $moreNavActive ? 'active' : '' }}">More</summary>
+                <div class="pm-subnav-more__items">
+                    <a class="{{ request()->routeIs('admin.project-management.search') ? 'active' : '' }}" href="{{ route('admin.project-management.search') }}">Search</a>
+                    <a class="{{ request()->routeIs('admin.project-management.calendar') ? 'active' : '' }}" href="{{ route('admin.project-management.calendar') }}">Calendar</a>
+                    <a class="{{ request()->routeIs('admin.project-management.team') ? 'active' : '' }}" href="{{ route('admin.project-management.team') }}">Team</a>
+                    <a class="{{ request()->routeIs('admin.project-management.reports') ? 'active' : '' }}" href="{{ route('admin.project-management.reports') }}">Reports</a>
+                    <a class="{{ request()->routeIs('admin.project-management.archived') ? 'active' : '' }}" href="{{ route('admin.project-management.archived') }}">Archived</a>
+                    @if (\App\Support\AdminAccess::isFullAdmin() && isset($project) && $project)
+                        <a class="{{ request()->routeIs('admin.project-management.settings') ? 'active' : '' }}" href="{{ route('admin.project-management.settings', $project) }}">Settings</a>
+                    @endif
+                    <a class="{{ request()->routeIs('admin.project-management.notifications') ? 'active' : '' }}" href="{{ route('admin.project-management.notifications') }}">Notifications</a>
+                </div>
+            </details>
         </nav>
 
         @yield('project-content')

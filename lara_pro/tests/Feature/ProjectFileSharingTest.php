@@ -2,6 +2,8 @@
 
 use App\Models\Project;
 use App\Models\ProjectFile;
+use App\Models\User;
+use App\Support\AdminAccess;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -40,6 +42,7 @@ it('shows project portfolio charts and the file workspace entry point', function
         ->assertSee('Projects by status')
         ->assertSee('Files by project')
         ->assertSee('Upload a file for the project team')
+        ->assertSee('Secure handoffs')
         ->assertSee('Choose a project')
         ->assertSee('Northstar Client Portal');
 
@@ -239,4 +242,64 @@ it('lets subaccounts view projects while limiting project file access separately
         ->withSession($limitedSession)
         ->get(route('admin.projects.files.download', $projectFile))
         ->assertForbidden();
+});
+
+it('shows limited members shared project files only', function () {
+    Storage::fake('local');
+
+    $member = User::factory()->create([
+        'role' => AdminAccess::ROLE_SUBACCOUNT,
+        'permissions' => ['projects', 'project-files'],
+        'is_active' => true,
+    ]);
+    $project = Project::query()->create([
+        'project_number' => 'TT-PRJ-SHARED-001',
+        'name' => 'Shared Files Project',
+        'status' => 'active',
+    ]);
+    $sharedPath = 'projects/files/'.$project->id.'/shared.pdf';
+    $privatePath = 'projects/files/'.$project->id.'/private.pdf';
+    Storage::disk('local')->put($sharedPath, 'shared project file');
+    Storage::disk('local')->put($privatePath, 'private project file');
+    $sharedFile = ProjectFile::query()->create([
+        'project_id' => $project->id,
+        'original_name' => 'shared.pdf',
+        'path' => $sharedPath,
+        'mime_type' => 'application/pdf',
+        'size' => 20,
+        'is_shared' => true,
+        'share_token' => str_repeat('s', 64),
+        'shared_at' => now(),
+    ]);
+    $privateFile = ProjectFile::query()->create([
+        'project_id' => $project->id,
+        'original_name' => 'private.pdf',
+        'path' => $privatePath,
+        'mime_type' => 'application/pdf',
+        'size' => 21,
+    ]);
+    $session = [
+        config('luxury-quotes.admin.session_key', 'luxury_quote_admin_authenticated') => true,
+        'admin_user_id' => $member->id,
+        'admin_user_name' => $member->name,
+        'admin_role' => $member->role,
+        'admin_permissions' => ['projects', 'project-files'],
+        'luxury_quote_admin_email' => $member->email,
+    ];
+
+    $this->withSession($session)
+        ->get(route('admin.projects.show', $project))
+        ->assertOk()
+        ->assertSee('shared.pdf')
+        ->assertDontSee('private.pdf')
+        ->assertSee('Shared project files')
+        ->assertDontSee('Create share link');
+
+    $this->withSession($session)->get(route('admin.projects.files.download', $sharedFile))->assertOk();
+    $this->withSession($session)->get(route('admin.projects.files.download', $privateFile))->assertForbidden();
+    $this->withSession($session)->post(route('admin.projects.files.store', $project), [
+        'file' => UploadedFile::fake()->create('blocked.pdf', 10, 'application/pdf'),
+    ])->assertForbidden();
+    $this->withSession($session)->post(route('admin.projects.files.share', $sharedFile))->assertForbidden();
+    $this->withSession($session)->delete(route('admin.projects.files.destroy', $sharedFile))->assertForbidden();
 });

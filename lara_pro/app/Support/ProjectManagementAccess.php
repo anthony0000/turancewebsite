@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Models\Project;
+use App\Models\Task;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
@@ -45,7 +46,39 @@ final class ProjectManagementAccess
 
     public static function canManage(Project $project): bool
     {
-        return self::canView($project) && (AdminAccess::isFullAdmin() || AdminAccess::can('projects'));
+        return self::canView($project) && AdminAccess::isFullAdmin();
+    }
+
+    public static function isLimitedMember(): bool
+    {
+        return ! AdminAccess::isFullAdmin();
+    }
+
+    public static function scopeVisibleTasks(Builder $query): Builder
+    {
+        if (! self::isLimitedMember()) {
+            return $query;
+        }
+
+        $userId = self::user()?->id;
+
+        return $userId === null
+            ? $query->whereRaw('1 = 0')
+            : $query->where('assignee_id', $userId);
+    }
+
+    public static function canViewTask(Task $task): bool
+    {
+        if (! self::canView($task->project)) {
+            return false;
+        }
+
+        return ! self::isLimitedMember() || (int) $task->assignee_id === (int) self::user()?->id;
+    }
+
+    public static function ensureTaskVisible(Task $task): void
+    {
+        abort_unless(self::canViewTask($task), 403);
     }
 
     public static function scopeVisible(Builder $query): Builder

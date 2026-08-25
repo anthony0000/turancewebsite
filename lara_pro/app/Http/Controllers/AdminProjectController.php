@@ -25,13 +25,14 @@ class AdminProjectController extends Controller
 
     public function index(): View
     {
-        $canManageProjectFiles = AdminAccess::can('project-files');
+        $canViewProjectFiles = AdminAccess::can('project-files');
+        $canManageProjectFiles = $canViewProjectFiles && AdminAccess::isFullAdmin();
         $projectsQuery = Project::query()
             ->withCount('staffContracts');
 
-        if ($canManageProjectFiles) {
+        if ($canViewProjectFiles) {
             $projectsQuery->withCount([
-                'files',
+                'files' => fn ($query) => $query->when(! $canManageProjectFiles, fn ($files) => $files->where('is_shared', true)),
                 'files as shared_files_count' => fn ($query) => $query->where('is_shared', true),
             ]);
         }
@@ -71,20 +72,22 @@ class AdminProjectController extends Controller
             'activeCount' => $projects->whereIn('status', ['active', 'in_progress'])->count(),
             'fileCount' => (int) $projects->sum('files_count'),
             'sharedFileCount' => (int) $projects->sum('shared_files_count'),
+            'canViewProjectFiles' => $canViewProjectFiles,
             'canManageProjectFiles' => $canManageProjectFiles,
         ]);
     }
 
     public function show(Project $project): View
     {
-        $canManageProjectFiles = AdminAccess::can('project-files');
+        $canViewProjectFiles = AdminAccess::can('project-files');
+        $canManageProjectFiles = $canViewProjectFiles && AdminAccess::isFullAdmin();
         $project->load([
             'staffContracts' => fn ($query) => $query->with('invoice')->latest('updated_at'),
         ]);
 
-        if ($canManageProjectFiles) {
+        if ($canViewProjectFiles) {
             $project->load([
-                'files' => fn ($query) => $query->with('uploader')->latest(),
+                'files' => fn ($query) => $query->when(! $canManageProjectFiles, fn ($files) => $files->where('is_shared', true))->with('uploader')->latest(),
             ]);
         } else {
             $project->setRelation('files', collect());
@@ -95,12 +98,15 @@ class AdminProjectController extends Controller
             'files' => $project->files,
             'contracts' => $project->staffContracts,
             'sharedFileCount' => $project->files->where('is_shared', true)->count(),
+            'canViewProjectFiles' => $canViewProjectFiles,
             'canManageProjectFiles' => $canManageProjectFiles,
         ]);
     }
 
     public function storeFile(Request $request, Project $project): RedirectResponse
     {
+        abort_unless(AdminAccess::isFullAdmin(), 403);
+
         $validated = $request->validate([
             'file' => ['required', 'file', 'max:51200', 'mimes:'.implode(',', self::FILE_MIMES)],
             'description' => ['nullable', 'string', 'max:500'],
@@ -115,6 +121,8 @@ class AdminProjectController extends Controller
 
     public function storeExternalFile(Request $request): RedirectResponse|JsonResponse
     {
+        abort_unless(AdminAccess::isFullAdmin(), 403);
+
         $validated = $request->validate([
             'project_id' => ['required', 'integer', 'exists:projects,id'],
             'file' => ['required', 'file', 'max:51200', 'mimes:'.implode(',', self::FILE_MIMES)],
@@ -168,16 +176,21 @@ class AdminProjectController extends Controller
 
     public function downloadFile(ProjectFile $projectFile): BinaryFileResponse
     {
+        abort_unless(AdminAccess::isFullAdmin() || $projectFile->is_shared, 403);
+
         return $this->fileResponse($projectFile, false);
     }
 
     public function previewFile(ProjectFile $projectFile): BinaryFileResponse
     {
+        abort_unless(AdminAccess::isFullAdmin() || $projectFile->is_shared, 403);
+
         return $this->fileResponse($projectFile, true);
     }
 
     public function toggleShare(ProjectFile $projectFile): RedirectResponse
     {
+        abort_unless(AdminAccess::isFullAdmin(), 403);
         abort_unless($projectFile->hasStoredFile(), 404);
 
         $isSharing = ! $projectFile->is_shared;
@@ -196,6 +209,7 @@ class AdminProjectController extends Controller
 
     public function destroyFile(ProjectFile $projectFile): RedirectResponse
     {
+        abort_unless(AdminAccess::isFullAdmin(), 403);
         $projectId = $projectFile->project_id;
         Storage::disk('local')->delete($projectFile->path);
         $projectFile->delete();

@@ -75,6 +75,24 @@ it('enforces project membership for limited accounts', function () {
     $this->withSession(projectManagementSession($admin))->get(route('admin.project-management.projects.show', $project))->assertOk();
 });
 
+it('limits members to their assigned tasks across web and API surfaces', function () {
+    $admin = User::factory()->create(['role' => AdminAccess::ROLE_ADMIN, 'permissions' => AdminAccess::permissionKeys(), 'is_active' => true]);
+    $member = User::factory()->create(['role' => AdminAccess::ROLE_SUBACCOUNT, 'permissions' => ['projects'], 'is_active' => true]);
+    $project = Project::query()->create(['project_number' => 'SCOPE', 'name' => 'Scoped Work', 'status' => 'active', 'priority' => 'medium']);
+    $column = $project->boardColumns()->create(['name' => 'To Do', 'position' => 0]);
+    $project->members()->attach($member->id, ['role' => 'member']);
+    $assigned = $project->tasks()->create(['task_number' => 1, 'title' => 'Member task', 'type' => 'task', 'priority' => 'medium', 'status' => 'to_do', 'board_column_id' => $column->id, 'assignee_id' => $member->id, 'reporter_id' => $admin->id, 'position' => 0]);
+    $hidden = $project->tasks()->create(['task_number' => 2, 'title' => 'Private teammate task', 'type' => 'task', 'priority' => 'high', 'status' => 'to_do', 'board_column_id' => $column->id, 'assignee_id' => $admin->id, 'reporter_id' => $admin->id, 'position' => 1]);
+    $session = projectManagementSession($member);
+
+    $this->withSession($session)->get(route('admin.project-management.dashboard'))->assertOk()->assertSee('My tasks')->assertSee('1')->assertDontSee('Private teammate task');
+    $this->withSession($session)->get(route('admin.project-management.board', $project))->assertOk()->assertSee('Member task')->assertDontSee('Private teammate task');
+    $this->withSession($session)->get(route('admin.project-management.tasks.show', $assigned))->assertOk()->assertSee('Member task');
+    $this->withSession($session)->get(route('admin.project-management.tasks.show', $hidden))->assertForbidden();
+    $this->withSession($session)->getJson(route('admin.project-management.api.projects.show', $project))->assertOk()->assertJsonCount(1, 'data.tasks')->assertJsonPath('data.tasks.0.title', 'Member task');
+    $this->withSession($session)->getJson(route('admin.project-management.api.search', ['q' => 'task']))->assertOk()->assertJsonCount(1, 'data.tasks');
+});
+
 it('sanitizes comments, records time, and exposes protected JSON project data', function () {
     $admin = User::factory()->create(['role' => AdminAccess::ROLE_ADMIN, 'permissions' => AdminAccess::permissionKeys(), 'is_active' => true]);
     $project = Project::query()->create(['project_number' => 'API', 'name' => 'API Project', 'status' => 'active', 'priority' => 'medium']);
@@ -96,7 +114,7 @@ it('renders the operational project-management surfaces with live records', func
     $task = $project->tasks()->create(['task_number' => 1, 'title' => 'Visible task', 'type' => 'task', 'priority' => 'medium', 'status' => 'to_do', 'board_column_id' => $project->boardColumns()->first()->id, 'reporter_id' => $admin->id, 'position' => 0]);
     $session = projectManagementSession($admin);
 
-    $this->withSession($session)->get(route('admin.project-management.dashboard'))->assertOk()->assertSee('Delivery control room');
+    $this->withSession($session)->get(route('admin.project-management.dashboard'))->assertOk()->assertSee('Project overview');
     $this->withSession($session)->get(route('admin.project-management.board', $project))->assertOk()->assertSee('Visible task');
     $this->withSession($session)->get(route('admin.project-management.tasks.show', $task))->assertOk()->assertSee('Task details');
     $this->withSession($session)->get(route('admin.project-management.reports'))->assertOk()->assertSee('Operational reporting');
