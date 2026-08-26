@@ -159,15 +159,19 @@
                                 <details class="action-menu">
                                     <summary>Actions</summary>
                                     <div class="action-menu-panel">
-                                        <a href="{{ route('admin.staff-contracts.show', $contract) }}">Preview</a>
+                                        <a class="action-menu-primary" href="{{ route('admin.staff-contracts.show', $contract) }}">Preview</a>
                                         @if ($contract->hasSignedDocument())
-                                            <span>Locked after signed upload</span>
+                                            <span class="action-menu-status">
+                                                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+                                                Locked after signed upload
+                                            </span>
                                         @else
                                             <a href="{{ route('admin.staff-contracts.edit', $contract) }}">Edit</a>
                                         @endif
-                                        <a href="{{ route('admin.staff-contracts.pdf', $contract) }}">Download PDF</a>
+                                        <span class="action-menu-divider" aria-hidden="true"></span>
+                                        <a class="action-menu-download" href="{{ route('admin.staff-contracts.pdf', $contract) }}">Download PDF</a>
                                         @if ($contract->hasSignedDocument())
-                                            <a href="{{ route('admin.staff-contracts.signed-document', $contract) }}">Download signed copy</a>
+                                            <a class="action-menu-download" href="{{ route('admin.staff-contracts.signed-document', $contract) }}">Download signed copy</a>
                                         @endif
                                     </div>
                                 </details>

@@ -2508,12 +2508,13 @@ body.is-admin .admin-profile-panel form { margin: 0; }
     right: 0;
     z-index: 20;
     display: grid;
-    min-width: 154px;
-    padding: 6px;
+    min-width: 196px;
+    gap: 2px;
+    padding: 8px;
     border: 1px solid var(--line);
-    border-radius: var(--radius);
+    border-radius: 12px;
     background: var(--surface);
-    box-shadow: var(--shadow);
+    box-shadow: 0 14px 30px rgba(25, 31, 39, .12);
 }
 
 .action-menu-panel.is-floating {
@@ -2546,6 +2547,56 @@ body.is-admin .admin-profile-panel form { margin: 0; }
 .action-menu-panel a:hover,
 .action-menu-panel button:hover {
     background: var(--surface-soft);
+    color: var(--primary);
+}
+
+.action-menu-panel a.action-menu-primary {
+    background: var(--primary-soft);
+    color: var(--primary);
+    font-weight: 760;
+}
+
+.action-menu-panel a.action-menu-primary:hover {
+    background: rgba(184, 134, 11, .16);
+}
+
+.action-menu-panel .action-menu-status {
+    display: flex;
+    min-height: 29px;
+    align-items: center;
+    gap: 7px;
+    margin: 2px 4px 3px;
+    padding: 0 2px 6px;
+    border-bottom: 1px solid var(--line-soft);
+    color: var(--muted);
+    font-size: 10px;
+    font-weight: 620;
+    line-height: 1.3;
+}
+
+.action-menu-panel .action-menu-status svg {
+    flex: 0 0 13px;
+    width: 13px;
+    height: 13px;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.7;
+}
+
+.action-menu-panel .action-menu-divider {
+    display: block;
+    height: 1px;
+    margin: 4px 4px;
+    background: var(--line-soft);
+}
+
+.action-menu-panel a.action-menu-download {
+    color: var(--muted-strong);
+}
+
+.action-menu-panel a.action-menu-download:hover {
     color: var(--primary);
 }
 
