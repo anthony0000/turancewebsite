@@ -23,7 +23,7 @@
     <main class="shared-file-page">
         <section class="shared-file-card">
             <div class="shared-file-mark" aria-hidden="true">TT</div>
-            <span class="eyebrow">Secure project handoff</span>
+            <span class="eyebrow">Secure file sharing</span>
             <h1>{{ $projectFile->original_name }}</h1>
             <p>{{ $projectFile->description ?: 'A project file shared securely by Turance Technologies.' }}</p>
 

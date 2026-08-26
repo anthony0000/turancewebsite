@@ -291,10 +291,11 @@
 
 @section('content')
     <div class="pm-shell">
+        <nav class="pm-subnav" aria-label="Project management navigation">
+        @if (\App\Support\AdminAccess::isFullAdmin())
         @php
             $moreNavActive = request()->routeIs('admin.project-management.search', 'admin.project-management.calendar', 'admin.project-management.team', 'admin.project-management.reports', 'admin.project-management.archived', 'admin.project-management.notifications', 'admin.project-management.settings');
         @endphp
-        <nav class="pm-subnav" aria-label="Project management navigation">
             <a class="{{ request()->routeIs('admin.project-management.dashboard') && ! request('assignee_id') ? 'active' : '' }}" href="{{ route('admin.project-management.dashboard') }}">Overview</a>
             <a class="{{ request()->routeIs('admin.project-management.dashboard') && request('assignee_id') ? 'active' : '' }}" href="{{ route('admin.project-management.dashboard', ['assignee_id' => \App\Support\ProjectManagementAccess::user()?->id]) }}">My tasks</a>
             <a class="{{ request()->routeIs('admin.project-management.projects*') && ! request()->routeIs('admin.project-management.archived') ? 'active' : '' }}" href="{{ route('admin.project-management.projects') }}">Projects</a>
@@ -317,6 +318,9 @@
                     <a class="{{ request()->routeIs('admin.project-management.notifications') ? 'active' : '' }}" href="{{ route('admin.project-management.notifications') }}">Notifications</a>
                 </div>
             </details>
+        @else
+            <a class="active" href="{{ route('admin.project-management.dashboard') }}">My tasks</a>
+        @endif
         </nav>
 
         @yield('project-content')

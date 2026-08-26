@@ -1,6 +1,6 @@
 @extends('admin.layouts.app')
 
-@section('title', $project->name.' | Project Workspace')
+@section('title', $project->name.' | File sharing')
 
 @section('content')
     @php
@@ -10,9 +10,9 @@
 
     <section class="panel hero-banner project-detail-hero">
         <div>
-            <span class="eyebrow">Project workspace · {{ $project->project_number }}</span>
+            <span class="eyebrow">Project file sharing · {{ $project->project_number }}</span>
             <h1>{{ $project->name }}</h1>
-            <p>{{ $project->description ?: 'A shared project room for working files, signed documents, references, and final handoff materials.' }}</p>
+            <p>{{ $project->description ?: 'A shared project room for working files, signed documents, and references.' }}</p>
             <div class="hero-actions">
                 <a class="ghost-button" href="{{ route('admin.projects.index') }}">Back to Projects</a>
                 @if ($contracts->isNotEmpty())
@@ -27,7 +27,7 @@
                 <p>{{ $clientLabel }}</p>
             </div>
             <div class="callout-card">
-                <span class="metric-label">File handoff</span>
+                <span class="metric-label">File sharing</span>
                 @if ($canViewProjectFiles)
                     <strong>{{ number_format($sharedFileCount) }} shared</strong>
                     <p>{{ number_format($files->count()) }} total project {{ \Illuminate\Support\Str::plural('file', $files->count()) }}</p>
@@ -106,7 +106,7 @@
                                                 <input id="share-link-{{ $file->id }}" type="text" readonly value="{{ route('project-files.share', $file->share_token) }}" data-share-url>
                                                 <button class="ghost-button" type="button" data-copy-share>Copy</button>
                                             </div>
-                                            <small>Anyone with this link can download this file. Revoke it when the handoff is complete.</small>
+                                            <small>Anyone with this link can download this file. Revoke it when sharing is complete.</small>
                                         </div>
                                     @endif
                                 </div>
@@ -140,7 +140,7 @@
                         <label for="project-file">File</label>
                         <input id="project-file" type="file" name="file" required accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.ppt,.pptx,.txt,.rtf,.jpg,.jpeg,.png,.webp,.zip">
                         <label for="project-file-description">Description <span>(optional)</span></label>
-                        <textarea id="project-file-description" name="description" rows="4" maxlength="500" placeholder="e.g. Approved homepage references for the design handoff.">{{ old('description') }}</textarea>
+                        <textarea id="project-file-description" name="description" rows="4" maxlength="500" placeholder="e.g. Approved homepage references for the design team.">{{ old('description') }}</textarea>
                         @error('file')
                             <p class="form-error">{{ $message }}</p>
                         @enderror

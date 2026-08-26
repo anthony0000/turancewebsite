@@ -1,6 +1,6 @@
 # Project file storage
 
-Project handoff uploads store their bytes in the private `project_file_contents` database table. The `project_files.path` value remains a logical path for file naming and compatibility:
+File-sharing uploads store their bytes in the private `project_file_contents` database table. The `project_files.path` value remains a logical path for file naming and compatibility:
 
 ```text
 projects/files/{project_id}/{uuid}.{extension}

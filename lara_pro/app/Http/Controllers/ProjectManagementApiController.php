@@ -25,6 +25,7 @@ class ProjectManagementApiController extends Controller
 {
     public function projects(Request $request): JsonResponse
     {
+        ProjectManagementAccess::ensureFullWorkspace();
         $projects = ProjectManagementAccess::scopeVisible(Project::query())
             ->where('status', '!=', 'archived')
             ->with(['client', 'projectManager'])
@@ -39,6 +40,7 @@ class ProjectManagementApiController extends Controller
 
     public function project(Project $project): JsonResponse
     {
+        ProjectManagementAccess::ensureFullWorkspace();
         ProjectManagementAccess::ensureVisible($project);
         ProjectManagementAccess::ensureDefaultColumns($project);
         $project->load(['client', 'projectManager', 'members', 'boardColumns', 'labels', 'milestones', 'sprints']);
@@ -68,6 +70,7 @@ class ProjectManagementApiController extends Controller
 
     public function members(Project $project): JsonResponse
     {
+        ProjectManagementAccess::ensureFullWorkspace();
         ProjectManagementAccess::ensureVisible($project);
 
         return response()->json(['data' => $project->members()->get()->map(fn ($member) => ['id' => $member->id, 'name' => $member->name, 'email' => $member->email, 'role' => $member->pivot->role])->values()]);
@@ -92,6 +95,7 @@ class ProjectManagementApiController extends Controller
 
     public function columns(Project $project): JsonResponse
     {
+        ProjectManagementAccess::ensureFullWorkspace();
         ProjectManagementAccess::ensureVisible($project);
         ProjectManagementAccess::ensureDefaultColumns($project);
 
@@ -185,6 +189,7 @@ class ProjectManagementApiController extends Controller
 
     public function comments(Project $project, ?Task $task = null): JsonResponse
     {
+        ProjectManagementAccess::ensureFullWorkspace();
         ProjectManagementAccess::ensureVisible($project);
         if ($task) {
             abort_unless((int) $task->project_id === (int) $project->id, 404);
@@ -274,6 +279,7 @@ class ProjectManagementApiController extends Controller
 
     public function notifications(): JsonResponse
     {
+        ProjectManagementAccess::ensureFullWorkspace();
         $notifications = DB::table('notifications')->where('notifiable_type', \App\Models\User::class)->where('notifiable_id', ProjectManagementAccess::user()?->id)->latest()->paginate(30);
 
         return response()->json(['data' => $notifications->items(), 'meta' => ['current_page' => $notifications->currentPage(), 'last_page' => $notifications->lastPage(), 'total' => $notifications->total()]]);
@@ -281,6 +287,7 @@ class ProjectManagementApiController extends Controller
 
     public function markNotification(string $notification): JsonResponse
     {
+        ProjectManagementAccess::ensureFullWorkspace();
         DB::table('notifications')->where('id', $notification)->where('notifiable_type', \App\Models\User::class)->where('notifiable_id', ProjectManagementAccess::user()?->id)->update(['read_at' => now()]);
 
         return response()->json(['data' => null, 'message' => 'Notification marked as read.']);
@@ -288,6 +295,7 @@ class ProjectManagementApiController extends Controller
 
     public function search(Request $request): JsonResponse
     {
+        ProjectManagementAccess::ensureFullWorkspace();
         $term = trim((string) $request->input('q', ''));
         $projectIds = ProjectManagementAccess::scopeVisible(Project::query())->pluck('projects.id')->all();
         $projects = Project::query()->whereIn('id', $projectIds ?: [0])->where(fn (Builder $query) => $query->where('name', 'like', '%'.$term.'%')->orWhere('project_number', 'like', '%'.$term.'%')->orWhere('client_name', 'like', '%'.$term.'%'))->limit(25)->get()->map(fn (Project $project) => ['id' => $project->id, 'key' => $project->project_number, 'name' => $project->name]);
@@ -298,6 +306,7 @@ class ProjectManagementApiController extends Controller
 
     public function activity(Project $project): JsonResponse
     {
+        ProjectManagementAccess::ensureFullWorkspace();
         ProjectManagementAccess::ensureVisible($project);
 
         return response()->json(['data' => $project->activityLogs()->with('actor')->latest()->paginate(50)]);
@@ -305,6 +314,7 @@ class ProjectManagementApiController extends Controller
 
     public function reports(Request $request): JsonResponse
     {
+        ProjectManagementAccess::ensureFullWorkspace();
         $projectIds = ProjectManagementAccess::scopeVisible(Project::query())->pluck('projects.id')->all();
         $tasks = ProjectManagementAccess::scopeVisibleTasks(Task::query())->whereIn('project_id', $projectIds ?: [0])->whereNull('archived_at')->when($request->filled('project_id'), fn (Builder $query) => $query->where('project_id', $request->integer('project_id')))->get();
 

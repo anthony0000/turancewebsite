@@ -43,9 +43,9 @@ it('shows project portfolio charts and the file workspace entry point', function
         ->assertSee('Projects by status')
         ->assertSee('Files by project')
         ->assertSee('Upload a file for the project team')
-        ->assertSee('Secure handoffs')
+        ->assertSee('Shared files')
         ->assertSee('Choose a project')
-        ->assertSee('Uploaded project files')
+        ->assertSee('Project file library')
         ->assertSee('Download')
         ->assertSee('Update')
         ->assertSee('Remove')
@@ -278,16 +278,13 @@ it('lets subaccounts view projects while limiting project file access separately
         ->get(route('admin.projects.index'))
         ->assertOk()
         ->assertSee('Project file access is limited for this account.')
-        ->assertSee('Limited File Access Project')
+        ->assertDontSee('Limited File Access Project')
         ->assertDontSee('Upload a file for the project team');
 
     $this
         ->withSession($limitedSession)
         ->get(route('admin.projects.show', $project))
-        ->assertOk()
-        ->assertSee('Project file access is limited for this account.')
-        ->assertDontSee('restricted.pdf')
-        ->assertDontSee('Upload a file');
+        ->assertForbidden();
 
     $this
         ->withSession($limitedSession)
@@ -316,6 +313,7 @@ it('shows limited members shared project files only', function () {
         'name' => 'Shared Files Project',
         'status' => 'active',
     ]);
+    $project->members()->attach($member->id, ['role' => 'member']);
     $sharedPath = 'projects/files/'.$project->id.'/shared.pdf';
     $privatePath = 'projects/files/'.$project->id.'/private.pdf';
     Storage::disk('local')->put($sharedPath, 'shared project file');
@@ -342,9 +340,16 @@ it('shows limited members shared project files only', function () {
         'admin_user_id' => $member->id,
         'admin_user_name' => $member->name,
         'admin_role' => $member->role,
-        'admin_permissions' => ['projects', 'project-files'],
+        'admin_permissions' => ['projects'],
         'luxury_quote_admin_email' => $member->email,
     ];
+
+    $this->withSession($session)
+        ->get(route('admin.projects.index'))
+        ->assertOk()
+        ->assertSee('shared.pdf')
+        ->assertDontSee('private.pdf')
+        ->assertSee('File sharing');
 
     $this->withSession($session)
         ->get(route('admin.projects.show', $project))

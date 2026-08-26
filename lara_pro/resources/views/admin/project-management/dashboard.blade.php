@@ -1,6 +1,9 @@
 @extends('admin.project-management.layout', ['title' => 'Overview'])
 
 @section('project-content')
+    @if (! $canManageWorkspace)
+        @include('admin.project-management.partials.my-tasks')
+    @else
     <div class="pm-dashboard">
     <section class="panel pm-hero">
         <div>
@@ -71,4 +74,5 @@
 
     <section class="panel pm-panel"><div class="pm-panel-head"><div><h3>Recent activity</h3><p>Important changes across the visible workspace.</p></div><a class="pm-icon-link" href="{{ route('admin.project-management.notifications') }}">Notifications</a></div><div class="pm-list">@forelse ($recentActivity as $activity)<div class="pm-list-item"><div><strong>{{ Str::headline(str_replace('.', ' ', $activity->action)) }}</strong><span>{{ $activity->actor_name ?: 'System' }} · {{ $activity->project_name ?: 'Workspace' }} · {{ CarbonCarbon::parse($activity->created_at)->diffForHumans() }}</span></div></div>@empty<div class="pm-empty">Activity will appear as the team starts moving work.</div>@endforelse</div></section>
     </div>
+    @endif
 @endsection

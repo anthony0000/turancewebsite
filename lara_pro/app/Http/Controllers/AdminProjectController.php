@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Project;
 use App\Models\ProjectFile;
 use App\Support\AdminAccess;
+use App\Support\ProjectManagementAccess;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -27,21 +28,18 @@ class AdminProjectController extends Controller
 
     public function index(): View
     {
-        $canViewProjectFiles = AdminAccess::can('project-files');
-        $canManageProjectFiles = $canViewProjectFiles && AdminAccess::isFullAdmin();
-        $projectsQuery = Project::query()
-            ->withCount('staffContracts');
-
-        if ($canViewProjectFiles) {
-            $projectsQuery->withCount([
+        $canManageProjectFiles = AdminAccess::isFullAdmin();
+        $projectsQuery = ProjectManagementAccess::scopeVisibleSharedProjects(Project::query())
+            ->withCount('staffContracts')
+            ->withCount([
                 'files' => fn ($query) => $query->when(! $canManageProjectFiles, fn ($files) => $files->where('is_shared', true)),
                 'files as shared_files_count' => fn ($query) => $query->where('is_shared', true),
             ]);
-        }
 
         $projects = $projectsQuery
             ->latest('updated_at')
             ->get();
+        $canViewProjectFiles = $canManageProjectFiles || $projects->isNotEmpty();
 
         $statusCounts = $projects
             ->groupBy(fn (Project $project) => $this->statusLabel($project->status))
@@ -68,7 +66,9 @@ class AdminProjectController extends Controller
         $files = $canViewProjectFiles
             ? ProjectFile::query()
                 ->with('project')
-                ->when(! $canManageProjectFiles, fn ($query) => $query->where('is_shared', true))
+                ->when(! $canManageProjectFiles, fn ($query) => $query
+                    ->where('is_shared', true)
+                    ->whereIn('project_id', $projects->modelKeys() ?: [0]))
                 ->latest()
                 ->get()
             : collect();
@@ -90,11 +90,17 @@ class AdminProjectController extends Controller
 
     public function show(Project $project): View
     {
-        $canViewProjectFiles = AdminAccess::can('project-files');
-        $canManageProjectFiles = $canViewProjectFiles && AdminAccess::isFullAdmin();
-        $project->load([
-            'staffContracts' => fn ($query) => $query->with('invoice')->latest('updated_at'),
-        ]);
+        $canManageProjectFiles = AdminAccess::isFullAdmin();
+        $canViewProjectFiles = ProjectManagementAccess::canViewSharedFiles($project);
+        abort_unless($canViewProjectFiles, 403);
+
+        if ($canManageProjectFiles) {
+            $project->load([
+                'staffContracts' => fn ($query) => $query->with('invoice')->latest('updated_at'),
+            ]);
+        } else {
+            $project->setRelation('staffContracts', collect());
+        }
 
         if ($canViewProjectFiles) {
             $project->load([
@@ -190,14 +196,14 @@ class AdminProjectController extends Controller
 
     public function downloadFile(ProjectFile $projectFile): BinaryFileResponse|Response
     {
-        abort_unless(AdminAccess::isFullAdmin() || $projectFile->is_shared, 403);
+        $this->ensureReadableFile($projectFile);
 
         return $this->fileResponse($projectFile, false);
     }
 
     public function previewFile(ProjectFile $projectFile): BinaryFileResponse|Response
     {
-        abort_unless(AdminAccess::isFullAdmin() || $projectFile->is_shared, 403);
+        $this->ensureReadableFile($projectFile);
 
         return $this->fileResponse($projectFile, true);
     }
@@ -384,6 +390,15 @@ class AdminProjectController extends Controller
     private function abortUnlessShared(ProjectFile $projectFile): void
     {
         abort_unless($projectFile->is_shared && filled($projectFile->share_token) && $projectFile->hasStoredFile(), 404);
+    }
+
+    private function ensureReadableFile(ProjectFile $projectFile): void
+    {
+        if (AdminAccess::isFullAdmin()) {
+            return;
+        }
+
+        abort_unless($projectFile->is_shared && ProjectManagementAccess::canViewSharedFiles($projectFile->project), 403);
     }
 
     private function statusLabel(?string $status): string

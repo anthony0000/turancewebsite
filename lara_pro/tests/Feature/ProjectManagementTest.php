@@ -63,7 +63,7 @@ it('creates tasks and persists status and ordering through the board endpoint', 
         ->and($task->fresh()->position)->toBe(0);
 });
 
-it('enforces project membership for limited accounts', function () {
+it('keeps limited accounts out of the project management workspace', function () {
     $admin = User::factory()->create(['role' => AdminAccess::ROLE_ADMIN, 'permissions' => AdminAccess::permissionKeys(), 'is_active' => true]);
     $member = User::factory()->create(['role' => AdminAccess::ROLE_SUBACCOUNT, 'permissions' => ['projects'], 'is_active' => true]);
     $other = User::factory()->create(['role' => AdminAccess::ROLE_SUBACCOUNT, 'permissions' => ['projects'], 'is_active' => true]);
@@ -71,7 +71,7 @@ it('enforces project membership for limited accounts', function () {
     $project->members()->attach($member->id, ['role' => 'member']);
 
     $this->withSession(projectManagementSession($other))->get(route('admin.project-management.projects.show', $project))->assertForbidden();
-    $this->withSession(projectManagementSession($member))->get(route('admin.project-management.projects.show', $project))->assertOk()->assertSee('Private Work');
+    $this->withSession(projectManagementSession($member))->get(route('admin.project-management.projects.show', $project))->assertForbidden();
     $this->withSession(projectManagementSession($admin))->get(route('admin.project-management.projects.show', $project))->assertOk();
 });
 
@@ -85,12 +85,12 @@ it('limits members to their assigned tasks across web and API surfaces', functio
     $hidden = $project->tasks()->create(['task_number' => 2, 'title' => 'Private teammate task', 'type' => 'task', 'priority' => 'high', 'status' => 'to_do', 'board_column_id' => $column->id, 'assignee_id' => $admin->id, 'reporter_id' => $admin->id, 'position' => 1]);
     $session = projectManagementSession($member);
 
-    $this->withSession($session)->get(route('admin.project-management.dashboard'))->assertOk()->assertSee('My tasks')->assertSee('1')->assertDontSee('Private teammate task');
-    $this->withSession($session)->get(route('admin.project-management.board', $project))->assertOk()->assertSee('Member task')->assertDontSee('Private teammate task');
+    $this->withSession($session)->get(route('admin.project-management.dashboard'))->assertOk()->assertSee('My tasks')->assertSee('Member task')->assertDontSee('Private teammate task')->assertDontSee('Project overview');
+    $this->withSession($session)->get(route('admin.project-management.board', $project))->assertForbidden();
     $this->withSession($session)->get(route('admin.project-management.tasks.show', $assigned))->assertOk()->assertSee('Member task');
     $this->withSession($session)->get(route('admin.project-management.tasks.show', $hidden))->assertForbidden();
-    $this->withSession($session)->getJson(route('admin.project-management.api.projects.show', $project))->assertOk()->assertJsonCount(1, 'data.tasks')->assertJsonPath('data.tasks.0.title', 'Member task');
-    $this->withSession($session)->getJson(route('admin.project-management.api.search', ['q' => 'task']))->assertOk()->assertJsonCount(1, 'data.tasks');
+    $this->withSession($session)->getJson(route('admin.project-management.api.projects.show', $project))->assertForbidden();
+    $this->withSession($session)->getJson(route('admin.project-management.api.search', ['q' => 'task']))->assertForbidden();
 });
 
 it('sanitizes comments, records time, and exposes protected JSON project data', function () {
@@ -119,4 +119,15 @@ it('renders the operational project-management surfaces with live records', func
     $this->withSession($session)->get(route('admin.project-management.tasks.show', $task))->assertOk()->assertSee('Task details');
     $this->withSession($session)->get(route('admin.project-management.reports'))->assertOk()->assertSee('Operational reporting');
     $this->withSession($session)->get(route('admin.project-management.calendar'))->assertOk()->assertSee('Planning calendar');
+});
+
+it('keeps project management to one highlighted sidebar destination', function () {
+    $admin = User::factory()->create(['role' => AdminAccess::ROLE_ADMIN, 'permissions' => AdminAccess::permissionKeys(), 'is_active' => true]);
+
+    $response = $this->withSession(projectManagementSession($admin))
+        ->get(route('admin.project-management.dashboard'))
+        ->assertOk();
+
+    expect(substr_count($response->getContent(), 'class="admin-nav-link active"'))->toBe(1)
+        ->and($response->getContent())->toContain('<strong>Projects</strong>');
 });

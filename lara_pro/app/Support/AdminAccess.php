@@ -30,8 +30,8 @@ final class AdminAccess
             'description' => 'Review project records and project-to-invoice relationships.',
         ],
         'project-files' => [
-            'label' => 'Project files',
-            'description' => 'Upload, update, download, preview, remove, and securely share external project files.',
+            'label' => 'File sharing',
+            'description' => 'View files shared with assigned project teams; full admins can upload, update, remove, and share files.',
         ],
         'letters' => [
             'label' => 'Letterhead',

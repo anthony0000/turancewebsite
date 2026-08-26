@@ -1,6 +1,6 @@
 @extends('admin.layouts.app')
 
-@section('title', 'Projects & Files | Admin')
+@section('title', 'File sharing | Admin')
 
 @section('content')
     @php
@@ -12,7 +12,7 @@
             <div>
                 <span class="tt-projects-heading-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 7.5h6l2 2h8v10H4z"/><path d="M4 7.5V5h6l2 2.5"/></svg></span>
                 <span class="eyebrow">Project files</span>
-                <h1>Project handoffs</h1>
+                <h1>File sharing</h1>
             </div>
             <div class="tt-projects-page-actions">
                 @if ($canManageProjectFiles)
@@ -31,7 +31,7 @@
             <div class="tt-projects-stat"><span class="tt-projects-stat-icon tt-projects-stat-icon--gold" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 7h16v13H4z"/><path d="M8 7V4h8v3"/><path d="M8 12h8"/></svg></span><span class="metric-label">Projects</span><strong>{{ number_format($projectCount) }}</strong></div>
             <div class="tt-projects-stat"><span class="tt-projects-stat-icon tt-projects-stat-icon--green" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12.5 9.5 17 19 7.5"/><circle cx="12" cy="12" r="9"/></svg></span><span class="metric-label">Active</span><strong>{{ number_format($activeCount) }}</strong></div>
             <div class="tt-projects-stat"><span class="tt-projects-stat-icon tt-projects-stat-icon--orange" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 3h9l3 3v15H6z"/><path d="M15 3v4h4M9 12h6M9 16h6"/></svg></span><span class="metric-label">Files</span><strong>{{ $canViewProjectFiles ? number_format($fileCount) : '—' }}</strong></div>
-            <div class="tt-projects-stat"><span class="tt-projects-stat-icon tt-projects-stat-icon--slate" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 10V8a6 6 0 0 1 12 0v2"/><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M12 14v2"/></svg></span><span class="metric-label">Secure handoffs</span><strong>{{ $canViewProjectFiles ? number_format($sharedFileCount) : '—' }}</strong></div>
+            <div class="tt-projects-stat"><span class="tt-projects-stat-icon tt-projects-stat-icon--slate" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 10V8a6 6 0 0 1 12 0v2"/><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M12 14v2"/></svg></span><span class="metric-label">Shared files</span><strong>{{ $canViewProjectFiles ? number_format($sharedFileCount) : '—' }}</strong></div>
         </section>
 
         <div class="tt-projects-workspace">
@@ -39,7 +39,7 @@
                 <div class="tt-projects-card-head">
                     <div>
                         <span class="tt-projects-section-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 16V4"/><path d="m7 9 5-5 5 5"/><path d="M5 14v5h14v-5"/></svg></span>
-                        <span class="eyebrow">External project files</span>
+                        <span class="eyebrow">Project file sharing</span>
                         @if ($canManageProjectFiles)
                             <h2>Upload a file for the project team</h2>
                         @elseif ($canViewProjectFiles)
@@ -150,7 +150,7 @@
                     <div class="tt-projects-card-head">
                     <div>
                         <span class="tt-projects-section-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 5h14v14H5z"/><path d="M8 15v-3M12 15V8M16 15v-6"/></svg></span>
-                        <span class="eyebrow">Handoff activity</span>
+                        <span class="eyebrow">File activity</span>
                             <h2>Files by project</h2>
                         </div>
                     </div>
@@ -187,7 +187,7 @@
                 <div>
                     <span class="tt-projects-section-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 3h9l3 3v15H6z"/><path d="M15 3v4h4M9 12h6M9 16h6"/></svg></span>
                     <span class="eyebrow">File management</span>
-                    <h2>Uploaded project files</h2>
+                    <h2>Project file library</h2>
                 </div>
                 <span class="tt-projects-count">{{ number_format($files->count()) }} files</span>
             </div>

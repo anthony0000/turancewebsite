@@ -40,7 +40,25 @@ final class ProjectManagementAccess
         return $userId !== null && (
             (int) $project->project_manager_id === (int) $userId
             || $project->members()->whereKey($userId)->exists()
-            || ! $project->members()->exists()
+            || $project->tasks()->where('assignee_id', $userId)->exists()
+        );
+    }
+
+    public static function canViewSharedFiles(Project $project): bool
+    {
+        if (! AdminAccess::can('projects')) {
+            return false;
+        }
+
+        if (AdminAccess::isFullAdmin()) {
+            return true;
+        }
+
+        $userId = self::user()?->id;
+
+        return $userId !== null && (
+            (int) $project->project_manager_id === (int) $userId
+            || $project->members()->whereKey($userId)->exists()
         );
     }
 
@@ -52,6 +70,11 @@ final class ProjectManagementAccess
     public static function isLimitedMember(): bool
     {
         return ! AdminAccess::isFullAdmin();
+    }
+
+    public static function ensureFullWorkspace(): void
+    {
+        abort_unless(AdminAccess::isFullAdmin(), 403);
     }
 
     public static function scopeVisibleTasks(Builder $query): Builder
@@ -96,7 +119,25 @@ final class ProjectManagementAccess
         return $query->where(function (Builder $visible) use ($userId): void {
             $visible->where('project_manager_id', $userId)
                 ->orWhereHas('members', fn (Builder $members) => $members->whereKey($userId))
-                ->orWhereDoesntHave('members');
+                ->orWhereHas('tasks', fn (Builder $tasks) => $tasks->where('assignee_id', $userId));
+        });
+    }
+
+    public static function scopeVisibleSharedProjects(Builder $query): Builder
+    {
+        if (AdminAccess::isFullAdmin()) {
+            return $query;
+        }
+
+        $userId = self::user()?->id;
+
+        if ($userId === null) {
+            return $query->whereRaw('1 = 0');
+        }
+
+        return $query->where(function (Builder $visible) use ($userId): void {
+            $visible->where('project_manager_id', $userId)
+                ->orWhereHas('members', fn (Builder $members) => $members->whereKey($userId));
         });
     }
 

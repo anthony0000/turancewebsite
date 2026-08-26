@@ -36,6 +36,10 @@ class AdminProjectManagementController extends Controller
 
     public function dashboard(Request $request): View
     {
+        if (ProjectManagementAccess::isLimitedMember()) {
+            return $this->staffDashboard($request);
+        }
+
         $projects = $this->visibleProjects()
             ->where('status', '!=', 'archived')
             ->withCount([
@@ -106,6 +110,7 @@ class AdminProjectManagementController extends Controller
 
     public function storeSavedFilter(Request $request): RedirectResponse
     {
+        ProjectManagementAccess::ensureFullWorkspace();
         $validated = $request->validate(['name' => ['required', 'string', 'max:80'], 'filters' => ['nullable', 'array']]);
         SavedFilter::query()->updateOrCreate(['user_id' => ProjectManagementAccess::user()?->id, 'project_id' => null, 'name' => trim($validated['name'])], ['filters' => array_filter($validated['filters'] ?? [], fn ($value) => $value !== null && $value !== '')]);
 
@@ -114,6 +119,7 @@ class AdminProjectManagementController extends Controller
 
     public function destroySavedFilter(SavedFilter $savedFilter): RedirectResponse
     {
+        ProjectManagementAccess::ensureFullWorkspace();
         abort_unless((int) $savedFilter->user_id === (int) ProjectManagementAccess::user()?->id, 403);
         $savedFilter->delete();
 
@@ -122,6 +128,7 @@ class AdminProjectManagementController extends Controller
 
     public function projects(Request $request): View
     {
+        ProjectManagementAccess::ensureFullWorkspace();
         $query = $this->visibleProjects()
             ->with(['client', 'projectManager'])
             ->withCount(['tasks' => fn (Builder $tasks) => ProjectManagementAccess::scopeVisibleTasks($tasks)->whereNull('archived_at'), 'members'])
@@ -211,6 +218,7 @@ class AdminProjectManagementController extends Controller
 
     public function showProject(Project $project): View
     {
+        ProjectManagementAccess::ensureFullWorkspace();
         ProjectManagementAccess::ensureVisible($project);
         ProjectManagementAccess::ensureDefaultColumns($project);
         $project->load(['client', 'projectManager', 'members', 'boardColumns', 'labels', 'milestones', 'sprints']);
@@ -311,6 +319,7 @@ class AdminProjectManagementController extends Controller
 
     public function board(Project $project): View
     {
+        ProjectManagementAccess::ensureFullWorkspace();
         ProjectManagementAccess::ensureVisible($project);
         ProjectManagementAccess::ensureDefaultColumns($project);
         $project->load(['client', 'boardColumns', 'members', 'labels', 'milestones', 'sprints']);
@@ -339,6 +348,7 @@ class AdminProjectManagementController extends Controller
 
     public function backlog(Project $project): View
     {
+        ProjectManagementAccess::ensureFullWorkspace();
         ProjectManagementAccess::ensureVisible($project);
         $project->load(['sprints', 'members']);
 
@@ -352,6 +362,7 @@ class AdminProjectManagementController extends Controller
 
     public function sprints(Project $project): View
     {
+        ProjectManagementAccess::ensureFullWorkspace();
         ProjectManagementAccess::ensureVisible($project);
         $sprints = $project->sprints()->withCount(['tasks' => fn (Builder $tasks) => ProjectManagementAccess::scopeVisibleTasks($tasks)])->with(['tasks' => fn (Builder $tasks) => ProjectManagementAccess::scopeVisibleTasks($tasks)->whereNotNull('completed_at')])->latest('starts_on')->get();
 
@@ -369,6 +380,7 @@ class AdminProjectManagementController extends Controller
 
     public function calendar(Request $request): View
     {
+        ProjectManagementAccess::ensureFullWorkspace();
         $projects = $this->visibleProjects()->where('status', '!=', 'archived')->with(['milestones', 'sprints'])->get();
         $projectIds = $projects->modelKeys();
         $view = in_array($request->input('view'), ['month', 'week', 'agenda'], true) ? $request->input('view') : 'agenda';
@@ -390,6 +402,7 @@ class AdminProjectManagementController extends Controller
 
     public function team(): View
     {
+        ProjectManagementAccess::ensureFullWorkspace();
         $projects = $this->visibleProjects()->with(['members', 'projectManager'])->get();
         $tasks = ProjectManagementAccess::scopeVisibleTasks(Task::query())->whereIn('project_id', $projects->modelKeys() ?: [0])->whereNull('archived_at')->with('assignee')->get();
 
@@ -398,6 +411,7 @@ class AdminProjectManagementController extends Controller
 
     public function reports(Request $request): View
     {
+        ProjectManagementAccess::ensureFullWorkspace();
         $projects = $this->visibleProjects()->where('status', '!=', 'archived')->with('client')->get();
         $tasks = $this->filteredTasks($request, $projects->modelKeys())->with(['assignee', 'project'])->get();
         $completed = $tasks->whereNotNull('completed_at');
@@ -416,6 +430,7 @@ class AdminProjectManagementController extends Controller
 
     public function settings(Project $project): View
     {
+        ProjectManagementAccess::ensureFullWorkspace();
         abort_unless(ProjectManagementAccess::canManage($project), 403);
         ProjectManagementAccess::ensureDefaultColumns($project);
 
@@ -424,8 +439,15 @@ class AdminProjectManagementController extends Controller
 
     public function task(Task $task): View
     {
-        $project = $task->project;
         ProjectManagementAccess::ensureTaskVisible($task);
+
+        if (ProjectManagementAccess::isLimitedMember()) {
+            return view('admin.project-management.staff-task', [
+                'task' => $task->load(['project', 'column', 'assignee']),
+            ]);
+        }
+
+        $project = $task->project;
         $task->load(['project', 'column', 'assignee', 'reporter', 'milestone', 'sprint', 'labels', 'subtasks.assignee', 'comments.user', 'attachments.uploader', 'timeEntries.user', 'checklists.items']);
 
         return view('admin.project-management.task', [
@@ -717,6 +739,7 @@ class AdminProjectManagementController extends Controller
 
     public function notifications(): View
     {
+        ProjectManagementAccess::ensureFullWorkspace();
         $notifications = DB::table('notifications')->where('notifiable_type', User::class)->where('notifiable_id', ProjectManagementAccess::user()?->id)->latest()->paginate(30);
 
         return view('admin.project-management.notifications', compact('notifications'));
@@ -724,6 +747,7 @@ class AdminProjectManagementController extends Controller
 
     public function markNotification(string $notification): RedirectResponse
     {
+        ProjectManagementAccess::ensureFullWorkspace();
         DB::table('notifications')->where('id', $notification)->where('notifiable_type', User::class)->where('notifiable_id', ProjectManagementAccess::user()?->id)->update(['read_at' => now()]);
 
         return back();
@@ -731,6 +755,7 @@ class AdminProjectManagementController extends Controller
 
     public function search(Request $request): View
     {
+        ProjectManagementAccess::ensureFullWorkspace();
         $term = trim((string) $request->string('q'));
         $projects = $this->visibleProjects()->when($term !== '', fn (Builder $query) => $query->where(fn (Builder $q) => $q->where('name', 'like', '%'.$term.'%')->orWhere('project_number', 'like', '%'.$term.'%')->orWhere('client_name', 'like', '%'.$term.'%')))->limit(25)->get();
         $tasks = ProjectManagementAccess::scopeVisibleTasks(Task::query())->whereIn('project_id', $this->visibleProjects()->pluck('projects.id')->all() ?: [0])->when($term !== '', fn (Builder $query) => $query->where(fn (Builder $q) => $q->where('title', 'like', '%'.$term.'%')->orWhere('description', 'like', '%'.$term.'%')))->with('project')->limit(50)->get();
@@ -741,6 +766,30 @@ class AdminProjectManagementController extends Controller
     private function visibleProjects(): Builder
     {
         return ProjectManagementAccess::scopeVisible(Project::query());
+    }
+
+    private function staffDashboard(Request $request): View
+    {
+        $userId = ProjectManagementAccess::user()?->id;
+        $projects = $userId === null
+            ? collect()
+            : $this->visibleProjects()
+                ->where('status', '!=', 'archived')
+                ->whereHas('tasks', fn (Builder $tasks) => $tasks->where('assignee_id', $userId))
+                ->get();
+        $tasks = $this->filteredTasks($request, $projects->modelKeys())->get();
+        $weekStart = now()->startOfWeek();
+
+        return view('admin.project-management.dashboard', [
+            'projects' => $projects,
+            'tasks' => $tasks,
+            'myTasks' => $tasks->count(),
+            'todayTasks' => $tasks->filter(fn (Task $task) => $task->due_on?->isToday())->count(),
+            'overdueTasks' => $tasks->filter(fn (Task $task) => $task->is_overdue)->count(),
+            'completedThisWeek' => $tasks->filter(fn (Task $task) => $task->completed_at?->greaterThanOrEqualTo($weekStart))->count(),
+            'filters' => $request->only(['project_id', 'priority', 'status', 'date_from', 'date_to']),
+            'canManageWorkspace' => false,
+        ]);
     }
 
     private function visibleProjectTasks(Project $project): Builder

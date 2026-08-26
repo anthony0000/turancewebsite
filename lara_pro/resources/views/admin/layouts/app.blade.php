@@ -44,9 +44,10 @@
         $isProposalDashboard => 'Proposal Studio',
         $isStaffContractPreview => 'Staff Contract Preview',
         $isStaffContractEditor => 'Edit Staff Contract',
+        $isProjectManagementWorkspace && ! \App\Support\AdminAccess::isFullAdmin() => 'My tasks',
         $isProjectManagementWorkspace => 'Project Management',
         $isProjectPreview => 'Project Workspace',
-        $isProjectDashboard => 'Projects & Files',
+        $isProjectDashboard => 'File sharing',
         $isLetterBuilder => 'Letter Generator',
         $isSubaccountWorkspace => 'Sub-accounts',
         $isAdminProfile => 'Profile & Settings',
@@ -67,9 +68,10 @@
         $isProposalDashboard => 'Build, review, and export client proposals.',
         $isStaffContractPreview => 'Review the project-bound staff agreement, signing details, and contract PDF.',
         $isStaffContractEditor => 'Update the project, commercial terms, staff details, and signing section.',
+        $isProjectManagementWorkspace && ! \App\Support\AdminAccess::isFullAdmin() => 'Review the tasks assigned to you and open the relevant project file sharing area.',
         $isProjectManagementWorkspace => 'Plan projects, move work across the board, and keep delivery visible to the team.',
-        $isProjectPreview => 'Keep project files private by default, then create a secure link for the right handoff.',
-        $isProjectDashboard => 'Review project health, handoff activity, and the files attached to each engagement.',
+        $isProjectPreview => 'Keep project files private by default, then create a secure link for the right people.',
+        $isProjectDashboard => 'Review project health, file activity, and the files attached to each engagement.',
         $isLetterBuilder => 'Write letters and basic company documents on the Turance letterhead, then export them as PDF.',
         $isSubaccountWorkspace => 'Create team accounts and limit the parts of the admin workspace they can access.',
         $isAdminProfile => 'Manage your admin identity, contact details, and account security.',
@@ -90,9 +92,10 @@
         $isProposalDashboard => 'Proposal Studio',
         $isStaffContractPreview => 'Staff Contract Preview',
         $isStaffContractEditor => 'Edit Staff Contract',
+        $isProjectManagementWorkspace && ! \App\Support\AdminAccess::isFullAdmin() => 'My tasks',
         $isProjectManagementWorkspace => 'Project Management',
         $isProjectPreview => 'Project Workspace',
-        $isProjectDashboard => 'Projects & Files',
+        $isProjectDashboard => 'File sharing',
         $isLetterBuilder => 'Letter Generator',
         $isSubaccountWorkspace => 'Sub-accounts',
         $isAdminProfile => 'Profile & Settings',
@@ -2337,6 +2340,7 @@
                             @endif
 
                             @if ($canProjects)
+                                @if ($isFullAdmin)
                                 <a class="admin-nav-link {{ $isProjectManagementWorkspace ? 'active' : '' }}"
                                     href="{{ route('admin.project-management.dashboard') }}">
                                 <span class="admin-nav-icon" aria-hidden="true">
@@ -2350,6 +2354,23 @@
                                     <span>Delivery workspace</span>
                                 </div>
                                 </a>
+                                @else
+                                <a class="admin-nav-link {{ $isProjectManagementWorkspace ? 'active' : '' }}"
+                                    href="{{ route('admin.project-management.dashboard') }}">
+                                <span class="admin-nav-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24">
+                                        <path d="M5 4h14v16H5z" />
+                                        <path d="M8 8h8" />
+                                        <path d="M8 12h8" />
+                                        <path d="M8 16h5" />
+                                    </svg>
+                                </span>
+                                <div>
+                                    <strong>My tasks</strong>
+                                    <span>Assigned work</span>
+                                </div>
+                                </a>
+                                @endif
 
                                 <a class="admin-nav-link {{ $isProjectFileWorkspace ? 'active' : '' }}"
                                     href="{{ route('admin.projects.index') }}">
@@ -2362,8 +2383,8 @@
                                     </svg>
                                 </span>
                                 <div>
-                                    <strong>Project Files</strong>
-                                    <span>Secure handoffs</span>
+                                    <strong>File sharing</strong>
+                                    <span>Shared project files</span>
                                 </div>
                                 </a>
                             @endif
@@ -2436,7 +2457,7 @@
                                 </a>
                             @endif
 
-                            @if ($isInvoicePreview || $isInvoiceEditor || $isProposalPreview || $isProposalEditor || $isStaffContractPreview || $isStaffContractEditor || $isLetterWorkspace || $isAdminProfile || $isSubaccountWorkspace || $isProjectManagementWorkspace)
+                            @if ($isInvoicePreview || $isInvoiceEditor || $isProposalPreview || $isProposalEditor || $isStaffContractPreview || $isStaffContractEditor || $isLetterWorkspace || $isAdminProfile || $isSubaccountWorkspace)
                                 <span class="admin-nav-label">Current</span>
                                 <a class="admin-nav-link active" href="{{ url()->current() }}">
                                     <span class="admin-nav-icon" aria-hidden="true">
@@ -2576,8 +2597,12 @@
                         <a class="command-palette__item" data-command-item data-command-label="Activity Traffic Leads" href="{{ route('admin.quotes.activity') }}"><span class="command-palette__item-icon">↗</span><span><strong>Activity</strong><small>Traffic and leads</small></span><span class="command-palette__arrow">↵</span></a>
                     @endif
                     @if ($canProjects)
+                        @if ($isFullAdmin)
                         <a class="command-palette__item" data-command-item data-command-label="Projects Delivery" href="{{ route('admin.project-management.dashboard') }}"><span class="command-palette__item-icon">□</span><span><strong>Projects</strong><small>Delivery workspace</small></span><span class="command-palette__arrow">↵</span></a>
-                        <a class="command-palette__item" data-command-item data-command-label="Project Files Secure Handoffs" href="{{ route('admin.projects.index') }}"><span class="command-palette__item-icon">▱</span><span><strong>Project files</strong><small>Shared files</small></span><span class="command-palette__arrow">↵</span></a>
+                        @else
+                        <a class="command-palette__item" data-command-item data-command-label="My Tasks" href="{{ route('admin.project-management.dashboard') }}"><span class="command-palette__item-icon">□</span><span><strong>My tasks</strong><small>Assigned work</small></span><span class="command-palette__arrow">↵</span></a>
+                        @endif
+                        <a class="command-palette__item" data-command-item data-command-label="File Sharing" href="{{ route('admin.projects.index') }}"><span class="command-palette__item-icon">▱</span><span><strong>File sharing</strong><small>Shared files</small></span><span class="command-palette__arrow">↵</span></a>
                     @endif
                     <a class="command-palette__item" data-command-item data-command-label="Profile Settings" href="{{ route('admin.profile') }}"><span class="command-palette__item-icon">◎</span><span><strong>Profile</strong><small>Account settings</small></span><span class="command-palette__arrow">↵</span></a>
                     <p class="command-palette__empty" data-command-empty hidden>No matching workspace items.</p>
