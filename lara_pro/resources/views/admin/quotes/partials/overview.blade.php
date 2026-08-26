@@ -5,23 +5,6 @@
 @endphp
 
 <section class="tt-dashboard" id="dashboard-overview" aria-label="Turance business dashboard">
-    <header class="tt-dashboard-head">
-        <div class="tt-dashboard-title">
-            <span class="eyebrow">Turance Technologies</span>
-            <h1>Dashboard</h1>
-            <p>Everything happening across your business.</p>
-        </div>
-        <div class="tt-dashboard-tools">
-            <button class="admin-search-trigger" type="button" data-command-open aria-haspopup="dialog" aria-keyshortcuts="Control+K Meta+K">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5" /><path d="m16 16 4 4" /></svg>
-                <span>Search anything...</span>
-                <kbd>⌘ K</kbd>
-            </button>
-            <a class="button" href="{{ route('admin.quotes.create') }}">+ New invoice</a>
-            <a class="tt-dashboard-avatar" href="{{ route('admin.profile') }}" aria-label="Open profile">TT</a>
-        </div>
-    </header>
-
     <div class="tt-dashboard-intro">
         <div><span class="eyebrow">Business performance</span><h2>Keep the next move visible.</h2></div>
         <div class="tt-dashboard-status"><span class="status-dot status-dot--{{ $visitTrackingReady ? 'live' : 'pending' }}"></span>{{ $visitTrackingReady ? 'Tracking live' : 'Tracking pending setup' }}@if (! empty($anniversaryPromo['is_active']))<span class="tt-status-divider"></span>{{ $anniversaryPromo['discount_percent'] }}% promotion live @endif</div>

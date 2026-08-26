@@ -244,7 +244,7 @@
         .admin-topbar-actions {
             display: flex;
             align-items: center;
-            flex-wrap: wrap;
+            flex-wrap: nowrap;
             gap: 12px;
         }
 
@@ -1877,7 +1877,7 @@
         .admin-pagebar-actions {
             display: flex;
             align-items: center;
-            flex-wrap: wrap;
+            flex-wrap: nowrap;
             gap: 10px;
         }
 
@@ -2098,8 +2098,7 @@
             }
 
             .section-heading,
-            .wizard-actions,
-            .admin-pagebar {
+            .wizard-actions {
                 flex-direction: column;
                 align-items: flex-start;
             }
@@ -2486,7 +2485,7 @@
                         <div class="admin-pagebar-actions">
                             <button class="admin-search-trigger" type="button" data-command-open aria-haspopup="dialog" aria-keyshortcuts="Control+K Meta+K">
                                 <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5" /><path d="m16 16 4 4" /></svg>
-                                <span>Search</span>
+                                <span>Search anything...</span>
                                 <kbd>⌘ K</kbd>
                             </button>
                             @if ($isSubaccountWorkspace)

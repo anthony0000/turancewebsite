@@ -67,6 +67,16 @@
                             <span class="tt-projects-form-note">PDF, Office, image, text, and ZIP files up to 50 MB.</span>
                             <button class="button" type="submit" data-project-file-submit>Upload to project</button>
                         </div>
+                        <div class="tt-project-upload-progress" data-project-file-progress hidden>
+                            <div class="tt-project-upload-progress__head">
+                                <span data-project-file-progress-label>Preparing upload</span>
+                                <strong data-project-file-progress-value>0%</strong>
+                            </div>
+                            <div class="tt-project-upload-progress__track" role="progressbar" aria-label="File upload progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" data-project-file-progress-track>
+                                <span data-project-file-progress-fill></span>
+                            </div>
+                            <span class="tt-project-upload-progress__detail" data-project-file-progress-detail>Getting the file ready…</span>
+                        </div>
                         <p class="form-help" data-project-file-status role="status" aria-live="polite"></p>
                     </form>
                 @elseif ($canViewProjectFiles && ! $canManageProjectFiles)
@@ -199,7 +209,65 @@
 
             const submit = form.querySelector('[data-project-file-submit]');
             const status = form.querySelector('[data-project-file-status]');
+            const progress = form.querySelector('[data-project-file-progress]');
+            const progressLabel = form.querySelector('[data-project-file-progress-label]');
+            const progressValue = form.querySelector('[data-project-file-progress-value]');
+            const progressTrack = form.querySelector('[data-project-file-progress-track]');
+            const progressFill = form.querySelector('[data-project-file-progress-fill]');
+            const progressDetail = form.querySelector('[data-project-file-progress-detail]');
             const defaultLabel = submit?.textContent || 'Upload to project';
+
+            const setProgress = (value, label, detail) => {
+                if (!progress) {
+                    return;
+                }
+
+                const safeValue = Math.max(0, Math.min(100, Math.round(value)));
+                progress.hidden = false;
+                progress.classList.toggle('is-indeterminate', safeValue === 0);
+                if (progressLabel) progressLabel.textContent = label;
+                if (progressValue) progressValue.textContent = `${safeValue}%`;
+                if (progressDetail) progressDetail.textContent = detail;
+                if (progressTrack) progressTrack.setAttribute('aria-valuenow', String(safeValue));
+                if (progressFill) progressFill.style.width = `${safeValue}%`;
+            };
+
+            const uploadFile = (formData, onProgress) => new Promise((resolve, reject) => {
+                const request = new XMLHttpRequest();
+
+                request.open('POST', form.action);
+                request.setRequestHeader('Accept', 'application/json');
+                request.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+                request.upload.addEventListener('progress', (event) => {
+                    if (!event.lengthComputable) {
+                        onProgress(0, 'Uploading file', 'Uploading securely…');
+                        return;
+                    }
+
+                    const percent = (event.loaded / event.total) * 100;
+                    onProgress(percent, 'Uploading file', `${Math.round(percent)}% uploaded`);
+                });
+                request.addEventListener('load', () => {
+                    let payload = {};
+
+                    try {
+                        payload = JSON.parse(request.responseText || '{}');
+                    } catch (error) {
+                        payload = {};
+                    }
+
+                    if (request.status >= 200 && request.status < 300) {
+                        resolve(payload);
+                        return;
+                    }
+
+                    const validationMessage = Object.values(payload.errors || {}).flat().find((message) => typeof message === 'string');
+                    reject(new Error(validationMessage || payload.message || 'The file could not be uploaded.'));
+                });
+                request.addEventListener('error', () => reject(new Error('The file could not be uploaded.')));
+                request.addEventListener('abort', () => reject(new Error('The upload was cancelled.')));
+                request.send(formData);
+            });
 
             form.addEventListener('submit', async (event) => {
                 event.preventDefault();
@@ -210,29 +278,29 @@
 
                 submit.disabled = true;
                 submit.textContent = 'Uploading…';
+                if (progress) progress.classList.remove('is-complete', 'is-error');
+                setProgress(0, 'Preparing upload', 'Getting the file ready…');
                 if (status) {
-                    status.textContent = 'Uploading file…';
+                    status.textContent = '';
                     status.classList.remove('form-error');
                 }
 
                 try {
-                    const response = await fetch(form.action, {
-                        method: 'POST',
-                        body: new FormData(form),
-                        headers: { Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
-                    });
-                    const payload = await response.json().catch(() => ({}));
-
-                    if (!response.ok) {
-                        const validationMessage = Object.values(payload.errors || {}).flat().find((message) => typeof message === 'string');
-                        throw new Error(validationMessage || payload.message || 'The file could not be uploaded.');
-                    }
+                    const payload = await uploadFile(new FormData(form), setProgress);
 
                     form.reset();
+                    if (progress) {
+                        progress.classList.remove('is-indeterminate');
+                        progress.classList.add('is-complete');
+                    }
+                    setProgress(100, 'Upload complete', 'File is now available in the project workspace.');
                     if (status) {
                         status.textContent = payload.message || 'File uploaded successfully.';
                     }
                 } catch (error) {
+                    if (progress) progress.classList.add('is-error');
+                    if (progressLabel) progressLabel.textContent = 'Upload failed';
+                    if (progressDetail) progressDetail.textContent = 'Check the file and try again.';
                     if (status) {
                         status.textContent = error.message || 'The file could not be uploaded.';
                         status.classList.add('form-error');

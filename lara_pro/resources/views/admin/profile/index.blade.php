@@ -18,6 +18,12 @@
         </div>
     </section>
 
+    @if ($isFullAdmin)
+        <div class="admin-mobile-page-action">
+            <a class="ghost-button" href="{{ route('admin.subaccounts.index') }}">Manage Sub-accounts</a>
+        </div>
+    @endif
+
     @if ($errors->any())
         <div class="validation-summary" style="margin-top: 24px; padding: 16px 18px; border: 1px solid rgba(185, 74, 61, 0.3); border-radius: 16px; background: rgba(185, 74, 61, 0.08); color: var(--danger);">
             <strong>Review the account details.</strong>

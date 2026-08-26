@@ -2889,8 +2889,9 @@ body.is-admin:not(.is-dashboard-overview) .proposal-builder-panel .panel-head {
 /* Activity uses the same three-zone canvas as the dashboard. */
 .tt-page {
     display: grid;
-    max-width: 1540px;
-    margin: 0 auto;
+    width: 100%;
+    max-width: none;
+    margin: 0;
     gap: 0;
     animation: tt-dashboard-in 260ms ease both;
 }
@@ -2990,10 +2991,6 @@ body.is-admin .admin-sidebar .admin-nav-icon svg { display: block; width: 16px; 
 /* Overview rebuild: a quiet canvas with an asymmetric analytical
  * workspace. The legacy overview markup remains available to other sections,
  * while this surface has its own proportions and interaction language. */
-body.is-dashboard-overview .admin-pagebar {
-    display: none;
-}
-
 body.is-dashboard-overview .admin-workspace--with-sidebar .admin-main {
     padding: 0 42px 56px;
     background: #fff;
@@ -3001,8 +2998,9 @@ body.is-dashboard-overview .admin-workspace--with-sidebar .admin-main {
 
 .tt-dashboard {
     display: grid;
-    max-width: 1540px;
-    margin: 0 auto;
+    width: 100%;
+    max-width: none;
+    margin: 0;
     gap: 0;
     color: #1b1d21;
     animation: tt-dashboard-in 260ms ease both;
@@ -3011,74 +3009,6 @@ body.is-dashboard-overview .admin-workspace--with-sidebar .admin-main {
 @keyframes tt-dashboard-in {
     from { opacity: 0; transform: translateY(8px); }
     to { opacity: 1; transform: translateY(0); }
-}
-
-.tt-dashboard-head {
-    display: flex;
-    min-height: 104px;
-    align-items: center;
-    justify-content: space-between;
-    gap: 28px;
-    border-bottom: 1px solid #edf0f2;
-}
-
-.tt-dashboard-title h1 {
-    margin: 2px 0 0;
-    color: #17191d;
-    font-family: var(--font-display);
-    font-size: 28px;
-    font-weight: 650;
-    letter-spacing: -0.04em;
-    line-height: 1.05;
-}
-
-.tt-dashboard-title p {
-    margin: 6px 0 0;
-    color: #858b94;
-    font-size: 12px;
-}
-
-.tt-dashboard-tools {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.tt-dashboard-tools .admin-search-trigger {
-    min-width: 230px;
-    border: 0;
-    border-bottom: 1px solid #e4e7ea;
-    border-radius: 0;
-    background: transparent;
-}
-
-.tt-dashboard-tools .admin-search-trigger:hover {
-    border-color: var(--primary);
-    background: transparent;
-}
-
-.tt-dashboard-tools .button {
-    min-height: 34px;
-    padding-inline: 14px;
-    border: 0;
-    border-radius: 5px;
-    background: #1c1e22;
-    box-shadow: none;
-    font-size: 11px;
-}
-
-.tt-dashboard-tools .button:hover { background: var(--primary-strong); }
-
-.tt-dashboard-avatar {
-    display: grid;
-    width: 32px;
-    height: 32px;
-    place-items: center;
-    border-radius: 50%;
-    background: #eef0f2;
-    color: #555b65;
-    font-size: 10px;
-    font-weight: 800;
 }
 
 .tt-dashboard-intro {
@@ -3246,9 +3176,6 @@ body.is-dashboard-overview .admin-workspace--with-sidebar .admin-main {
 }
 
 @media (max-width: 900px) {
-    .tt-dashboard-head { align-items: flex-start; flex-direction: column; padding: 24px 0; }
-    .tt-dashboard-tools { width: 100%; }
-    .tt-dashboard-tools .admin-search-trigger { flex: 1; }
     .tt-lower-grid { grid-template-columns: 1fr; }
     .tt-invoices { padding-right: 0; }
     .tt-projects { padding: 24px 0 0; border-top: 1px solid #edf0f2; border-left: 0; }
@@ -3267,7 +3194,6 @@ body.is-dashboard-overview .admin-workspace--with-sidebar .admin-main {
     .tt-snapshot { padding-top: 24px; }
     .tt-snapshot-list { grid-template-columns: 1fr; }
     .tt-chart-tools { justify-items: start; }
-    .tt-dashboard-tools .admin-search-trigger { min-width: 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -4049,7 +3975,7 @@ body.is-admin .admin-pagebar-title {
 
 body.is-admin .admin-pagebar-actions {
     flex: 0 1 auto;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     justify-content: flex-end;
 }
 
@@ -5828,8 +5754,9 @@ body.is-admin:not(.is-dashboard-overview) .pm-hero {
  * strip, and a directory that stays readable when the dataset grows. */
 .tt-projects-page {
     display: grid;
-    max-width: 1540px;
-    margin: 0 auto;
+    width: 100%;
+    max-width: none;
+    margin: 0;
     gap: 0;
     color: #1b1d21;
 }
@@ -5952,6 +5879,42 @@ body.is-project-files .admin-main { width: auto; max-width: none; justify-self: 
 .tt-projects-upload-form__actions .button { min-height: 36px; border-radius: 5px; box-shadow: none; }
 .tt-projects-upload-form [data-project-file-status]:empty { display: none; }
 
+.tt-project-upload-progress {
+    display: grid;
+    gap: 8px;
+    margin-top: 14px;
+    padding: 12px 13px;
+    border: 1px solid #e7eaed;
+    border-radius: 8px;
+    background: #fbfcfc;
+}
+
+.tt-project-upload-progress__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    color: #59616c;
+    font-size: 11px;
+}
+
+.tt-project-upload-progress__head strong { color: #25292f; font-size: 11px; font-variant-numeric: tabular-nums; }
+.tt-project-upload-progress__track { position: relative; height: 7px; overflow: hidden; border-radius: 99px; background: #e9edef; }
+.tt-project-upload-progress__track > span { display: block; width: 0; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #b27c00, #d6a32a); transition: width 180ms ease; }
+.tt-project-upload-progress.is-indeterminate .tt-project-upload-progress__track > span { width: 42% !important; animation: tt-project-upload-progress 1.15s ease-in-out infinite; }
+.tt-project-upload-progress.is-complete .tt-project-upload-progress__track > span { background: #4d9b70; }
+.tt-project-upload-progress.is-error .tt-project-upload-progress__track > span { background: #c46b5e; }
+.tt-project-upload-progress__detail { color: #858b94; font-size: 10px; }
+
+@keyframes tt-project-upload-progress {
+    0% { transform: translateX(-115%); }
+    100% { transform: translateX(275%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tt-project-upload-progress.is-indeterminate .tt-project-upload-progress__track > span { animation: none; width: 42% !important; }
+}
+
 .tt-projects-empty {
     display: flex;
     min-height: 112px;
@@ -6056,47 +6019,235 @@ body.is-project-files .admin-main { width: auto; max-width: none; justify-self: 
     .tt-projects-register .quote-table td { padding-inline: 16px; }
 }
 
-/* Mobile admin chrome: keep the title row and action row full width instead
- * of allowing the legacy flex rules to shrink the whole pagebar to content. */
-@media (max-width: 760px) {
+/* Responsive admin chrome --------------------------------------------------
+ * The pagebar has two independent groups. Each breakpoint chooses which
+ * controls belong in the single row; the toolbar never creates a second row
+ * by wrapping its children. */
+body.is-admin .admin-pagebar {
+    display: flex;
+    width: calc(100% + 84px);
+    min-width: 0;
+    min-height: 72px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    flex-wrap: nowrap;
+}
+
+body.is-admin:not(.is-dashboard-overview) .admin-pagebar {
+    min-height: 72px;
+}
+
+body.is-admin:not(.is-dashboard-overview) .admin-pagebar h1 {
+    font-size: 24px;
+}
+
+body.is-dashboard-overview .admin-pagebar {
+    margin-inline: -42px;
+    padding-inline: 42px;
+}
+
+body.is-admin .admin-pagebar-title {
+    min-width: 0;
+    flex: 1 1 auto;
+    align-items: center;
+}
+
+body.is-admin .admin-pagebar-title > div {
+    min-width: 0;
+}
+
+body.is-admin .admin-pagebar-title h1 {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+body.is-admin .admin-pagebar-actions {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    flex: 0 0 auto;
+    flex-wrap: nowrap;
+}
+
+body.is-admin .admin-pagebar-actions > *,
+body.is-admin .admin-pagebar-actions .admin-profile-menu {
+    flex: 0 0 auto;
+}
+
+body.is-admin .admin-pagebar-actions .admin-search-trigger {
+    width: 230px;
+    min-width: 0;
+    flex: 0 1 230px;
+}
+
+.admin-mobile-page-action {
+    display: none;
+}
+
+/* Medium: retain the action, but turn search into a compact icon. */
+@media (min-width: 768px) and (max-width: 1023px) {
     body.is-admin .admin-pagebar {
-        display: grid;
-        width: 100%;
-        min-width: 0;
-        box-sizing: border-box;
-        grid-template-columns: minmax(0, 1fr) auto;
-        grid-template-rows: auto auto;
-        align-items: center;
-        gap: 10px 12px;
-        margin-inline: -14px;
-        padding: 10px 14px 12px;
-        flex-direction: initial;
+        min-height: 68px;
+        gap: 12px;
     }
 
-    body.is-admin .admin-pagebar-title {
-        grid-column: 1 / -1;
-        width: 100%;
-        min-width: 0;
+    body.is-admin:not(.is-dashboard-overview) .admin-pagebar {
+        min-height: 68px;
     }
 
-    body.is-admin .admin-pagebar-actions {
-        grid-column: 1 / -1;
-        display: grid;
-        width: 100%;
-        min-width: 0;
-        grid-template-columns: minmax(0, 1fr) auto auto;
-        grid-template-rows: 36px 36px;
-        align-items: center;
-        gap: 8px;
+    body.is-admin .admin-pagebar .eyebrow,
+    body.is-admin:not(.is-dashboard-overview) .admin-pagebar .eyebrow {
+        display: none;
+    }
+
+    body.is-admin .admin-pagebar h1,
+    body.is-admin:not(.is-dashboard-overview) .admin-pagebar h1 {
+        font-size: 18px;
     }
 
     body.is-admin .admin-pagebar-actions .admin-search-trigger {
-        grid-column: 1;
-        grid-row: 1;
-        width: 100%;
-        min-width: 0;
+        width: 36px;
+        height: 36px;
+        flex-basis: 36px;
+        justify-content: center;
+        padding: 0;
     }
 
-    body.is-admin .admin-pagebar-actions > .button { grid-column: 2; grid-row: 2; }
-    body.is-admin .admin-pagebar-actions .admin-profile-menu { grid-column: 3; grid-row: 2; margin-left: 0; }
+    body.is-admin .admin-pagebar-actions .admin-search-trigger span,
+    body.is-admin .admin-pagebar-actions .admin-search-trigger kbd {
+        display: none;
+    }
+
+    body.is-admin .admin-pagebar-actions > .button,
+    body.is-admin .admin-pagebar-actions > .ghost-button {
+        max-width: 172px;
+        min-height: 34px;
+        overflow: hidden;
+        padding-inline: 10px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+}
+
+/* Small: the mobile topbar is intentionally only menu, title, and account.
+ * Search and contextual actions remain available through their page/menu
+ * surfaces instead of consuming a second toolbar row. */
+@media (max-width: 767px) {
+    body.is-admin .admin-pagebar {
+        width: calc(100% + 28px);
+        min-height: 64px;
+        gap: 10px;
+        margin-inline: -14px;
+        padding: 10px 14px;
+    }
+
+    body.is-admin:not(.is-dashboard-overview) .admin-pagebar {
+        width: calc(100% + 28px);
+        min-height: 64px;
+        margin-inline: -14px;
+        padding: 10px 14px;
+    }
+
+    body.is-admin .admin-pagebar-title {
+        gap: 10px;
+    }
+
+    body.is-admin .admin-mobile-nav-button {
+        display: inline-grid;
+        width: 40px;
+        height: 40px;
+        flex-basis: 40px;
+        border-radius: 10px;
+    }
+
+    body.is-admin .admin-pagebar .eyebrow,
+    body.is-admin:not(.is-dashboard-overview) .admin-pagebar .eyebrow {
+        display: none;
+    }
+
+    body.is-admin .admin-pagebar h1,
+    body.is-admin:not(.is-dashboard-overview) .admin-pagebar h1 {
+        font-size: 18px;
+    }
+
+    body.is-admin .admin-pagebar-actions {
+        gap: 0;
+    }
+
+    body.is-admin:not(.is-dashboard-overview) .admin-pagebar-actions {
+        width: auto;
+        justify-content: flex-end;
+    }
+
+    body.is-admin .admin-pagebar-actions .admin-search-trigger,
+    body.is-admin .admin-pagebar-actions > .button,
+    body.is-admin .admin-pagebar-actions > .ghost-button {
+        display: none;
+    }
+
+    body.is-admin .admin-pagebar-actions .admin-profile-menu {
+        display: block;
+        margin-left: 0;
+    }
+
+    body.is-admin .admin-pagebar-actions .admin-profile-menu summary {
+        min-height: 34px;
+        padding: 1px;
+    }
+
+    body.is-admin .admin-pagebar-actions .admin-avatar {
+        width: 32px;
+        height: 32px;
+        flex: 0 0 32px;
+        border-radius: 50%;
+    }
+
+    .admin-mobile-page-action {
+        display: flex;
+        margin-top: -2px;
+        padding-bottom: 18px;
+    }
+
+    .admin-mobile-page-action .ghost-button {
+        width: 100%;
+        min-height: 40px;
+    }
+}
+
+/* The dashboard canvas uses a wider horizontal gutter than inner pages. Keep
+ * the shared pagebar flush with that canvas instead of inheriting a smaller
+ * legacy negative margin. */
+@media (max-width: 1220px) {
+    body.is-dashboard-overview .admin-workspace--with-sidebar .admin-main {
+        padding-inline: 28px;
+    }
+
+    body.is-dashboard-overview .admin-pagebar {
+        width: calc(100% + 56px);
+        margin-inline: -28px;
+        padding-inline: 28px;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 1100px) {
+    body.is-admin:not(.is-dashboard-overview) .admin-pagebar {
+        width: calc(100% + 44px);
+    }
+}
+
+@media (max-width: 680px) {
+    body.is-dashboard-overview .admin-workspace--with-sidebar .admin-main {
+        padding-inline: 18px;
+    }
+
+    body.is-dashboard-overview .admin-pagebar {
+        width: calc(100% + 36px);
+        margin-inline: -18px;
+        padding-inline: 18px;
+    }
 }
