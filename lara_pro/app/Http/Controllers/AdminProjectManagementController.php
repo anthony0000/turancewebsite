@@ -52,9 +52,7 @@ class AdminProjectManagementController extends Controller
         $activeProjects = $projects->whereIn('status', ['planning', 'active', 'on_hold']);
         $completedProjects = $projects->where('status', 'completed');
         $overdueTasks = $tasks->filter(fn (Task $task) => $task->is_overdue);
-        $todayTasks = $tasks->filter(fn (Task $task) => $task->due_on?->isToday());
-        $weekStart = now()->startOfWeek();
-        $completedThisWeek = $tasks->filter(fn (Task $task) => $task->completed_at?->greaterThanOrEqualTo($weekStart));
+        $openTasks = $tasks->whereNull('completed_at');
 
         $recentActivityQuery = DB::table('activity_logs')
             ->leftJoin('users', 'users.id', '=', 'activity_logs.actor_id')
@@ -77,7 +75,7 @@ class AdminProjectManagementController extends Controller
                 'projects.name as project_name',
             ]);
 
-        $workload = $tasks->whereNotNull('assignee_id')
+        $workload = $openTasks->whereNotNull('assignee_id')
             ->groupBy('assignee_id')
             ->map(fn ($group) => [
                 'name' => $group->first()->assignee?->name ?? 'Unassigned',
@@ -92,17 +90,15 @@ class AdminProjectManagementController extends Controller
             'totalProjects' => $activeProjects->count(),
             'completedProjects' => $completedProjects->count(),
             'overdueProjects' => $activeProjects->filter(fn (Project $project) => $project->ends_on?->isBefore(today()))->count(),
-            'myTasks' => $tasks->where('assignee_id', ProjectManagementAccess::user()?->id)->count(),
-            'todayTasks' => $todayTasks->count(),
+            'openTasks' => $openTasks->count(),
             'overdueTasks' => $overdueTasks->count(),
-            'completedThisWeek' => $completedThisWeek->count(),
             'upcomingMilestones' => Milestone::query()->whereIn('project_id', $projectIds ?: [0])->where('status', '!=', 'completed')->whereNotNull('due_on')->orderBy('due_on')->limit(8)->with('project')->get(),
             'recentActivity' => $recentActivity,
             'workload' => $workload,
             'statusBreakdown' => $tasks->groupBy('status')->map->count(),
             'priorityBreakdown' => $tasks->groupBy('priority')->map->count(),
             'filters' => $request->only(['project_id', 'assignee_id', 'priority', 'status', 'date_from', 'date_to']),
-            'members' => $this->availableUsers(),
+            'assignees' => $this->availableTaskAssignees(),
             'savedFilters' => SavedFilter::query()->where('user_id', ProjectManagementAccess::user()?->id)->latest()->get(),
             'canManageWorkspace' => AdminAccess::isFullAdmin(),
         ]);
@@ -335,7 +331,7 @@ class AdminProjectManagementController extends Controller
             'project' => $project,
             'columns' => $project->boardColumns,
             'tasksByColumn' => $tasks,
-            'members' => $this->availableUsers(),
+            'assignees' => $this->availableTaskAssignees(),
             'labels' => $project->labels,
             'milestones' => $project->milestones,
             'sprints' => $project->sprints,
@@ -424,7 +420,7 @@ class AdminProjectManagementController extends Controller
             'memberBreakdown' => $completed->groupBy('assignee_id')->map(fn ($items) => ['name' => $items->first()->assignee?->name ?? 'Unassigned', 'count' => $items->count()])->values(),
             'estimatedHours' => round((float) $tasks->sum('estimated_hours'), 1),
             'loggedHours' => round((float) TimeEntry::query()->whereIn('task_id', $tasks->modelKeys() ?: [0])->sum('minutes') / 60, 1),
-            'members' => $this->availableUsers(),
+            'assignees' => $this->availableTaskAssignees(),
         ]);
     }
 
@@ -454,6 +450,7 @@ class AdminProjectManagementController extends Controller
             'project' => $project,
             'task' => $task,
             'members' => $this->availableUsers(),
+            'assignees' => $this->availableTaskAssignees(),
             'columns' => $project->boardColumns()->get(),
             'labels' => $project->labels()->get(),
             'milestones' => $project->milestones()->get(),
@@ -807,6 +804,11 @@ class AdminProjectManagementController extends Controller
         return User::query()->whereIn('role', [AdminAccess::ROLE_ADMIN, AdminAccess::ROLE_SUBACCOUNT])->where('is_active', true)->orderBy('name')->get();
     }
 
+    private function availableTaskAssignees()
+    {
+        return User::query()->where('role', AdminAccess::ROLE_SUBACCOUNT)->where('is_active', true)->orderBy('name')->get();
+    }
+
     private function projectRules(?Project $project = null): array
     {
         return [
@@ -837,7 +839,7 @@ class AdminProjectManagementController extends Controller
             'type' => ['required', Rule::in(self::TASK_TYPES)],
             'priority' => ['required', Rule::in(self::PRIORITIES)],
             'board_column_id' => ['nullable', 'integer', Rule::exists('board_columns', 'id')->where('project_id', $project->id)],
-            'assignee_id' => ['nullable', 'integer', 'exists:users,id'],
+            'assignee_id' => ['nullable', 'integer', Rule::exists('users', 'id')->where('role', AdminAccess::ROLE_SUBACCOUNT)->where('is_active', true)],
             'reporter_id' => ['nullable', 'integer', 'exists:users,id'],
             'starts_on' => ['nullable', 'date'],
             'due_on' => ['nullable', 'date'],

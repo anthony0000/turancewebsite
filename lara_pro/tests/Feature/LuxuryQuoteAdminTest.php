@@ -12,10 +12,15 @@ it('renders the redesigned admin login page', function () {
     config()->set('luxury-quotes.admin.password', 'luxury-pass-123');
 
     $this
+        ->withSession(['status' => 'Admin session closed.'])
         ->get(route('admin.login'))
         ->assertOk()
         ->assertSee('Sign in')
-        ->assertSee('auth-card', false);
+        ->assertSee('auth-card', false)
+        ->assertSee('Admin session closed.')
+        ->assertSee('alert-success', false)
+        ->assertSee('body.is-auth .admin-alert-stack', false)
+        ->assertSee('admin-alert-close', false);
 });
 
 it('allows an admin to sign in to the invoice generator', function () {

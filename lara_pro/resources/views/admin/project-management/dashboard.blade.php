@@ -7,8 +7,8 @@
     <div class="pm-dashboard">
     <section class="panel pm-hero">
         <div>
-            <span class="eyebrow">Delivery</span>
-            <h2>Project overview</h2>
+            <span class="eyebrow">Workspace control</span>
+            <h2>Assign and track work</h2>
         </div>
         <div class="pm-actions">
             @if ($canManageWorkspace)
@@ -19,7 +19,7 @@
     </section>
 
     <section class="pm-kpis">
-        @foreach ([['Active projects', $totalProjects, 'Planning, active, and on-hold work'], ['Completed projects', $completedProjects, 'Delivered project records'], ['Overdue tasks', $overdueTasks, 'Open tasks past their due date'], ['My tasks', $myTasks, $todayTasks.' due today · '.$completedThisWeek.' completed this week']] as $kpi)
+        @foreach ([['Active projects', $totalProjects], ['Completed projects', $completedProjects], ['Overdue tasks', $overdueTasks], ['Open tasks', $openTasks]] as $kpi)
             <article class="panel pm-kpi">
                 <span class="metric-label">{{ $kpi[0] }}</span>
                 <strong>{{ number_format($kpi[1]) }}</strong>
@@ -34,7 +34,7 @@
         <div class="pm-form-grid">
             <div class="field"><label for="dashboard-project">Project</label><select id="dashboard-project" name="project_id"><option value="">All projects</option>@foreach ($projects as $project)<option value="{{ $project->id }}" @selected(($filters['project_id'] ?? '') == $project->id)>{{ $project->project_number }} · {{ $project->name }}</option>@endforeach</select></div>
             @if ($canManageWorkspace)
-                <div class="field"><label for="dashboard-member">Assignee</label><select id="dashboard-member" name="assignee_id"><option value="">Everyone</option>@foreach ($members as $member)<option value="{{ $member->id }}" @selected(($filters['assignee_id'] ?? '') == $member->id)>{{ $member->name }}</option>@endforeach</select></div>
+                <div class="field"><label for="dashboard-member">Assignee</label><select id="dashboard-member" name="assignee_id"><option value="">Everyone</option>@foreach ($assignees as $assignee)<option value="{{ $assignee->id }}" @selected(($filters['assignee_id'] ?? '') == $assignee->id)>{{ $assignee->name }}</option>@endforeach</select></div>
             @endif
             <div class="field"><label for="dashboard-priority">Priority</label><select id="dashboard-priority" name="priority"><option value="">Every priority</option>@foreach (['low', 'medium', 'high', 'urgent'] as $priority)<option value="{{ $priority }}" @selected(($filters['priority'] ?? '') === $priority)>{{ Str::headline($priority) }}</option>@endforeach</select></div>
             <div class="field"><label for="dashboard-status">Status</label><select id="dashboard-status" name="status"><option value="">Every status</option>@foreach ($statusBreakdown->keys() as $status)<option value="{{ $status }}" @selected(($filters['status'] ?? '') === $status)>{{ Str::headline($status) }}</option>@endforeach</select></div>

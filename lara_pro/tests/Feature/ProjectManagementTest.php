@@ -109,16 +109,31 @@ it('sanitizes comments, records time, and exposes protected JSON project data', 
 
 it('renders the operational project-management surfaces with live records', function () {
     $admin = User::factory()->create(['role' => AdminAccess::ROLE_ADMIN, 'permissions' => AdminAccess::permissionKeys(), 'is_active' => true]);
+    $staff = User::factory()->create(['role' => AdminAccess::ROLE_SUBACCOUNT, 'permissions' => ['projects'], 'is_active' => true]);
     $project = Project::query()->create(['project_number' => 'VIEW', 'name' => 'View Project', 'status' => 'active', 'priority' => 'medium']);
     $project->boardColumns()->create(['name' => 'To Do', 'position' => 0]);
+    $project->members()->attach($staff->id, ['role' => 'member']);
     $task = $project->tasks()->create(['task_number' => 1, 'title' => 'Visible task', 'type' => 'task', 'priority' => 'medium', 'status' => 'to_do', 'board_column_id' => $project->boardColumns()->first()->id, 'reporter_id' => $admin->id, 'position' => 0]);
     $session = projectManagementSession($admin);
 
-    $this->withSession($session)->get(route('admin.project-management.dashboard'))->assertOk()->assertSee('Project overview');
-    $this->withSession($session)->get(route('admin.project-management.board', $project))->assertOk()->assertSee('Visible task');
+    $this->withSession($session)->get(route('admin.project-management.dashboard'))->assertOk()->assertSee('Assign and track work')->assertSee('Open tasks')->assertDontSee('My tasks');
+    $this->withSession($session)->get(route('admin.project-management.board', $project))->assertOk()->assertSee('Visible task')->assertSee('value="'.$staff->id.'">'.$staff->name.'</option>', false)->assertDontSee('value="'.$admin->id.'">'.$admin->name.'</option>', false)->assertDontSee('Move work forward with a board the team can trust.')->assertDontSee('My tasks');
     $this->withSession($session)->get(route('admin.project-management.tasks.show', $task))->assertOk()->assertSee('Task details');
     $this->withSession($session)->get(route('admin.project-management.reports'))->assertOk()->assertSee('Operational reporting');
     $this->withSession($session)->get(route('admin.project-management.calendar'))->assertOk()->assertSee('Planning calendar');
+});
+
+it('prevents administrators from being assigned tasks through web and API requests', function () {
+    $admin = User::factory()->create(['role' => AdminAccess::ROLE_ADMIN, 'permissions' => AdminAccess::permissionKeys(), 'is_active' => true]);
+    $project = Project::query()->create(['project_number' => 'ASSIGN', 'name' => 'Assignment Rules', 'status' => 'active', 'priority' => 'medium']);
+    $column = $project->boardColumns()->create(['name' => 'To Do', 'position' => 0]);
+    $session = projectManagementSession($admin);
+    $payload = ['title' => 'Do not assign admin', 'type' => 'task', 'priority' => 'medium', 'board_column_id' => $column->id, 'assignee_id' => $admin->id];
+
+    $this->withSession($session)->from(route('admin.project-management.board', $project))->post(route('admin.project-management.tasks.store', $project), $payload)->assertRedirect()->assertSessionHasErrors('assignee_id');
+    $this->withSession($session)->postJson(route('admin.project-management.api.tasks.store', $project), $payload)->assertStatus(422)->assertJsonValidationErrors('assignee_id');
+
+    expect(Task::query()->where('project_id', $project->id)->count())->toBe(0);
 });
 
 it('keeps project management to one highlighted sidebar destination', function () {

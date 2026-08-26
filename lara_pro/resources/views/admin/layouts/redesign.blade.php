@@ -5720,6 +5720,102 @@ body.is-admin .admin-alert-stack .alert-warning {
     }
 }
 
+/* Auth feedback shares the login card's reading width and visual language.
+ * The base alert remains available for inline form validation, while session
+ * feedback gets a deliberate status row and a real dismiss control. */
+body.is-auth .admin-alert-stack {
+    width: min(100%, 760px);
+    margin: 0 auto 14px;
+}
+
+body.is-auth .admin-alert-stack .alert {
+    display: flex;
+    min-height: 46px;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px 10px 14px;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    box-shadow: 0 12px 26px rgba(39, 43, 53, .08);
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+body.is-auth .admin-alert-stack .alert > span {
+    min-width: 0;
+    flex: 1;
+}
+
+body.is-auth .admin-alert-stack .alert::before {
+    display: inline-grid;
+    width: 22px;
+    height: 22px;
+    flex: 0 0 22px;
+    place-items: center;
+    border-radius: 50%;
+    background: currentColor;
+    color: #fff;
+    content: "✓";
+    font-size: 12px;
+    font-weight: 800;
+    line-height: 1;
+}
+
+body.is-auth .admin-alert-stack .alert-warning::before,
+body.is-auth .admin-alert-stack .alert-danger::before {
+    content: "!";
+}
+
+body.is-auth .admin-alert-stack .alert-success {
+    border-color: rgba(22, 133, 86, .2);
+    background: #f0fbf6;
+    color: #166534;
+}
+
+body.is-auth .admin-alert-stack .alert-warning {
+    border-color: rgba(183, 121, 31, .22);
+    background: #fffaf0;
+    color: #92400e;
+}
+
+body.is-auth .admin-alert-stack .alert-danger {
+    border-color: rgba(194, 65, 85, .22);
+    background: #fff1f2;
+    color: #9f1239;
+}
+
+body.is-auth .admin-alert-close {
+    display: inline-grid;
+    width: 28px;
+    height: 28px;
+    flex: 0 0 28px;
+    margin: 0;
+    place-items: center;
+    border: 0;
+    border-radius: 7px;
+    background: transparent;
+    color: currentColor;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: 400;
+    line-height: 1;
+    opacity: .62;
+}
+
+body.is-auth .admin-alert-close:hover,
+body.is-auth .admin-alert-close:focus-visible {
+    background: rgba(39, 43, 53, .08);
+    opacity: 1;
+    outline: none;
+}
+
+@media (max-width: 760px) {
+    body.is-auth .admin-alert-stack {
+        width: 100%;
+        margin-bottom: 12px;
+    }
+}
+
 /* The original shell used a generated icon marker that expands on hover.
  * The current navigation already has real SVG icons, so that marker creates
  * the stray beige tiles seen behind each item. */

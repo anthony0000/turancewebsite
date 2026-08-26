@@ -19,9 +19,6 @@
         .pm-dashboard .pm-panel-head p { display: none; }
         .pm-dashboard .pm-panel-head { margin-bottom: 10px; }
         .pm-dashboard .pm-kpi small { display: none; }
-        .pm-board-view .pm-hero h2 { font-size: 0; }
-        .pm-board-view .pm-hero h2::after { content: 'Move work forward.'; display: block; font-size: clamp(24px, 3vw, 36px); }
-        .pm-board-view .pm-hero p { display: none; }
         .pm-board-view[data-read-only="1"] .pm-hero .button,
         .pm-board-view[data-read-only="1"] .pm-task-card { cursor: default; }
         .pm-board-view[data-read-only="1"] .pm-task-card [data-keyboard-move] { display: none; }
@@ -296,8 +293,7 @@
         @php
             $moreNavActive = request()->routeIs('admin.project-management.search', 'admin.project-management.calendar', 'admin.project-management.team', 'admin.project-management.reports', 'admin.project-management.archived', 'admin.project-management.notifications', 'admin.project-management.settings');
         @endphp
-            <a class="{{ request()->routeIs('admin.project-management.dashboard') && ! request('assignee_id') ? 'active' : '' }}" href="{{ route('admin.project-management.dashboard') }}">Overview</a>
-            <a class="{{ request()->routeIs('admin.project-management.dashboard') && request('assignee_id') ? 'active' : '' }}" href="{{ route('admin.project-management.dashboard', ['assignee_id' => \App\Support\ProjectManagementAccess::user()?->id]) }}">My tasks</a>
+            <a class="{{ request()->routeIs('admin.project-management.dashboard') ? 'active' : '' }}" href="{{ route('admin.project-management.dashboard') }}">Overview</a>
             <a class="{{ request()->routeIs('admin.project-management.projects*') && ! request()->routeIs('admin.project-management.archived') ? 'active' : '' }}" href="{{ route('admin.project-management.projects') }}">Projects</a>
             @if (isset($project) && $project)
                 <a class="{{ request()->routeIs('admin.project-management.board') ? 'active' : '' }}" href="{{ route('admin.project-management.board', $project) }}">Board</a>

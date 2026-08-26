@@ -137,7 +137,7 @@ class ProjectManagementApiController extends Controller
             'type' => ['required', Rule::in(['task', 'feature', 'bug', 'improvement', 'research', 'design', 'meeting', 'support'])],
             'priority' => ['required', Rule::in(['low', 'medium', 'high', 'urgent'])],
             'board_column_id' => ['nullable', 'integer', Rule::exists('board_columns', 'id')->where('project_id', $project->id)],
-            'assignee_id' => ['nullable', 'integer', 'exists:users,id'],
+            'assignee_id' => ['nullable', 'integer', Rule::exists('users', 'id')->where('role', AdminAccess::ROLE_SUBACCOUNT)->where('is_active', true)],
             'due_on' => ['nullable', 'date'],
             'description' => ['nullable', 'string', 'max:20000'],
         ]);
@@ -170,7 +170,7 @@ class ProjectManagementApiController extends Controller
     public function updateTask(Request $request, Task $task): JsonResponse
     {
         abort_unless(ProjectManagementAccess::canManage($task->project), 403);
-        $validated = $request->validate(['title' => ['sometimes', 'required', 'string', 'max:255'], 'priority' => ['sometimes', Rule::in(['low', 'medium', 'high', 'urgent'])], 'assignee_id' => ['nullable', 'integer', 'exists:users,id'], 'due_on' => ['nullable', 'date'], 'description' => ['nullable', 'string', 'max:20000'], 'parent_task_id' => ['nullable', 'integer', Rule::exists('tasks', 'id')->where('project_id', $task->project_id)->where('id', '!=', $task->id)] ]);
+        $validated = $request->validate(['title' => ['sometimes', 'required', 'string', 'max:255'], 'priority' => ['sometimes', Rule::in(['low', 'medium', 'high', 'urgent'])], 'assignee_id' => ['nullable', 'integer', Rule::exists('users', 'id')->where('role', AdminAccess::ROLE_SUBACCOUNT)->where('is_active', true)], 'due_on' => ['nullable', 'date'], 'description' => ['nullable', 'string', 'max:20000'], 'parent_task_id' => ['nullable', 'integer', Rule::exists('tasks', 'id')->where('project_id', $task->project_id)->where('id', '!=', $task->id)] ]);
         $task->fill($validated);
         if (array_key_exists('description', $validated)) {
             $task->description = ProjectManagementAccess::sanitize($validated['description']);
