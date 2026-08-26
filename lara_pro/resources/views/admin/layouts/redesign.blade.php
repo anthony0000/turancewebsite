@@ -6498,6 +6498,8 @@ body.is-project-files .admin-main { width: auto; max-width: none; justify-self: 
     border-radius: 8px;
     background: #fbfcfc;
 }
+.tt-project-upload-progress[hidden] { display: none !important; }
+.project-file-edit__progress { margin-top: 2px; }
 
 .tt-project-upload-progress__head {
     display: flex;
