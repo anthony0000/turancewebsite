@@ -1,6 +1,6 @@
 @extends('admin.layouts.app')
 
-@section('title', 'Sub-accounts | Admin')
+@section('title', 'Staff accounts | Admin')
 
 @section('content')
     <style>
@@ -41,16 +41,16 @@
     <section class="panel hero-banner">
         <div>
             <span class="eyebrow">Team access</span>
-            <h1>Sub-accounts with clear boundaries.</h1>
+            <h1>Staff accounts with clear boundaries.</h1>
             <p>Create separate admin logins for your team and choose exactly which workspace areas each person can use.</p>
             <div class="hero-actions">
-                <a class="button" href="{{ route('admin.subaccounts.create') }}">Create Sub-account</a>
+                <a class="button" href="{{ route('admin.subaccounts.create') }}">Create Staff account</a>
                 <a class="ghost-button" href="{{ route('admin.profile') }}">Back to Profile</a>
             </div>
         </div>
         <div class="hero-callout">
             <div class="callout-card">
-                <span class="metric-label">Active sub-accounts</span>
+                <span class="metric-label">Active staff accounts</span>
                 <strong>{{ number_format($subaccounts->where('is_active', true)->count()) }}</strong>
                 <p>Separate logins currently allowed into the admin workspace.</p>
             </div>
@@ -116,7 +116,7 @@
                     @empty
                         <tr>
                             <td colspan="4">
-                                <strong>No sub-accounts created yet.</strong>
+                                <strong>No staff accounts created yet.</strong>
                                 <span>Create a separate login instead of sharing the primary admin credentials.</span>
                             </td>
                         </tr>

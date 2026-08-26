@@ -117,7 +117,7 @@ it('enforces limited sub-account access on the server', function () {
         ->withSession(adminAccountSession($subaccount))
         ->get(route('admin.profile'))
         ->assertOk()
-        ->assertSee('Limited sub-account');
+        ->assertSee('Staff account');
 });
 
 it('allows a sub-account to sign in with its own credentials', function () {

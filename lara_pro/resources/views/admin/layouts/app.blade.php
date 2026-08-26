@@ -49,7 +49,7 @@
         $isProjectPreview => 'Project Workspace',
         $isProjectDashboard => 'File sharing',
         $isLetterBuilder => 'Letter Generator',
-        $isSubaccountWorkspace => 'Sub-accounts',
+        $isSubaccountWorkspace => 'Staff accounts',
         $isAdminProfile => 'Profile & Settings',
         $isStaffContractDashboard => 'Staff Contracts',
         $isStaffContractBuilder => 'Staff Contract Builder',
@@ -73,7 +73,7 @@
         $isProjectPreview => 'Keep project files private by default, then create a secure link for the right people.',
         $isProjectDashboard => 'Review project health, file activity, and the files attached to each engagement.',
         $isLetterBuilder => 'Write letters and basic company documents on the Turance letterhead, then export them as PDF.',
-        $isSubaccountWorkspace => 'Create team accounts and limit the parts of the admin workspace they can access.',
+        $isSubaccountWorkspace => 'Create staff accounts and limit the parts of the admin workspace they can access.',
         $isAdminProfile => 'Manage your admin identity, contact details, and account security.',
         $isStaffContractDashboard => 'Track project-bound staff agreements and export signed-ready contract documents.',
         $isStaffContractBuilder => 'Create a staff agreement with a required project, price, terms, and signing section.',
@@ -97,7 +97,7 @@
         $isProjectPreview => 'Project Workspace',
         $isProjectDashboard => 'File sharing',
         $isLetterBuilder => 'Letter Generator',
-        $isSubaccountWorkspace => 'Sub-accounts',
+        $isSubaccountWorkspace => 'Staff accounts',
         $isAdminProfile => 'Profile & Settings',
         $isStaffContractDashboard => 'Staff Contracts',
         $isStaffContractBuilder => 'Staff Contract Builder',
@@ -2460,8 +2460,8 @@
                                         </svg>
                                     </span>
                                     <div>
-                                        <strong>Sub-accounts</strong>
-                                        <span>Limited access</span>
+                                        <strong>Staff accounts</strong>
+                                        <span>Team access</span>
                                     </div>
                                 </a>
                             @endif
@@ -2513,23 +2513,27 @@
                         </div>
 
                         <div class="admin-pagebar-actions">
+                            @if ($isFullAdmin)
                             <button class="admin-search-trigger" type="button" data-command-open aria-haspopup="dialog" aria-keyshortcuts="Control+K Meta+K">
                                 <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5" /><path d="m16 16 4 4" /></svg>
                                 <span>Search anything...</span>
                                 <kbd>⌘ K</kbd>
                             </button>
+                            @endif
                             @if ($isSubaccountWorkspace)
-                                <a class="button" href="{{ route('admin.subaccounts.create') }}">New Sub-account</a>
+                                <a class="button" href="{{ route('admin.subaccounts.create') }}">New Staff account</a>
                             @elseif ($isAdminProfile)
                                 @if ($isFullAdmin)
-                                    <a class="ghost-button" href="{{ route('admin.subaccounts.index') }}">Manage Sub-accounts</a>
+                                    <a class="ghost-button" href="{{ route('admin.subaccounts.index') }}">Manage Staff accounts</a>
                                 @endif
                             @elseif ($isProposalWorkspace)
                                 <a class="button" href="{{ route('admin.proposals.index') }}">New Proposal</a>
                               @elseif ($isProjectPreview)
                                   <a class="ghost-button" href="{{ route('admin.projects.index') }}">Back to Projects</a>
                               @elseif ($isProjectManagementWorkspace)
+                                  @if ($isFullAdmin)
                                   <a class="button" href="{{ route('admin.project-management.projects.create') }}">New Project</a>
+                                  @endif
                               @elseif ($isStaffContractWorkspace)
                                 <a class="button" href="{{ route('admin.staff-contracts.create') }}">New Staff Contract</a>
                             @elseif ($isLetterWorkspace)
@@ -2550,7 +2554,7 @@
                                     <p>{{ \App\Support\AdminAccess::email() }}</p>
                                     <a class="ghost-button" href="{{ route('admin.profile') }}">Profile & Settings</a>
                                     @if ($isFullAdmin)
-                                        <a class="ghost-button" href="{{ route('admin.subaccounts.index') }}">Manage Sub-accounts</a>
+                                        <a class="ghost-button" href="{{ route('admin.subaccounts.index') }}">Manage Staff accounts</a>
                                     @endif
                                     <form method="POST" action="{{ route('admin.logout') }}">
                                         @csrf

@@ -2,7 +2,7 @@
 
 @php
     $editing = filled($user);
-    $pageTitle = $editing ? 'Edit sub-account access' : 'Create a sub-account';
+    $pageTitle = $editing ? 'Edit staff account access' : 'Create a staff account';
     $formAction = $editing ? route('admin.subaccounts.update', $user) : route('admin.subaccounts.store');
     $selectedPermissions = old('permissions', $user?->permissions ?? []);
 @endphp
@@ -12,7 +12,7 @@
 @section('content')
     @if ($errors->any())
         <div class="validation-summary" style="margin-bottom: 24px; padding: 16px 18px; border: 1px solid rgba(185, 74, 61, 0.3); border-radius: 16px; background: rgba(185, 74, 61, 0.08); color: var(--danger);">
-            <strong>Review the sub-account details.</strong>
+            <strong>Review the staff account details.</strong>
             <ul style="margin: 8px 0 0 18px;">
                 @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>
@@ -81,7 +81,7 @@
 
         <div class="wizard-actions" style="margin-top: 28px;">
             <a class="ghost-button" href="{{ route('admin.subaccounts.index') }}">Cancel</a>
-            <button class="button" type="submit">{{ $editing ? 'Save Access Changes' : 'Create Sub-account' }}</button>
+            <button class="button" type="submit">{{ $editing ? 'Save Access Changes' : 'Create Staff account' }}</button>
         </div>
     </form>
 @endsection

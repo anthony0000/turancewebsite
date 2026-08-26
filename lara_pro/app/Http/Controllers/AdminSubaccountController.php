@@ -47,7 +47,7 @@ class AdminSubaccountController extends Controller
 
         return redirect()
             ->route('admin.subaccounts.index')
-            ->with('status', 'Sub-account created with limited access.');
+            ->with('status', 'Staff account created with limited access.');
     }
 
     public function edit(User $user): View
@@ -81,7 +81,7 @@ class AdminSubaccountController extends Controller
 
         return redirect()
             ->route('admin.subaccounts.index')
-            ->with('status', 'Sub-account access updated.');
+            ->with('status', 'Staff account access updated.');
     }
 
     public function toggle(User $user): RedirectResponse
@@ -91,7 +91,7 @@ class AdminSubaccountController extends Controller
 
         return redirect()
             ->route('admin.subaccounts.index')
-            ->with('status', $user->is_active ? 'Sub-account activated.' : 'Sub-account suspended.');
+            ->with('status', $user->is_active ? 'Staff account activated.' : 'Staff account suspended.');
     }
 
     /** @return array<string, mixed> */

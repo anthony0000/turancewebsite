@@ -12,7 +12,7 @@
         <div class="hero-callout">
             <div class="callout-card">
                 <span class="metric-label">Access level</span>
-                <strong>{{ $isFullAdmin ? 'Full administrator' : 'Sub-account' }}</strong>
+                <strong>{{ $isFullAdmin ? 'Full administrator' : 'Staff account' }}</strong>
                 <p>{{ $isFullAdmin ? 'All admin modules and account controls.' : 'Access is limited by the permissions assigned to this account.' }}</p>
             </div>
         </div>
@@ -20,7 +20,7 @@
 
     @if ($isFullAdmin)
         <div class="admin-mobile-page-action">
-            <a class="ghost-button" href="{{ route('admin.subaccounts.index') }}">Manage Sub-accounts</a>
+            <a class="ghost-button" href="{{ route('admin.subaccounts.index') }}">Manage Staff accounts</a>
         </div>
     @endif
 
@@ -84,7 +84,7 @@
             </div>
 
             <div class="wizard-actions" style="margin-top: 28px;">
-                <span class="admin-pill">{{ ucfirst($user->role) }} account</span>
+                <span class="admin-pill">{{ $isFullAdmin ? 'Administrator account' : 'Staff account' }}</span>
                 <button class="button" type="submit">Save Profile Settings</button>
             </div>
         </form>
@@ -100,7 +100,7 @@
                     </div>
                     <div class="meta-item">
                         <span>Role</span>
-                        <strong>{{ $isFullAdmin ? 'Full administrator' : 'Limited sub-account' }}</strong>
+                        <strong>{{ $isFullAdmin ? 'Full administrator' : 'Staff account' }}</strong>
                     </div>
                     <div class="meta-item">
                         <span>Created</span>
@@ -112,9 +112,9 @@
             @if ($isFullAdmin)
                 <section class="panel panel-padded">
                     <span class="eyebrow">Team access</span>
-                    <h3 class="panel-title">Create limited accounts</h3>
+                    <h3 class="panel-title">Create staff accounts</h3>
                     <p class="section-copy">Give team members access to only the workspaces they need, without sharing the main admin credentials.</p>
-                    <a class="button" href="{{ route('admin.subaccounts.index') }}" style="margin-top: 18px;">Manage Sub-accounts</a>
+                    <a class="button" href="{{ route('admin.subaccounts.index') }}" style="margin-top: 18px;">Manage Staff accounts</a>
                 </section>
             @endif
         </aside>
