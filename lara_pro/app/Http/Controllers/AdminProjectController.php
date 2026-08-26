@@ -18,8 +18,6 @@ class AdminProjectController extends Controller
 {
     private const PROJECT_FILES_DIRECTORY = 'projects/files';
 
-    private const PROJECT_FILES_DISK = 'project-files';
-
     private const FILE_MIMES = [
         'pdf', 'doc', 'docx', 'xls', 'xlsx', 'csv', 'ppt', 'pptx', 'txt', 'rtf',
         'jpg', 'jpeg', 'png', 'webp', 'zip',
@@ -179,7 +177,7 @@ class AdminProjectController extends Controller
                 'description' => filled($description) ? trim($description) : null,
             ]);
         } catch (\Throwable $exception) {
-            Storage::disk(self::PROJECT_FILES_DISK)->delete($path);
+            Storage::disk('local')->delete($path);
 
             throw $exception;
         }
@@ -199,7 +197,7 @@ class AdminProjectController extends Controller
         return $this->fileResponse($projectFile, true);
     }
 
-    public function updateFile(Request $request, ProjectFile $projectFile): RedirectResponse
+    public function updateFile(Request $request, ProjectFile $projectFile): RedirectResponse|JsonResponse
     {
         abort_unless(AdminAccess::isFullAdmin(), 403);
 
@@ -240,20 +238,36 @@ class AdminProjectController extends Controller
             $projectFile->forceFill($attributes)->save();
         } catch (\Throwable $exception) {
             if ($newPath !== null) {
-                Storage::disk(self::PROJECT_FILES_DISK)->delete($newPath);
+                Storage::disk('local')->delete($newPath);
             }
 
             throw $exception;
         }
 
         if ($newPath !== null && $oldPath !== $newPath) {
-            Storage::disk(self::PROJECT_FILES_DISK)->delete($oldPath);
+            Storage::disk('local')->delete($oldPath);
+        }
+
+        $message = $newPath !== null
+            ? 'Project file updated and replaced successfully.'
+            : 'Project file details updated successfully.';
+
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'message' => $message,
+                'data' => [
+                    'id' => $projectFile->id,
+                    'original_name' => $projectFile->original_name,
+                    'description' => $projectFile->description,
+                    'file_kind' => $projectFile->fileKind(),
+                    'size_label' => $projectFile->sizeLabel(),
+                    'mime_type' => $projectFile->mime_type,
+                ],
+            ]);
         }
 
         return $this->projectFileRedirect($request, $projectFile)
-            ->with('status', $newPath !== null
-                ? 'Project file updated and replaced successfully.'
-                : 'Project file details updated successfully.');
+            ->with('status', $message);
     }
 
     public function toggleShare(ProjectFile $projectFile): RedirectResponse
@@ -278,7 +292,7 @@ class AdminProjectController extends Controller
     {
         abort_unless(AdminAccess::isFullAdmin(), 403);
         $projectId = $projectFile->project_id;
-        Storage::disk(self::PROJECT_FILES_DISK)->delete($projectFile->path);
+        Storage::disk('local')->delete($projectFile->path);
         $projectFile->delete();
 
         return $this->projectFileRedirect(request(), $projectFile, $projectId)
@@ -315,8 +329,8 @@ class AdminProjectController extends Controller
         $extension = strtolower($file->getClientOriginalExtension() ?: $file->guessExtension() ?: 'file');
         $extension = preg_replace('/[^a-z0-9]+/i', '', $extension) ?: 'file';
         $filename = Str::uuid().'.'.$extension;
-        $disk = Storage::disk(self::PROJECT_FILES_DISK);
-        $path = $file->storeAs(self::PROJECT_FILES_DIRECTORY.'/'.$project->id, $filename, self::PROJECT_FILES_DISK);
+        $disk = Storage::disk('local');
+        $path = $file->storeAs(self::PROJECT_FILES_DIRECTORY.'/'.$project->id, $filename, 'local');
 
         if (! is_string($path) || $path === '' || ! $disk->exists($path)) {
             throw new \RuntimeException('The project file could not be stored.');
@@ -336,7 +350,7 @@ class AdminProjectController extends Controller
     {
         abort_unless($projectFile->hasStoredFile(), 404);
 
-        $path = Storage::disk(self::PROJECT_FILES_DISK)->path($projectFile->path);
+        $path = Storage::disk('local')->path($projectFile->path);
         $headers = [
             'Content-Type' => $projectFile->mime_type ?: 'application/octet-stream',
             'X-Content-Type-Options' => 'nosniff',

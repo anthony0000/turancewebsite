@@ -195,19 +195,19 @@
             @if ($files->isNotEmpty())
                 <div class="project-file-manager-list">
                     @foreach ($files as $file)
-                        <article class="project-file-manager-row">
+                        <article class="project-file-manager-row" data-project-file-item="{{ $file->id }}">
                             <div class="project-file-card__icon" aria-hidden="true">{{ strtoupper(substr($file->fileKind(), 0, 1)) }}</div>
                             <div class="project-file-manager-row__body">
                                 <div class="project-file-manager-row__heading">
                                     <div>
-                                        <h3>{{ $file->original_name }}</h3>
+                                        <h3 data-project-file-name>{{ $file->original_name }}</h3>
                                         <p>
                                             @if ($file->project)
                                                 <a href="{{ route('admin.projects.show', $file->project) }}">{{ $file->project->name }}</a> &middot;
                                             @else
                                                 Project unavailable &middot;
                                             @endif
-                                            {{ $file->fileKind() }} &middot; {{ $file->sizeLabel() }} &middot; Added {{ optional($file->created_at)->format('M d, Y') }}
+                                            <span data-project-file-meta>{{ $file->fileKind() }} &middot; {{ $file->sizeLabel() }}</span> &middot; Added {{ optional($file->created_at)->format('M d, Y') }}
                                         </p>
                                     </div>
                                     @if ($file->is_shared)
@@ -218,7 +218,7 @@
                                 </div>
 
                                 @if ($file->description)
-                                    <p class="project-file-card__description">{{ $file->description }}</p>
+                                    <p class="project-file-card__description" data-project-file-description>{{ $file->description }}</p>
                                 @endif
 
                                 <div class="project-file-card__actions">

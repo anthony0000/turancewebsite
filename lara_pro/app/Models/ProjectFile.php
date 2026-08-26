@@ -42,7 +42,7 @@ class ProjectFile extends Model
 
     public function hasStoredFile(): bool
     {
-        return filled($this->path) && Storage::disk('project-files')->exists($this->path);
+        return filled($this->path) && Storage::disk('local')->exists($this->path);
     }
 
     public function sizeLabel(): string

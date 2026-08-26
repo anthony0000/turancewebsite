@@ -59,13 +59,13 @@
                 @if ($files->isNotEmpty())
                     <div class="project-file-list">
                         @foreach ($files as $file)
-                            <article class="project-file-card">
+                            <article class="project-file-card" data-project-file-item="{{ $file->id }}">
                                 <div class="project-file-card__icon" aria-hidden="true">{{ strtoupper(substr($file->fileKind(), 0, 1)) }}</div>
                                 <div class="project-file-card__body">
                                     <div class="project-file-card__heading">
                                         <div>
-                                            <h3>{{ $file->original_name }}</h3>
-                                            <p>{{ $file->fileKind() }} · {{ $file->sizeLabel() }} · Added {{ optional($file->created_at)->format('M d, Y') }}</p>
+                                            <h3 data-project-file-name>{{ $file->original_name }}</h3>
+                                            <p><span data-project-file-meta>{{ $file->fileKind() }} · {{ $file->sizeLabel() }}</span> · Added {{ optional($file->created_at)->format('M d, Y') }}</p>
                                         </div>
                                         @if ($file->is_shared)
                                             <span class="file-share-badge">Shared</span>
@@ -75,7 +75,7 @@
                                     </div>
 
                                     @if ($file->description)
-                                        <p class="project-file-card__description">{{ $file->description }}</p>
+                                        <p class="project-file-card__description" data-project-file-description>{{ $file->description }}</p>
                                     @endif
 
                                     <div class="project-file-card__actions">

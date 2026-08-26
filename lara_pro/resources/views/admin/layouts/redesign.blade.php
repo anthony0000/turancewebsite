@@ -1370,6 +1370,17 @@ body.is-admin .admin-profile-panel form { margin: 0; }
     font-size: 11px;
 }
 
+.project-file-edit__status {
+    min-height: 0;
+    margin: 0;
+    color: var(--muted);
+    font-size: 10px;
+    line-height: 1.45;
+}
+.project-file-edit__status:empty { display: none; }
+.project-file-edit__status.is-success { color: var(--success); }
+.project-file-edit__status.is-error { color: #b94a3d; }
+
 .project-share-link {
     display: grid;
     gap: 6px;
