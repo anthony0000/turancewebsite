@@ -1292,6 +1292,84 @@ body.is-admin .admin-profile-panel form { margin: 0; }
     font-weight: 700;
 }
 
+.project-file-edit {
+    position: relative;
+}
+
+.project-file-edit > summary {
+    min-height: 34px;
+    padding: 0 11px;
+    border-radius: 9px;
+    cursor: pointer;
+    font-size: 11px;
+    list-style: none;
+}
+
+.project-file-edit > summary::-webkit-details-marker {
+    display: none;
+}
+
+.project-file-edit > summary:hover,
+.project-file-edit[open] > summary {
+    border-color: var(--primary);
+    color: var(--primary-strong);
+}
+
+.project-file-edit__form {
+    display: grid;
+    min-width: min(330px, calc(100vw - 48px));
+    gap: 8px;
+    margin-top: 8px;
+    padding: 13px;
+    border: 1px solid var(--line-soft);
+    border-radius: 9px;
+    background: var(--surface);
+    box-shadow: 0 10px 25px rgba(24, 29, 35, .08);
+}
+
+.project-file-edit__form label {
+    color: var(--muted-strong);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+}
+
+.project-file-edit__form input,
+.project-file-edit__form textarea {
+    width: 100%;
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    background: var(--surface-soft);
+    color: var(--text);
+    font: inherit;
+    font-size: 11px;
+}
+
+.project-file-edit__form input {
+    min-height: 38px;
+    padding: 8px;
+}
+
+.project-file-edit__form textarea {
+    min-height: 68px;
+    padding: 9px;
+    resize: vertical;
+}
+
+.project-file-edit__form small {
+    color: var(--muted);
+    font-size: 10px;
+    line-height: 1.45;
+}
+
+.project-file-edit__form .button {
+    min-height: 34px;
+    margin-top: 3px;
+    border-radius: 7px;
+    font-size: 11px;
+}
+
 .project-share-link {
     display: grid;
     gap: 6px;
@@ -6478,6 +6556,20 @@ body.is-project-files .admin-main { width: auto; max-width: none; justify-self: 
 .tt-projects-register .quote-table th:first-child,
 .tt-projects-register .quote-table td:first-child { padding-left: 22px; }
 .tt-projects-table-empty { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+
+.tt-project-file-manager { border-top: 1px solid #edf0f2; border-bottom: 1px solid #edf0f2; }
+.project-file-manager-list { display: grid; gap: 10px; padding: 18px 22px 22px; }
+.project-file-manager-row { display: grid; grid-template-columns: 42px minmax(0, 1fr); gap: 13px; padding: 14px; border: 1px solid #e7eaed; border-radius: 8px; background: #fbfcfc; }
+.project-file-manager-row__body,
+.project-file-manager-row__heading,
+.project-file-manager-row__heading > div { min-width: 0; }
+.project-file-manager-row__heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.project-file-manager-row h3 { margin: 0; overflow-wrap: anywhere; color: #25292f; font-size: 13px; line-height: 1.3; }
+.project-file-manager-row h3 + p { margin: 5px 0 0; color: #858b94; font-size: 10px; line-height: 1.5; }
+.project-file-manager-row h3 + p a { color: #69717b; text-decoration: underline; text-underline-offset: 2px; }
+.project-file-manager-row .project-file-card__description { margin-bottom: 0; }
+.project-file-manager-row .project-file-card__actions { margin-top: 12px; }
+.project-file-manager-row .project-file-edit__form { position: absolute; z-index: 3; right: 0; }
 
 @media (max-width: 980px) {
     body.is-admin .admin-workspace--with-sidebar { grid-template-columns: 1fr; }

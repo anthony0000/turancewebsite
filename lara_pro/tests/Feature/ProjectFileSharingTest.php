@@ -44,6 +44,10 @@ it('shows project portfolio charts and the file workspace entry point', function
         ->assertSee('Upload a file for the project team')
         ->assertSee('Secure handoffs')
         ->assertSee('Choose a project')
+        ->assertSee('Uploaded project files')
+        ->assertSee('Download')
+        ->assertSee('Update')
+        ->assertSee('Remove')
         ->assertSee('Northstar Client Portal');
 
     $this
@@ -149,6 +153,51 @@ it('stores project files privately, shares one file, and can revoke the link', f
     expect($projectFile->is_shared)->toBeFalse();
 
     $this->get(route('project-files.share', $projectFile->share_token))->assertNotFound();
+});
+
+it('updates project file details and replaces the stored file without creating a duplicate', function () {
+    Storage::fake('local');
+
+    $project = Project::query()->create([
+        'project_number' => 'TT-PRJ-UPDATE-001',
+        'name' => 'File Update Project',
+        'status' => 'active',
+    ]);
+
+    $oldPath = 'projects/files/'.$project->id.'/original.pdf';
+    Storage::disk('local')->put($oldPath, 'original project file');
+    $projectFile = ProjectFile::query()->create([
+        'project_id' => $project->id,
+        'original_name' => 'original.pdf',
+        'path' => $oldPath,
+        'mime_type' => 'application/pdf',
+        'size' => 20,
+        'description' => 'Original description',
+    ]);
+
+    $this
+        ->withSession(projectAdminSession())
+        ->put(route('admin.projects.files.update', $projectFile), [
+            'file' => UploadedFile::fake()->create('updated-reference.docx', 72, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'),
+            'description' => 'Updated reference material.',
+        ])
+        ->assertRedirect(route('admin.projects.show', $project));
+
+    $projectFile->refresh();
+
+    expect(ProjectFile::query()->count())->toBe(1)
+        ->and($projectFile->original_name)->toBe('updated-reference.docx')
+        ->and($projectFile->description)->toBe('Updated reference material.')
+        ->and($projectFile->path)->not->toBe($oldPath);
+
+    Storage::disk('local')->assertMissing($oldPath);
+    Storage::disk('local')->assertExists($projectFile->path);
+
+    $this
+        ->withSession(projectAdminSession())
+        ->get(route('admin.projects.files.download', $projectFile))
+        ->assertOk()
+        ->assertHeader('Content-Disposition', 'attachment; filename=updated-reference.docx');
 });
 
 it('removes the stored project file and keeps project access permission scoped', function () {
@@ -301,5 +350,8 @@ it('shows limited members shared project files only', function () {
         'file' => UploadedFile::fake()->create('blocked.pdf', 10, 'application/pdf'),
     ])->assertForbidden();
     $this->withSession($session)->post(route('admin.projects.files.share', $sharedFile))->assertForbidden();
+    $this->withSession($session)->put(route('admin.projects.files.update', $sharedFile), [
+        'description' => 'Blocked update',
+    ])->assertForbidden();
     $this->withSession($session)->delete(route('admin.projects.files.destroy', $sharedFile))->assertForbidden();
 });

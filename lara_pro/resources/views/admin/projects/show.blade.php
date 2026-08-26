@@ -84,6 +84,7 @@
                                         @endif
                                         <a class="ghost-button" href="{{ route('admin.projects.files.download', $file) }}">Download</a>
                                         @if ($canManageProjectFiles)
+                                        @include('admin.projects.partials.file-update-form', ['file' => $file])
                                         <form method="POST" action="{{ route('admin.projects.files.share', $file) }}">
                                             @csrf
                                             <button class="{{ $file->is_shared ? 'ghost-button' : 'button' }}" type="submit">

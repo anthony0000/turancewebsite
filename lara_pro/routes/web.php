@@ -139,6 +139,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::post('/{project}/files', [AdminProjectController::class, 'storeFile'])->name('files.store');
                 Route::get('/files/{projectFile}/download', [AdminProjectController::class, 'downloadFile'])->name('files.download');
                 Route::get('/files/{projectFile}/preview', [AdminProjectController::class, 'previewFile'])->name('files.preview');
+                Route::put('/files/{projectFile}', [AdminProjectController::class, 'updateFile'])->name('files.update');
                 Route::post('/files/{projectFile}/share', [AdminProjectController::class, 'toggleShare'])->name('files.share');
                 Route::delete('/files/{projectFile}', [AdminProjectController::class, 'destroyFile'])->name('files.destroy');
             });

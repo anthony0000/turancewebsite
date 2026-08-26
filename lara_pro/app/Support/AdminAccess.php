@@ -31,7 +31,7 @@ final class AdminAccess
         ],
         'project-files' => [
             'label' => 'Project files',
-            'description' => 'Upload, download, preview, and securely share external project files.',
+            'description' => 'Upload, update, download, preview, remove, and securely share external project files.',
         ],
         'letters' => [
             'label' => 'Letterhead',

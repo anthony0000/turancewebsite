@@ -63,8 +63,17 @@ class AdminProjectController extends Controller
             ])
             ->values();
 
+        $files = $canViewProjectFiles
+            ? ProjectFile::query()
+                ->with('project')
+                ->when(! $canManageProjectFiles, fn ($query) => $query->where('is_shared', true))
+                ->latest()
+                ->get()
+            : collect();
+
         return view('admin.projects.index', [
             'projects' => $projects,
+            'files' => $files,
             'statusCounts' => $statusCounts,
             'statusChartStyle' => $this->statusChartStyle($statusCounts, $projects->count()),
             'fileLeaders' => $fileLeaders,
@@ -188,6 +197,63 @@ class AdminProjectController extends Controller
         return $this->fileResponse($projectFile, true);
     }
 
+    public function updateFile(Request $request, ProjectFile $projectFile): RedirectResponse
+    {
+        abort_unless(AdminAccess::isFullAdmin(), 403);
+
+        $validated = $request->validate([
+            'file' => ['nullable', 'file', 'max:51200', 'mimes:'.implode(',', self::FILE_MIMES)],
+            'description' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        $newPath = null;
+        $oldPath = $projectFile->path;
+
+        if ($request->hasFile('file')) {
+            $newPath = $this->storeProjectFile(
+                Project::query()->findOrFail($projectFile->project_id),
+                $validated['file']
+            );
+        }
+
+        try {
+            $attributes = [];
+
+            if ($newPath !== null) {
+                $file = $validated['file'];
+                $attributes = [
+                    'original_name' => $this->originalName($file),
+                    'path' => $newPath,
+                    'mime_type' => $file->getMimeType() ?: $file->getClientMimeType(),
+                    'size' => $file->getSize(),
+                ];
+            }
+
+            if ($request->exists('description')) {
+                $attributes['description'] = filled($validated['description'] ?? null)
+                    ? trim($validated['description'])
+                    : null;
+            }
+
+            $projectFile->forceFill($attributes)->save();
+        } catch (\Throwable $exception) {
+            if ($newPath !== null) {
+                Storage::disk('local')->delete($newPath);
+            }
+
+            throw $exception;
+        }
+
+        if ($newPath !== null && $oldPath !== $newPath) {
+            Storage::disk('local')->delete($oldPath);
+        }
+
+        return $this->projectFileRedirect($request, $projectFile)
+            ->with('status', $newPath !== null
+                ? 'Project file updated and replaced successfully.'
+                : 'Project file details updated successfully.');
+    }
+
     public function toggleShare(ProjectFile $projectFile): RedirectResponse
     {
         abort_unless(AdminAccess::isFullAdmin(), 403);
@@ -200,8 +266,7 @@ class AdminProjectController extends Controller
             'shared_at' => $isSharing ? now() : null,
         ])->save();
 
-        return redirect()
-            ->route('admin.projects.show', $projectFile->project_id)
+        return $this->projectFileRedirect(request(), $projectFile)
             ->with('status', $isSharing
                 ? 'A secure share link is ready for this file.'
                 : 'The file share link has been revoked.');
@@ -214,9 +279,17 @@ class AdminProjectController extends Controller
         Storage::disk('local')->delete($projectFile->path);
         $projectFile->delete();
 
-        return redirect()
-            ->route('admin.projects.show', $projectId)
+        return $this->projectFileRedirect(request(), $projectFile, $projectId)
             ->with('status', 'File removed from the project workspace.');
+    }
+
+    private function projectFileRedirect(Request $request, ProjectFile $projectFile, ?int $projectId = null): RedirectResponse
+    {
+        if ($request->string('return_to')->toString() === 'index') {
+            return redirect()->route('admin.projects.index');
+        }
+
+        return redirect()->route('admin.projects.show', $projectId ?? $projectFile->project_id);
     }
 
     public function sharedFile(ProjectFile $projectFile): View

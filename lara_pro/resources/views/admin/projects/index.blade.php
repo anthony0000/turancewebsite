@@ -3,6 +3,10 @@
 @section('title', 'Projects & Files | Admin')
 
 @section('content')
+    @php
+        $previewableMimes = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp'];
+    @endphp
+
     <div class="tt-projects-page">
         <header class="tt-projects-page-head">
             <div>
@@ -13,6 +17,11 @@
             <div class="tt-projects-page-actions">
                 @if ($canManageProjectFiles)
                     <a class="button" href="#project-file-upload"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4"/><path d="m7 9 5-5 5 5"/><path d="M5 14v5h14v-5"/></svg>Upload file</a>
+                @endif
+                @if ($canViewProjectFiles && $files->isNotEmpty())
+                    <a class="ghost-button" href="#project-file-manager"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h8M8 17h5"/></svg>Manage files</a>
+                @endif
+                @if ($canManageProjectFiles)
                     <a class="ghost-button" href="{{ route('admin.project-management.dashboard') }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h5"/></svg>Project management</a>
                 @endif
             </div>
@@ -31,7 +40,13 @@
                     <div>
                         <span class="tt-projects-section-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 16V4"/><path d="m7 9 5-5 5 5"/><path d="M5 14v5h14v-5"/></svg></span>
                         <span class="eyebrow">External project files</span>
-                        <h2>Upload a file for the project team</h2>
+                        @if ($canManageProjectFiles)
+                            <h2>Upload a file for the project team</h2>
+                        @elseif ($canViewProjectFiles)
+                            <h2>Shared project files</h2>
+                        @else
+                            <h2>Project file access</h2>
+                        @endif
                     </div>
                     @if ($canManageProjectFiles)
                         <span class="tt-projects-card-note">Private until shared</span>
@@ -95,7 +110,7 @@
                     </div>
                 @else
                     <div class="tt-projects-empty">
-                        <strong>Project file access is limited.</strong>
+                        <strong>Project file access is limited for this account.</strong>
                     </div>
                 @endif
             </section>
@@ -165,6 +180,86 @@
                 </section>
             </aside>
         </div>
+
+        @if ($canViewProjectFiles)
+        <section id="project-file-manager" class="tt-projects-register tt-projects-card tt-project-file-manager">
+            <div class="tt-projects-card-head">
+                <div>
+                    <span class="tt-projects-section-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 3h9l3 3v15H6z"/><path d="M15 3v4h4M9 12h6M9 16h6"/></svg></span>
+                    <span class="eyebrow">File management</span>
+                    <h2>Uploaded project files</h2>
+                </div>
+                <span class="tt-projects-count">{{ number_format($files->count()) }} files</span>
+            </div>
+
+            @if ($files->isNotEmpty())
+                <div class="project-file-manager-list">
+                    @foreach ($files as $file)
+                        <article class="project-file-manager-row">
+                            <div class="project-file-card__icon" aria-hidden="true">{{ strtoupper(substr($file->fileKind(), 0, 1)) }}</div>
+                            <div class="project-file-manager-row__body">
+                                <div class="project-file-manager-row__heading">
+                                    <div>
+                                        <h3>{{ $file->original_name }}</h3>
+                                        <p>
+                                            @if ($file->project)
+                                                <a href="{{ route('admin.projects.show', $file->project) }}">{{ $file->project->name }}</a> &middot;
+                                            @else
+                                                Project unavailable &middot;
+                                            @endif
+                                            {{ $file->fileKind() }} &middot; {{ $file->sizeLabel() }} &middot; Added {{ optional($file->created_at)->format('M d, Y') }}
+                                        </p>
+                                    </div>
+                                    @if ($file->is_shared)
+                                        <span class="file-share-badge">Shared</span>
+                                    @else
+                                        <span class="file-private-badge">Private</span>
+                                    @endif
+                                </div>
+
+                                @if ($file->description)
+                                    <p class="project-file-card__description">{{ $file->description }}</p>
+                                @endif
+
+                                <div class="project-file-card__actions">
+                                    @if (in_array($file->mime_type, $previewableMimes, true))
+                                        <a class="ghost-button" href="{{ route('admin.projects.files.preview', $file) }}" target="_blank" rel="noopener">Preview</a>
+                                    @endif
+                                    <a class="ghost-button" href="{{ route('admin.projects.files.download', $file) }}">Download</a>
+                                    @if ($canManageProjectFiles)
+                                        @include('admin.projects.partials.file-update-form', ['file' => $file, 'returnTo' => 'index'])
+                                        <form method="POST" action="{{ route('admin.projects.files.share', $file) }}">
+                                            @csrf
+                                            <input type="hidden" name="return_to" value="index">
+                                            <button class="{{ $file->is_shared ? 'ghost-button' : 'button' }}" type="submit">
+                                                {{ $file->is_shared ? 'Revoke link' : 'Create share link' }}
+                                            </button>
+                                        </form>
+                                        <form method="POST" action="{{ route('admin.projects.files.destroy', $file) }}" onsubmit="return confirm('Remove this file from the project?');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <input type="hidden" name="return_to" value="index">
+                                            <button class="file-delete-button" type="submit">Remove</button>
+                                        </form>
+                                    @endif
+                                </div>
+                            </div>
+                        </article>
+                    @endforeach
+                </div>
+            @else
+                <div class="tt-projects-empty tt-projects-empty--files">
+                    <span class="tt-projects-empty-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span>
+                    <strong>No project files yet</strong>
+                    @if ($canManageProjectFiles)
+                        <span>Uploaded files will appear here with download, update, sharing, and remove controls.</span>
+                    @else
+                        <span>Shared files will appear here for download.</span>
+                    @endif
+                </div>
+            @endif
+        </section>
+        @endif
 
         <section class="tt-projects-register tt-projects-card">
             <div class="tt-projects-card-head">
@@ -297,6 +392,7 @@
                     if (status) {
                         status.textContent = payload.message || 'File uploaded successfully.';
                     }
+                    window.setTimeout(() => window.location.reload(), 900);
                 } catch (error) {
                     if (progress) progress.classList.add('is-error');
                     if (progressLabel) progressLabel.textContent = 'Upload failed';
