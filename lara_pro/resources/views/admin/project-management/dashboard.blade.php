@@ -4,9 +4,8 @@
     <div class="pm-dashboard">
     <section class="panel pm-hero">
         <div>
-            <span class="eyebrow">Project overview</span>
-            <h2>Keep delivery moving.</h2>
-            <p>Projects, tasks, and deadlines at a glance.</p>
+            <span class="eyebrow">Delivery</span>
+            <h2>Project overview</h2>
         </div>
         <div class="pm-actions">
             @if ($canManageWorkspace)
@@ -25,7 +24,9 @@
         @endforeach
     </section>
 
-    <form class="panel pm-panel" method="GET" action="{{ route('admin.project-management.dashboard') }}">
+    <details class="panel pm-panel pm-filter-panel">
+        <summary><span><strong>Filter view</strong><small>Projects, assignees, dates</small></span><span class="pm-filter-panel__toggle">Open</span></summary>
+        <form method="GET" action="{{ route('admin.project-management.dashboard') }}">
         <div class="pm-panel-head"><div><h3>Filters</h3></div><a class="pm-icon-link" href="{{ route('admin.project-management.dashboard') }}">Reset</a></div>
         <div class="pm-form-grid">
             <div class="field"><label for="dashboard-project">Project</label><select id="dashboard-project" name="project_id"><option value="">All projects</option>@foreach ($projects as $project)<option value="{{ $project->id }}" @selected(($filters['project_id'] ?? '') == $project->id)>{{ $project->project_number }} · {{ $project->name }}</option>@endforeach</select></div>
@@ -37,9 +38,10 @@
             <div class="field"><label for="dashboard-from">Due from</label><input id="dashboard-from" type="date" name="date_from" value="{{ $filters['date_from'] ?? '' }}"></div>
             <div class="field"><label for="dashboard-to">Due to</label><input id="dashboard-to" type="date" name="date_to" value="{{ $filters['date_to'] ?? '' }}"></div>
         </div>
-        <div class="pm-form-actions"><button class="button" type="submit">Apply view</button></div>
-    </form>
-    <section class="panel pm-panel"><div class="pm-panel-head"><div><h3>Saved views</h3></div></div><div class="pm-actions" style="margin-bottom:12px">@forelse ($savedFilters as $savedFilter)<a class="pm-chip" href="{{ route('admin.project-management.dashboard', $savedFilter->filters ?: []) }}">{{ $savedFilter->name }}</a><form method="POST" action="{{ route('admin.project-management.filters.destroy', $savedFilter) }}">@csrf @method('DELETE')<button class="pm-icon-link" type="submit" aria-label="Remove {{ $savedFilter->name }}">×</button></form>@empty<span class="pm-muted">No saved views yet.</span>@endforelse</div><form class="pm-inline-form" method="POST" action="{{ route('admin.project-management.filters.store') }}">@csrf<div class="field"><label for="saved-filter-name">Save filters as</label><input id="saved-filter-name" name="name" required placeholder="My open tasks"></div>@foreach ($filters as $key => $value)<input type="hidden" name="filters[{{ $key }}]" value="{{ $value }}">@endforeach<button class="ghost-button" type="submit">Save view</button></form></section>
+        <div class="pm-form-actions"><a class="pm-icon-link" href="{{ route('admin.project-management.dashboard') }}">Reset</a><button class="button" type="submit">Apply view</button></div>
+        </form>
+    <section class="pm-saved-views"><div class="pm-panel-head"><div><h3>Saved views</h3></div></div><div class="pm-actions pm-saved-views__links">@forelse ($savedFilters as $savedFilter)<a class="pm-chip" href="{{ route('admin.project-management.dashboard', $savedFilter->filters ?: []) }}">{{ $savedFilter->name }}</a><form method="POST" action="{{ route('admin.project-management.filters.destroy', $savedFilter) }}">@csrf @method('DELETE')<button class="pm-icon-link" type="submit" aria-label="Remove {{ $savedFilter->name }}">×</button></form>@empty<span class="pm-muted">No saved views yet.</span>@endforelse</div><form class="pm-inline-form" method="POST" action="{{ route('admin.project-management.filters.store') }}">@csrf<div class="field"><label for="saved-filter-name">Save as</label><input id="saved-filter-name" name="name" required placeholder="Open tasks"></div>@foreach ($filters as $key => $value)<input type="hidden" name="filters[{{ $key }}]" value="{{ $value }}">@endforeach<button class="ghost-button" type="submit">Save view</button></form></section>
+    </details>
 
     <div class="pm-grid">
         <section class="panel pm-panel">
@@ -51,13 +53,13 @@
                         <strong>{{ $project->progress_percentage }}%</strong>
                     </div>
                 @empty
-                    <div class="pm-empty">No active projects match this view.</div>
+                    <div class="pm-empty pm-empty--actionable"><strong>No active projects yet.</strong><span>Start a project to see delivery progress here.</span>@if ($canManageWorkspace)<a class="pm-icon-link" href="{{ route('admin.project-management.projects.create') }}">Create project <span aria-hidden="true">→</span></a>@endif</div>
                 @endforelse
             </div>
         </section>
         <section class="panel pm-panel">
             <div class="pm-panel-head"><div><h3>Task distribution</h3></div></div>
-            <div class="pm-chart-bars"><strong class="pm-muted">By status</strong>@forelse ($statusBreakdown as $status => $count)<div class="pm-chart-bar"><span>{{ Str::headline($status) }}</span><div class="pm-progress"><span style="width:{{ $tasks->count() ? round(($count / $tasks->count()) * 100) : 0 }}%"></span></div><span>{{ $count }}</span></div>@empty<div class="pm-empty">No tasks in this view.</div>@endforelse</div>
+            <div class="pm-chart-bars"><strong class="pm-muted">By status</strong>@forelse ($statusBreakdown as $status => $count)<div class="pm-chart-bar"><span>{{ Str::headline($status) }}</span><div class="pm-progress"><span style="width:{{ $tasks->count() ? round(($count / $tasks->count()) * 100) : 0 }}%"></span></div><span>{{ $count }}</span></div>@empty<div class="pm-empty pm-empty--compact"><strong>No tasks yet.</strong><span>Task distribution appears once work is added.</span></div>@endforelse</div>
             <div class="pm-chart-bars" style="margin-top:20px"><strong class="pm-muted">By priority</strong>@foreach ($priorityBreakdown as $priority => $count)<div class="pm-chart-bar"><span>{{ Str::headline($priority) }}</span><div class="pm-progress"><span style="width:{{ $tasks->count() ? round(($count / $tasks->count()) * 100) : 0 }}%; background:{{ $priority === 'urgent' ? 'var(--danger)' : 'var(--accent)' }}"></span></div><span>{{ $count }}</span></div>@endforeach</div>
         </section>
     </div>

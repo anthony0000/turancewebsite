@@ -2189,7 +2189,7 @@
     @stack('styles')
 </head>
 
-<body class="{{ $isAuthenticated ? 'is-admin' : 'is-auth' }}">
+<body class="{{ $isAuthenticated ? 'is-admin' : 'is-auth' }} {{ request()->routeIs('admin.quotes.index') ? 'is-dashboard-overview' : '' }} {{ request()->routeIs('admin.quotes.create') ? 'is-invoice-builder' : '' }} {{ request()->routeIs('admin.projects.index') ? 'is-project-files' : '' }}">
     <div class="admin-shell {{ $isAuthenticated ? 'admin-shell--app' : 'admin-shell--auth' }}">
         <div class="admin-workspace {{ $isAuthenticated ? 'admin-workspace--with-sidebar' : '' }}">
             @if ($isAuthenticated)
@@ -2202,7 +2202,7 @@
                                 </span>
                                 <span class="admin-brand-copy">
                                     <strong>{{ $brandName }}</strong>
-                                    <span>Admin</span>
+                                    <span>Admin Workspace</span>
                                 </span>
                             </a>
 
@@ -2215,7 +2215,7 @@
                         </div>
 
                         <nav class="admin-nav">
-                            <span class="admin-nav-label">Monitor</span>
+                            <span class="admin-nav-label">Overview</span>
                             @if ($canInvoices)
                                 <a class="admin-nav-link {{ request()->routeIs('admin.quotes.index') ? 'active' : '' }}"
                                     href="{{ route('admin.quotes.index') }}">
@@ -2404,7 +2404,7 @@
                                 </a>
                             @endif
 
-                            <span class="admin-nav-label">Account</span>
+                            <span class="admin-nav-label">System</span>
                             <a class="admin-nav-link {{ $isAdminProfile ? 'active' : '' }}"
                                 href="{{ route('admin.profile') }}">
                                 <span class="admin-nav-icon" aria-hidden="true">
@@ -2478,13 +2478,17 @@
                                 </svg>
                             </button>
                             <div>
-                                <span class="eyebrow">{{ $currentAdminHint }}</span>
+                                <span class="eyebrow">Workspace</span>
                                 <h1>{{ $adminPageTitle }}</h1>
                             </div>
                         </div>
 
                         <div class="admin-pagebar-actions">
-                            <span class="admin-date-pill">{{ now()->format('M d, Y') }}</span>
+                            <button class="admin-search-trigger" type="button" data-command-open aria-haspopup="dialog" aria-keyshortcuts="Control+K Meta+K">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5" /><path d="m16 16 4 4" /></svg>
+                                <span>Search</span>
+                                <kbd>⌘ K</kbd>
+                            </button>
                             @if ($isSubaccountWorkspace)
                                 <a class="button" href="{{ route('admin.subaccounts.create') }}">New Sub-account</a>
                             @elseif ($isAdminProfile)
@@ -2529,18 +2533,54 @@
                     </header>
                 @endif
 
-                @if (session('status'))
-                    <div class="alert alert-success">{{ session('status') }}</div>
-                @endif
+                @if (session('status') || session('admin_notice'))
+                    <div class="admin-alert-stack" aria-live="polite" aria-atomic="true">
+                        @if (session('status'))
+                            <div class="alert alert-success" role="status">{{ session('status') }}</div>
+                        @endif
 
-                @if (session('admin_notice'))
-                    <div class="alert alert-warning">{{ session('admin_notice') }}</div>
+                        @if (session('admin_notice'))
+                            <div class="alert alert-warning" role="alert">{{ session('admin_notice') }}</div>
+                        @endif
+                    </div>
                 @endif
 
                 @yield('content')
             </main>
         </div>
     </div>
+    @if ($isAuthenticated)
+        <div class="command-palette" data-command-palette hidden>
+            <div class="command-palette__backdrop" data-command-close></div>
+            <section class="command-palette__dialog" role="dialog" aria-modal="true" aria-labelledby="command-palette-title">
+                <div class="command-palette__head">
+                    <label id="command-palette-title" for="command-palette-input">Jump to</label>
+                    <button class="admin-icon-button" type="button" data-command-close aria-label="Close search">×</button>
+                </div>
+                <div class="command-palette__input-wrap">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5" /><path d="m16 16 4 4" /></svg>
+                    <input id="command-palette-input" type="search" data-command-input placeholder="Search workspace" autocomplete="off">
+                    <kbd>ESC</kbd>
+                </div>
+                <div class="command-palette__results" data-command-results>
+                    @if ($canInvoices)
+                        <a class="command-palette__item" data-command-item data-command-label="Dashboard Overview" href="{{ route('admin.quotes.index') }}"><span class="command-palette__item-icon">⌂</span><span><strong>Overview</strong><small>Dashboard</small></span><span class="command-palette__arrow">↵</span></a>
+                        <a class="command-palette__item" data-command-item data-command-label="New Invoice Builder" href="{{ route('admin.quotes.create') }}"><span class="command-palette__item-icon">＋</span><span><strong>New invoice</strong><small>Invoice builder</small></span><span class="command-palette__arrow">↵</span></a>
+                    @endif
+                    @if ($canActivity)
+                        <a class="command-palette__item" data-command-item data-command-label="Activity Traffic Leads" href="{{ route('admin.quotes.activity') }}"><span class="command-palette__item-icon">↗</span><span><strong>Activity</strong><small>Traffic and leads</small></span><span class="command-palette__arrow">↵</span></a>
+                    @endif
+                    @if ($canProjects)
+                        <a class="command-palette__item" data-command-item data-command-label="Projects Delivery" href="{{ route('admin.project-management.dashboard') }}"><span class="command-palette__item-icon">□</span><span><strong>Projects</strong><small>Delivery workspace</small></span><span class="command-palette__arrow">↵</span></a>
+                        <a class="command-palette__item" data-command-item data-command-label="Project Files Secure Handoffs" href="{{ route('admin.projects.index') }}"><span class="command-palette__item-icon">▱</span><span><strong>Project files</strong><small>Shared files</small></span><span class="command-palette__arrow">↵</span></a>
+                    @endif
+                    <a class="command-palette__item" data-command-item data-command-label="Profile Settings" href="{{ route('admin.profile') }}"><span class="command-palette__item-icon">◎</span><span><strong>Profile</strong><small>Account settings</small></span><span class="command-palette__arrow">↵</span></a>
+                    <p class="command-palette__empty" data-command-empty hidden>No matching workspace items.</p>
+                </div>
+                <div class="command-palette__foot"><span>Navigate</span><span><kbd>↑</kbd><kbd>↓</kbd> Select</span><span><kbd>↵</kbd> Open</span></div>
+            </section>
+        </div>
+    @endif
     <script>
         (() => {
             const body = document.body;
@@ -2569,6 +2609,110 @@
             document.addEventListener('keydown', (event) => {
                 if (event.key === 'Escape') {
                     body.classList.remove('is-mobile-nav-open');
+                }
+            });
+        })();
+
+        (() => {
+            const palette = document.querySelector('[data-command-palette]');
+            const openButton = document.querySelector('[data-command-open]');
+            const closeButtons = document.querySelectorAll('[data-command-close]');
+            const input = palette?.querySelector('[data-command-input]');
+            const items = palette ? Array.from(palette.querySelectorAll('[data-command-item]')) : [];
+            const empty = palette?.querySelector('[data-command-empty]');
+            let lastFocusedElement = null;
+            let activeIndex = 0;
+
+            const visibleItems = () => items.filter((item) => !item.hidden);
+
+            const setActiveItem = (index) => {
+                const visible = visibleItems();
+
+                if (!visible.length) {
+                    activeIndex = 0;
+                    return;
+                }
+
+                activeIndex = (index + visible.length) % visible.length;
+                visible.forEach((item, itemIndex) => {
+                    item.classList.toggle('is-keyboard-active', itemIndex === activeIndex);
+                });
+            };
+
+            const closePalette = () => {
+                if (!palette) {
+                    return;
+                }
+
+                palette.hidden = true;
+                document.body.classList.remove('is-command-open');
+                lastFocusedElement?.focus?.();
+            };
+
+            const openPalette = () => {
+                if (!palette) {
+                    return;
+                }
+
+                lastFocusedElement = document.activeElement;
+                palette.hidden = false;
+                document.body.classList.add('is-command-open');
+                input?.focus();
+                input?.select();
+                setActiveItem(0);
+            };
+
+            const filterItems = () => {
+                const query = (input?.value || '').trim().toLowerCase();
+                let visibleCount = 0;
+
+                items.forEach((item) => {
+                    const matches = !query || (item.dataset.commandLabel || item.textContent).toLowerCase().includes(query);
+                    item.hidden = !matches;
+                    visibleCount += matches ? 1 : 0;
+                });
+
+                if (empty) {
+                    empty.hidden = visibleCount !== 0;
+                }
+
+                setActiveItem(0);
+            };
+
+            openButton?.addEventListener('click', openPalette);
+            closeButtons.forEach((button) => button.addEventListener('click', closePalette));
+            input?.addEventListener('input', filterItems);
+
+            document.addEventListener('keydown', (event) => {
+                if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+                    event.preventDefault();
+                    openPalette();
+                    return;
+                }
+
+                if (palette && !palette.hidden && ['ArrowDown', 'ArrowUp', 'Enter'].includes(event.key)) {
+                    const visible = visibleItems();
+
+                    if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+                        event.preventDefault();
+                        setActiveItem(activeIndex + (event.key === 'ArrowDown' ? 1 : -1));
+                    } else if (visible[activeIndex]) {
+                        event.preventDefault();
+                        visible[activeIndex].click();
+                    }
+
+                    return;
+                }
+
+                if (event.key === 'Escape' && palette && !palette.hidden) {
+                    event.preventDefault();
+                    closePalette();
+                }
+            });
+
+            palette?.addEventListener('click', (event) => {
+                if (event.target === palette) {
+                    closePalette();
                 }
             });
         })();

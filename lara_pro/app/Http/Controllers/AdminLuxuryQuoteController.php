@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\ContactMessage;
 use App\Models\LuxuryQuote;
 use App\Models\PageVisit;
+use App\Models\Project;
 use App\Models\PromotionSetting;
 use App\Support\DocumentTypography;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -29,14 +30,14 @@ class AdminLuxuryQuoteController extends Controller
 
     private const DEFAULT_EXCHANGE_RATE = 1370;
 
-    public function index(): View
+    public function index(Request $request): View
     {
-        return $this->renderDashboardSection('overview');
+        return $this->renderDashboardSection('overview', $request);
     }
 
-    public function activity(): View
+    public function activity(Request $request): View
     {
-        return $this->renderDashboardSection('activity');
+        return $this->renderDashboardSection('activity', $request);
     }
 
     public function insights(): View
@@ -83,15 +84,27 @@ class AdminLuxuryQuoteController extends Controller
         return redirect()->route('admin.quotes.promotion')->with('status', 'Landing-page promotion updated.');
     }
 
-    private function renderDashboardSection(string $section): View
+    private function renderDashboardSection(string $section, ?Request $request = null): View
     {
+        $periodDays = $this->dashboardPeriodDays($request);
+
         return view('admin.quotes.index', array_merge(
-            $this->dashboardViewData(),
-            ['adminSection' => $section],
+            $this->dashboardViewData($periodDays),
+            [
+                'adminSection' => $section,
+                'dashboardPeriodDays' => $periodDays,
+            ],
         ));
     }
 
-    private function dashboardViewData(): array
+    private function dashboardPeriodDays(?Request $request): int
+    {
+        $period = (int) ($request?->input('period', 14) ?? 14);
+
+        return in_array($period, [7, 14, 30, 90, 180, 365], true) ? $period : 14;
+    }
+
+    private function dashboardViewData(int $periodDays = 14): array
     {
         $templates = config('luxury-quotes.templates', []);
         $categories = config('luxury-quotes.categories', []);
@@ -168,10 +181,23 @@ class AdminLuxuryQuoteController extends Controller
             ? ContactMessage::query()->latest()->limit(5)->get()
             : collect();
 
+        $activeProjects = $this->tableExists('projects') && \App\Support\AdminAccess::can('projects')
+            ? Project::query()
+                ->whereIn('status', ['planning', 'active', 'on_hold'])
+                ->withCount([
+                    'tasks' => fn ($query) => $query->whereNull('archived_at'),
+                    'tasks as completed_tasks_count' => fn ($query) => $query->whereNull('archived_at')->whereNotNull('completed_at'),
+                ])
+                ->latest('updated_at')
+                ->limit(4)
+                ->get()
+            : collect();
+
         $dailyOverview = $this->buildDailyOverview(
             quoteTableReady: $quoteTableReady,
             messageTableReady: $messageTableReady,
             visitTableReady: $visitTableReady,
+            days: $periodDays,
         );
 
         $templateBreakdown = $this->buildQuoteBreakdown(
@@ -299,6 +325,9 @@ class AdminLuxuryQuoteController extends Controller
             'quoteCount' => $quoteCount,
             'contactCount' => $contactCount,
             'visitCount' => $visitCount,
+            'totalPipeline' => $totalPipeline,
+            'currentPipeline' => $currentPipeline,
+            'averageQuoteValue' => $averageQuoteValue,
             'visitTrackingReady' => $visitTableReady,
             'quotesThisMonth' => $quotesThisMonth,
             'messagesThisMonth' => $messagesThisMonth,
@@ -310,6 +339,7 @@ class AdminLuxuryQuoteController extends Controller
             'topPages' => $topPages,
             'monthlyPipeline' => $monthlyPipeline,
             'recentMessages' => $recentMessages,
+            'activeProjects' => $activeProjects,
             'dashboardHighlights' => $dashboardHighlights,
             'sidebarStats' => $sidebarStats,
             'priceBounds' => [

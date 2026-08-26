@@ -1,11 +1,13 @@
 @php
     $chart = $dailyOverview['chart'];
     $chartSummaryCompact = $chartSummaryCompact ?? false;
+    $chartOnly = $chartOnly ?? false;
+    $chartPeriodDays = $dashboardPeriodDays ?? 14;
 @endphp
 
 <div class="line-chart-shell">
     <svg class="line-chart" viewBox="0 0 {{ $chart['width'] }} {{ $chart['height'] + 24 }}"
-        role="img" aria-label="Daily visits, invoices and leads over the last 14 days">
+        role="img" aria-label="Daily visits, invoices and leads over the last {{ $chartPeriodDays }} days">
         <defs>
             <linearGradient id="chart-fill-visits" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stop-color="#111111" stop-opacity="0.14" />
@@ -49,23 +51,24 @@
     @endunless
 </div>
 
+@unless ($chartOnly)
 <div class="chart-summary-grid {{ $chartSummaryCompact ? 'chart-summary-grid--compact' : '' }}">
     <div class="mini-card">
-        <span class="metric-label">{{ $chartSummaryCompact ? 'Visits' : '14-Day Visits' }}</span>
+        <span class="metric-label">{{ $chartSummaryCompact ? 'Visits' : $chartPeriodDays.'-Day Visits' }}</span>
         <strong>{{ number_format($dailyOverview['totals']['visits']) }}</strong>
         @unless ($chartSummaryCompact)
             <p>Tracked page views.</p>
         @endunless
     </div>
     <div class="mini-card">
-        <span class="metric-label">{{ $chartSummaryCompact ? 'Invoices' : '14-Day Invoices' }}</span>
+        <span class="metric-label">{{ $chartSummaryCompact ? 'Invoices' : $chartPeriodDays.'-Day Invoices' }}</span>
         <strong>{{ number_format($dailyOverview['totals']['quotes']) }}</strong>
         @unless ($chartSummaryCompact)
             <p>Generated invoices.</p>
         @endunless
     </div>
     <div class="mini-card">
-        <span class="metric-label">{{ $chartSummaryCompact ? 'Leads' : '14-Day Leads' }}</span>
+        <span class="metric-label">{{ $chartSummaryCompact ? 'Leads' : $chartPeriodDays.'-Day Leads' }}</span>
         <strong>{{ number_format($dailyOverview['totals']['messages']) }}</strong>
         @unless ($chartSummaryCompact)
             <p>Contact enquiries.</p>
@@ -83,6 +86,7 @@
         @endunless
     </div>
 </div>
+@endunless
 
 @if (! $visitTrackingReady)
     <div class="data-note">Visit analytics will populate after tracking is enabled.</div>

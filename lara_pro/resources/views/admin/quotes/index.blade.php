@@ -29,14 +29,14 @@
         $wizardSteps = [
             [
                 'id' => 'brief',
-                'label' => 'Project Brief',
-                'description' => 'Template and category',
+                'label' => 'Brief',
+                'description' => 'Choose direction',
                 'fields' => ['template', 'project_category', 'project_title', 'executive_summary'],
             ],
             [
                 'id' => 'client',
                 'label' => 'Client',
-                'description' => 'Identity and timeline',
+                'description' => 'Add client',
                 'fields' => [
                     'company_name',
                     'company_industry',
@@ -51,13 +51,13 @@
             [
                 'id' => 'delivery',
                 'label' => 'Scope',
-                'description' => 'Costs and outcomes',
+                'description' => 'Price scope',
                 'fields' => ['line_items', 'outcomes', 'milestones', 'optional_addons'],
             ],
             [
                 'id' => 'finish',
                 'label' => 'Review',
-                'description' => 'Notes and submit',
+                'description' => 'Check and send',
                 'fields' => ['intro_message', 'closing_note'],
             ],
         ];
@@ -87,11 +87,17 @@
         $showPromotion = $adminSection === 'promotion';
         $showBuilder = $adminSection === 'builder';
         $showArchive = $adminSection === 'archive';
+        $dashboardPeriodDays = $dashboardPeriodDays ?? 14;
+        $dashboardPeriods = [7 => '7D', 14 => '14D', 30 => '30D', 90 => '3M', 180 => '6M', 365 => '1Y'];
         $anniversaryPromo = $anniversaryPromo ?? config('seo.anniversary_promo', []);
         $promoApplyDefault = old('discount_percent', $anniversaryPromo['is_active'] ?? false ? ($anniversaryPromo['discount_percent'] ?? 0) : 0);
     @endphp
 
     @if ($showOverview)
+        @include('admin.quotes.partials.overview')
+    @endif
+
+    @if (false && $showOverview)
     <section class="dash-topline" id="dashboard-overview" aria-label="Workspace status">
         <div class="status-chip-row">
             <span class="status-chip status-chip--{{ $visitTrackingReady ? 'ok' : 'warn' }}">
@@ -125,16 +131,23 @@
 
     <div class="dashboard-grid dashboard-overview-grid">
         <section class="panel panel-padded dashboard-overview-chart-panel">
-            <div class="panel-head panel-head--row">
+            <div class="panel-head panel-head--row dashboard-chart-head">
                 <div>
                     <span class="eyebrow">Performance</span>
                     <h2>Activity trend</h2>
                 </div>
 
-                <div class="chart-legend" aria-label="Chart legend">
-                    <span class="legend-item"><span class="legend-swatch legend-swatch--visits"></span>Visits</span>
-                    <span class="legend-item"><span class="legend-swatch legend-swatch--quotes"></span>Invoices</span>
-                    <span class="legend-item"><span class="legend-swatch legend-swatch--messages"></span>Leads</span>
+                <div class="dashboard-chart-head-tools">
+                    <nav class="dashboard-chart-periods" aria-label="Chart period">
+                        @foreach ($dashboardPeriods as $periodDays => $periodLabel)
+                            <a class="{{ $dashboardPeriodDays === $periodDays ? 'active' : '' }}" href="{{ route($showActivity ? 'admin.quotes.activity' : 'admin.quotes.index', ['period' => $periodDays]) }}">{{ $periodLabel }}</a>
+                        @endforeach
+                    </nav>
+                    <div class="chart-legend" aria-label="Chart legend">
+                        <span class="legend-item"><span class="legend-swatch legend-swatch--visits"></span>Visits</span>
+                        <span class="legend-item"><span class="legend-swatch legend-swatch--quotes"></span>Invoices</span>
+                        <span class="legend-item"><span class="legend-swatch legend-swatch--messages"></span>Leads</span>
+                    </div>
                 </div>
             </div>
 
@@ -234,6 +247,10 @@
     @endif
 
     @if ($showActivity)
+        @include('admin.quotes.partials.activity-overview')
+    @endif
+
+    @if (false && $showActivity)
     <div class="section-heading" id="performance-overview">
         <div>
             <span class="eyebrow">Performance</span>
@@ -250,8 +267,8 @@
             <div class="panel-head panel-head--row">
                 <div>
                     <span class="eyebrow">Activity</span>
-                    <h2>14-day snapshot</h2>
-                    <p>Visits, leads, and invoices over the same window.</p>
+                    <h2>{{ $dashboardPeriodDays ?? 14 }}-day snapshot</h2>
+                    <p>Visits, leads, and invoices.</p>
                 </div>
 
                 <div class="chart-legend">
@@ -274,7 +291,7 @@
 
             <div class="line-chart-shell">
                 <svg class="line-chart" viewBox="0 0 {{ $chart['width'] }} {{ $chart['height'] + 24 }}"
-                    role="img" aria-label="Daily visits, invoices and leads over the last 14 days">
+                    role="img" aria-label="Daily visits, invoices and leads over the last {{ $dashboardPeriodDays ?? 14 }} days">
                     <defs>
                         <linearGradient id="chart-fill-visits" x1="0" y1="0" x2="0" y2="1">
                             <stop offset="0%" stop-color="#111111" stop-opacity="0.14" />
@@ -322,17 +339,17 @@
 
             <div class="chart-summary-grid">
                 <div class="mini-card">
-                    <span class="metric-label">14-Day Visits</span>
+                        <span class="metric-label">{{ $dashboardPeriodDays ?? 14 }}-Day Visits</span>
                     <strong>{{ number_format($dailyOverview['totals']['visits']) }}</strong>
                     <p>Tracked page views.</p>
                 </div>
                 <div class="mini-card">
-                    <span class="metric-label">14-Day Invoices</span>
+                        <span class="metric-label">{{ $dashboardPeriodDays ?? 14 }}-Day Invoices</span>
                     <strong>{{ number_format($dailyOverview['totals']['quotes']) }}</strong>
                     <p>Generated invoices.</p>
                 </div>
                 <div class="mini-card">
-                    <span class="metric-label">14-Day Leads</span>
+                        <span class="metric-label">{{ $dashboardPeriodDays ?? 14 }}-Day Leads</span>
                     <strong>{{ number_format($dailyOverview['totals']['messages']) }}</strong>
                     <p>Contact enquiries.</p>
                 </div>
@@ -404,6 +421,10 @@
     @endif
 
     @if ($showPromotion)
+        @include('admin.quotes.partials.promotion-overview')
+    @endif
+
+    @if (false && $showPromotion)
     <div class="section-heading" id="promotion-control">
         <div>
             <span class="eyebrow">Landing Page</span>
@@ -451,6 +472,10 @@
     @endif
 
     @if ($showInsights)
+        @include('admin.quotes.partials.insights-overview')
+    @endif
+
+    @if (false && $showInsights)
     <div class="section-heading" id="business-insights">
         <div>
             <span class="eyebrow">Business Insights</span>
@@ -545,21 +570,21 @@
     @endif
 
     @if ($showBuilder)
-    <div class="section-heading" id="invoice-studio">
+    <div class="section-heading tt-builder-head" id="invoice-studio">
         <div>
             <span class="eyebrow">Invoice Studio</span>
-            <h2>Guided invoice builder</h2>
-            <p>Four compact steps for brief, client, scope, and review.</p>
+            <h2>Create the next invoice.</h2>
+            <p>Brief <span aria-hidden="true">→</span> client <span aria-hidden="true">→</span> scope <span aria-hidden="true">→</span> send.</p>
         </div>
-        <span class="admin-pill">4 steps</span>
+        <span class="tt-page-badge"><i class="tt-page-badge__gold"></i>4-step workflow</span>
     </div>
 
-    <div class="dashboard-grid">
-        <section class="panel panel-padded" id="quote-builder">
+    <div class="dashboard-grid tt-builder-layout">
+        <section class="panel panel-padded tt-section tt-builder-main" id="quote-builder">
             <div class="panel-head">
                 <span class="eyebrow">New Invoice</span>
                 <h2>Create invoice</h2>
-                <p>Add the essentials, review the snapshot, and generate the saved PDF.</p>
+                <p>Four focused steps from brief to send.</p>
             </div>
 
             @if ($errors->any())
@@ -831,11 +856,11 @@
             </div>
         </section>
 
-        <aside class="sticky-stack">
-            <section class="panel panel-padded">
+        <aside class="sticky-stack tt-builder-rail">
+            <section class="panel panel-padded tt-section">
                 <div class="panel-head panel-head--tight">
                     <span class="eyebrow">Snapshot</span>
-                    <h3 class="panel-title">Before build</h3>
+                    <h3 class="panel-title">Build context</h3>
                 </div>
 
                 <div class="stat-list">
@@ -849,10 +874,10 @@
                 </div>
             </section>
 
-            <section class="panel panel-padded">
+            <section class="panel panel-padded tt-section">
                 <div class="panel-head panel-head--tight">
                     <span class="eyebrow">Recent invoices</span>
-                    <h3 class="panel-title">Latest activity</h3>
+                    <h3 class="panel-title">Latest invoices</h3>
                 </div>
 
                 <ul class="record-list">
@@ -875,10 +900,10 @@
                 </ul>
             </section>
 
-            <section class="panel panel-padded">
+            <section class="panel panel-padded tt-section">
                 <div class="panel-head panel-head--tight">
                     <span class="eyebrow">Recent leads</span>
-                    <h3 class="panel-title">Contact activity</h3>
+                    <h3 class="panel-title">Latest leads</h3>
                 </div>
 
                 @if ($recentMessages->isNotEmpty())
@@ -905,6 +930,10 @@
     @endif
 
     @if ($showArchive)
+        @include('admin.quotes.partials.archive-overview')
+    @endif
+
+    @if (false && $showArchive)
     <div class="section-heading">
         <div>
             <span class="eyebrow">Invoice Archive</span>
