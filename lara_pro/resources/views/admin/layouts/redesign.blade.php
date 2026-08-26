@@ -6557,7 +6557,7 @@ body.is-project-files .admin-main { width: auto; max-width: none; justify-self: 
 .tt-projects-register .quote-table td:first-child { padding-left: 22px; }
 .tt-projects-table-empty { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 
-.tt-project-file-manager { border-top: 1px solid #edf0f2; border-bottom: 1px solid #edf0f2; }
+.tt-project-file-manager { overflow: visible; border-top: 1px solid #edf0f2; border-bottom: 1px solid #edf0f2; }
 .project-file-manager-list { display: grid; gap: 10px; padding: 18px 22px 22px; }
 .project-file-manager-row { display: grid; grid-template-columns: 42px minmax(0, 1fr); gap: 13px; padding: 14px; border: 1px solid #e7eaed; border-radius: 8px; background: #fbfcfc; }
 .project-file-manager-row__body,
@@ -6568,8 +6568,8 @@ body.is-project-files .admin-main { width: auto; max-width: none; justify-self: 
 .project-file-manager-row h3 + p { margin: 5px 0 0; color: #858b94; font-size: 10px; line-height: 1.5; }
 .project-file-manager-row h3 + p a { color: #69717b; text-decoration: underline; text-underline-offset: 2px; }
 .project-file-manager-row .project-file-card__description { margin-bottom: 0; }
-.project-file-manager-row .project-file-card__actions { margin-top: 12px; }
-.project-file-manager-row .project-file-edit__form { position: absolute; z-index: 3; right: 0; }
+.project-file-manager-row .project-file-card__actions { align-items: flex-start; margin-top: 12px; }
+.project-file-manager-row .project-file-edit__form { position: static; }
 
 @media (max-width: 980px) {
     body.is-admin .admin-workspace--with-sidebar { grid-template-columns: 1fr; }

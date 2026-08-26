@@ -38,6 +38,15 @@ return [
             'report' => false,
         ],
 
+        'project-files' => [
+            'driver' => 'local',
+            // Point this at persistent shared storage in production. The
+            // database stores paths relative to this directory.
+            'root' => env('PROJECT_FILES_ROOT') ?: storage_path('app/private'),
+            'throw' => true,
+            'report' => true,
+        ],
+
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
