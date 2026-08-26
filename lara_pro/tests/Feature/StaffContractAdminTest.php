@@ -3,6 +3,7 @@
 use App\Models\LuxuryQuote;
 use App\Models\Project;
 use App\Models\StaffContract;
+use App\Models\StaffContractDocumentContent;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -262,8 +263,9 @@ it('stores an automatically named private signed copy and locks the contract', f
         ->and($contract->signed_document_mime)->toBe('application/pdf')
         ->and($firstPath)->toStartWith('staff-contracts/signed-documents/');
 
-    Storage::disk('local')->assertExists($firstPath);
+    expect(StaffContractDocumentContent::query()->where('staff_contract_id', $contract->id)->exists())->toBeTrue();
     Storage::disk('public')->assertMissing($firstPath);
+    Storage::disk('local')->deleteDirectory('staff-contracts');
 
     $this
         ->withSession($session)
@@ -278,7 +280,7 @@ it('stores an automatically named private signed copy and locks the contract', f
         ->withSession($session)
         ->get(route('admin.staff-contracts.signed-document', $contract))
         ->assertOk()
-        ->assertHeader('Content-Disposition', 'attachment; filename=tt-staff-proof-001-amina-stone-signed.pdf');
+        ->assertHeader('Content-Disposition', 'attachment; filename="tt-staff-proof-001-amina-stone-signed.pdf"');
 
     $this
         ->withSession($session)
@@ -310,7 +312,7 @@ it('stores an automatically named private signed copy and locks the contract', f
         ->and($contract->signed_document_original_name)->toBe('tt-staff-proof-001-amina-stone-signed.pdf')
         ->and($contract->signed_document_path)->toBe($firstPath);
 
-    Storage::disk('local')->assertExists($firstPath);
+    expect(StaffContractDocumentContent::query()->where('staff_contract_id', $contract->id)->exists())->toBeTrue();
 });
 
 it('does not lock a contract when its recorded signed file is missing', function () {

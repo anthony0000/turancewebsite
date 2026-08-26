@@ -18,7 +18,6 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
-use Throwable;
 
 class AdminStaffContractController extends Controller
 {
@@ -160,32 +159,47 @@ class AdminStaffContractController extends Controller
         return $pdf->download(Str::slug($staffContract->contract_number.' '.$staffContract->staff_name).'.pdf');
     }
 
-    public function downloadSignedDocument(StaffContract $staffContract): BinaryFileResponse
+    public function downloadSignedDocument(StaffContract $staffContract): BinaryFileResponse|Response
     {
-        $absolutePath = $this->signedDocumentAbsolutePath($staffContract);
-
-        return response()->download(
-            $absolutePath,
-            $staffContract->signed_document_original_name ?: Str::slug($staffContract->contract_number).'.document',
-            [
-                'Content-Type' => $staffContract->signed_document_mime ?: 'application/octet-stream',
-                'X-Content-Type-Options' => 'nosniff',
-            ],
-        );
+        return $this->signedDocumentResponse($staffContract, false);
     }
 
-    public function previewSignedDocument(StaffContract $staffContract): BinaryFileResponse
+    public function previewSignedDocument(StaffContract $staffContract): BinaryFileResponse|Response
     {
-        $absolutePath = $this->signedDocumentAbsolutePath($staffContract);
+        return $this->signedDocumentResponse($staffContract, true);
+    }
 
-        $filename = $staffContract->signed_document_original_name
-            ?: Str::slug($staffContract->contract_number).'_signed-document';
+    private function signedDocumentResponse(StaffContract $contract, bool $inline): BinaryFileResponse|Response
+    {
+        abort_unless($contract->hasSignedDocument(), 404);
 
-        return response()->file($absolutePath, [
-            'Content-Type' => $staffContract->signed_document_mime ?: 'application/octet-stream',
-            'Content-Disposition' => 'inline; filename="'.addslashes($filename).'"',
+        $filename = $contract->signed_document_original_name
+            ?: Str::slug($contract->contract_number).'.document';
+        $headers = [
+            'Content-Type' => $contract->signed_document_mime ?: 'application/octet-stream',
             'X-Content-Type-Options' => 'nosniff',
-        ]);
+        ];
+        $content = $contract->signedDocumentContent()->first(['contents']);
+
+        if ($content !== null) {
+            $headers['Content-Disposition'] = ($inline ? 'inline' : 'attachment').'; filename="'.addslashes($filename).'"';
+
+            if ($contract->signed_document_size !== null) {
+                $headers['Content-Length'] = (string) $contract->signed_document_size;
+            }
+
+            return response($content->contents, 200, $headers);
+        }
+
+        $absolutePath = $this->signedDocumentAbsolutePath($contract);
+
+        if ($inline) {
+            $headers['Content-Disposition'] = 'inline; filename="'.addslashes($filename).'"';
+
+            return response()->file($absolutePath, $headers);
+        }
+
+        return response()->download($absolutePath, $filename, $headers);
     }
 
     private function signedDocumentAbsolutePath(StaffContract $contract): string
@@ -241,31 +255,26 @@ class AdminStaffContractController extends Controller
 
     private function replaceSignedDocument(StaffContract $contract, UploadedFile $file): void
     {
-        $disk = Storage::disk('local');
         $filename = $this->signedDocumentFilename($contract, $file);
-        $path = $file->storeAs(self::SIGNED_DOCUMENT_DIRECTORY, $filename, 'local');
-
-        if (! is_string($path) || $path === '') {
-            throw new \RuntimeException('The signed document could not be stored.');
-        }
-
+        $path = self::SIGNED_DOCUMENT_DIRECTORY.'/'.$filename;
+        $contents = $file->getContent();
         $oldPath = $contract->signed_document_path;
 
-        try {
+        DB::transaction(function () use ($contract, $path, $filename, $file, $contents): void {
             $contract->forceFill([
                 'signed_document_path' => $path,
                 'signed_document_original_name' => $filename,
                 'signed_document_mime' => $file->getMimeType() ?: $file->getClientMimeType(),
                 'signed_document_size' => $file->getSize() ?: null,
             ])->save();
-        } catch (Throwable $exception) {
-            $disk->delete($path);
 
-            throw $exception;
-        }
+            $contract->signedDocumentContent()->updateOrCreate([], [
+                'contents' => $contents,
+            ]);
+        });
 
         if (filled($oldPath) && $oldPath !== $path) {
-            $disk->delete($oldPath);
+            Storage::disk('local')->delete($oldPath);
         }
     }
 
