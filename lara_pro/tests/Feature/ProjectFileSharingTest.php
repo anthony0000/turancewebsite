@@ -349,7 +349,11 @@ it('shows limited members shared project files only', function () {
         ->assertOk()
         ->assertSee('shared.pdf')
         ->assertDontSee('private.pdf')
-        ->assertSee('File sharing');
+        ->assertSee('Shared project files')
+        ->assertDontSee('Manage files')
+        ->assertDontSee('Projects by status')
+        ->assertDontSee('Files by project')
+        ->assertDontSee('Shared files only');
 
     $this->withSession($session)
         ->get(route('admin.projects.show', $project))

@@ -85,7 +85,7 @@ it('limits members to their assigned tasks across web and API surfaces', functio
     $hidden = $project->tasks()->create(['task_number' => 2, 'title' => 'Private teammate task', 'type' => 'task', 'priority' => 'high', 'status' => 'to_do', 'board_column_id' => $column->id, 'assignee_id' => $admin->id, 'reporter_id' => $admin->id, 'position' => 1]);
     $session = projectManagementSession($member);
 
-    $this->withSession($session)->get(route('admin.project-management.dashboard'))->assertOk()->assertSee('My tasks')->assertSee('Member task')->assertDontSee('Private teammate task')->assertDontSee('Project overview');
+    $this->withSession($session)->get(route('admin.project-management.dashboard'))->assertOk()->assertSee('My tasks')->assertSee('Workspace')->assertSee('Member task')->assertDontSee('Private teammate task')->assertDontSee('Project overview')->assertDontSee('<span class="admin-nav-label">Create</span>');
     $this->withSession($session)->get(route('admin.project-management.board', $project))->assertForbidden();
     $this->withSession($session)->get(route('admin.project-management.tasks.show', $assigned))->assertOk()->assertSee('Member task');
     $this->withSession($session)->get(route('admin.project-management.tasks.show', $hidden))->assertForbidden();

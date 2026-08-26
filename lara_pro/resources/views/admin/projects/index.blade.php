@@ -11,14 +11,14 @@
         <header class="tt-projects-page-head">
             <div>
                 <span class="tt-projects-heading-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 7.5h6l2 2h8v10H4z"/><path d="M4 7.5V5h6l2 2.5"/></svg></span>
-                <span class="eyebrow">Project files</span>
+                <span class="eyebrow">{{ $canManageProjectFiles ? 'Project files' : 'Shared files' }}</span>
                 <h1>File sharing</h1>
             </div>
             <div class="tt-projects-page-actions">
                 @if ($canManageProjectFiles)
                     <a class="button" href="#project-file-upload"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4"/><path d="m7 9 5-5 5 5"/><path d="M5 14v5h14v-5"/></svg>Upload file</a>
                 @endif
-                @if ($canViewProjectFiles && $files->isNotEmpty())
+                @if ($canManageProjectFiles && $files->isNotEmpty())
                     <a class="ghost-button" href="#project-file-manager"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h8M8 17h5"/></svg>Manage files</a>
                 @endif
                 @if ($canManageProjectFiles)
@@ -27,6 +27,7 @@
             </div>
         </header>
 
+        @if ($canManageProjectFiles)
         <section class="tt-projects-stat-strip" aria-label="Project file summary">
             <div class="tt-projects-stat"><span class="tt-projects-stat-icon tt-projects-stat-icon--gold" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 7h16v13H4z"/><path d="M8 7V4h8v3"/><path d="M8 12h8"/></svg></span><span class="metric-label">Projects</span><strong>{{ number_format($projectCount) }}</strong></div>
             <div class="tt-projects-stat"><span class="tt-projects-stat-icon tt-projects-stat-icon--green" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12.5 9.5 17 19 7.5"/><circle cx="12" cy="12" r="9"/></svg></span><span class="metric-label">Active</span><strong>{{ number_format($activeCount) }}</strong></div>
@@ -180,16 +181,24 @@
                 </section>
             </aside>
         </div>
+        @elseif (! $canViewProjectFiles)
+            <section class="tt-projects-access-card tt-projects-card">
+                <div class="tt-projects-empty">
+                    <strong>Project file access is limited for this account.</strong>
+                    <span>Ask a project administrator to add you to a project team.</span>
+                </div>
+            </section>
+        @endif
 
         @if ($canViewProjectFiles)
         <section id="project-file-manager" class="tt-projects-register tt-projects-card tt-project-file-manager">
             <div class="tt-projects-card-head">
                 <div>
                     <span class="tt-projects-section-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 3h9l3 3v15H6z"/><path d="M15 3v4h4M9 12h6M9 16h6"/></svg></span>
-                    <span class="eyebrow">File management</span>
-                    <h2>Project file library</h2>
+                    <span class="eyebrow">{{ $canManageProjectFiles ? 'File management' : 'Shared files' }}</span>
+                    <h2>{{ $canManageProjectFiles ? 'Project file library' : 'Shared project files' }}</h2>
                 </div>
-                <span class="tt-projects-count">{{ number_format($files->count()) }} files</span>
+                <span class="tt-projects-count">{{ number_format($files->count()) }} {{ $canManageProjectFiles ? 'files' : 'shared files' }}</span>
             </div>
 
             @if ($files->isNotEmpty())
@@ -210,10 +219,12 @@
                                             <span data-project-file-meta>{{ $file->fileKind() }} &middot; {{ $file->sizeLabel() }}</span> &middot; Added {{ optional($file->created_at)->format('M d, Y') }}
                                         </p>
                                     </div>
-                                    @if ($file->is_shared)
-                                        <span class="file-share-badge">Shared</span>
-                                    @else
-                                        <span class="file-private-badge">Private</span>
+                                    @if ($canManageProjectFiles)
+                                        @if ($file->is_shared)
+                                            <span class="file-share-badge">Shared</span>
+                                        @else
+                                            <span class="file-private-badge">Private</span>
+                                        @endif
                                     @endif
                                 </div>
 
@@ -250,7 +261,7 @@
             @else
                 <div class="tt-projects-empty tt-projects-empty--files">
                     <span class="tt-projects-empty-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span>
-                    <strong>No project files yet</strong>
+                    <strong>{{ $canManageProjectFiles ? 'No project files yet' : 'No shared files yet' }}</strong>
                     @if ($canManageProjectFiles)
                         <span>Uploaded files will appear here with download, update, sharing, and remove controls.</span>
                     @else
@@ -261,6 +272,7 @@
         </section>
         @endif
 
+        @if ($canManageProjectFiles)
         <section class="tt-projects-register tt-projects-card">
             <div class="tt-projects-card-head">
                 <div>
@@ -290,6 +302,7 @@
                 </table>
             </div>
         </section>
+        @endif
     </div>
 @endsection
 

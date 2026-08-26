@@ -2217,6 +2217,7 @@
                         </div>
 
                         <nav class="admin-nav">
+                            @if ($canInvoices || $canActivity || $canInsights || $canPromotion)
                             <span class="admin-nav-label">Overview</span>
                             @if ($canInvoices)
                                 <a class="admin-nav-link {{ request()->routeIs('admin.quotes.index') ? 'active' : '' }}"
@@ -2283,7 +2284,9 @@
                                 </div>
                                 </a>
                             @endif
+                            @endif
 
+                            @if ($canInvoices || $canProposals || $canStaffContracts)
                             <span class="admin-nav-label">Create</span>
                             @if ($canInvoices)
                                 <a class="admin-nav-link {{ request()->routeIs('admin.quotes.create') ? 'active' : '' }}"
@@ -2338,8 +2341,10 @@
                                 </div>
                                 </a>
                             @endif
+                            @endif
 
                             @if ($canProjects)
+                                <span class="admin-nav-label">Workspace</span>
                                 @if ($isFullAdmin)
                                 <a class="admin-nav-link {{ $isProjectManagementWorkspace ? 'active' : '' }}"
                                     href="{{ route('admin.project-management.dashboard') }}">
@@ -2389,6 +2394,9 @@
                                 </a>
                             @endif
 
+                            @if ($canLetters || $canArchive)
+                            <span class="admin-nav-label">Manage</span>
+
                             @if ($canLetters)
                                 <a class="admin-nav-link {{ $isLetterWorkspace ? 'active' : '' }}"
                                     href="{{ route('admin.letters.create') }}">
@@ -2422,6 +2430,7 @@
                                     <span>Saved work</span>
                                 </div>
                                 </a>
+                            @endif
                             @endif
 
                             <span class="admin-nav-label">System</span>

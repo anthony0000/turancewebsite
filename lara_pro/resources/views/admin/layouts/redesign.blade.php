@@ -5835,6 +5835,12 @@ body.is-admin .admin-sidebar .admin-nav-link {
     padding: 5px 8px 5px 6px !important;
 }
 
+/* The rail owns the available height, but its navigation items should keep
+ * their natural row height instead of stretching into oversized cards. */
+body.is-admin .admin-sidebar .admin-nav {
+    align-content: start;
+}
+
 body.is-admin .admin-sidebar .admin-nav-link .admin-nav-icon {
     display: grid !important;
     place-items: center !important;
