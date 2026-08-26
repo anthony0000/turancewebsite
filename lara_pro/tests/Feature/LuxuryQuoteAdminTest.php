@@ -14,7 +14,7 @@ it('renders the redesigned admin login page', function () {
     $this
         ->get(route('admin.login'))
         ->assertOk()
-        ->assertSee('Welcome back to the invoice desk.')
+        ->assertSee('Sign in')
         ->assertSee('auth-card', false);
 });
 

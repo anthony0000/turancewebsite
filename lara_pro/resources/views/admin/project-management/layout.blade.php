@@ -4,7 +4,7 @@
 
 @push('styles')
     <style>
-        .pm-shell { display: grid; gap: 18px; }
+        .pm-shell { display: grid; gap: 18px; align-content: start; }
         .pm-subnav { position: relative; display: flex; flex-wrap: nowrap; align-items: center; gap: 7px; padding: 8px; border: 1px solid var(--line); border-radius: 16px; background: rgba(255,255,255,.78); overflow: visible; }
         .pm-subnav > a, .pm-subnav-more { flex: 0 0 auto; }
         .pm-subnav a { display: inline-flex; min-height: 34px; align-items: center; padding: 0 11px; border-radius: 9px; color: var(--muted); font-size: 12px; font-weight: 700; }
@@ -31,6 +31,28 @@
         .pm-project-view[data-read-only="1"] form { display: none; }
         .pm-project-view[data-read-only="1"] .pm-tabs a[href*="settings"] { display: none; }
         .pm-project-view[data-read-only="1"] > section.panel.pm-panel:last-child { display: none; }
+        .pm-project-view .pm-hero { align-items: center; padding: 22px 26px; }
+        body.is-admin .pm-project-view .pm-hero h2 { color: var(--text); font-size: 25px !important; letter-spacing: -.035em; }
+        .pm-project-view .pm-hero > div:first-child { min-width: 0; }
+        .pm-project-view .pm-hero > div:first-child > p { display: block !important; max-width: 720px; margin: 8px 0 0; color: var(--muted); font-size: 12px; line-height: 1.5; }
+        .pm-project-view .pm-hero .pm-project-meta { margin-top: 11px !important; }
+        .pm-project-view .pm-stat-row { gap: 10px; }
+        .pm-project-view .pm-stat { min-height: 76px; display: grid; align-content: center; gap: 5px; padding: 13px 15px; }
+        .pm-project-view .pm-stat strong { color: var(--text); font-size: 23px; line-height: 1; }
+        .pm-project-view .pm-tabs { gap: 6px; margin: 0; }
+        .pm-project-view .pm-tabs a { display: inline-flex; min-height: 38px; align-items: center; padding-inline: 13px; }
+        .pm-project-view .pm-tabs a.active { border-color: #1c1e22; background: #1c1e22; color: #fff; }
+        .pm-project-view .pm-detail-grid { align-items: start; }
+        .pm-project-view .pm-stack { align-content: start; }
+        .pm-project-view .pm-stack > .pm-panel { min-height: 0; }
+        .pm-project-view .pm-panel-head { align-items: center; }
+        .pm-project-view .pm-empty { display: grid; min-height: 76px; align-content: center; justify-items: start; gap: 5px; padding: 16px 0; text-align: left; }
+        .pm-project-view .pm-empty strong { color: var(--text); font-size: 13px; }
+        .pm-project-view .pm-empty span { color: var(--muted); font-size: 11px; }
+        .pm-project-view .pm-empty .pm-icon-link { justify-content: flex-start; margin-top: 2px; }
+        .pm-project-view .pm-inline-form { align-items: end; }
+        .pm-project-view .pm-inline-form .field,
+        .pm-project-view .pm-inline-form select { min-width: 0; }
         .pm-task-view .pm-panel-head p { display: none; }
         .pm-task-view[data-read-only="1"] form:not(.pm-list-item) { display: none; }
         .pm-task-view[data-read-only="1"] form.pm-list-item { pointer-events: none; }
@@ -130,7 +152,14 @@
         .pm-chart-bar > span:last-child { text-align: right; font-weight: 800; }
         /* Keep empty delivery views compact and useful instead of stretching
            every neighboring panel to the height of a blank state. */
-        .pm-dashboard { display: grid; gap: 14px; }
+        .pm-dashboard,
+        .pm-project-list,
+        .pm-board-view,
+        .pm-backlog-view,
+        .pm-sprints-view,
+        .pm-task-view,
+        .pm-project-view { display: grid; gap: 18px; align-content: start; }
+        .pm-dashboard { gap: 18px; }
         .pm-dashboard .pm-grid,
         .pm-dashboard .pm-grid-wide { align-items: start; }
         .pm-dashboard .pm-panel { min-height: 0; }
@@ -256,7 +285,7 @@
         @media (max-width: 980px) { .pm-create-layout { grid-template-columns: 1fr; } .pm-create-aside { position: static; grid-template-columns: repeat(2, minmax(0, 1fr)); } }
         @media (max-width: 640px) { .pm-create-aside { grid-template-columns: 1fr; } .pm-create-main { padding: 16px; } .pm-member-grid { grid-template-columns: 1fr; } }
         @media (max-width: 980px) { .pm-kpis { grid-template-columns: repeat(2, minmax(0,1fr)); } .pm-grid, .pm-detail-grid { grid-template-columns: 1fr; } }
-        @media (max-width: 640px) { .pm-kpis, .pm-grid-wide, .pm-form-grid { grid-template-columns: 1fr; } .pm-hero { align-items: flex-start; flex-direction: column; padding: 18px; } .pm-subnav { overflow-x: auto; flex-wrap: nowrap; } .pm-subnav a { flex: 0 0 auto; } .pm-panel { padding: 14px; } }
+        @media (max-width: 640px) { .pm-kpis, .pm-grid-wide, .pm-form-grid { grid-template-columns: 1fr; } .pm-hero { align-items: flex-start; flex-direction: column; padding: 18px; } .pm-subnav { overflow-x: auto; flex-wrap: nowrap; } .pm-subnav a { flex: 0 0 auto; } .pm-panel { padding: 14px; } .pm-project-view .pm-stat-row { grid-template-columns: 1fr; } .pm-project-view .pm-tabs { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 3px; } .pm-project-view .pm-tabs a { flex: 0 0 auto; } .pm-project-view .pm-hero .pm-actions { width: 100%; } .pm-project-view .pm-hero .pm-actions > * { flex: 1 1 0; } }
     </style>
 @endpush
 

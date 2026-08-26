@@ -2533,13 +2533,19 @@
                 @endif
 
                 @if (session('status') || session('admin_notice'))
-                    <div class="admin-alert-stack" aria-live="polite" aria-atomic="true">
+                    <div class="admin-alert-stack" data-admin-alert-stack aria-live="polite" aria-atomic="true">
                         @if (session('status'))
-                            <div class="alert alert-success" role="status">{{ session('status') }}</div>
+                            <div class="alert alert-success" role="status">
+                                <span>{{ session('status') }}</span>
+                                <button class="admin-alert-close" type="button" data-admin-alert-close aria-label="Dismiss notification">&times;</button>
+                            </div>
                         @endif
 
                         @if (session('admin_notice'))
-                            <div class="alert alert-warning" role="alert">{{ session('admin_notice') }}</div>
+                            <div class="alert alert-warning" role="alert">
+                                <span>{{ session('admin_notice') }}</span>
+                                <button class="admin-alert-close" type="button" data-admin-alert-close aria-label="Dismiss notification">&times;</button>
+                            </div>
                         @endif
                     </div>
                 @endif
@@ -2580,6 +2586,55 @@
             </section>
         </div>
     @endif
+    <script>
+        (() => {
+            const stack = document.querySelector('[data-admin-alert-stack]');
+
+            if (!stack) {
+                return;
+            }
+
+            stack.querySelectorAll('.alert').forEach((alert) => {
+                let dismissTimer;
+                let isPaused = false;
+                const delay = alert.classList.contains('alert-danger') ? 8000 : 5000;
+
+                const remove = () => {
+                    if (isPaused || alert.classList.contains('is-dismissing')) {
+                        return;
+                    }
+
+                    alert.classList.add('is-dismissing');
+                    window.setTimeout(() => alert.remove(), 220);
+                };
+
+                const schedule = (timeout = delay) => {
+                    window.clearTimeout(dismissTimer);
+                    dismissTimer = window.setTimeout(remove, timeout);
+                };
+
+                alert.querySelector('[data-admin-alert-close]')?.addEventListener('click', remove);
+                alert.addEventListener('mouseenter', () => {
+                    isPaused = true;
+                    window.clearTimeout(dismissTimer);
+                });
+                alert.addEventListener('mouseleave', () => {
+                    isPaused = false;
+                    schedule(2500);
+                });
+                alert.addEventListener('focusin', () => {
+                    isPaused = true;
+                    window.clearTimeout(dismissTimer);
+                });
+                alert.addEventListener('focusout', () => {
+                    isPaused = false;
+                    schedule(2500);
+                });
+
+                schedule();
+            });
+        })();
+    </script>
     <script>
         (() => {
             const body = document.body;

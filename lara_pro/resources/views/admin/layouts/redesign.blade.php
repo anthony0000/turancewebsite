@@ -3908,6 +3908,488 @@ body.is-auth .admin-main {
     }
 }
 
+/* The auth surface uses the same restrained canvas and card language as the
+ * authenticated admin workspace. Keep identity and credentials only. */
+body.is-auth {
+    min-height: 100dvh;
+    overflow-x: hidden;
+    background:
+        radial-gradient(ellipse 32% 48% at 20% 20%, rgba(184, 134, 11, .09), transparent 70%),
+        radial-gradient(ellipse 28% 42% at 84% 76%, rgba(78, 89, 108, .1), transparent 70%),
+        #f7f7fa;
+}
+
+body.is-auth::before,
+body.is-auth::after {
+    position: fixed;
+    z-index: 0;
+    display: block;
+    border-radius: 50%;
+    content: "";
+    pointer-events: none;
+}
+
+body.is-auth::before {
+    top: -170px;
+    left: 50%;
+    width: 460px;
+    height: 300px;
+    background: rgba(184, 134, 11, .06);
+    filter: blur(1px);
+    transform: translateX(-50%) rotate(-17deg);
+}
+
+body.is-auth::after {
+    top: 8%;
+    left: 12%;
+    width: 12px;
+    height: 12px;
+    background: rgba(184, 134, 11, .28);
+    box-shadow:
+        760px 12px 0 rgba(184, 134, 11, .42),
+        980px 360px 0 rgba(78, 89, 108, .18),
+        190px 500px 0 rgba(184, 134, 11, .22);
+}
+
+body.is-auth .admin-shell--auth {
+    width: 100%;
+    max-width: none;
+    min-height: 100dvh;
+    padding: 24px;
+    place-items: start center;
+}
+
+body.is-auth .admin-workspace {
+    width: min(100%, 1040px);
+    max-width: 1040px;
+    position: relative;
+    z-index: 1;
+}
+
+body.is-auth .admin-main {
+    width: 100%;
+    gap: 0;
+}
+
+body.is-auth .admin-alert-stack {
+    width: 100%;
+    margin-bottom: 12px;
+}
+
+body.is-auth .auth-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 0;
+    width: min(100%, 820px);
+    min-height: 500px;
+    margin: clamp(34px, 9vh, 78px) auto 0;
+    overflow: hidden;
+    border: 1px solid #e1e4e8;
+    border-radius: 20px;
+    box-shadow: 0 24px 70px rgba(31, 38, 48, .12);
+}
+
+body.is-auth .auth-brand-panel {
+    order: 2;
+    position: relative;
+    display: grid;
+    min-height: 500px;
+    align-content: space-between;
+    gap: 32px;
+    padding: 36px;
+    border: 0;
+    border-radius: 0;
+    overflow: hidden;
+    border-left: 1px solid rgba(255, 255, 255, .08);
+    background:
+        radial-gradient(circle at 75% 26%, rgba(184, 134, 11, .22), transparent 26%),
+        linear-gradient(145deg, #2b3038, #17191d 70%);
+}
+
+body.is-auth .auth-brand-panel::before {
+    background:
+        linear-gradient(135deg, rgba(184, 134, 11, .28), transparent 42%),
+        repeating-linear-gradient(135deg, rgba(255, 255, 255, .06) 0 1px, transparent 1px 22px);
+    opacity: 1;
+}
+
+body.is-auth .auth-brand-panel::after {
+    right: -82px;
+    bottom: -105px;
+    width: 300px;
+    height: 300px;
+    border-color: rgba(212, 175, 55, .28);
+}
+
+body.is-auth .auth-brand-panel .auth-brand-lockup {
+    padding-bottom: 0;
+    border-bottom: 0;
+}
+
+body.is-auth .auth-brand-panel .auth-brand-lockup .admin-brand-mark {
+    width: 42px;
+    height: 42px;
+    border-radius: 9px;
+    background: linear-gradient(145deg, #d5a72c, #8f6508);
+}
+
+body.is-auth .auth-brand-panel .auth-brand-copy strong {
+    color: #fff;
+    font-size: 16px;
+}
+
+body.is-auth .auth-brand-panel .auth-brand-copy span {
+    color: #d5a72c;
+}
+
+body.is-auth .auth-visual {
+    position: relative;
+    min-height: 300px;
+    margin: 0 -4px -4px;
+    border: 1px solid rgba(255, 255, 255, .17);
+    border-radius: 16px;
+    background: linear-gradient(145deg, rgba(255, 255, 255, .1), rgba(255, 255, 255, .02));
+    overflow: hidden;
+}
+
+body.is-auth .auth-visual::before {
+    content: "";
+    position: absolute;
+    inset: 24px;
+    border: 1px solid rgba(212, 175, 55, .24);
+    border-radius: 12px;
+}
+
+body.is-auth .auth-visual-orbit {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 230px;
+    height: 230px;
+    border: 1px solid rgba(212, 175, 55, .42);
+    border-radius: 50%;
+    transform: translate(-50%, -50%) rotate(-24deg) scaleX(1.55);
+}
+
+body.is-auth .auth-visual-orbit::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #d5a72c;
+    box-shadow: 0 0 0 7px rgba(212, 175, 55, .12), 0 0 34px rgba(212, 175, 55, .7);
+    transform: translate(-50%, -50%);
+}
+
+body.is-auth .auth-visual-bars {
+    position: absolute;
+    right: 31px;
+    bottom: 31px;
+    display: flex;
+    align-items: end;
+    gap: 7px;
+    height: 92px;
+}
+
+body.is-auth .auth-visual-bars i {
+    display: block;
+    width: 13px;
+    height: 42px;
+    border-radius: 4px 4px 0 0;
+    background: #d5a72c;
+    opacity: .85;
+}
+
+body.is-auth .auth-visual-bars i:nth-child(2) { height: 62px; opacity: .62; }
+body.is-auth .auth-visual-bars i:nth-child(3) { height: 50px; opacity: .72; }
+body.is-auth .auth-visual-bars i:nth-child(4) { height: 78px; opacity: .48; }
+body.is-auth .auth-visual-bars i:nth-child(5) { height: 66px; opacity: .58; }
+
+body.is-auth .auth-visual-window {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: calc(100% - 62px);
+    height: 194px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, .25);
+    border-radius: 11px;
+    background: rgba(248, 250, 252, .94);
+    box-shadow: 0 22px 32px rgba(0, 0, 0, .2);
+    transform: translate(-50%, -50%) rotate(-3deg);
+}
+
+body.is-auth .auth-visual-window__top {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    height: 28px;
+    padding: 0 11px;
+    border-bottom: 1px solid #e4e8ec;
+    background: #fff;
+}
+
+body.is-auth .auth-visual-window__top i {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #c9ced5;
+}
+
+body.is-auth .auth-visual-window__top i:first-child { background: #d5a72c; }
+
+body.is-auth .auth-visual-window__body {
+    display: grid;
+    grid-template-columns: 42px minmax(0, 1fr);
+    height: calc(100% - 28px);
+}
+
+body.is-auth .auth-visual-window__rail {
+    border-right: 1px solid #e4e8ec;
+    background:
+        linear-gradient(#d5a72c 0 0) 13px 18px / 16px 5px no-repeat,
+        repeating-linear-gradient(180deg, #d9dee3 0 4px, transparent 4px 15px) 13px 43px / 16px 4px no-repeat,
+        #f1f3f5;
+}
+
+body.is-auth .auth-visual-window__content {
+    position: relative;
+    padding: 24px 22px 18px;
+    background: linear-gradient(145deg, #fff, #f3f5f7);
+}
+
+body.is-auth .auth-visual-window__line {
+    width: 42%;
+    height: 7px;
+    border-radius: 999px;
+    background: #24282e;
+    opacity: .82;
+}
+
+body.is-auth .auth-visual-window__content::before,
+body.is-auth .auth-visual-window__content::after {
+    content: "";
+    position: absolute;
+    left: 22px;
+    right: 22px;
+    height: 1px;
+    background: #e5e8eb;
+}
+
+body.is-auth .auth-visual-window__content::before { top: 57px; }
+body.is-auth .auth-visual-window__content::after { top: 91px; }
+
+body.is-auth .auth-visual-window__content .auth-visual-bars {
+    position: absolute;
+    right: 22px;
+    bottom: 18px;
+    display: flex;
+    align-items: end;
+    gap: 6px;
+    height: 74px;
+}
+
+body.is-auth .auth-visual-window__content .auth-visual-bars i {
+    display: block;
+    width: 12px;
+    height: 34px;
+    border-radius: 3px 3px 0 0;
+    background: #1f2328;
+    opacity: .86;
+}
+
+body.is-auth .auth-visual-window__content .auth-visual-bars i:nth-child(2) { height: 52px; background: #b8860b; }
+body.is-auth .auth-visual-window__content .auth-visual-bars i:nth-child(3) { height: 43px; opacity: .58; }
+body.is-auth .auth-visual-window__content .auth-visual-bars i:nth-child(4) { height: 66px; background: #b8860b; opacity: .74; }
+body.is-auth .auth-visual-window__content .auth-visual-bars i:nth-child(5) { height: 55px; opacity: .66; }
+
+body.is-auth .auth-visual-float {
+    position: absolute;
+    display: block;
+    width: 13px;
+    height: 13px;
+    border: 1px solid rgba(255, 255, 255, .5);
+    border-radius: 50%;
+    background: #d5a72c;
+    box-shadow: 0 0 0 6px rgba(213, 167, 44, .1);
+}
+
+body.is-auth .auth-visual-float--one { top: 29px; right: 31px; }
+body.is-auth .auth-visual-float--two { bottom: 28px; left: 28px; width: 9px; height: 9px; opacity: .6; }
+}
+
+body.is-auth .auth-card {
+    order: 1;
+    width: auto;
+    min-height: 500px;
+    margin: 0;
+    align-content: start;
+    padding: 56px 50px;
+    border: 0;
+    border-right: 1px solid #e6e8eb;
+    border-left: 0;
+    border-radius: 0;
+    background: #fff;
+    box-shadow: none;
+}
+
+body.is-auth .auth-card::before {
+    height: 3px;
+    background: var(--primary);
+}
+
+body.is-auth .auth-brand-lockup {
+    gap: 11px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #edf0f2;
+}
+
+body.is-auth .auth-brand-lockup .admin-brand-mark {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: #1c1e22;
+    border: 0;
+    box-shadow: none;
+}
+
+body.is-auth .auth-brand-copy strong {
+    color: #17191d;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+body.is-auth .auth-brand-copy span {
+    margin-top: 3px;
+    color: #858b94;
+    font-size: 9px;
+    letter-spacing: .1em;
+}
+
+body.is-auth .auth-card-head {
+    margin: 0;
+}
+
+body.is-auth .auth-card-head h1 {
+    margin: 0;
+    color: #17191d;
+    font-family: var(--font-display);
+    font-size: 30px;
+    font-weight: 600;
+    letter-spacing: -.035em;
+    line-height: 1.15;
+}
+
+body.is-auth .auth-card-head p {
+    max-width: 280px;
+    margin: 9px 0 0;
+    color: #858b94;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+body.is-auth .auth-form {
+    gap: 14px;
+}
+
+body.is-auth .auth-card .field,
+body.is-auth .auth-card .field-full {
+    gap: 6px;
+}
+
+body.is-auth .auth-card .field label {
+    color: #17191d;
+    font-size: 11px;
+    font-weight: 650;
+}
+
+body.is-auth .auth-card .field input {
+    min-height: 44px;
+    padding: 0 12px;
+    border: 1px solid #dfe3e7;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: none;
+}
+
+body.is-auth .auth-card .field input:focus {
+    border-color: rgba(184, 134, 11, .55);
+    box-shadow: 0 0 0 3px rgba(184, 134, 11, .1);
+}
+
+body.is-auth .auth-form .button {
+    min-height: 44px;
+    border: 0;
+    border-radius: 8px;
+    background: #1c1e22;
+    box-shadow: none;
+    font-size: 12px;
+}
+
+body.is-auth .auth-form .button:hover {
+    background: #34373c;
+}
+
+body.is-auth .auth-card .alert {
+    border-radius: 8px;
+    font-size: 11px;
+}
+
+@media (max-width: 900px) {
+    body.is-auth .auth-grid {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 380px);
+        margin-top: 32px;
+    }
+
+    body.is-auth .auth-brand-panel,
+    body.is-auth .auth-card {
+        min-height: 460px;
+    }
+
+    body.is-auth .auth-brand-panel { padding: 30px; }
+    body.is-auth .auth-card { padding: 42px 30px; }
+    body.is-auth .auth-visual { min-height: 250px; }
+}
+
+@media (max-width: 680px) {
+    body.is-auth .auth-grid {
+        grid-template-columns: 1fr;
+        margin-top: 20px;
+    }
+
+    body.is-auth .auth-card {
+        order: -1;
+        min-height: 0;
+        padding: 28px 22px;
+        border-right: 0;
+        border-left: 0;
+        border-bottom: 1px solid #e6e8eb;
+    }
+
+    body.is-auth .auth-brand-panel {
+        min-height: 260px;
+        grid-template-rows: auto 1fr;
+        padding: 26px 22px;
+    }
+
+    body.is-auth .auth-visual {
+        min-height: 130px;
+        margin: 0;
+    }
+
+    body.is-auth .auth-visual-orbit { width: 120px; height: 120px; }
+    body.is-auth .auth-visual-bars { right: 20px; bottom: 20px; transform: scale(.72); transform-origin: bottom right; }
+}
+
+@media (max-width: 520px) {
+    body.is-auth .admin-shell--auth { padding: 14px; }
+    body.is-auth .auth-grid { margin-top: 24px; }
+    body.is-auth .auth-card { min-height: 0; padding: 28px 22px; }
+}
+
 /* Keep page-level overflow out of the viewport; wide data regions scroll locally. */
 body.is-admin {
     overflow-x: hidden;
@@ -4729,7 +5211,7 @@ body.is-command-open {
 /* Project management keeps the same data and permissions, but gives the
  * dashboard one visual rhythm and hides advanced filters until requested. */
 body.is-admin .pm-dashboard {
-    gap: 14px;
+    gap: 18px;
 }
 
 body.is-admin .pm-dashboard .pm-hero {
@@ -5013,6 +5495,40 @@ body.is-admin .admin-alert-stack .alert {
     animation: admin-alert-in 0.22s ease-out both;
 }
 
+body.is-admin .admin-alert-stack .alert > span {
+    min-width: 0;
+}
+
+body.is-admin .admin-alert-close {
+    display: inline-grid;
+    width: 22px;
+    height: 22px;
+    flex: 0 0 22px;
+    margin: -2px -3px -2px auto;
+    place-items: center;
+    border: 0;
+    border-radius: 5px;
+    background: transparent;
+    color: currentColor;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: 400;
+    line-height: 1;
+    opacity: .68;
+}
+
+body.is-admin .admin-alert-close:hover,
+body.is-admin .admin-alert-close:focus-visible {
+    background: rgba(28, 34, 42, .08);
+    opacity: 1;
+    outline: none;
+}
+
+body.is-admin .admin-alert-stack .alert.is-dismissing {
+    animation: admin-alert-out 0.22s ease-in both;
+    pointer-events: none;
+}
+
 body.is-admin .admin-alert-stack .alert::before {
     width: 7px;
     height: 7px;
@@ -5041,6 +5557,18 @@ body.is-admin .admin-alert-stack .alert-warning {
     to {
         opacity: 1;
         transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes admin-alert-out {
+    from {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateY(-6px) scale(.98);
     }
 }
 
@@ -5722,15 +6250,8 @@ body.is-admin:not(.is-dashboard-overview) .admin-main > .dashboard-grid > .tt-se
     box-shadow: none;
 }
 
-body.is-admin:not(.is-dashboard-overview) .pm-shell { gap: 0; }
+body.is-admin:not(.is-dashboard-overview) .pm-shell { gap: 18px; }
 body.is-admin:not(.is-dashboard-overview) .pm-subnav { margin-bottom: 0; }
-body.is-admin:not(.is-dashboard-overview) .pm-hero {
-    margin-top: 0;
-    border-radius: 0;
-    border-inline: 0;
-    border-top: 0;
-    box-shadow: none;
-}
 
 @media (max-width: 1100px) {
     body.is-admin:not(.is-dashboard-overview) .admin-workspace--with-sidebar .admin-main { padding-inline: 22px; }

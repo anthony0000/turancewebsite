@@ -20,7 +20,6 @@ class AdminAuthController extends Controller
 
         return view('admin.auth.login', [
             'configured' => $this->credentialsConfigured(),
-            'templateCount' => count(config('luxury-quotes.templates', [])),
         ]);
     }
 
