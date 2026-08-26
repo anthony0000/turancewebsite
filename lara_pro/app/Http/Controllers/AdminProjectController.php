@@ -9,7 +9,9 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -164,10 +166,11 @@ class AdminProjectController extends Controller
 
     private function createProjectFile(Project $project, UploadedFile $file, ?string $description): ProjectFile
     {
-        $path = $this->storeProjectFile($project, $file);
+        $path = $this->projectFilePath($project, $file);
+        $contents = $file->getContent();
 
-        try {
-            return ProjectFile::query()->create([
+        return DB::transaction(function () use ($project, $file, $description, $path, $contents): ProjectFile {
+            $projectFile = ProjectFile::query()->create([
                 'project_id' => $project->id,
                 'uploaded_by' => AdminAccess::currentUser()?->id,
                 'original_name' => $this->originalName($file),
@@ -176,21 +179,23 @@ class AdminProjectController extends Controller
                 'size' => $file->getSize(),
                 'description' => filled($description) ? trim($description) : null,
             ]);
-        } catch (\Throwable $exception) {
-            Storage::disk('local')->delete($path);
 
-            throw $exception;
-        }
+            $projectFile->content()->create([
+                'contents' => $contents,
+            ]);
+
+            return $projectFile;
+        });
     }
 
-    public function downloadFile(ProjectFile $projectFile): BinaryFileResponse
+    public function downloadFile(ProjectFile $projectFile): BinaryFileResponse|Response
     {
         abort_unless(AdminAccess::isFullAdmin() || $projectFile->is_shared, 403);
 
         return $this->fileResponse($projectFile, false);
     }
 
-    public function previewFile(ProjectFile $projectFile): BinaryFileResponse
+    public function previewFile(ProjectFile $projectFile): BinaryFileResponse|Response
     {
         abort_unless(AdminAccess::isFullAdmin() || $projectFile->is_shared, 403);
 
@@ -207,42 +212,45 @@ class AdminProjectController extends Controller
         ]);
 
         $newPath = null;
+        $newContents = null;
         $oldPath = $projectFile->path;
 
         if ($request->hasFile('file')) {
-            $newPath = $this->storeProjectFile(
+            $newFile = $validated['file'];
+            $newPath = $this->projectFilePath(
                 Project::query()->findOrFail($projectFile->project_id),
-                $validated['file']
+                $newFile
             );
+            $newContents = $newFile->getContent();
         }
 
-        try {
-            $attributes = [];
+        $attributes = [];
 
-            if ($newPath !== null) {
-                $file = $validated['file'];
-                $attributes = [
-                    'original_name' => $this->originalName($file),
-                    'path' => $newPath,
-                    'mime_type' => $file->getMimeType() ?: $file->getClientMimeType(),
-                    'size' => $file->getSize(),
-                ];
-            }
+        if ($newPath !== null) {
+            $file = $validated['file'];
+            $attributes = [
+                'original_name' => $this->originalName($file),
+                'path' => $newPath,
+                'mime_type' => $file->getMimeType() ?: $file->getClientMimeType(),
+                'size' => $file->getSize(),
+            ];
+        }
 
-            if ($request->exists('description')) {
-                $attributes['description'] = filled($validated['description'] ?? null)
-                    ? trim($validated['description'])
-                    : null;
-            }
+        if ($request->exists('description')) {
+            $attributes['description'] = filled($validated['description'] ?? null)
+                ? trim($validated['description'])
+                : null;
+        }
 
+        DB::transaction(function () use ($projectFile, $attributes, $newPath, $newContents): void {
             $projectFile->forceFill($attributes)->save();
-        } catch (\Throwable $exception) {
-            if ($newPath !== null) {
-                Storage::disk('local')->delete($newPath);
-            }
 
-            throw $exception;
-        }
+            if ($newPath !== null) {
+                $projectFile->content()->updateOrCreate([], [
+                    'contents' => $newContents,
+                ]);
+            }
+        });
 
         if ($newPath !== null && $oldPath !== $newPath) {
             Storage::disk('local')->delete($oldPath);
@@ -292,7 +300,9 @@ class AdminProjectController extends Controller
     {
         abort_unless(AdminAccess::isFullAdmin(), 403);
         $projectId = $projectFile->project_id;
-        Storage::disk('local')->delete($projectFile->path);
+        if (! $projectFile->content()->exists()) {
+            Storage::disk('local')->delete($projectFile->path);
+        }
         $projectFile->delete();
 
         return $this->projectFileRedirect(request(), $projectFile, $projectId)
@@ -317,26 +327,19 @@ class AdminProjectController extends Controller
         ]);
     }
 
-    public function downloadSharedFile(ProjectFile $projectFile): BinaryFileResponse
+    public function downloadSharedFile(ProjectFile $projectFile): BinaryFileResponse|Response
     {
         $this->abortUnlessShared($projectFile);
 
         return $this->fileResponse($projectFile, false);
     }
 
-    private function storeProjectFile(Project $project, UploadedFile $file): string
+    private function projectFilePath(Project $project, UploadedFile $file): string
     {
         $extension = strtolower($file->getClientOriginalExtension() ?: $file->guessExtension() ?: 'file');
         $extension = preg_replace('/[^a-z0-9]+/i', '', $extension) ?: 'file';
-        $filename = Str::uuid().'.'.$extension;
-        $disk = Storage::disk('local');
-        $path = $file->storeAs(self::PROJECT_FILES_DIRECTORY.'/'.$project->id, $filename, 'local');
 
-        if (! is_string($path) || $path === '' || ! $disk->exists($path)) {
-            throw new \RuntimeException('The project file could not be stored.');
-        }
-
-        return $path;
+        return self::PROJECT_FILES_DIRECTORY.'/'.$project->id.'/'.Str::uuid().'.'.$extension;
     }
 
     private function originalName(UploadedFile $file): string
@@ -346,15 +349,28 @@ class AdminProjectController extends Controller
         return Str::limit($name !== '' ? $name : 'Project file', 255, '');
     }
 
-    private function fileResponse(ProjectFile $projectFile, bool $inline): BinaryFileResponse
+    private function fileResponse(ProjectFile $projectFile, bool $inline): BinaryFileResponse|Response
     {
         abort_unless($projectFile->hasStoredFile(), 404);
 
-        $path = Storage::disk('local')->path($projectFile->path);
         $headers = [
             'Content-Type' => $projectFile->mime_type ?: 'application/octet-stream',
             'X-Content-Type-Options' => 'nosniff',
         ];
+
+        $content = $projectFile->content()->first(['contents']);
+
+        if ($content !== null) {
+            $headers['Content-Disposition'] = ($inline ? 'inline' : 'attachment').'; filename="'.addslashes($projectFile->original_name).'"';
+
+            if ($projectFile->size !== null) {
+                $headers['Content-Length'] = (string) $projectFile->size;
+            }
+
+            return response($content->contents, 200, $headers);
+        }
+
+        $path = Storage::disk('local')->path($projectFile->path);
 
         if ($inline) {
             $headers['Content-Disposition'] = 'inline; filename="'.addslashes($projectFile->original_name).'"';

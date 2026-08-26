@@ -2,6 +2,7 @@
 
 use App\Models\Project;
 use App\Models\ProjectFile;
+use App\Models\ProjectFileContent;
 use App\Models\User;
 use App\Support\AdminAccess;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -83,7 +84,7 @@ it('uploads an external project file with ajax even when the project has no staf
         ->and($projectFile->original_name)->toBe('client-reference.docx')
         ->and($projectFile->description)->toBe('Reference material for the staff handoff.');
 
-    Storage::disk('local')->assertExists($projectFile->path);
+    expect(ProjectFileContent::query()->where('project_file_id', $projectFile->id)->exists())->toBeTrue();
 });
 
 it('stores project files privately, shares one file, and can revoke the link', function () {
@@ -111,14 +112,15 @@ it('stores project files privately, shares one file, and can revoke the link', f
         ->and($projectFile->is_shared)->toBeFalse()
         ->and($projectFile->description)->toBe('Approved reference file for the final handoff.');
 
-    Storage::disk('local')->assertExists($projectFile->path);
+    expect(ProjectFileContent::query()->where('project_file_id', $projectFile->id)->exists())->toBeTrue();
     Storage::disk('public')->assertMissing($projectFile->path);
+    Storage::disk('local')->deleteDirectory('projects');
 
     $this
         ->withSession(projectAdminSession())
         ->get(route('admin.projects.files.download', $projectFile))
         ->assertOk()
-        ->assertHeader('Content-Disposition', 'attachment; filename=approved-reference.pdf');
+        ->assertHeader('Content-Disposition', 'attachment; filename="approved-reference.pdf"');
 
     $this
         ->withSession(projectAdminSession())
@@ -141,7 +143,7 @@ it('stores project files privately, shares one file, and can revoke the link', f
     $this
         ->get(route('project-files.download', $projectFile->share_token))
         ->assertOk()
-        ->assertHeader('Content-Disposition', 'attachment; filename=approved-reference.pdf');
+        ->assertHeader('Content-Disposition', 'attachment; filename="approved-reference.pdf"');
 
     $this
         ->withSession(projectAdminSession())
@@ -179,31 +181,33 @@ it('updates project file details and replaces the stored file without creating a
         ->withSession(projectAdminSession())
         ->post(route('admin.projects.files.update', $projectFile), [
             '_method' => 'PUT',
-            'file' => UploadedFile::fake()->create('updated-reference.docx', 72, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'),
+            'file' => UploadedFile::fake()->createWithContent('updated-reference.txt', 'updated document bytes'),
             'description' => 'Updated reference material.',
         ], [
             'Accept' => 'application/json',
             'X-Requested-With' => 'XMLHttpRequest',
         ])
         ->assertOk()
-        ->assertJsonPath('data.original_name', 'updated-reference.docx')
+        ->assertJsonPath('data.original_name', 'updated-reference.txt')
         ->assertJsonPath('data.description', 'Updated reference material.');
 
     $projectFile->refresh();
 
     expect(ProjectFile::query()->count())->toBe(1)
-        ->and($projectFile->original_name)->toBe('updated-reference.docx')
+        ->and($projectFile->original_name)->toBe('updated-reference.txt')
         ->and($projectFile->description)->toBe('Updated reference material.')
         ->and($projectFile->path)->not->toBe($oldPath);
 
     Storage::disk('local')->assertMissing($oldPath);
-    Storage::disk('local')->assertExists($projectFile->path);
+    expect(ProjectFileContent::query()->where('project_file_id', $projectFile->id)->value('contents'))
+        ->toBe('updated document bytes');
 
     $this
         ->withSession(projectAdminSession())
         ->get(route('admin.projects.files.download', $projectFile))
         ->assertOk()
-        ->assertHeader('Content-Disposition', 'attachment; filename=updated-reference.docx');
+        ->assertHeader('Content-Disposition', 'attachment; filename="updated-reference.txt"')
+        ->assertContent('updated document bytes');
 });
 
 it('removes the stored project file and keeps project access permission scoped', function () {

@@ -1,19 +1,19 @@
 # Project file storage
 
-Project handoff uploads use the same private `local` filesystem disk as signed contract documents. The database stores paths relative to the local disk root:
+Project handoff uploads store their bytes in the private `project_file_contents` database table. The `project_files.path` value remains a logical path for file naming and compatibility:
 
 ```text
 projects/files/{project_id}/{uuid}.{extension}
 ```
 
-The local disk root is:
+The local disk is retained as a fallback for older project-file records that were uploaded before database-backed content storage:
 
 ```text
 storage/app/private
 ```
 
-Because this application bootstraps Laravel from the nested `lara_pro` directory, the local path is `lara_pro/storage/app/private`, not the repository root's `storage` directory. The PHP/web-server user must have read and write access to this existing storage directory.
+New project-file uploads do not depend on the release directory, an external storage root, or `storage:link`. The file bytes and metadata therefore remain available after the application is replaced by a Git deployment, provided the production database is persistent.
 
-A database row without its physical file cannot restore the missing file contents; those files must be re-uploaded or recovered from a server backup.
+A database row without its content record cannot restore the missing file contents; those files must be re-uploaded or recovered from a server backup.
 
-Project files are private and are served through the authenticated/share-token controller routes. `storage:link` is not required for them.
+Project files are private and are served through the authenticated/share-token controller routes. Run the migration during deployment with `php artisan migrate --force` before using the upload controls.
