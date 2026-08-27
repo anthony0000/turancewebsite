@@ -180,6 +180,13 @@ class ProjectManagementApiController extends Controller
         return response()->json(['data' => $task->fresh()->load(['project', 'column', 'assignee']), 'message' => 'Task updated.']);
     }
 
+    public function deleteTask(Request $request, Task $task): JsonResponse
+    {
+        $request->headers->set('Accept', 'application/json');
+
+        return app(AdminProjectManagementController::class)->destroyTask($request, $task);
+    }
+
     public function moveTask(Request $request, Task $task): JsonResponse
     {
         $request->headers->set('Accept', 'application/json');

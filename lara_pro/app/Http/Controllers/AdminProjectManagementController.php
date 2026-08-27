@@ -16,6 +16,7 @@ use App\Models\TimeEntry;
 use App\Models\User;
 use App\Support\AdminAccess;
 use App\Support\ProjectManagementAccess;
+use App\Support\StaffDailyMotivation;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
@@ -540,6 +541,27 @@ class AdminProjectManagementController extends Controller
         return redirect()->route('admin.project-management.tasks.show', $task)->with('status', 'Task saved.');
     }
 
+    public function destroyTask(Request $request, Task $task): RedirectResponse|JsonResponse
+    {
+        $project = $task->project;
+        abort_unless(ProjectManagementAccess::canManage($project), 403);
+
+        $taskKey = $task->task_key;
+        $attachmentPaths = $task->attachments()->pluck('path');
+        $task->delete();
+
+        foreach ($attachmentPaths as $path) {
+            Storage::disk('local')->delete($path);
+        }
+
+        ProjectManagementAccess::log($project, 'task.deleted', Task::class, $task->id, ['task_key' => $taskKey], null);
+        ProjectManagementAccess::notify($project, 'task.deleted', 'Task deleted: '.$taskKey, route('admin.project-management.board', $project), ProjectManagementAccess::user()?->id);
+
+        return $request->expectsJson()
+            ? response()->json(['data' => null, 'message' => 'Task deleted.'])
+            : redirect()->route('admin.project-management.board', $project)->with('status', 'Task deleted.');
+    }
+
     public function completeTask(Request $request, Task $task): RedirectResponse|JsonResponse
     {
         ProjectManagementAccess::ensureTaskVisible($task);
@@ -881,6 +903,7 @@ class AdminProjectManagementController extends Controller
             'priorityBreakdown' => $tasks->groupBy('priority')->map->count(),
             'dueBreakdown' => $dueBreakdown,
             'projectBreakdown' => $projectBreakdown,
+            'dailyMotivation' => StaffDailyMotivation::forDate(),
             'filters' => $request->only(['project_id', 'priority', 'status', 'date_from', 'date_to']),
             'canManageWorkspace' => false,
         ]);

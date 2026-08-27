@@ -166,6 +166,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::post('/projects/{project}/sprints', [ProjectManagementApiController::class, 'storeSprint'])->name('sprints.store');
                 Route::get('/projects/{project}/activity', [ProjectManagementApiController::class, 'activity'])->name('activity');
                 Route::patch('/tasks/{task}', [ProjectManagementApiController::class, 'updateTask'])->name('tasks.update');
+                Route::delete('/tasks/{task}', [ProjectManagementApiController::class, 'deleteTask'])->name('tasks.destroy');
                 Route::patch('/tasks/{task}/move', [ProjectManagementApiController::class, 'moveTask'])->name('tasks.move');
                 Route::patch('/tasks/{task}/complete', [ProjectManagementApiController::class, 'completeTask'])->name('tasks.complete');
                 Route::patch('/tasks/{task}/reopen', [ProjectManagementApiController::class, 'reopenTask'])->name('tasks.reopen');
@@ -205,6 +206,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/projects/{project}/tasks', [AdminProjectManagementController::class, 'storeTask'])->name('tasks.store');
             Route::get('/tasks/{task}', [AdminProjectManagementController::class, 'task'])->name('tasks.show');
             Route::put('/tasks/{task}', [AdminProjectManagementController::class, 'updateTask'])->name('tasks.update');
+            Route::delete('/tasks/{task}', [AdminProjectManagementController::class, 'destroyTask'])->name('tasks.destroy');
             Route::patch('/tasks/{task}/move', [AdminProjectManagementController::class, 'moveTask'])->name('tasks.move');
             Route::patch('/tasks/{task}/complete', [AdminProjectManagementController::class, 'completeTask'])->name('tasks.complete');
             Route::patch('/tasks/{task}/reopen', [AdminProjectManagementController::class, 'reopenTask'])->name('tasks.reopen');

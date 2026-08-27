@@ -64,6 +64,30 @@ it('creates tasks and persists status and ordering through the board endpoint', 
         ->and($task->fresh()->position)->toBe(0);
 });
 
+it('updates and deletes tasks through ajax endpoints', function () {
+    $admin = User::factory()->create(['role' => AdminAccess::ROLE_ADMIN, 'permissions' => AdminAccess::permissionKeys(), 'is_active' => true]);
+    $project = Project::query()->create(['project_number' => 'EDIT', 'name' => 'Editable tasks', 'status' => 'active', 'priority' => 'medium']);
+    $column = $project->boardColumns()->create(['name' => 'To Do', 'position' => 0]);
+    $task = $project->tasks()->create(['task_number' => 1, 'title' => 'Original task', 'type' => 'task', 'priority' => 'medium', 'status' => 'to_do', 'board_column_id' => $column->id, 'reporter_id' => $admin->id, 'position' => 0]);
+    $session = projectManagementSession($admin);
+
+    $this->withSession($session)
+        ->putJson(route('admin.project-management.tasks.update', $task), ['title' => 'Updated task', 'type' => 'feature', 'priority' => 'high', 'board_column_id' => $column->id])
+        ->assertOk()
+        ->assertJsonPath('message', 'Task updated.')
+        ->assertJsonPath('data.title', 'Updated task');
+
+    expect($task->fresh()->title)->toBe('Updated task');
+
+    $this->withSession($session)
+        ->deleteJson(route('admin.project-management.tasks.destroy', $task))
+        ->assertOk()
+        ->assertJsonPath('message', 'Task deleted.');
+
+    expect(Task::query()->find($task->id))->toBeNull()
+        ->and($project->activityLogs()->where('action', 'task.deleted')->exists())->toBeTrue();
+});
+
 it('uses public project and task keys for links and route binding', function () {
     $admin = User::factory()->create(['role' => AdminAccess::ROLE_ADMIN, 'permissions' => AdminAccess::permissionKeys(), 'is_active' => true]);
     $project = Project::query()->create(['project_number' => 'PUBLIC', 'name' => 'Public keys', 'status' => 'active', 'priority' => 'medium']);
@@ -108,7 +132,7 @@ it('limits members to their assigned tasks across web and API surfaces', functio
     $hidden = $project->tasks()->create(['task_number' => 2, 'title' => 'Private teammate task', 'type' => 'task', 'priority' => 'high', 'status' => 'to_do', 'board_column_id' => $column->id, 'assignee_id' => $admin->id, 'reporter_id' => $admin->id, 'position' => 1]);
     $session = projectManagementSession($member);
 
-    $this->withSession($session)->get(route('admin.project-management.dashboard'))->assertOk()->assertSee('My tasks')->assertSee('Workspace')->assertSee('Member task')->assertSee('Work status')->assertSee('Due-date health')->assertSee('Open work by project')->assertDontSee('Private teammate task')->assertDontSee('Project overview')->assertDontSee('<span class="admin-nav-label">Create</span>')->assertDontSee('Search anything...')->assertDontSee('New Project');
+    $this->withSession($session)->get(route('admin.project-management.dashboard'))->assertOk()->assertSee('My tasks')->assertSee('Workspace')->assertSee('Member task')->assertSee('Daily motivation')->assertSee('Work status')->assertSee('Due-date health')->assertSee('Open work by project')->assertDontSee('Private teammate task')->assertDontSee('Project overview')->assertDontSee('<span class="admin-nav-label">Create</span>')->assertDontSee('Search anything...')->assertDontSee('New Project');
     $this->withSession($session)->get(route('admin.project-management.board', $project))->assertForbidden();
     $this->withSession($session)->get(route('admin.project-management.tasks.show', $assigned))->assertOk()->assertSee('Member task');
     $this->withSession($session)->get(route('admin.project-management.tasks.show', $hidden))->assertForbidden();
@@ -140,7 +164,7 @@ it('renders the operational project-management surfaces with live records', func
     $session = projectManagementSession($admin);
 
     $this->withSession($session)->get(route('admin.project-management.dashboard'))->assertOk()->assertSee('Assign and track work')->assertSee('Open tasks')->assertSee('Task details')->assertSee('Visible task')->assertDontSee('My tasks');
-    $this->withSession($session)->get(route('admin.project-management.board', $project))->assertOk()->assertSee('Visible task')->assertSee('value="'.$staff->id.'">'.$staff->name.'</option>', false)->assertDontSee('value="'.$admin->id.'">'.$admin->name.'</option>', false)->assertDontSee('Move work forward with a board the team can trust.')->assertDontSee('My tasks');
+    $this->withSession($session)->get(route('admin.project-management.board', $project))->assertOk()->assertSee('Visible task')->assertSee('value="'.$staff->id.'">'.e($staff->name).'</option>', false)->assertDontSee('value="'.$admin->id.'">'.e($admin->name).'</option>', false)->assertDontSee('Move work forward with a board the team can trust.')->assertDontSee('My tasks');
     $this->withSession($session)->get(route('admin.project-management.tasks.show', $task))->assertOk()->assertSee('Task details');
     $this->withSession($session)->get(route('admin.project-management.reports'))->assertOk()->assertSee('Operational reporting');
     $this->withSession($session)->get(route('admin.project-management.calendar'))->assertOk()->assertSee('Planning calendar');
@@ -187,6 +211,7 @@ it('lets assigned staff complete tasks and authorized staff reopen them', functi
         'assignee_id' => $staff->id,
         'reporter_id' => $admin->id,
         'position' => 0,
+        'due_on' => now()->addDay()->toDateString(),
     ]);
 
     $staffSession = projectManagementSession($staff);
@@ -194,7 +219,9 @@ it('lets assigned staff complete tasks and authorized staff reopen them', functi
         ->get(route('admin.project-management.tasks.show', $task))
         ->assertOk()
         ->assertSee('Mark as done')
-        ->assertSee('What needs to happen');
+        ->assertSee('What needs to happen')
+        ->assertSee('Due countdown')
+        ->assertSee('data-task-countdown', false);
 
     $this->withSession($staffSession)
         ->patchJson(route('admin.project-management.tasks.complete', $task))

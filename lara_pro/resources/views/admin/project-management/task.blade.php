@@ -24,6 +24,12 @@
                         <button class="button" type="submit">Mark as done</button>
                     </form>
                 @endif
+                @if ($canManageWorkspace)
+                    <form method="POST" action="{{ route('admin.project-management.tasks.destroy', $task) }}" data-ajax-form data-ajax-delete-task="1" data-ajax-success-url="{{ route('admin.project-management.board', $project) }}" data-ajax-confirm="Delete this task permanently? This cannot be undone.">
+                        @csrf @method('DELETE')
+                        <button class="ghost-button pm-danger-button" type="submit">Delete task</button>
+                    </form>
+                @endif
             </div>
         </section>
 
@@ -37,7 +43,7 @@
                             <p>Update the essentials here. Less-used planning details are tucked away below.</p>
                         </div>
                     </div>
-                    <form method="POST" action="{{ route('admin.project-management.tasks.update', $task) }}" data-ajax-form>
+                    <form method="POST" action="{{ route('admin.project-management.tasks.update', $task) }}" data-ajax-form data-ajax-task-edit>
                         @csrf @method('PUT')
                         <div class="pm-form-grid pm-task-form-primary">
                             <div class="field-full"><label for="task-title">Task title</label><input id="task-title" name="title" value="{{ $task->title }}" required></div>

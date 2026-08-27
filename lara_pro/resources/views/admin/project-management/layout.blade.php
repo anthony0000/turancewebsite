@@ -71,6 +71,27 @@
         .pm-hero h2 { max-width: 760px; margin: 6px 0 0; font-size: clamp(24px, 3vw, 36px); line-height: 1.1; }
         .pm-hero p { max-width: 700px; margin: 12px 0 0; color: var(--muted); line-height: 1.6; }
         .pm-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+        .pm-daily-motivation { position: relative; isolation: isolate; display: grid; grid-template-columns: 42px minmax(0, 1fr); align-items: center; gap: 16px; min-height: 132px; padding: 22px 26px; overflow: hidden; border: 1px solid rgba(184,134,11,.22); border-radius: 14px; background: radial-gradient(circle at 93% 12%, rgba(255,255,255,.9), transparent 28%), linear-gradient(120deg, #fff8e6 0%, #fffdf8 57%, #f8f0dd 100%); box-shadow: 0 13px 30px rgba(102,76,20,.07); animation: pm-motivation-rise .72s cubic-bezier(.2,.75,.25,1) both; }
+        .pm-daily-motivation::before { position: absolute; inset: -80% 30% -80% -20%; z-index: -1; content: ''; background: linear-gradient(105deg, transparent 35%, rgba(255,255,255,.58) 50%, transparent 65%); transform: translateX(-55%); animation: pm-motivation-sheen 7s ease-in-out 1s infinite; }
+        .pm-daily-motivation__mark { display: grid; width: 42px; height: 42px; place-items: center; border: 1px solid rgba(184,134,11,.28); border-radius: 13px; background: rgba(255,255,255,.68); color: var(--primary); box-shadow: 0 0 0 6px rgba(184,134,11,.06); animation: pm-motivation-pulse 3.8s ease-in-out infinite; }
+        .pm-daily-motivation__mark svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.6; }
+        .pm-daily-motivation__content { min-width: 0; animation: pm-motivation-copy .7s .12s cubic-bezier(.2,.75,.25,1) both; }
+        .pm-daily-motivation__eyebrow { display: flex; flex-wrap: wrap; gap: 8px 14px; color: var(--primary-strong); font-size: 9px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+        .pm-daily-motivation__eyebrow span + span { color: var(--muted); font-weight: 650; letter-spacing: .04em; }
+        .pm-daily-motivation blockquote { max-width: 780px; margin: 8px 0 5px; color: var(--text); font-family: var(--font-display); font-size: clamp(17px, 2vw, 23px); font-weight: 700; letter-spacing: -.035em; line-height: 1.25; }
+        .pm-daily-motivation cite { color: var(--muted); font-size: 11px; font-style: normal; }
+        .pm-daily-motivation__orbit { position: absolute; top: -44px; right: 52px; width: 156px; height: 156px; border: 1px solid rgba(184,134,11,.14); border-radius: 50%; animation: pm-motivation-orbit 14s linear infinite; }
+        .pm-daily-motivation__orbit::before, .pm-daily-motivation__orbit::after { position: absolute; inset: 20px; border: 1px solid rgba(184,134,11,.1); border-radius: 50%; content: ''; }
+        .pm-daily-motivation__orbit::after { inset: 48px; background: rgba(184,134,11,.08); border: 0; }
+        .pm-daily-motivation__orbit span { position: absolute; width: 6px; height: 6px; border-radius: 50%; background: var(--primary); box-shadow: 0 0 0 4px rgba(184,134,11,.1); }
+        .pm-daily-motivation__orbit span:nth-child(1) { top: 13px; left: 77px; }
+        .pm-daily-motivation__orbit span:nth-child(2) { right: 13px; bottom: 46px; width: 4px; height: 4px; background: #d8a93b; }
+        .pm-daily-motivation__orbit span:nth-child(3) { bottom: 22px; left: 34px; width: 4px; height: 4px; background: #e1c77d; }
+        @keyframes pm-motivation-rise { from { opacity: 0; transform: translateY(12px) scale(.985); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        @keyframes pm-motivation-copy { from { opacity: 0; transform: translateX(-9px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes pm-motivation-pulse { 0%, 100% { box-shadow: 0 0 0 6px rgba(184,134,11,.06); transform: translateY(0); } 50% { box-shadow: 0 0 0 10px rgba(184,134,11,.025); transform: translateY(-2px); } }
+        @keyframes pm-motivation-sheen { 0%, 14% { transform: translateX(-55%); } 42%, 56% { transform: translateX(80%); } 100% { transform: translateX(80%); } }
+        @keyframes pm-motivation-orbit { to { transform: rotate(360deg); } }
         .pm-kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
         .pm-kpi { padding: 17px; }
         .pm-kpi strong { display: block; margin-top: 7px; font-size: 28px; line-height: 1; }
@@ -125,6 +146,17 @@
         .pm-task-hero { align-items: center; }
         .pm-task-hero h2 { color: var(--text); letter-spacing: -.035em; }
         .pm-task-hero__actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 8px; }
+        .pm-danger-button { border-color: rgba(194,65,85,.24); color: var(--danger); }
+        .pm-danger-button:hover { border-color: rgba(194,65,85,.42); background: #fff3f4; color: #a52f43; }
+        .pm-task-countdown { display: grid; min-width: 168px; gap: 3px; padding: 10px 12px; border: 1px solid rgba(184,134,11,.22); border-radius: 9px; background: #fffbed; }
+        .pm-task-countdown > span { color: var(--primary-strong); font-size: 9px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+        .pm-task-countdown strong { color: var(--text); font-size: 17px; letter-spacing: -.025em; line-height: 1.1; white-space: nowrap; }
+        .pm-task-countdown small { color: var(--muted); font-size: 10px; line-height: 1.3; }
+        .pm-task-countdown[data-countdown-state="urgent"] { border-color: rgba(212,139,45,.42); background: #fff8e8; }
+        .pm-task-countdown[data-countdown-state="urgent"] strong { color: #b56e22; }
+        .pm-task-countdown[data-countdown-state="overdue"] { border-color: rgba(194,65,85,.3); background: #fff3f4; }
+        .pm-task-countdown[data-countdown-state="overdue"] > span,
+        .pm-task-countdown[data-countdown-state="overdue"] strong { color: var(--danger); }
         .pm-task-edit-panel .pm-panel-head h3 { margin-top: 4px; color: var(--text); font-size: 21px; letter-spacing: -.03em; }
         .pm-task-edit-panel .pm-panel-head p { max-width: 600px; }
         .pm-task-form-primary { gap: 13px 14px; }
@@ -423,7 +455,8 @@
             .pm-board--trello { margin-inline: -2px; padding: 10px; }
             .pm-board--trello .pm-column { width: min(86vw, 306px); min-width: min(86vw, 306px); }
         }
-        @media (max-width: 640px) { .pm-kpis, .pm-grid-wide, .pm-form-grid { grid-template-columns: 1fr; } .pm-hero { align-items: flex-start; flex-direction: column; padding: 18px; } .pm-subnav { overflow-x: auto; flex-wrap: nowrap; } .pm-subnav a { flex: 0 0 auto; } .pm-panel { padding: 14px; } .pm-project-view .pm-stat-row { grid-template-columns: 1fr; } .pm-project-view .pm-tabs { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 3px; } .pm-project-view .pm-tabs a { flex: 0 0 auto; } .pm-project-view .pm-hero .pm-actions { width: 100%; } .pm-project-view .pm-hero .pm-actions > * { flex: 1 1 0; } }
+        @media (max-width: 640px) { .pm-kpis, .pm-grid-wide, .pm-form-grid { grid-template-columns: 1fr; } .pm-hero { align-items: flex-start; flex-direction: column; padding: 18px; } .pm-daily-motivation { grid-template-columns: 34px minmax(0, 1fr); gap: 12px; min-height: 0; padding: 18px; } .pm-daily-motivation__mark { width: 34px; height: 34px; border-radius: 10px; } .pm-daily-motivation__mark svg { width: 19px; height: 19px; } .pm-daily-motivation blockquote { font-size: 16px; } .pm-daily-motivation__orbit { right: -54px; opacity: .7; } .pm-task-countdown { width: 100%; } .pm-task-hero__actions { justify-content: flex-start; } .pm-subnav { overflow-x: auto; flex-wrap: nowrap; } .pm-subnav a { flex: 0 0 auto; } .pm-panel { padding: 14px; } .pm-project-view .pm-stat-row { grid-template-columns: 1fr; } .pm-project-view .pm-tabs { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 3px; } .pm-project-view .pm-tabs a { flex: 0 0 auto; } .pm-project-view .pm-hero .pm-actions { width: 100%; } .pm-project-view .pm-hero .pm-actions > * { flex: 1 1 0; } }
+        @media (prefers-reduced-motion: reduce) { .pm-daily-motivation, .pm-daily-motivation::before, .pm-daily-motivation__mark, .pm-daily-motivation__content, .pm-daily-motivation__orbit { animation: none !important; } }
     </style>
 @endpush
 
@@ -577,6 +610,19 @@
 
                 if (!root) return;
 
+                if (form.matches('[data-ajax-task-edit]')) {
+                    const title = data.title || form.querySelector('[name="title"]')?.value || '';
+                    const type = data.type || form.querySelector('[name="type"]')?.value || 'task';
+                    const column = data.column?.name || form.querySelector('[name="board_column_id"] option:checked')?.textContent || '';
+                    const heroTitle = root.querySelector('.pm-task-hero h2');
+                    const heroEyebrow = root.querySelector('.pm-task-hero .eyebrow');
+                    const heroMeta = root.querySelector('.pm-task-hero p');
+
+                    if (heroTitle) heroTitle.textContent = title;
+                    if (heroEyebrow && data.task_key) heroEyebrow.textContent = `${data.task_key} · ${String(type).replaceAll('_', ' ')}`;
+                    if (heroMeta && column) heroMeta.textContent = `${heroMeta.textContent.split(' · ')[0]} · ${column}`;
+                }
+
                 if (action.endsWith('/comments')) {
                     const list = panelWithHeading(root, 'Comments')?.querySelector('.pm-list');
                     if (list) list.insertAdjacentHTML('beforeend', `<div class="pm-list-item"><div><strong>${escapeHtml(data.user?.name || 'Team member')}</strong><span>Just now</span><p style="margin:7px 0 0; white-space:pre-wrap; line-height:1.5">${escapeHtml(data.body)}</p></div></div>`);
@@ -615,6 +661,7 @@
 
             const submitAjax = async (form) => {
                 if (form.dataset.ajaxSubmitting === '1') return;
+                if (form.dataset.ajaxConfirm && !window.confirm(form.dataset.ajaxConfirm)) return;
 
                 form.dataset.ajaxSubmitting = '1';
                 form.classList.add('is-saving');
@@ -639,11 +686,15 @@
                     const payload = await responsePayload(response);
                     const action = form.getAttribute('action') || '';
 
-                    if (/\/tasks\/\d+\/(complete|reopen)$/.test(action)) updateTaskState(form);
+                    if (/\/tasks\/[^/]+\/(complete|reopen)$/.test(action)) updateTaskState(form);
                     if (/\/notifications\/[^/]+\/read$/.test(action)) updateNotification(form);
                     if (shouldReset(action)) form.reset();
 
                     showFeedback(form, payload.message || 'Saved.');
+                    if (form.dataset.ajaxDeleteTask === '1') {
+                        window.location.assign(form.dataset.ajaxSuccessUrl || document.referrer || '/');
+                        return;
+                    }
                     updateTaskContent({form, payload, action});
                     document.dispatchEvent(new CustomEvent('pm:ajax-success', {detail: {form, payload, action}}));
                 } catch (error) {
