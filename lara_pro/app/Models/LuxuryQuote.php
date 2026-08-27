@@ -7,6 +7,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class LuxuryQuote extends Model
 {
+    public function getRouteKeyName(): string
+    {
+        return 'quote_number';
+    }
+
     protected $fillable = [
         'quote_number',
         'template',

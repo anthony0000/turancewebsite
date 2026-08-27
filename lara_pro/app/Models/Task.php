@@ -26,6 +26,39 @@ class Task extends Model
 
     protected $appends = ['task_key', 'is_overdue'];
 
+    public function getRouteKeyName(): string
+    {
+        return 'task_key';
+    }
+
+    public function getRouteKey(): string
+    {
+        $projectNumber = $this->relationLoaded('project')
+            ? $this->project?->project_number
+            : Project::query()->whereKey($this->project_id)->value('project_number');
+
+        return ($projectNumber ?: 'TASK').'-'.$this->task_number;
+    }
+
+    public function resolveRouteBindingQuery($query, $value, $field = null)
+    {
+        if ($field !== null) {
+            return parent::resolveRouteBindingQuery($query, $value, $field);
+        }
+
+        $value = (string) $value;
+        $separator = strrpos($value, '-');
+        $projectNumber = $separator === false ? '' : substr($value, 0, $separator);
+        $taskNumber = $separator === false ? '' : substr($value, $separator + 1);
+
+        if ($projectNumber === '' || ! ctype_digit($taskNumber)) {
+            return $query->whereKey(0);
+        }
+
+        return $query->where('task_number', (int) $taskNumber)
+            ->whereHas('project', fn ($project) => $project->where('project_number', $projectNumber));
+    }
+
     public function project(): BelongsTo { return $this->belongsTo(Project::class); }
     public function column(): BelongsTo { return $this->belongsTo(BoardColumn::class, 'board_column_id'); }
     public function reporter(): BelongsTo { return $this->belongsTo(User::class, 'reporter_id'); }

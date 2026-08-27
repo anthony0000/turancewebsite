@@ -91,7 +91,7 @@
                                     ? collect(preg_split('/\s+/', trim($task->assignee->name)))->filter()->map(fn ($part) => Str::upper(Str::substr($part, 0, 1)))->take(2)->join('')
                                     : '—';
                             @endphp
-                            <article class="pm-task-card" draggable="true" tabindex="0" role="listitem" data-task-card data-task-id="{{ $task->id }}" data-assignee="{{ $task->assignee_id ?: '' }}" data-priority="{{ $task->priority }}" data-overdue="{{ $task->is_overdue ? '1' : '0' }}">
+                            <article class="pm-task-card" draggable="true" tabindex="0" role="listitem" data-task-card data-task-id="{{ $task->task_key }}" data-assignee="{{ $task->assignee_id ?: '' }}" data-priority="{{ $task->priority }}" data-overdue="{{ $task->is_overdue ? '1' : '0' }}">
                                 <div class="pm-task-card__top">
                                     <span class="pm-task-key">{{ $task->task_key }}</span>
                                     <span class="pm-task-type">{{ Str::headline($task->type) }}</span>
@@ -247,7 +247,7 @@
                 }
             };
 
-            board.querySelectorAll('[data-task-card]').forEach(card => {
+            const bindCard = card => {
                 card.addEventListener('dragstart', event => {
                     dragState = {card, originList: card.parentElement, originNext: card.nextElementSibling, saved: false};
                     event.dataTransfer.effectAllowed = 'move';
@@ -279,7 +279,9 @@
                     }
                     applyFilters();
                 });
-            });
+            };
+
+            board.querySelectorAll('[data-task-card]').forEach(bindCard);
 
             columns.forEach(column => {
                 const list = column.querySelector('[data-column-list]');
@@ -350,6 +352,51 @@
                 document.querySelectorAll('[data-board-filter]').forEach(input => { if (input.type === 'checkbox') input.checked = false; else input.value = ''; });
                 document.querySelectorAll('[data-team-filter]').forEach((button, index) => { const isActive = index === 0; button.classList.toggle('is-active', isActive); button.setAttribute('aria-pressed', isActive ? 'true' : 'false'); });
                 applyFilters();
+            });
+            document.addEventListener('pm:ajax-success', event => {
+                const {form, payload, action} = event.detail;
+                const task = payload.data;
+                if (!task || !form.closest('.pm-board-view') || !action.endsWith('/tasks')) return;
+
+                const list = board.querySelector(`[data-column-id="${task.board_column_id}"] [data-column-list]`);
+                if (!list) return;
+
+                const make = (tag, className, value) => {
+                    const element = document.createElement(tag);
+                    if (className) element.className = className;
+                    if (value !== undefined) element.textContent = value;
+                    return element;
+                };
+                const card = make('article', 'pm-task-card');
+                card.dataset.taskCard = '';
+                card.dataset.taskId = task.task_key;
+                card.dataset.assignee = task.assignee_id || '';
+                card.dataset.priority = task.priority || 'medium';
+                card.dataset.overdue = '0';
+                card.draggable = true;
+
+                const top = make('div', 'pm-task-card__top');
+                top.append(make('span', 'pm-task-key', task.task_key || 'New task'), make('span', 'pm-task-type', task.type || 'Task'), make('span', 'pm-task-grip', '⋮⋮'));
+                const title = make('h4');
+                const link = make('a', null, task.title || 'New task');
+                link.href = '{{ url('/admin/project-management/tasks') }}/' + task.task_key;
+                title.append(link);
+                const details = make('div', 'pm-task-card__details');
+                details.append(make('span', 'pm-task-due', task.due_on ? 'Due date set' : 'No due date'), make('span', 'pm-chip pm-chip--priority-' + (task.priority || 'medium'), (task.priority || 'medium').replace('_', ' ')));
+                const footer = make('div', 'pm-task-card__footer');
+                const assignee = make('label', 'pm-task-assignee');
+                assignee.append(make('span', 'pm-avatar pm-avatar--empty', '—'));
+                const assigneeSelect = board.querySelector('[data-card-assignee]')?.cloneNode(true);
+                if (assigneeSelect) {
+                    assigneeSelect.value = task.assignee_id || '';
+                    assignee.append(assigneeSelect);
+                }
+                footer.append(assignee, make('span', 'pm-task-stats'));
+                card.append(top, title, details, footer);
+                list.querySelector('[data-drop-placeholder]')?.before(card);
+                bindCard(card);
+                updatePlaceholders();
+                refreshCounts();
             });
             document.querySelectorAll('[data-add-to-column]').forEach(link => link.addEventListener('click', () => {
                 const column = document.querySelector('#task-column');

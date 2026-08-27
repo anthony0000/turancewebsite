@@ -13,13 +13,13 @@
                 @if ($task->completed_at)
                     <span class="pm-chip pm-chip--success">Done {{ $task->completed_at->format('M d, Y') }}</span>
                     @if ($canManageTaskStatus)
-                        <form method="POST" action="{{ route('admin.project-management.tasks.reopen', $task) }}">
+                        <form method="POST" action="{{ route('admin.project-management.tasks.reopen', $task) }}" data-ajax-form data-ajax-task-state="reopen" data-ajax-next-action="{{ route('admin.project-management.tasks.complete', $task) }}">
                             @csrf @method('PATCH')
                             <button class="ghost-button" type="submit">Mark not completed</button>
                         </form>
                     @endif
                 @else
-                    <form method="POST" action="{{ route('admin.project-management.tasks.complete', $task) }}">
+                    <form method="POST" action="{{ route('admin.project-management.tasks.complete', $task) }}" data-ajax-form data-ajax-task-state="complete" data-ajax-next-action="{{ route('admin.project-management.tasks.reopen', $task) }}">
                         @csrf @method('PATCH')
                         <button class="button" type="submit">Mark as done</button>
                     </form>
@@ -37,7 +37,7 @@
                             <p>Update the essentials here. Less-used planning details are tucked away below.</p>
                         </div>
                     </div>
-                    <form method="POST" action="{{ route('admin.project-management.tasks.update', $task) }}">
+                    <form method="POST" action="{{ route('admin.project-management.tasks.update', $task) }}" data-ajax-form>
                         @csrf @method('PUT')
                         <div class="pm-form-grid pm-task-form-primary">
                             <div class="field-full"><label for="task-title">Task title</label><input id="task-title" name="title" value="{{ $task->title }}" required></div>

@@ -9,6 +9,11 @@ use Illuminate\Support\Facades\Storage;
 
 class StaffContract extends Model
 {
+    public function getRouteKeyName(): string
+    {
+        return 'contract_number';
+    }
+
     protected $fillable = [
         'project_id',
         'luxury_quote_id',

@@ -147,6 +147,10 @@
         .pm-notification-message { color: var(--text); font-size: 13px; }
         .pm-notification-meta { display: block; margin-top: 5px; color: var(--muted); font-size: 11px; }
         .pm-notification-type { display: inline-flex; margin-bottom: 5px; color: var(--primary-strong); font-size: 9px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+        [data-pm-ajax-feedback] { margin-top: 8px; font-size: 11px; line-height: 1.4; }
+        [data-pm-ajax-feedback].is-success { color: var(--success); }
+        [data-pm-ajax-feedback].is-error { color: var(--danger); }
+        form.is-saving { opacity: .72; pointer-events: none; }
         .pm-board-hero { border-bottom-left-radius: 10px; border-bottom-right-radius: 10px; }
         .pm-board-hero h2 { color: var(--text); letter-spacing: -.035em; }
         .pm-board-toolbar { display: grid; gap: 16px; padding: 16px 20px; border-radius: 10px; background: #fff; }
@@ -440,3 +444,218 @@
         @yield('project-content')
     </div>
 @endsection
+
+@push('scripts')
+    <script>
+        (() => {
+            const taskOrNotificationForm = (form) => {
+                const action = form.getAttribute('action') || '';
+
+                return action.includes('/tasks') || action.includes('/notifications');
+            };
+
+            const feedbackFor = (form) => {
+                let feedback = form.nextElementSibling;
+
+                if (!feedback?.matches('[data-pm-ajax-feedback]')) {
+                    feedback = document.createElement('div');
+                    feedback.dataset.pmAjaxFeedback = '';
+                    form.after(feedback);
+                }
+
+                return feedback;
+            };
+
+            const showFeedback = (form, message, isError = false) => {
+                const feedback = feedbackFor(form);
+                feedback.textContent = message;
+                feedback.className = `pm-ajax-feedback ${isError ? 'is-error' : 'is-success'}`;
+            };
+
+            const responsePayload = async (response) => {
+                const contentType = response.headers.get('content-type') || '';
+
+                if (!contentType.includes('application/json')) {
+                    throw new Error('The server returned an unexpected response. Please try again.');
+                }
+
+                const payload = await response.json();
+
+                if (!response.ok) {
+                    const validationMessage = payload.errors
+                        ? Object.values(payload.errors).flat()[0]
+                        : null;
+                    throw new Error(validationMessage || payload.message || 'This action could not be completed.');
+                }
+
+                return payload;
+            };
+
+            const updateTaskState = (form) => {
+                const action = form.getAttribute('action') || '';
+                const isCompleting = action.endsWith('/complete');
+                const nextAction = action.replace(/\/(complete|reopen)$/, isCompleting ? '/reopen' : '/complete');
+                const button = form.querySelector('button[type="submit"]');
+                const actions = form.closest('.pm-task-hero__actions');
+
+                form.action = nextAction;
+                form.querySelector('[name="_method"]')?.setAttribute('value', 'PATCH');
+
+                if (button) {
+                    button.textContent = isCompleting ? 'Mark not completed' : 'Mark as done';
+                    button.classList.toggle('button', !isCompleting);
+                    button.classList.toggle('ghost-button', isCompleting);
+                }
+
+                if (actions) {
+                    const existingBadge = actions.querySelector('.pm-chip--success');
+
+                    if (isCompleting && !existingBadge) {
+                        const badge = document.createElement('span');
+                        badge.className = 'pm-chip pm-chip--success';
+                        badge.textContent = 'Done just now';
+                        actions.insertBefore(badge, form);
+                    } else if (!isCompleting) {
+                        existingBadge?.remove();
+                    }
+                }
+            };
+
+            const updateNotification = (form) => {
+                const item = form.closest('.pm-list-item');
+                item?.classList.remove('is-unread');
+                form.remove();
+                item?.querySelector('.pm-notification-meta')?.replaceChildren(
+                    ...[document.createTextNode((item.querySelector('.pm-notification-meta')?.textContent || '').replace('Unread', 'Read'))]
+                );
+
+                document.querySelectorAll('.pm-notification-count').forEach((badge) => {
+                    const count = Number.parseInt(badge.textContent, 10) || 0;
+                    const next = Math.max(0, count - 1);
+
+                    if (next === 0) badge.remove();
+                    else badge.textContent = next > 99 ? '99+' : String(next);
+                });
+            };
+
+            const shouldReset = (action) => /\/projects\/\d+\/tasks$|\/comments$|\/time$|\/attachments$|\/checklists$|\/checklist-items$|\/sprint$/.test(action);
+
+            const escapeHtml = (value) => String(value ?? '')
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#039;');
+
+            const panelWithHeading = (root, heading) => [...root.querySelectorAll('.pm-panel')]
+                .find((panel) => panel.querySelector('h3')?.textContent.trim() === heading);
+
+            const updateTaskContent = ({form, payload, action}) => {
+                const root = form.closest('.pm-task-view');
+                const data = payload.data || {};
+
+                if (!root) return;
+
+                if (action.endsWith('/comments')) {
+                    const list = panelWithHeading(root, 'Comments')?.querySelector('.pm-list');
+                    if (list) list.insertAdjacentHTML('beforeend', `<div class="pm-list-item"><div><strong>${escapeHtml(data.user?.name || 'Team member')}</strong><span>Just now</span><p style="margin:7px 0 0; white-space:pre-wrap; line-height:1.5">${escapeHtml(data.body)}</p></div></div>`);
+                }
+
+                if (action.endsWith('/time')) {
+                    const panel = panelWithHeading(root, 'Time tracking');
+                    const list = panel?.querySelector('.pm-list:last-child');
+                    if (list) list.insertAdjacentHTML('afterbegin', `<div class="pm-list-item"><div><strong>${(Number(data.minutes || 0) / 60).toFixed(1)}h · ${escapeHtml(data.user?.name || 'Team member')}</strong><span>${escapeHtml(data.description || 'No description')}</span></div></div>`);
+                    const hours = panel?.querySelector('p');
+                    const current = Number.parseFloat(hours?.textContent || '0') || 0;
+                    if (hours) hours.textContent = `${(current + Number(data.minutes || 0) / 60).toFixed(1)} hours logged.`;
+                }
+
+                if (action.endsWith('/attachments')) {
+                    const list = panelWithHeading(root, 'Files')?.querySelector('.pm-list');
+                    if (list) list.insertAdjacentHTML('afterbegin', `<div class="pm-list-item"><div><strong>${escapeHtml(data.original_name)}</strong><span>Team member · ${((Number(data.size || 0) / 1024)).toFixed(1)} KB</span></div><a class="pm-icon-link" href="${escapeHtml(data.download_url)}">Download</a></div>`);
+                }
+
+                if (action.endsWith('/timer/start') || action.endsWith('/timer/stop')) {
+                    const isRunning = action.endsWith('/timer/start');
+                    form.action = form.action.replace(/\/(start|stop)$/, isRunning ? '/stop' : '/start');
+                    const button = form.querySelector('button[type="submit"]');
+                    if (button) {
+                        button.textContent = isRunning ? 'Stop active timer' : 'Start timer';
+                        button.classList.toggle('button', isRunning);
+                        button.classList.toggle('ghost-button', !isRunning);
+                    }
+                }
+
+                if (action.endsWith('/tasks') && form.closest('.pm-subtask-create')) {
+                    const list = panelWithHeading(root, 'Subtasks')?.querySelector('.pm-list');
+                    if (list && data.task_key) list.insertAdjacentHTML('beforeend', `<div class="pm-list-item"><div><strong>${escapeHtml(data.task_key)} · ${escapeHtml(data.title)}</strong><span>${escapeHtml(data.assignee?.name || 'Unassigned')}</span></div><span class="pm-chip">Open</span></div>`);
+                }
+            };
+
+            const submitAjax = async (form) => {
+                if (form.dataset.ajaxSubmitting === '1') return;
+
+                form.dataset.ajaxSubmitting = '1';
+                form.classList.add('is-saving');
+                const button = form.querySelector('button[type="submit"]');
+                const originalLabel = button?.textContent;
+                if (button) {
+                    button.disabled = true;
+                    button.textContent = 'Saving…';
+                }
+
+                try {
+                    const method = (form.querySelector('[name="_method"]')?.value || form.method || 'POST').toUpperCase();
+                    const response = await fetch(form.action, {
+                        method: method === 'GET' ? 'POST' : method,
+                        headers: {
+                            Accept: 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || form.querySelector('[name="_token"]')?.value || '',
+                        },
+                        body: new FormData(form),
+                    });
+                    const payload = await responsePayload(response);
+                    const action = form.getAttribute('action') || '';
+
+                    if (/\/tasks\/\d+\/(complete|reopen)$/.test(action)) updateTaskState(form);
+                    if (/\/notifications\/[^/]+\/read$/.test(action)) updateNotification(form);
+                    if (shouldReset(action)) form.reset();
+
+                    showFeedback(form, payload.message || 'Saved.');
+                    updateTaskContent({form, payload, action});
+                    document.dispatchEvent(new CustomEvent('pm:ajax-success', {detail: {form, payload, action}}));
+                } catch (error) {
+                    showFeedback(form, error.message || 'This action could not be completed.', true);
+                } finally {
+                    form.dataset.ajaxSubmitting = '0';
+                    form.classList.remove('is-saving');
+                    if (button) {
+                        button.disabled = false;
+                        if (button.textContent === 'Saving…') button.textContent = originalLabel;
+                    }
+                }
+            };
+
+            document.addEventListener('submit', (event) => {
+                const form = event.target.closest('form');
+
+                if (!form || event.defaultPrevented || !taskOrNotificationForm(form)) return;
+
+                event.preventDefault();
+                submitAjax(form);
+            });
+
+            document.addEventListener('change', (event) => {
+                const checkbox = event.target;
+                const form = checkbox.closest('form');
+
+                if (!(checkbox instanceof HTMLInputElement) || checkbox.type !== 'checkbox' || !form || !taskOrNotificationForm(form) || !form.action.includes('/checklist-items/')) return;
+
+                event.preventDefault();
+                event.stopImmediatePropagation();
+                submitAjax(form);
+            }, true);
+        })();
+    </script>
+@endpush

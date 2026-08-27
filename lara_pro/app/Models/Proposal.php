@@ -12,6 +12,11 @@ class Proposal extends Model
 {
     use SoftDeletes;
 
+    public function getRouteKeyName(): string
+    {
+        return 'proposal_number';
+    }
+
     protected $fillable = [
         'user_id',
         'proposal_template_id',

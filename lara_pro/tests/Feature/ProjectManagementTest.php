@@ -64,6 +64,28 @@ it('creates tasks and persists status and ordering through the board endpoint', 
         ->and($task->fresh()->position)->toBe(0);
 });
 
+it('uses public project and task keys for links and route binding', function () {
+    $admin = User::factory()->create(['role' => AdminAccess::ROLE_ADMIN, 'permissions' => AdminAccess::permissionKeys(), 'is_active' => true]);
+    $project = Project::query()->create(['project_number' => 'PUBLIC', 'name' => 'Public keys', 'status' => 'active', 'priority' => 'medium']);
+    $column = $project->boardColumns()->create(['name' => 'To Do', 'position' => 0]);
+    $task = $project->tasks()->create(['task_number' => 7, 'title' => 'Use a public route key', 'type' => 'task', 'priority' => 'medium', 'status' => 'to_do', 'board_column_id' => $column->id, 'reporter_id' => $admin->id, 'position' => 0]);
+    $session = projectManagementSession($admin);
+
+    expect(route('admin.project-management.projects.show', $project))->toEndWith('/projects/PUBLIC')
+        ->and(route('admin.project-management.tasks.show', $task))->toEndWith('/tasks/PUBLIC-7');
+
+    $this->withSession($session)
+        ->get('/admin/project-management/projects/PUBLIC')
+        ->assertOk();
+    $this->withSession($session)
+        ->get('/admin/project-management/tasks/PUBLIC-7')
+        ->assertOk()
+        ->assertSee('Use a public route key');
+    $this->withSession($session)
+        ->get('/admin/project-management/tasks/'.$task->id)
+        ->assertNotFound();
+});
+
 it('keeps limited accounts out of the project management workspace', function () {
     $admin = User::factory()->create(['role' => AdminAccess::ROLE_ADMIN, 'permissions' => AdminAccess::permissionKeys(), 'is_active' => true]);
     $member = User::factory()->create(['role' => AdminAccess::ROLE_SUBACCOUNT, 'permissions' => ['projects'], 'is_active' => true]);
@@ -175,8 +197,9 @@ it('lets assigned staff complete tasks and authorized staff reopen them', functi
         ->assertSee('What needs to happen');
 
     $this->withSession($staffSession)
-        ->patch(route('admin.project-management.tasks.complete', $task))
-        ->assertRedirect();
+        ->patchJson(route('admin.project-management.tasks.complete', $task))
+        ->assertOk()
+        ->assertJsonPath('message', 'Task marked as done.');
 
     expect($task->fresh()->completed_at)->not->toBeNull()
         ->and($task->fresh()->board_column_id)->toBe($doneColumn->id)
@@ -188,8 +211,9 @@ it('lets assigned staff complete tasks and authorized staff reopen them', functi
 
     $staff->update(['permissions' => ['projects', 'project-management']]);
     $this->withSession(projectManagementSession($staff))
-        ->patch(route('admin.project-management.tasks.reopen', $task))
-        ->assertRedirect();
+        ->patchJson(route('admin.project-management.tasks.reopen', $task))
+        ->assertOk()
+        ->assertJsonPath('message', 'Task marked as not completed.');
 
     expect($task->fresh()->completed_at)->toBeNull()
         ->and($task->fresh()->board_column_id)->toBe($openColumn->id)
@@ -217,8 +241,20 @@ it('lets assigned staff complete tasks and authorized staff reopen them', functi
         ->assertSee('Mark not completed');
 
     $this->withSession(projectManagementSession($staff))
-        ->patch(route('admin.project-management.tasks.reopen', $teammateTask))
-        ->assertRedirect();
+        ->patchJson(route('admin.project-management.tasks.reopen', $teammateTask))
+        ->assertOk()
+        ->assertJsonPath('message', 'Task marked as not completed.');
 
-    expect($teammateTask->fresh()->completed_at)->toBeNull();
+    $notification = DB::table('notifications')->where('notifiable_id', $admin->id)->where('type', 'task.completed')->latest('created_at')->first();
+    $this->withSession(projectManagementSession($admin))
+        ->get(route('admin.project-management.notifications'))
+        ->assertOk()
+        ->assertSee('Task completed: Finish the handoff');
+    $this->withSession(projectManagementSession($admin))
+        ->patchJson(route('admin.project-management.notifications.read', $notification->id))
+        ->assertOk()
+        ->assertJsonPath('message', 'Notification marked as read.');
+
+    expect($teammateTask->fresh()->completed_at)->toBeNull()
+        ->and(DB::table('notifications')->where('id', $notification->id)->whereNotNull('read_at')->exists())->toBeTrue();
 });

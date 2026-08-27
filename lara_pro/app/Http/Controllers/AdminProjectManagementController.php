@@ -365,13 +365,17 @@ class AdminProjectManagementController extends Controller
         return view('admin.project-management.sprints', ['project' => $project, 'sprints' => $sprints, 'canManageWorkspace' => AdminAccess::isFullAdmin()]);
     }
 
-    public function assignTaskSprint(Request $request, Task $task): RedirectResponse
+    public function assignTaskSprint(Request $request, Task $task): RedirectResponse|JsonResponse
     {
         abort_unless(ProjectManagementAccess::canManage($task->project), 403);
         $validated = $request->validate(['sprint_id' => ['nullable', 'integer', Rule::exists('sprints', 'id')->where('project_id', $task->project_id)]]);
         $task->update(['sprint_id' => $validated['sprint_id'] ?? null]);
 
-        return back()->with('status', $validated['sprint_id'] ? 'Task moved into the sprint.' : 'Task returned to the backlog.');
+        $message = $validated['sprint_id'] ? 'Task moved into the sprint.' : 'Task returned to the backlog.';
+
+        return $request->expectsJson()
+            ? response()->json(['data' => $task->fresh()->load('sprint'), 'message' => $message])
+            : back()->with('status', $message);
     }
 
     public function calendar(Request $request): View
@@ -695,7 +699,7 @@ class AdminProjectManagementController extends Controller
         return back()->with('status', 'Team member removed.');
     }
 
-    public function storeComment(Request $request, Project $project, ?Task $task = null): RedirectResponse
+    public function storeComment(Request $request, Project $project, ?Task $task = null): RedirectResponse|JsonResponse
     {
         abort_unless(ProjectManagementAccess::canManage($project), 403);
         if ($task) {
@@ -709,47 +713,57 @@ class AdminProjectManagementController extends Controller
             ProjectManagementAccess::notify($project, 'comment.mention', 'You were mentioned in a comment', $task ? route('admin.project-management.tasks.show', $task) : route('admin.project-management.projects.show', $project), ProjectManagementAccess::user()?->id, [$mentioned->id]);
         }
 
-        return back()->with('status', 'Comment added.');
+        return $request->expectsJson()
+            ? response()->json(['data' => $comment->load('user'), 'message' => 'Comment added.'], 201)
+            : back()->with('status', 'Comment added.');
     }
 
-    public function storeTimeEntry(Request $request, Task $task): RedirectResponse
+    public function storeTimeEntry(Request $request, Task $task): RedirectResponse|JsonResponse
     {
         abort_unless(ProjectManagementAccess::canManage($task->project), 403);
         $validated = $request->validate(['minutes' => ['required', 'integer', 'min:1', 'max:1440'], 'description' => ['nullable', 'string', 'max:1000'], 'started_at' => ['nullable', 'date']]);
-        TimeEntry::query()->create(['project_id' => $task->project_id, 'task_id' => $task->id, 'user_id' => ProjectManagementAccess::user()?->id, 'started_at' => $validated['started_at'] ?? now()->subMinutes($validated['minutes']), 'ended_at' => now(), 'minutes' => $validated['minutes'], 'description' => ProjectManagementAccess::sanitize($validated['description'] ?? null)]);
+        $entry = TimeEntry::query()->create(['project_id' => $task->project_id, 'task_id' => $task->id, 'user_id' => ProjectManagementAccess::user()?->id, 'started_at' => $validated['started_at'] ?? now()->subMinutes($validated['minutes']), 'ended_at' => now(), 'minutes' => $validated['minutes'], 'description' => ProjectManagementAccess::sanitize($validated['description'] ?? null)]);
         ProjectManagementAccess::log($task->project, 'time-entry.created', TimeEntry::class, null, taskId: $task->id);
 
-        return back()->with('status', 'Time logged.');
+        return $request->expectsJson()
+            ? response()->json(['data' => $entry->load('user'), 'message' => 'Time logged.'], 201)
+            : back()->with('status', 'Time logged.');
     }
 
-    public function startTimer(Task $task): RedirectResponse
+    public function startTimer(Request $request, Task $task): RedirectResponse|JsonResponse
     {
         abort_unless(ProjectManagementAccess::canManage($task->project), 403);
         abort_if(TimeEntry::query()->where('user_id', ProjectManagementAccess::user()?->id)->whereNull('ended_at')->exists(), 422, 'Stop your active timer before starting another one.');
-        TimeEntry::query()->create(['project_id' => $task->project_id, 'task_id' => $task->id, 'user_id' => ProjectManagementAccess::user()?->id, 'started_at' => now(), 'minutes' => 0]);
+        $entry = TimeEntry::query()->create(['project_id' => $task->project_id, 'task_id' => $task->id, 'user_id' => ProjectManagementAccess::user()?->id, 'started_at' => now(), 'minutes' => 0]);
 
-        return back()->with('status', 'Timer started.');
+        return $request->expectsJson()
+            ? response()->json(['data' => $entry->load('user'), 'message' => 'Timer started.'])
+            : back()->with('status', 'Timer started.');
     }
 
-    public function stopTimer(Task $task): RedirectResponse
+    public function stopTimer(Request $request, Task $task): RedirectResponse|JsonResponse
     {
         abort_unless(ProjectManagementAccess::canManage($task->project), 403);
         $entry = TimeEntry::query()->where('task_id', $task->id)->where('user_id', ProjectManagementAccess::user()?->id)->whereNull('ended_at')->latest('started_at')->firstOrFail();
         $entry->update(['ended_at' => now(), 'minutes' => max(1, $entry->started_at->diffInMinutes(now()))]);
 
-        return back()->with('status', 'Timer stopped and time saved.');
+        return $request->expectsJson()
+            ? response()->json(['data' => $entry->fresh()->load('user'), 'message' => 'Timer stopped and time saved.'])
+            : back()->with('status', 'Timer stopped and time saved.');
     }
 
-    public function storeAttachment(Request $request, Task $task): RedirectResponse
+    public function storeAttachment(Request $request, Task $task): RedirectResponse|JsonResponse
     {
         abort_unless(ProjectManagementAccess::canManage($task->project), 403);
         $validated = $request->validate(['file' => ['required', 'file', 'max:51200', 'mimes:pdf,doc,docx,xls,xlsx,csv,ppt,pptx,txt,jpg,jpeg,png,webp,zip']]);
         /** @var UploadedFile $file */
         $file = $validated['file'];
         $path = $file->storeAs('project-management/'.$task->project_id.'/'.$task->id, Str::uuid().'.'.strtolower($file->getClientOriginalExtension() ?: 'file'), 'local');
-        ProjectAttachment::query()->create(['project_id' => $task->project_id, 'task_id' => $task->id, 'uploaded_by' => ProjectManagementAccess::user()?->id, 'original_name' => Str::limit($file->getClientOriginalName(), 255, ''), 'path' => $path, 'mime_type' => $file->getMimeType(), 'size' => $file->getSize()]);
+        $attachment = ProjectAttachment::query()->create(['project_id' => $task->project_id, 'task_id' => $task->id, 'uploaded_by' => ProjectManagementAccess::user()?->id, 'original_name' => Str::limit($file->getClientOriginalName(), 255, ''), 'path' => $path, 'mime_type' => $file->getMimeType(), 'size' => $file->getSize()]);
 
-        return back()->with('status', 'Attachment uploaded securely.');
+        return $request->expectsJson()
+            ? response()->json(['data' => [...$attachment->toArray(), 'download_url' => route('admin.project-management.attachments.download', $attachment)], 'message' => 'Attachment uploaded securely.'], 201)
+            : back()->with('status', 'Attachment uploaded securely.');
     }
 
     public function downloadAttachment(ProjectAttachment $attachment): BinaryFileResponse
@@ -760,31 +774,37 @@ class AdminProjectManagementController extends Controller
         return response()->download(Storage::disk('local')->path($attachment->path), $attachment->original_name, ['X-Content-Type-Options' => 'nosniff']);
     }
 
-    public function storeChecklistItem(Request $request, Task $task): RedirectResponse
+    public function storeChecklistItem(Request $request, Task $task): RedirectResponse|JsonResponse
     {
         abort_unless(ProjectManagementAccess::canManage($task->project), 403);
         $validated = $request->validate(['checklist_id' => ['required', 'integer', Rule::exists('checklists', 'id')->where('task_id', $task->id)], 'content' => ['required', 'string', 'max:500']]);
         $checklist = $task->checklists()->findOrFail($validated['checklist_id']);
-        $checklist->items()->create(['content' => trim($validated['content']), 'position' => (int) ($checklist->items()->max('position') ?? -1) + 1]);
+        $item = $checklist->items()->create(['content' => trim($validated['content']), 'position' => (int) ($checklist->items()->max('position') ?? -1) + 1]);
 
-        return back()->with('status', 'Checklist item added.');
+        return $request->expectsJson()
+            ? response()->json(['data' => $item->load('checklist'), 'message' => 'Checklist item added.'], 201)
+            : back()->with('status', 'Checklist item added.');
     }
 
-    public function storeChecklist(Request $request, Task $task): RedirectResponse
+    public function storeChecklist(Request $request, Task $task): RedirectResponse|JsonResponse
     {
         abort_unless(ProjectManagementAccess::canManage($task->project), 403);
         $validated = $request->validate(['title' => ['required', 'string', 'max:120']]);
-        $task->checklists()->create(['title' => trim($validated['title']), 'position' => (int) ($task->checklists()->max('position') ?? -1) + 1]);
+        $checklist = $task->checklists()->create(['title' => trim($validated['title']), 'position' => (int) ($task->checklists()->max('position') ?? -1) + 1]);
 
-        return back()->with('status', 'Checklist added.');
+        return $request->expectsJson()
+            ? response()->json(['data' => $checklist->load('items'), 'message' => 'Checklist added.'], 201)
+            : back()->with('status', 'Checklist added.');
     }
 
-    public function toggleChecklistItem(\App\Models\ChecklistItem $item): RedirectResponse
+    public function toggleChecklistItem(Request $request, \App\Models\ChecklistItem $item): RedirectResponse|JsonResponse
     {
         abort_unless(ProjectManagementAccess::canManage($item->checklist->task->project), 403);
         $item->update(['is_complete' => ! $item->is_complete]);
 
-        return back();
+        return $request->expectsJson()
+            ? response()->json(['data' => $item->fresh(), 'message' => $item->is_complete ? 'Checklist item completed.' : 'Checklist item reopened.'])
+            : back();
     }
 
     public function notifications(): View
@@ -795,12 +815,14 @@ class AdminProjectManagementController extends Controller
         return view('admin.project-management.notifications', compact('notifications'));
     }
 
-    public function markNotification(string $notification): RedirectResponse
+    public function markNotification(Request $request, string $notification): RedirectResponse|JsonResponse
     {
         ProjectManagementAccess::ensureNotificationsWorkspace();
         DB::table('notifications')->where('id', $notification)->where('notifiable_type', User::class)->where('notifiable_id', ProjectManagementAccess::user()?->id)->update(['read_at' => now()]);
 
-        return back();
+        return $request->expectsJson()
+            ? response()->json(['data' => null, 'message' => 'Notification marked as read.'])
+            : back();
     }
 
     public function search(Request $request): View

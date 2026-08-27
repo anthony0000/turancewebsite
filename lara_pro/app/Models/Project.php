@@ -9,6 +9,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Project extends Model
 {
+    public function getRouteKeyName(): string
+    {
+        return 'project_number';
+    }
+
     protected $fillable = [
         'project_number',
         'name',
