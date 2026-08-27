@@ -2,6 +2,13 @@
 
 @section('title', ($title ?? 'Project Management').' | Admin')
 
+@php
+    $pmNotificationUserId = \App\Support\ProjectManagementAccess::user()?->id;
+    $pmUnreadNotifications = $pmNotificationUserId && \App\Support\AdminAccess::can('projects')
+        ? \Illuminate\Support\Facades\DB::table('notifications')->where('notifiable_type', \App\Models\User::class)->where('notifiable_id', $pmNotificationUserId)->whereNull('read_at')->count()
+        : 0;
+@endphp
+
 @push('styles')
     <style>
         .pm-shell { display: grid; gap: 18px; align-content: start; }
@@ -16,6 +23,7 @@
         .pm-subnav-more[open] summary, .pm-subnav-more summary:hover { background: var(--panel-soft); color: var(--muted-strong); }
         .pm-subnav-more__items { position: absolute; top: calc(100% + 6px); right: 0; z-index: 70; display: grid; min-width: 170px; gap: 2px; padding: 6px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface, #fff); box-shadow: 0 12px 28px rgba(31,38,48,.12); }
         .pm-subnav-more__items a { width: 100%; justify-content: flex-start; white-space: nowrap; }
+        .pm-notification-count { display: inline-grid; min-width: 17px; height: 17px; margin-left: 4px; place-items: center; border-radius: 999px; background: var(--primary); color: #fff; font-size: 9px; font-weight: 800; line-height: 1; }
         .pm-dashboard .pm-panel-head p { display: none; }
         .pm-dashboard .pm-panel-head { margin-bottom: 10px; }
         .pm-dashboard .pm-kpi small { display: none; }
@@ -114,6 +122,31 @@
         .pm-card-labels span { padding: 3px 6px; border-radius: 5px; color: #684b00; background: #fff4cf; font-size: 10px; }
         .pm-task-bottom { color: var(--muted); font-size: 11px; }
         .pm-task-bottom .is-overdue { color: var(--danger); font-weight: 800; }
+        .pm-task-hero { align-items: center; }
+        .pm-task-hero h2 { color: var(--text); letter-spacing: -.035em; }
+        .pm-task-hero__actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 8px; }
+        .pm-task-edit-panel .pm-panel-head h3 { margin-top: 4px; color: var(--text); font-size: 21px; letter-spacing: -.03em; }
+        .pm-task-edit-panel .pm-panel-head p { max-width: 600px; }
+        .pm-task-form-primary { gap: 13px 14px; }
+        .pm-task-form-primary .field-full:last-child { margin-top: 2px; }
+        .pm-advanced-fields { margin-top: 18px; border-top: 1px solid var(--line-soft); }
+        .pm-advanced-fields summary { display: flex; min-height: 48px; align-items: center; justify-content: space-between; gap: 12px; color: var(--text); cursor: pointer; font-size: 12px; font-weight: 800; list-style: none; }
+        .pm-advanced-fields summary::-webkit-details-marker { display: none; }
+        .pm-advanced-fields summary::after { width: 7px; height: 7px; flex: 0 0 7px; margin-right: 3px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; content: ''; transform: rotate(45deg); transition: transform .18s ease; }
+        .pm-advanced-fields[open] summary::after { transform: rotate(225deg); }
+        .pm-advanced-fields summary span { margin-left: auto; color: var(--muted); font-size: 10px; font-weight: 500; }
+        .pm-advanced-fields > .pm-form-grid { padding: 4px 0 2px; }
+        .pm-task-label-options { gap: 7px; margin-top: 7px; }
+        .pm-task-label-options .pm-chip { min-height: 30px; gap: 6px; cursor: pointer; }
+        .pm-task-view .is-overdue { color: var(--danger); }
+        .pm-completion-note { display: grid; gap: 6px; border-color: rgba(184,134,11,.2); background: #fffbed; }
+        .pm-completion-note strong { color: var(--text); font-size: 13px; }
+        .pm-completion-note span { color: var(--muted); font-size: 11px; line-height: 1.5; }
+        .pm-notifications-list .pm-list-item { align-items: center; padding: 15px 0; }
+        .pm-notifications-list .pm-list-item.is-unread { padding-left: 12px; border-left: 3px solid var(--primary); background: linear-gradient(90deg, #fffbed, transparent); }
+        .pm-notification-message { color: var(--text); font-size: 13px; }
+        .pm-notification-meta { display: block; margin-top: 5px; color: var(--muted); font-size: 11px; }
+        .pm-notification-type { display: inline-flex; margin-bottom: 5px; color: var(--primary-strong); font-size: 9px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
         .pm-board-hero { border-bottom-left-radius: 10px; border-bottom-right-radius: 10px; }
         .pm-board-hero h2 { color: var(--text); letter-spacing: -.035em; }
         .pm-board-toolbar { display: grid; gap: 16px; padding: 16px 20px; border-radius: 10px; background: #fff; }
@@ -383,6 +416,7 @@
                 <a class="{{ request()->routeIs('admin.project-management.backlog') ? 'active' : '' }}" href="{{ route('admin.project-management.backlog', $project) }}">Backlog</a>
                 <a class="{{ request()->routeIs('admin.project-management.sprints') ? 'active' : '' }}" href="{{ route('admin.project-management.sprints', $project) }}">Sprints</a>
             @endif
+            <a class="{{ request()->routeIs('admin.project-management.notifications') ? 'active' : '' }}" href="{{ route('admin.project-management.notifications') }}">Notifications @if ($pmUnreadNotifications)<span class="pm-notification-count">{{ $pmUnreadNotifications > 99 ? '99+' : $pmUnreadNotifications }}</span>@endif</a>
             <details class="pm-subnav-more" @if ($moreNavActive) open @endif>
                 <summary class="{{ $moreNavActive ? 'active' : '' }}">More</summary>
                 <div class="pm-subnav-more__items">
@@ -399,6 +433,7 @@
             </details>
         @else
             <a class="active" href="{{ route('admin.project-management.dashboard') }}">My tasks</a>
+            <a class="{{ request()->routeIs('admin.project-management.notifications') ? 'active' : '' }}" href="{{ route('admin.project-management.notifications') }}">Notifications @if ($pmUnreadNotifications)<span class="pm-notification-count">{{ $pmUnreadNotifications > 99 ? '99+' : $pmUnreadNotifications }}</span>@endif</a>
         @endif
         </nav>
 

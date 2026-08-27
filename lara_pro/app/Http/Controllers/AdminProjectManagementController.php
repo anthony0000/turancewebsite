@@ -435,11 +435,13 @@ class AdminProjectManagementController extends Controller
 
     public function task(Task $task): View
     {
-        ProjectManagementAccess::ensureTaskVisible($task);
+        abort_unless(ProjectManagementAccess::canViewTask($task) || ProjectManagementAccess::canManageTaskStatus($task), 403);
 
         if (ProjectManagementAccess::isLimitedMember()) {
             return view('admin.project-management.staff-task', [
                 'task' => $task->load(['project', 'column', 'assignee']),
+                'canCompleteTask' => AdminAccess::isFullAdmin() || (int) $task->assignee_id === (int) ProjectManagementAccess::user()?->id,
+                'canManageTaskStatus' => ProjectManagementAccess::canManageTaskStatus($task),
             ]);
         }
 
@@ -458,6 +460,7 @@ class AdminProjectManagementController extends Controller
             'taskTypes' => self::TASK_TYPES,
             'priorities' => self::PRIORITIES,
             'canManageWorkspace' => AdminAccess::isFullAdmin(),
+            'canManageTaskStatus' => ProjectManagementAccess::canManageTaskStatus($task),
         ]);
     }
 
@@ -482,7 +485,7 @@ class AdminProjectManagementController extends Controller
             $task->labels()->sync($this->projectLabelIds($project, $validated['label_ids'] ?? []));
             ProjectManagementAccess::log($lockedProject, 'task.created', Task::class, $task->id, null, ['title' => $task->title], taskId: $task->id);
             if ($task->assignee_id) {
-                ProjectManagementAccess::notify($lockedProject, 'task.assigned', 'You were assigned '.$task->title, route('admin.project-management.tasks.show', $task), ProjectManagementAccess::user()?->id);
+                ProjectManagementAccess::notify($lockedProject, 'task.assigned', 'You were assigned '.$task->title, route('admin.project-management.tasks.show', $task), ProjectManagementAccess::user()?->id, [$task->assignee_id]);
             }
 
             return $task;
@@ -501,6 +504,7 @@ class AdminProjectManagementController extends Controller
         abort_unless(ProjectManagementAccess::canManage($project), 403);
         $validated = $request->validate($this->taskRules($project, $task));
         $old = $task->only(['title', 'priority', 'assignee_id', 'due_on', 'status', 'sprint_id', 'milestone_id']);
+        $wasCompleted = $task->completed_at !== null;
         $task->fill($this->taskPayload($validated));
         if (! empty($validated['board_column_id'])) {
             $column = BoardColumn::query()->whereKey($validated['board_column_id'])->where('project_id', $project->id)->firstOrFail();
@@ -514,11 +518,52 @@ class AdminProjectManagementController extends Controller
         }
         ProjectManagementAccess::log($project, 'task.updated', Task::class, $task->id, $old, $task->only(array_keys($old)), taskId: $task->id);
 
+        if ($task->assignee_id && (int) $old['assignee_id'] !== (int) $task->assignee_id) {
+            ProjectManagementAccess::notify($project, 'task.assigned', 'You were assigned '.$task->title, route('admin.project-management.tasks.show', $task), ProjectManagementAccess::user()?->id, [$task->assignee_id]);
+        }
+        if (! $wasCompleted && $task->completed_at) {
+            ProjectManagementAccess::notify($project, 'task.completed', 'Task completed: '.$task->title, route('admin.project-management.tasks.show', $task), ProjectManagementAccess::user()?->id);
+        } elseif ($wasCompleted && ! $task->completed_at) {
+            ProjectManagementAccess::notify($project, 'task.reopened', 'Task marked not completed: '.$task->title, route('admin.project-management.tasks.show', $task), ProjectManagementAccess::user()?->id);
+        }
+
         if ($request->expectsJson()) {
             return response()->json(['data' => $task->fresh()->load(['assignee', 'column', 'labels']), 'message' => 'Task updated.']);
         }
 
         return redirect()->route('admin.project-management.tasks.show', $task)->with('status', 'Task saved.');
+    }
+
+    public function completeTask(Request $request, Task $task): RedirectResponse|JsonResponse
+    {
+        ProjectManagementAccess::ensureTaskVisible($task);
+        $userId = ProjectManagementAccess::user()?->id;
+        abort_unless(AdminAccess::isFullAdmin() || (int) $task->assignee_id === (int) $userId, 403);
+
+        if (! $task->completed_at) {
+            $task = $this->setTaskCompletion($task, true);
+            ProjectManagementAccess::log($task->project, 'task.completed', Task::class, $task->id, null, ['completed_at' => $task->completed_at?->toISOString()], taskId: $task->id);
+            ProjectManagementAccess::notify($task->project, 'task.completed', 'Task completed: '.$task->title, route('admin.project-management.tasks.show', $task), $userId);
+        }
+
+        return $request->expectsJson()
+            ? response()->json(['data' => $task->fresh()->load(['project', 'column', 'assignee']), 'message' => 'Task marked as done.'])
+            : back()->with('status', 'Task marked as done.');
+    }
+
+    public function reopenTask(Request $request, Task $task): RedirectResponse|JsonResponse
+    {
+        abort_unless(ProjectManagementAccess::canManageTaskStatus($task), 403);
+
+        if ($task->completed_at) {
+            $task = $this->setTaskCompletion($task, false);
+            ProjectManagementAccess::log($task->project, 'task.reopened', Task::class, $task->id, null, ['completed_at' => null], taskId: $task->id);
+            ProjectManagementAccess::notify($task->project, 'task.reopened', 'Task marked not completed: '.$task->title, route('admin.project-management.tasks.show', $task), ProjectManagementAccess::user()?->id);
+        }
+
+        return $request->expectsJson()
+            ? response()->json(['data' => $task->fresh()->load(['project', 'column', 'assignee']), 'message' => 'Task marked as not completed.'])
+            : back()->with('status', 'Task marked as not completed.');
     }
 
     public function moveTask(Request $request, Task $task): JsonResponse
@@ -530,6 +575,7 @@ class AdminProjectManagementController extends Controller
             'position' => ['required', 'integer', 'min:0'],
         ]);
 
+        $wasCompleted = $task->completed_at !== null;
         DB::transaction(function () use ($task, $project, $validated): void {
             $column = BoardColumn::query()->whereKey($validated['board_column_id'])->where('project_id', $project->id)->firstOrFail();
             $destination = Task::query()->where('project_id', $project->id)->where('board_column_id', $column->id)->whereNull('archived_at')->where('id', '!=', $task->id)->orderBy('position')->lockForUpdate()->get()->values();
@@ -545,6 +591,13 @@ class AdminProjectManagementController extends Controller
             ])->save();
             ProjectManagementAccess::log($project, 'task.moved', Task::class, $task->id, null, ['column_id' => $column->id, 'position' => $position], taskId: $task->id);
         });
+
+        $task = $task->fresh();
+        if (! $wasCompleted && $task->completed_at) {
+            ProjectManagementAccess::notify($project, 'task.completed', 'Task completed: '.$task->title, route('admin.project-management.tasks.show', $task), ProjectManagementAccess::user()?->id);
+        } elseif ($wasCompleted && ! $task->completed_at) {
+            ProjectManagementAccess::notify($project, 'task.reopened', 'Task marked not completed: '.$task->title, route('admin.project-management.tasks.show', $task), ProjectManagementAccess::user()?->id);
+        }
 
         return response()->json(['message' => 'Task position saved.', 'task_id' => $task->id]);
     }
@@ -653,7 +706,7 @@ class AdminProjectManagementController extends Controller
         $comment = Comment::query()->create(['project_id' => $project->id, 'task_id' => $task?->id, 'user_id' => ProjectManagementAccess::user()?->id, 'parent_id' => $validated['parent_id'] ?? null, 'body' => ProjectManagementAccess::sanitize($validated['body'])]);
         ProjectManagementAccess::log($project, 'comment.created', Comment::class, $comment->id, taskId: $task?->id);
         foreach ($project->members()->get()->filter(fn (User $member) => $member->id !== ProjectManagementAccess::user()?->id && Str::contains(strtolower($comment->body), '@'.strtolower(Str::before($member->name, ' ')))) as $mentioned) {
-            ProjectManagementAccess::notify($project, 'comment.mention', 'You were mentioned in a comment', $task ? route('admin.project-management.tasks.show', $task) : route('admin.project-management.projects.show', $project), ProjectManagementAccess::user()?->id);
+            ProjectManagementAccess::notify($project, 'comment.mention', 'You were mentioned in a comment', $task ? route('admin.project-management.tasks.show', $task) : route('admin.project-management.projects.show', $project), ProjectManagementAccess::user()?->id, [$mentioned->id]);
         }
 
         return back()->with('status', 'Comment added.');
@@ -736,7 +789,7 @@ class AdminProjectManagementController extends Controller
 
     public function notifications(): View
     {
-        ProjectManagementAccess::ensureFullWorkspace();
+        ProjectManagementAccess::ensureNotificationsWorkspace();
         $notifications = DB::table('notifications')->where('notifiable_type', User::class)->where('notifiable_id', ProjectManagementAccess::user()?->id)->latest()->paginate(30);
 
         return view('admin.project-management.notifications', compact('notifications'));
@@ -744,7 +797,7 @@ class AdminProjectManagementController extends Controller
 
     public function markNotification(string $notification): RedirectResponse
     {
-        ProjectManagementAccess::ensureFullWorkspace();
+        ProjectManagementAccess::ensureNotificationsWorkspace();
         DB::table('notifications')->where('id', $notification)->where('notifiable_type', User::class)->where('notifiable_id', ProjectManagementAccess::user()?->id)->update(['read_at' => now()]);
 
         return back();
@@ -870,6 +923,29 @@ class AdminProjectManagementController extends Controller
             'estimated_hours' => $validated['estimated_hours'] ?? null,
             'story_points' => $validated['story_points'] ?? null,
         ];
+    }
+
+    private function setTaskCompletion(Task $task, bool $completed): Task
+    {
+        DB::transaction(function () use ($task, $completed): void {
+            $locked = Task::query()->whereKey($task->id)->lockForUpdate()->firstOrFail();
+            $targetColumn = $locked->project->boardColumns()
+                ->where('is_done', $completed)
+                ->when(! $completed, fn ($query) => $query->orderByRaw("CASE WHEN LOWER(name) = 'in progress' THEN 0 ELSE 1 END"))
+                ->orderBy('position')
+                ->first();
+            $attributes = ['completed_at' => $completed ? ($locked->completed_at ?: now()) : null];
+
+            if ($targetColumn && (int) $locked->board_column_id !== (int) $targetColumn->id) {
+                $attributes['board_column_id'] = $targetColumn->id;
+                $attributes['status'] = Str::snake($targetColumn->name);
+                $attributes['position'] = (int) ($locked->project->tasks()->where('board_column_id', $targetColumn->id)->where('id', '!=', $locked->id)->max('position') ?? -1) + 1;
+            }
+
+            $locked->forceFill($attributes)->save();
+        });
+
+        return $task->fresh(['project', 'column', 'assignee']);
     }
 
     private function projectLabelIds(Project $project, array $labelIds): array

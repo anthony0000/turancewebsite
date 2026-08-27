@@ -29,6 +29,10 @@ final class AdminAccess
             'label' => 'Projects',
             'description' => 'Review project records and project-to-invoice relationships.',
         ],
+        'project-management' => [
+            'label' => 'Manage projects',
+            'description' => 'Update project tasks, completion, assignments, and delivery workflow.',
+        ],
         'project-files' => [
             'label' => 'File sharing',
             'description' => 'View files shared with assigned project teams; full admins can upload, update, remove, and share files.',
@@ -97,6 +101,10 @@ final class AdminAccess
     public static function can(string $permission): bool
     {
         if (self::isFullAdmin()) {
+            return true;
+        }
+
+        if ($permission === 'projects' && in_array('project-management', self::permissionsForSession(), true)) {
             return true;
         }
 

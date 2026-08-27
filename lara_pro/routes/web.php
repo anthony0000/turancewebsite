@@ -167,6 +167,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('/projects/{project}/activity', [ProjectManagementApiController::class, 'activity'])->name('activity');
                 Route::patch('/tasks/{task}', [ProjectManagementApiController::class, 'updateTask'])->name('tasks.update');
                 Route::patch('/tasks/{task}/move', [ProjectManagementApiController::class, 'moveTask'])->name('tasks.move');
+                Route::patch('/tasks/{task}/complete', [ProjectManagementApiController::class, 'completeTask'])->name('tasks.complete');
+                Route::patch('/tasks/{task}/reopen', [ProjectManagementApiController::class, 'reopenTask'])->name('tasks.reopen');
                 Route::post('/tasks/{task}/time', [ProjectManagementApiController::class, 'storeTimeEntry'])->name('tasks.time.store');
                 Route::post('/tasks/{task}/checklists', [ProjectManagementApiController::class, 'storeChecklist'])->name('tasks.checklists.store');
                 Route::post('/tasks/{task}/checklist-items', [ProjectManagementApiController::class, 'storeChecklistItem'])->name('tasks.checklist-items.store');
@@ -204,6 +206,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/tasks/{task}', [AdminProjectManagementController::class, 'task'])->name('tasks.show');
             Route::put('/tasks/{task}', [AdminProjectManagementController::class, 'updateTask'])->name('tasks.update');
             Route::patch('/tasks/{task}/move', [AdminProjectManagementController::class, 'moveTask'])->name('tasks.move');
+            Route::patch('/tasks/{task}/complete', [AdminProjectManagementController::class, 'completeTask'])->name('tasks.complete');
+            Route::patch('/tasks/{task}/reopen', [AdminProjectManagementController::class, 'reopenTask'])->name('tasks.reopen');
             Route::patch('/tasks/{task}/sprint', [AdminProjectManagementController::class, 'assignTaskSprint'])->name('tasks.sprint');
             Route::post('/projects/{project}/tasks/{task}/comments', [AdminProjectManagementController::class, 'storeComment'])->name('tasks.comments.store');
             Route::post('/tasks/{task}/time', [AdminProjectManagementController::class, 'storeTimeEntry'])->name('tasks.time.store');

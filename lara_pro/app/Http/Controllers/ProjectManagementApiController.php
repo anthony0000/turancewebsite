@@ -187,6 +187,20 @@ class ProjectManagementApiController extends Controller
         return app(AdminProjectManagementController::class)->moveTask($request, $task);
     }
 
+    public function completeTask(Request $request, Task $task): JsonResponse
+    {
+        $request->headers->set('Accept', 'application/json');
+
+        return app(AdminProjectManagementController::class)->completeTask($request, $task);
+    }
+
+    public function reopenTask(Request $request, Task $task): JsonResponse
+    {
+        $request->headers->set('Accept', 'application/json');
+
+        return app(AdminProjectManagementController::class)->reopenTask($request, $task);
+    }
+
     public function comments(Project $project, ?Task $task = null): JsonResponse
     {
         ProjectManagementAccess::ensureFullWorkspace();
@@ -279,7 +293,7 @@ class ProjectManagementApiController extends Controller
 
     public function notifications(): JsonResponse
     {
-        ProjectManagementAccess::ensureFullWorkspace();
+        ProjectManagementAccess::ensureNotificationsWorkspace();
         $notifications = DB::table('notifications')->where('notifiable_type', \App\Models\User::class)->where('notifiable_id', ProjectManagementAccess::user()?->id)->latest()->paginate(30);
 
         return response()->json(['data' => $notifications->items(), 'meta' => ['current_page' => $notifications->currentPage(), 'last_page' => $notifications->lastPage(), 'total' => $notifications->total()]]);
@@ -287,7 +301,7 @@ class ProjectManagementApiController extends Controller
 
     public function markNotification(string $notification): JsonResponse
     {
-        ProjectManagementAccess::ensureFullWorkspace();
+        ProjectManagementAccess::ensureNotificationsWorkspace();
         DB::table('notifications')->where('id', $notification)->where('notifiable_type', \App\Models\User::class)->where('notifiable_id', ProjectManagementAccess::user()?->id)->update(['read_at' => now()]);
 
         return response()->json(['data' => null, 'message' => 'Notification marked as read.']);

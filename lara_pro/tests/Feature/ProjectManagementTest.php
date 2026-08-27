@@ -6,6 +6,7 @@ use App\Models\Task;
 use App\Models\User;
 use App\Support\AdminAccess;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 
 uses(RefreshDatabase::class);
 
@@ -145,4 +146,79 @@ it('keeps project management to one highlighted sidebar destination', function (
 
     expect(substr_count($response->getContent(), 'class="admin-nav-link active"'))->toBe(1)
         ->and($response->getContent())->toContain('<strong>Projects</strong>');
+});
+
+it('lets assigned staff complete tasks and authorized staff reopen them', function () {
+    $admin = User::factory()->create(['role' => AdminAccess::ROLE_ADMIN, 'permissions' => AdminAccess::permissionKeys(), 'is_active' => true]);
+    $staff = User::factory()->create(['role' => AdminAccess::ROLE_SUBACCOUNT, 'permissions' => ['projects'], 'is_active' => true]);
+    $project = Project::query()->create(['project_number' => 'DONE', 'name' => 'Completion workflow', 'status' => 'active', 'priority' => 'medium', 'project_manager_id' => $admin->id]);
+    $openColumn = $project->boardColumns()->create(['name' => 'In Progress', 'position' => 0]);
+    $doneColumn = $project->boardColumns()->create(['name' => 'Completed', 'position' => 1, 'is_done' => true]);
+    $project->members()->attach($staff->id, ['role' => 'member']);
+    $task = $project->tasks()->create([
+        'task_number' => 1,
+        'title' => 'Finish the handoff',
+        'type' => 'task',
+        'priority' => 'medium',
+        'status' => 'in_progress',
+        'board_column_id' => $openColumn->id,
+        'assignee_id' => $staff->id,
+        'reporter_id' => $admin->id,
+        'position' => 0,
+    ]);
+
+    $staffSession = projectManagementSession($staff);
+    $this->withSession($staffSession)
+        ->get(route('admin.project-management.tasks.show', $task))
+        ->assertOk()
+        ->assertSee('Mark as done')
+        ->assertSee('What needs to happen');
+
+    $this->withSession($staffSession)
+        ->patch(route('admin.project-management.tasks.complete', $task))
+        ->assertRedirect();
+
+    expect($task->fresh()->completed_at)->not->toBeNull()
+        ->and($task->fresh()->board_column_id)->toBe($doneColumn->id)
+        ->and(DB::table('notifications')->where('notifiable_id', $admin->id)->where('type', 'task.completed')->exists())->toBeTrue();
+
+    $this->withSession($staffSession)
+        ->patch(route('admin.project-management.tasks.reopen', $task))
+        ->assertForbidden();
+
+    $staff->update(['permissions' => ['projects', 'project-management']]);
+    $this->withSession(projectManagementSession($staff))
+        ->patch(route('admin.project-management.tasks.reopen', $task))
+        ->assertRedirect();
+
+    expect($task->fresh()->completed_at)->toBeNull()
+        ->and($task->fresh()->board_column_id)->toBe($openColumn->id)
+        ->and(DB::table('notifications')->where('notifiable_id', $admin->id)->where('type', 'task.reopened')->exists())->toBeTrue();
+
+    $teammate = User::factory()->create(['role' => AdminAccess::ROLE_SUBACCOUNT, 'permissions' => ['projects'], 'is_active' => true]);
+    $project->members()->attach($teammate->id, ['role' => 'member']);
+    $teammateTask = $project->tasks()->create([
+        'task_number' => 2,
+        'title' => 'Review teammate delivery',
+        'type' => 'task',
+        'priority' => 'medium',
+        'status' => 'completed',
+        'board_column_id' => $doneColumn->id,
+        'assignee_id' => $teammate->id,
+        'reporter_id' => $admin->id,
+        'position' => 1,
+        'completed_at' => now(),
+    ]);
+
+    $this->withSession(projectManagementSession($staff))
+        ->get(route('admin.project-management.tasks.show', $teammateTask))
+        ->assertOk()
+        ->assertSee('Assigned to '.$teammate->name)
+        ->assertSee('Mark not completed');
+
+    $this->withSession(projectManagementSession($staff))
+        ->patch(route('admin.project-management.tasks.reopen', $teammateTask))
+        ->assertRedirect();
+
+    expect($teammateTask->fresh()->completed_at)->toBeNull();
 });

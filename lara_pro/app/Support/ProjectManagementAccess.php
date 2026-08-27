@@ -67,6 +67,16 @@ final class ProjectManagementAccess
         return self::canView($project) && AdminAccess::isFullAdmin();
     }
 
+    public static function canManageTaskStatus(Task $task): bool
+    {
+        return self::canView($task->project) && (AdminAccess::isFullAdmin() || AdminAccess::can('project-management'));
+    }
+
+    public static function ensureNotificationsWorkspace(): void
+    {
+        abort_unless(self::user() !== null && AdminAccess::can('projects'), 403);
+    }
+
     public static function isLimitedMember(): bool
     {
         return ! AdminAccess::isFullAdmin();
@@ -178,12 +188,14 @@ final class ProjectManagementAccess
         ]);
     }
 
-    public static function notify(Project $project, string $type, string $message, string $url, ?int $exceptUserId = null): void
+    public static function notify(Project $project, string $type, string $message, string $url, ?int $exceptUserId = null, ?array $recipientIds = null): void
     {
-        $recipientIds = $project->members()->pluck('users.id')->all();
+        if ($recipientIds === null) {
+            $recipientIds = $project->members()->pluck('users.id')->all();
 
-        if ($project->project_manager_id) {
-            $recipientIds[] = $project->project_manager_id;
+            if ($project->project_manager_id) {
+                $recipientIds[] = $project->project_manager_id;
+            }
         }
 
         $recipientIds = array_values(array_unique(array_filter($recipientIds, fn ($id) => (int) $id !== (int) $exceptUserId)));
