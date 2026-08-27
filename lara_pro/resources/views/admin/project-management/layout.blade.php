@@ -465,7 +465,7 @@
         <nav class="pm-subnav" aria-label="Project management navigation">
         @if (\App\Support\AdminAccess::isFullAdmin())
         @php
-            $moreNavActive = request()->routeIs('admin.project-management.search', 'admin.project-management.calendar', 'admin.project-management.team', 'admin.project-management.reports', 'admin.project-management.archived', 'admin.project-management.notifications', 'admin.project-management.settings');
+            $moreNavActive = request()->routeIs('admin.project-management.search', 'admin.project-management.calendar', 'admin.project-management.team', 'admin.project-management.reports', 'admin.project-management.archived', 'admin.project-management.settings');
         @endphp
             <a class="{{ request()->routeIs('admin.project-management.dashboard') ? 'active' : '' }}" href="{{ route('admin.project-management.dashboard') }}">Overview</a>
             <a class="{{ request()->routeIs('admin.project-management.projects*') && ! request()->routeIs('admin.project-management.archived') ? 'active' : '' }}" href="{{ route('admin.project-management.projects') }}">Projects</a>
@@ -486,7 +486,6 @@
                     @if (\App\Support\AdminAccess::isFullAdmin() && isset($project) && $project)
                         <a class="{{ request()->routeIs('admin.project-management.settings') ? 'active' : '' }}" href="{{ route('admin.project-management.settings', $project) }}">Settings</a>
                     @endif
-                    <a class="{{ request()->routeIs('admin.project-management.notifications') ? 'active' : '' }}" href="{{ route('admin.project-management.notifications') }}">Notifications</a>
                 </div>
             </details>
         @else
@@ -502,6 +501,20 @@
 @push('scripts')
     <script>
         (() => {
+            const closeMoreMenus = () => document.querySelectorAll('.pm-subnav-more[open]').forEach((menu) => menu.removeAttribute('open'));
+
+            document.addEventListener('click', (event) => {
+                const menu = event.target.closest('.pm-subnav-more');
+
+                if (!menu || event.target.closest('.pm-subnav-more__items a') || !event.target.closest('.pm-subnav')) {
+                    closeMoreMenus();
+                }
+            });
+
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape') closeMoreMenus();
+            });
+
             const taskOrNotificationForm = (form) => {
                 const action = form.getAttribute('action') || '';
 

@@ -143,21 +143,26 @@
         @if ($canManageWorkspace)
             <div class="pm-grid-wide" id="new-task">
                 <section class="panel pm-panel">
-                    <div class="pm-panel-head"><div><h3>Create task</h3><p>Start with an owner and a list so the team knows what happens next.</p></div></div>
+                    <div class="pm-panel-head"><div><h3>Create task</h3><p>Add the essentials now. You can refine the planning details later.</p></div></div>
                     <form method="POST" action="{{ route('admin.project-management.tasks.store', $project) }}">
                         @csrf
-                        <div class="pm-form-grid">
+                        <div class="pm-form-grid pm-task-create-primary">
                             <div class="field-full"><label for="task-title">Title</label><input id="task-title" name="title" required placeholder="Prepare client review notes"></div>
-                            <div class="field"><label for="task-type">Type</label><select id="task-type" name="type">@foreach ($taskTypes as $type)<option value="{{ $type }}">{{ Str::headline($type) }}</option>@endforeach</select></div>
-                            <div class="field"><label for="task-priority">Priority</label><select id="task-priority" name="priority">@foreach ($priorities as $priority)<option value="{{ $priority }}" @selected($priority === 'medium')>{{ Str::headline($priority) }}</option>@endforeach</select></div>
                             <div class="field"><label for="task-column">Column</label><select id="task-column" name="board_column_id">@foreach ($columns as $column)<option value="{{ $column->id }}">{{ $column->name }}</option>@endforeach</select></div>
                             <div class="field"><label for="task-assignee">Assignee</label><select id="task-assignee" name="assignee_id"><option value="">Unassigned</option>@foreach ($assignees as $assignee)<option value="{{ $assignee->id }}">{{ $assignee->name }}</option>@endforeach</select></div>
                             <div class="field"><label for="task-due">Due date</label><input id="task-due" type="date" name="due_on"></div>
-                            <div class="field"><label for="task-hours">Estimated hours</label><input id="task-hours" type="number" min="0" step="0.25" name="estimated_hours"></div>
-                            <div class="field"><label for="task-points">Story points</label><input id="task-points" type="number" min="0" step="0.5" name="story_points"></div>
                             <div class="field-full"><label for="task-description">Description</label><textarea id="task-description" name="description" rows="4" placeholder="Keep the acceptance context clear."></textarea></div>
-                            @if ($labels->isNotEmpty())<div class="field-full"><label>Labels</label><div class="pm-actions" style="margin-top:8px">@foreach ($labels as $label)<label class="pm-chip" style="gap:6px"><input type="checkbox" name="label_ids[]" value="{{ $label->id }}">{{ $label->name }}</label>@endforeach</div></div>@endif
                         </div>
+                        <details class="pm-advanced-fields">
+                            <summary>More options <span>Type, priority, estimates and labels</span></summary>
+                            <div class="pm-form-grid">
+                                <div class="field"><label for="task-type">Type</label><select id="task-type" name="type">@foreach ($taskTypes as $type)<option value="{{ $type }}">{{ Str::headline($type) }}</option>@endforeach</select></div>
+                                <div class="field"><label for="task-priority">Priority</label><select id="task-priority" name="priority">@foreach ($priorities as $priority)<option value="{{ $priority }}" @selected($priority === 'medium')>{{ Str::headline($priority) }}</option>@endforeach</select></div>
+                                <div class="field"><label for="task-hours">Estimated hours</label><input id="task-hours" type="number" min="0" step="0.25" name="estimated_hours"></div>
+                                <div class="field"><label for="task-points">Story points</label><input id="task-points" type="number" min="0" step="0.5" name="story_points"></div>
+                                @if ($labels->isNotEmpty())<div class="field-full"><label>Labels</label><div class="pm-actions" style="margin-top:8px">@foreach ($labels as $label)<label class="pm-chip" style="gap:6px"><input type="checkbox" name="label_ids[]" value="{{ $label->id }}">{{ $label->name }}</label>@endforeach</div></div>@endif
+                            </div>
+                        </details>
                         <div class="pm-form-actions"><button class="button" type="submit">Create task</button></div>
                     </form>
                 </section>

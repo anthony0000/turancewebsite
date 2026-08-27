@@ -266,19 +266,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 ->middleware('admin.permission:archive')
                 ->name('quotes.archive');
             Route::get('/quotes/{luxuryQuote}/edit', [AdminLuxuryQuoteController::class, 'edit'])
-                ->whereNumber('luxuryQuote')
                 ->name('quotes.edit');
             Route::put('/quotes/{luxuryQuote}', [AdminLuxuryQuoteController::class, 'update'])
-                ->whereNumber('luxuryQuote')
                 ->name('quotes.update');
             Route::get('/quotes/{luxuryQuote}', [AdminLuxuryQuoteController::class, 'show'])
-                ->whereNumber('luxuryQuote')
                 ->name('quotes.show');
             Route::get('/quotes/{luxuryQuote}/pdf', [AdminLuxuryQuoteController::class, 'downloadPdf'])
-                ->whereNumber('luxuryQuote')
                 ->name('quotes.pdf');
             Route::get('/quotes/{luxuryQuote}/mou', [AdminLuxuryQuoteController::class, 'downloadMouPdf'])
-                ->whereNumber('luxuryQuote')
                 ->name('quotes.mou');
         });
 
