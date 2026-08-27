@@ -36,7 +36,6 @@
             </section>
             <aside class="pm-stack">
                 <section class="panel pm-panel"><div class="pm-panel-head"><div><h3>Assignment</h3><p>Your current task context.</p></div></div><div class="pm-list"><div class="pm-list-item"><span>Task key</span><strong>{{ $task->task_key }}</strong></div><div class="pm-list-item"><span>Priority</span><strong>{{ Str::headline($task->priority) }}</strong></div><div class="pm-list-item"><span>List</span><strong>{{ $task->column?->name ?: Str::headline($task->status) }}</strong></div><div class="pm-list-item"><span>Due date</span><strong class="{{ $task->is_overdue ? 'is-overdue' : '' }}">{{ optional($task->due_on)->format('M d, Y') ?: 'No due date' }}</strong></div></div></section>
-                <section class="panel pm-panel pm-completion-note"><strong>{{ $task->completed_at ? 'This task is complete.' : ($canCompleteTask ? 'Ready when you are.' : 'Waiting for the assignee.') }}</strong><span>{{ $task->completed_at ? 'An authorised project manager can reopen it if more work is needed.' : ($canCompleteTask ? 'Mark it done when the work is finished so the project team can see the progress.' : 'The assigned team member can mark it done when the work is finished.') }}</span></section>
             </aside>
         </div>
     </div>

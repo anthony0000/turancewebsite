@@ -67,6 +67,43 @@
         </section>
     </div>
 
+    <section class="panel pm-panel pm-task-overview">
+        <div class="pm-panel-head">
+            <div>
+                <h3>Task details</h3>
+                <p>Recent work in the current filtered view.</p>
+            </div>
+            @if ($projects->isNotEmpty())
+                <a class="pm-icon-link" href="{{ route('admin.project-management.backlog', $projects->first()) }}">Open backlog</a>
+            @endif
+        </div>
+        <div class="pm-task-overview-table" role="table" aria-label="Task details">
+            <div class="pm-task-overview-row pm-task-overview-row--head" role="row">
+                <span role="columnheader">Task</span>
+                <span role="columnheader">Project</span>
+                <span role="columnheader">Assignee</span>
+                <span role="columnheader">Priority</span>
+                <span role="columnheader">Due</span>
+                <span role="columnheader">Status</span>
+            </div>
+            @forelse ($taskOverview as $task)
+                <div class="pm-task-overview-row" role="row">
+                    <div role="cell" class="pm-task-overview-row__task">
+                        <strong><a href="{{ route('admin.project-management.tasks.show', $task) }}">{{ $task->title }}</a></strong>
+                        <span>{{ $task->task_key }} · {{ Str::headline($task->type) }}</span>
+                    </div>
+                    <span role="cell">{{ $task->project?->project_number ?: '—' }}</span>
+                    <span role="cell">{{ $task->assignee?->name ?: 'Unassigned' }}</span>
+                    <span role="cell" class="pm-task-overview-priority pm-task-overview-priority--{{ $task->priority }}">{{ Str::headline($task->priority) }}</span>
+                    <span role="cell" class="{{ $task->is_overdue ? 'is-overdue' : '' }}">{{ optional($task->due_on)->format('M d, Y') ?: 'No date' }}</span>
+                    <span role="cell"><span class="pm-chip {{ $task->completed_at ? 'pm-chip--success' : ($task->is_overdue ? 'pm-chip--danger' : '') }}">{{ $task->completed_at ? 'Completed' : Str::headline($task->status) }}</span></span>
+                </div>
+            @empty
+                <div class="pm-empty pm-empty--compact"><strong>No task details to show.</strong><span>Tasks matching this view will appear here.</span></div>
+            @endforelse
+        </div>
+    </section>
+
     <div class="pm-grid-wide">
         <section class="panel pm-panel"><div class="pm-panel-head"><div><h3>Upcoming milestones</h3><p>Commitments that are approaching next.</p></div></div><div class="pm-list">@forelse ($upcomingMilestones as $milestone)<div class="pm-list-item"><div><strong>{{ $milestone->title }}</strong><span>{{ $milestone->project->project_number }} · due {{ optional($milestone->due_on)->format('M d, Y') }}</span></div><span class="pm-chip">{{ $milestone->status }}</span></div>@empty<div class="pm-empty">No upcoming milestones.</div>@endforelse</div></section>
         <section class="panel pm-panel"><div class="pm-panel-head"><div><h3>Team workload</h3><p>Open task distribution by assignee.</p></div></div><div class="pm-list">@forelse ($workload as $person)<div class="pm-list-item"><div><strong>{{ $person['name'] }}</strong><span>{{ $person['hours'] }} estimated hours</span></div><span class="pm-chip">{{ $person['count'] }} tasks</span></div>@empty<div class="pm-empty">No assigned tasks in this view.</div>@endforelse</div></section>

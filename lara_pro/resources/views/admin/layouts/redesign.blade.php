@@ -33,6 +33,36 @@
 
 html {
     background: var(--bg);
+    scrollbar-color: rgba(184, 134, 11, .62) rgba(184, 134, 11, .08);
+    scrollbar-width: thin;
+}
+
+/* A quiet branded scrollbar keeps long workspaces feeling intentional while
+ * preserving a visible thumb for keyboard and trackpad users. */
+* {
+    scrollbar-color: rgba(184, 134, 11, .58) rgba(184, 134, 11, .08);
+    scrollbar-width: thin;
+}
+
+*::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+*::-webkit-scrollbar-track {
+    background: rgba(184, 134, 11, .07);
+}
+
+*::-webkit-scrollbar-thumb {
+    border: 3px solid transparent;
+    border-radius: 999px;
+    background: linear-gradient(180deg, rgba(184, 134, 11, .78), rgba(143, 101, 8, .62));
+    background-clip: content-box;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, var(--primary), var(--primary-strong));
+    background-clip: content-box;
 }
 
 body {

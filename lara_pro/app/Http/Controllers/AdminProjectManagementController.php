@@ -82,6 +82,7 @@ class AdminProjectManagementController extends Controller
                 'count' => $group->count(),
                 'hours' => round((float) $group->sum('estimated_hours'), 1),
             ])->values();
+        $taskOverview = $tasks->sortByDesc('updated_at')->take(10)->values();
 
         return view('admin.project-management.dashboard', [
             'projects' => $projects,
@@ -95,6 +96,7 @@ class AdminProjectManagementController extends Controller
             'upcomingMilestones' => Milestone::query()->whereIn('project_id', $projectIds ?: [0])->where('status', '!=', 'completed')->whereNotNull('due_on')->orderBy('due_on')->limit(8)->with('project')->get(),
             'recentActivity' => $recentActivity,
             'workload' => $workload,
+            'taskOverview' => $taskOverview,
             'statusBreakdown' => $tasks->groupBy('status')->map->count(),
             'priorityBreakdown' => $tasks->groupBy('priority')->map->count(),
             'filters' => $request->only(['project_id', 'assignee_id', 'priority', 'status', 'date_from', 'date_to']),
@@ -851,6 +853,22 @@ class AdminProjectManagementController extends Controller
                 ->get();
         $tasks = $this->filteredTasks($request, $projects->modelKeys())->get();
         $weekStart = now()->startOfWeek();
+        $today = today();
+        $nextWeek = today()->addDays(7);
+        $openTasks = $tasks->whereNull('completed_at');
+        $dueBreakdown = collect([
+            ['label' => 'Overdue', 'count' => $openTasks->filter(fn (Task $task) => $task->is_overdue)->count(), 'tone' => 'danger'],
+            ['label' => 'Due today', 'count' => $openTasks->filter(fn (Task $task) => $task->due_on?->isToday())->count(), 'tone' => 'warning'],
+            ['label' => 'Next 7 days', 'count' => $openTasks->filter(fn (Task $task) => $task->due_on?->isAfter($today) && $task->due_on?->lessThanOrEqualTo($nextWeek))->count(), 'tone' => 'primary'],
+            ['label' => 'Later', 'count' => $openTasks->filter(fn (Task $task) => $task->due_on?->isAfter($nextWeek))->count(), 'tone' => 'success'],
+            ['label' => 'No due date', 'count' => $openTasks->whereNull('due_on')->count(), 'tone' => 'muted'],
+        ]);
+        $projectBreakdown = $openTasks->groupBy(fn (Task $task) => $task->project?->project_number ?: 'unassigned')
+            ->map(fn ($group) => [
+                'name' => $group->first()->project?->name ?: 'Unassigned project',
+                'key' => $group->first()->project?->project_number ?: '—',
+                'count' => $group->count(),
+            ])->sortByDesc('count')->take(5)->values();
 
         return view('admin.project-management.dashboard', [
             'projects' => $projects,
@@ -859,6 +877,10 @@ class AdminProjectManagementController extends Controller
             'todayTasks' => $tasks->filter(fn (Task $task) => $task->due_on?->isToday())->count(),
             'overdueTasks' => $tasks->filter(fn (Task $task) => $task->is_overdue)->count(),
             'completedThisWeek' => $tasks->filter(fn (Task $task) => $task->completed_at?->greaterThanOrEqualTo($weekStart))->count(),
+            'statusBreakdown' => $tasks->groupBy('status')->map->count(),
+            'priorityBreakdown' => $tasks->groupBy('priority')->map->count(),
+            'dueBreakdown' => $dueBreakdown,
+            'projectBreakdown' => $projectBreakdown,
             'filters' => $request->only(['project_id', 'priority', 'status', 'date_from', 'date_to']),
             'canManageWorkspace' => false,
         ]);

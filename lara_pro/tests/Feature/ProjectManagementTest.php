@@ -108,7 +108,7 @@ it('limits members to their assigned tasks across web and API surfaces', functio
     $hidden = $project->tasks()->create(['task_number' => 2, 'title' => 'Private teammate task', 'type' => 'task', 'priority' => 'high', 'status' => 'to_do', 'board_column_id' => $column->id, 'assignee_id' => $admin->id, 'reporter_id' => $admin->id, 'position' => 1]);
     $session = projectManagementSession($member);
 
-    $this->withSession($session)->get(route('admin.project-management.dashboard'))->assertOk()->assertSee('My tasks')->assertSee('Workspace')->assertSee('Member task')->assertDontSee('Private teammate task')->assertDontSee('Project overview')->assertDontSee('<span class="admin-nav-label">Create</span>')->assertDontSee('Search anything...')->assertDontSee('New Project');
+    $this->withSession($session)->get(route('admin.project-management.dashboard'))->assertOk()->assertSee('My tasks')->assertSee('Workspace')->assertSee('Member task')->assertSee('Work status')->assertSee('Due-date health')->assertSee('Open work by project')->assertDontSee('Private teammate task')->assertDontSee('Project overview')->assertDontSee('<span class="admin-nav-label">Create</span>')->assertDontSee('Search anything...')->assertDontSee('New Project');
     $this->withSession($session)->get(route('admin.project-management.board', $project))->assertForbidden();
     $this->withSession($session)->get(route('admin.project-management.tasks.show', $assigned))->assertOk()->assertSee('Member task');
     $this->withSession($session)->get(route('admin.project-management.tasks.show', $hidden))->assertForbidden();
@@ -139,7 +139,7 @@ it('renders the operational project-management surfaces with live records', func
     $task = $project->tasks()->create(['task_number' => 1, 'title' => 'Visible task', 'type' => 'task', 'priority' => 'medium', 'status' => 'to_do', 'board_column_id' => $project->boardColumns()->first()->id, 'reporter_id' => $admin->id, 'position' => 0]);
     $session = projectManagementSession($admin);
 
-    $this->withSession($session)->get(route('admin.project-management.dashboard'))->assertOk()->assertSee('Assign and track work')->assertSee('Open tasks')->assertDontSee('My tasks');
+    $this->withSession($session)->get(route('admin.project-management.dashboard'))->assertOk()->assertSee('Assign and track work')->assertSee('Open tasks')->assertSee('Task details')->assertSee('Visible task')->assertDontSee('My tasks');
     $this->withSession($session)->get(route('admin.project-management.board', $project))->assertOk()->assertSee('Visible task')->assertSee('value="'.$staff->id.'">'.$staff->name.'</option>', false)->assertDontSee('value="'.$admin->id.'">'.$admin->name.'</option>', false)->assertDontSee('Move work forward with a board the team can trust.')->assertDontSee('My tasks');
     $this->withSession($session)->get(route('admin.project-management.tasks.show', $task))->assertOk()->assertSee('Task details');
     $this->withSession($session)->get(route('admin.project-management.reports'))->assertOk()->assertSee('Operational reporting');
