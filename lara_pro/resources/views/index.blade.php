@@ -28,21 +28,21 @@
                 'summary' => 'A connected platform designed to make bespoke fashion discovery, measurement and fulfilment more considered.',
                 'services' => ['Product strategy', 'UX design', 'Platform engineering'], 'year' => '2026',
                 'outcome' => 'A scalable foundation connecting customers, creators and operations.', 'visual' => 'fashion',
-                'image' => null, 'link' => null,
+                'image' => asset('/assets/img/project/project-2-thumb7.jpg'), 'image_alt' => 'Mobile product interface preview', 'link' => null,
             ],
             [
                 'name' => '3Hjobs', 'industry' => 'Local services', 'category' => 'Marketplace platform',
                 'summary' => 'A location-aware marketplace that helps people discover and engage trusted artisans around them.',
                 'services' => ['Service design', 'Mobile experience', 'Backend development'], 'year' => '2026',
                 'outcome' => 'A clearer path from local discovery to service engagement.', 'visual' => 'marketplace',
-                'image' => null, 'link' => null,
+                'image' => asset('/assets/img/project/project-2-thumb11.jpg'), 'image_alt' => 'Marketplace mobile interface preview', 'link' => null,
             ],
             [
                 'name' => 'KleanManager', 'industry' => 'Business operations', 'category' => 'Management software',
                 'summary' => 'An operations platform bringing orders, customers, payments and daily laundry workflows into one view.',
                 'services' => ['Workflow strategy', 'UI/UX design', 'Web application'], 'year' => '2025',
                 'outcome' => 'Better operational visibility and more consistent service control.', 'visual' => 'operations',
-                'image' => null, 'link' => null,
+                'image' => asset('/assets/img/project/project-2-thumb4.jpg'), 'image_alt' => 'Operations dashboard interface preview', 'link' => null,
             ],
             [
                 'name' => '36 Plus One', 'industry' => 'Social impact', 'category' => 'Nonprofit platform',
@@ -50,7 +50,7 @@
                 'services' => ['UX design', 'Web development', 'Donation workflows'], 'year' => 'Live',
                 'outcome' => 'One accessible destination for causes, donations, volunteering, organisational work and partner engagement.',
                 'visual' => 'impact',
-                'image' => null,
+                'image' => asset('/assets/img/project/36plusone-live.webp'), 'image_alt' => '36 Plus One website homepage',
                 'link' => 'https://www.36plusone.org/',
                 'link_label' => 'View live project',
             ],
@@ -60,7 +60,7 @@
                 'services' => ['Marketplace UX', 'Vendor management', 'Commerce engineering'], 'year' => 'Live',
                 'outcome' => 'A connected destination where families can discover products and shop across trusted seller stores.',
                 'visual' => 'family',
-                'image' => null,
+                'image' => asset('/assets/img/project/project-2-thumb1.jpg'), 'image_alt' => 'Marketplace website interface preview',
                 'link' => 'https://kiddovista.co.uk/',
                 'link_label' => 'View live project',
             ],
@@ -70,7 +70,7 @@
                 'services' => ['Commerce strategy', 'UI/UX design', 'E-commerce development'], 'year' => 'Live',
                 'outcome' => 'A structured digital shop connecting healthcare customers with essential products and clear purchasing journeys.',
                 'visual' => 'healthcare',
-                'image' => null,
+                'image' => asset('/assets/img/project/project-2-thumb6.jpg'), 'image_alt' => 'E-commerce website interface preview',
                 'link' => 'https://shop.ihcpro.co.uk/',
                 'link_label' => 'View live project',
             ],
@@ -324,9 +324,9 @@
                 <div class="tt-work__list">
                     @foreach ($projects as $project)
                         <article class="tt-project {{ $loop->even ? 'tt-project--reverse' : '' }}" data-reveal>
-                            <div class="tt-project__visual tt-project__visual--{{ $project['visual'] }}">
+                            <div class="tt-project__visual tt-project__visual--{{ $project['visual'] }} {{ $project['image'] ? 'tt-project__visual--image' : '' }}">
                                 @if ($project['image'])
-                                    <img src="{{ $project['image'] }}" alt="{{ $project['name'] }} interface preview" loading="lazy" decoding="async">
+                                    <img src="{{ $project['image'] }}" alt="{{ $project['image_alt'] ?? $project['name'].' project preview' }}" loading="lazy" decoding="async">
                                 @else
                                     <div class="tt-project-ui" aria-label="Abstract interface preview for {{ $project['name'] }}" role="img">
                                         <div class="tt-project-ui__bar"><i></i><span>{{ $project['name'] }}</span><i></i></div>

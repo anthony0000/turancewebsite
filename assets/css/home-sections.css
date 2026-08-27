@@ -569,6 +569,24 @@
   background: #071426;
 }
 
+.tt-project__visual--image { padding: 0; }
+
+.tt-project__visual--image > img {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transition: transform 700ms cubic-bezier(.2,.8,.2,1), filter 700ms cubic-bezier(.2,.8,.2,1);
+}
+
+.tt-project:hover .tt-project__visual--image > img {
+  filter: saturate(1.04);
+  transform: scale(1.025);
+}
+
 .tt-project__visual::before,
 .tt-project__visual::after {
   content: "";
