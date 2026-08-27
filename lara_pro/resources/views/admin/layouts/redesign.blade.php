@@ -4703,9 +4703,10 @@ body.is-admin .admin-brand-mark {
     width: 34px;
     height: 34px;
     flex-basis: 34px;
-    border: 0;
+    border: 1px solid rgba(184, 134, 11, 0.28);
     border-radius: 10px;
-    background: var(--primary);
+    background: linear-gradient(145deg, #fffdf8 0%, #f1e6cb 100%);
+    box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.55), 0 3px 9px rgba(102, 76, 20, 0.11);
 }
 
 body.is-admin .admin-sidebar .admin-brand-copy strong {
