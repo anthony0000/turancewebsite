@@ -27,6 +27,90 @@
             background: rgba(185, 74, 61, 0.11);
             color: var(--danger);
         }
+
+        .staff-contract-analytics {
+            align-items: stretch;
+        }
+
+        .staff-contract-analytics > .panel {
+            height: 100%;
+        }
+
+        .staff-contract-month-chart {
+            display: grid;
+            grid-template-columns: repeat(6, minmax(0, 1fr));
+            align-items: stretch;
+            min-height: 224px;
+            margin-top: 8px;
+            padding: 16px;
+            gap: 12px;
+        }
+
+        .staff-contract-month-chart .month-bar {
+            display: grid;
+            grid-template-rows: auto minmax(0, 1fr) auto;
+            align-items: end;
+            min-height: 190px;
+            gap: 10px;
+            text-align: center;
+        }
+
+        .staff-contract-month-chart .month-bar-column {
+            align-self: end;
+            justify-self: center;
+            width: min(100%, 38px);
+            max-width: none;
+            border-radius: 10px 10px 4px 4px;
+            background: linear-gradient(180deg, var(--quote), var(--pipeline));
+            box-shadow: 0 12px 22px rgba(102, 76, 20, 0.14);
+        }
+
+        .staff-contract-month-chart .month-bar strong {
+            color: var(--text);
+            font-size: 11px;
+        }
+
+        .staff-contract-month-chart .month-bar > span {
+            color: var(--muted);
+            font-size: 11px;
+        }
+
+        .staff-contract-currency-list {
+            display: grid;
+            gap: 12px;
+        }
+
+        .staff-contract-currency-list .bar-row {
+            background: rgba(184, 134, 11, 0.035);
+        }
+
+        .staff-contract-currency-value {
+            color: var(--text);
+            font-size: 13px;
+            white-space: nowrap;
+        }
+
+        .staff-contract-chart-note {
+            margin: 14px 0 0;
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 640px) {
+            .staff-contract-month-chart {
+                gap: 6px;
+                padding: 12px 8px;
+            }
+
+            .staff-contract-month-chart .month-bar {
+                gap: 7px;
+            }
+
+            .staff-contract-month-chart .month-bar-column {
+                width: 26px;
+            }
+        }
     </style>
 
     <section class="panel hero-banner">
@@ -77,6 +161,60 @@
             <span class="metric-label">Invoices available</span>
             <strong class="kpi-value">{{ number_format($invoiceCount) }}</strong>
             <span class="kpi-meta">The required source for every new contract.</span>
+        </article>
+    </section>
+
+    <section class="analytics-grid staff-contract-analytics" style="margin-top: 24px;">
+        <article class="panel panel-padded">
+            <div class="panel-head panel-head--tight">
+                <span class="eyebrow">Agreement activity</span>
+                <h2 class="panel-title">Agreements created</h2>
+                <p>New staff agreements added during the last six months.</p>
+            </div>
+
+            @if ($monthlyActivity->sum('count') > 0)
+                <div class="mini-chart staff-contract-month-chart" role="img" aria-label="Staff agreements created during the last six months">
+                    @foreach ($monthlyActivity as $month)
+                        <div class="month-bar" title="{{ $month['period'] }}: {{ number_format($month['count']) }} {{ \Illuminate\Support\Str::plural('agreement', $month['count']) }}">
+                            <span>{{ number_format($month['count']) }}</span>
+                            <div class="month-bar-column" style="height: {{ max(6, $month['height'] * 1.55) }}px;" aria-hidden="true"></div>
+                            <strong>{{ $month['label'] }}</strong>
+                        </div>
+                    @endforeach
+                </div>
+            @else
+                <div class="data-note">New agreement activity will appear here after a contract is created.</div>
+            @endif
+        </article>
+
+        <article class="panel panel-padded">
+            <div class="panel-head panel-head--tight">
+                <span class="eyebrow">Commercial mix</span>
+                <h2 class="panel-title">Fee by currency</h2>
+                <p>Compare agreement value within each currency.</p>
+            </div>
+
+            @if ($currencyBreakdown->isNotEmpty())
+                <div class="staff-contract-currency-list">
+                    @foreach ($currencyBreakdown as $currency)
+                        <div class="bar-row">
+                            <div class="bar-header">
+                                <div>
+                                    <strong>{{ $currency['currency'] }}</strong>
+                                    <span class="bar-meta">{{ number_format($currency['count']) }} {{ \Illuminate\Support\Str::plural('agreement', $currency['count']) }}</span>
+                                </div>
+                                <strong class="staff-contract-currency-value">{{ $currency['currency'] }} {{ number_format($currency['value'], 2) }}</strong>
+                            </div>
+                            <div class="bar-track" role="progressbar" aria-label="{{ $currency['currency'] }} agreement value" aria-valuenow="{{ $currency['value'] }}" aria-valuemin="0" aria-valuemax="{{ $maxCurrencyValue }}">
+                                <div class="bar-fill bar-fill--lead" style="width: {{ max(5, $currency['width']) }}%;"></div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+                <p class="staff-contract-chart-note">Currencies remain separate; no exchange-rate conversion is applied.</p>
+            @else
+                <div class="data-note">Fee distribution will appear after the first staff agreement is created.</div>
+            @endif
         </article>
     </section>
 

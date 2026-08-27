@@ -103,6 +103,8 @@ it('creates an invoice-linked staff contract with price terms and signing detail
         ->assertOk()
         ->assertSee('Northstar Client Portal')
         ->assertSee('Invoice-linked staff documents')
+        ->assertSee('Agreements created')
+        ->assertSee('Fee by currency')
         ->assertSee('Invoice TT-INV-STAFF-001');
 
     $pdfResponse = $this

@@ -47,13 +47,56 @@ class AdminStaffContractController extends Controller
             ->filter(fn (array $status) => $status['count'] > 0)
             ->values();
 
+        $activityStart = now()->startOfMonth()->subMonths(5);
+        $monthlyActivity = collect(range(0, 5))
+            ->map(function (int $offset) use ($activityStart, $contracts): array {
+                $month = $activityStart->copy()->addMonths($offset);
+
+                return [
+                    'label' => $month->format('M'),
+                    'period' => $month->format('F Y'),
+                    'count' => $contracts
+                        ->filter(fn (StaffContract $contract): bool => $contract->created_at?->isSameMonth($month) ?? false)
+                        ->count(),
+                ];
+            });
+
+        $maxMonthlyActivity = max(1, (int) $monthlyActivity->max('count'));
+        $monthlyActivity = $monthlyActivity->map(fn (array $month): array => $month + [
+            'height' => round(($month['count'] / $maxMonthlyActivity) * 100, 1),
+        ]);
+
+        $currencyBreakdown = $contracts
+            ->groupBy(function (StaffContract $contract): string {
+                $currency = strtoupper(trim((string) $contract->currency));
+
+                return $currency !== '' ? $currency : 'N/A';
+            })
+            ->map(function ($currencyContracts, string $currency): array {
+                return [
+                    'currency' => $currency,
+                    'count' => $currencyContracts->count(),
+                    'value' => (float) $currencyContracts->sum(fn (StaffContract $contract): float => (float) $contract->agreed_fee),
+                ];
+            })
+            ->sortByDesc('value')
+            ->values();
+
+        $maxCurrencyValue = max(1, (float) $currencyBreakdown->max('value'));
+        $currencyBreakdown = $currencyBreakdown->map(fn (array $currency): array => $currency + [
+            'width' => round(($currency['value'] / $maxCurrencyValue) * 100, 1),
+        ]);
+
         return view('admin.staff-contracts.index', [
             'contracts' => $contracts,
             'statusBreakdown' => $statusBreakdown,
+            'monthlyActivity' => $monthlyActivity,
+            'currencyBreakdown' => $currencyBreakdown,
+            'maxCurrencyValue' => $maxCurrencyValue,
             'invoiceCount' => LuxuryQuote::query()->count(),
-            'activeCount' => StaffContract::query()->whereIn('status', ['pending_signature', 'signed', 'active'])->count(),
-            'signedCount' => StaffContract::query()->where('status', 'signed')->count(),
-            'totalValue' => (float) StaffContract::query()->sum('agreed_fee'),
+            'activeCount' => $contracts->whereIn('status', ['pending_signature', 'signed', 'active'])->count(),
+            'signedCount' => $contracts->where('status', 'signed')->count(),
+            'totalValue' => (float) $contracts->sum(fn (StaffContract $contract): float => (float) $contract->agreed_fee),
         ]);
     }
 
