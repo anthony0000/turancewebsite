@@ -5,7 +5,7 @@
     <div class="pm-task-view pm-task-view--staff">
         <section class="panel pm-hero pm-task-hero">
             <div>
-                <span class="eyebrow">{{ $task->task_key }} &middot; {{ $task->project?->project_number ?: 'Assigned task' }}</span>
+                <span class="eyebrow">Assigned task &middot; {{ $task->task_key }}</span>
                 <h2>{{ $task->title }}</h2>
                 <p>{{ $task->project?->name ?: 'Project' }} &middot; @if ((int) $task->assignee_id === (int) \App\Support\ProjectManagementAccess::user()?->id) Assigned to you @else Assigned to {{ $task->assignee?->name ?: 'a team member' }} @endif</p>
             </div>
@@ -13,6 +13,7 @@
                 <span>Due countdown</span>
                 <strong data-countdown-value>{{ $task->completed_at ? 'Completed' : ($taskDeadline ? 'Calculating…' : 'No due date') }}</strong>
                 <small data-countdown-context>{{ $taskDeadline ? 'Until the end of the due date' : 'Set a due date to track delivery' }}</small>
+                <span class="pm-task-countdown__deadline">{{ $taskDeadline ? 'Due '.optional($task->due_on)->format('M d, Y').' · 11:59 PM' : 'No deadline set' }}</span>
             </div>
             <div class="pm-task-hero__actions">
                 <a class="ghost-button" href="{{ route('admin.project-management.dashboard') }}">Back to my tasks</a>
