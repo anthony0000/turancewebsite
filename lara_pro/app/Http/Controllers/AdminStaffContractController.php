@@ -91,10 +91,6 @@ class AdminStaffContractController extends Controller
             'width' => round(($currency['value'] / $maxCurrencyValue) * 100, 1),
         ]);
 
-        $contractFinancials = $contracts->mapWithKeys(fn (StaffContract $contract): array => [
-            $contract->getKey() => $this->contractFinancialSummary($contract),
-        ]);
-
         $linkedInvoiceGroups = $contracts
             ->filter(fn (StaffContract $contract): bool => $contract->invoice !== null)
             ->groupBy('luxury_quote_id');
@@ -114,7 +110,6 @@ class AdminStaffContractController extends Controller
             'monthlyActivity' => $monthlyActivity,
             'currencyBreakdown' => $currencyBreakdown,
             'maxCurrencyValue' => $maxCurrencyValue,
-            'contractFinancials' => $contractFinancials,
             'profitSummary' => [
                 'available' => $linkedInvoiceGroups->isNotEmpty(),
                 'value' => $totalProfitNaira,

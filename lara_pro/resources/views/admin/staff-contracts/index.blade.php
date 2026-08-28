@@ -191,14 +191,8 @@
             color: var(--success);
         }
 
-        .staff-contract-profit-value.is-negative,
-        .staff-contract-profit-inline.is-negative {
+        .staff-contract-profit-value.is-negative {
             color: var(--danger);
-        }
-
-        .staff-contract-profit-inline {
-            color: var(--success);
-            font-weight: 700;
         }
 
         @media (max-width: 640px) {
@@ -403,12 +397,6 @@
                             <td>
                                 <strong>{{ $contract->currency }} {{ number_format((float) $contract->agreed_fee, 2) }}</strong>
                                 <span>Agreed fee</span>
-                                @php($financialSummary = $contractFinancials[$contract->getKey()] ?? null)
-                                @if ($financialSummary)
-                                    <span class="staff-contract-profit-inline{{ $financialSummary['profitNaira'] < 0 ? ' is-negative' : '' }}">Profit left: NGN {{ number_format($financialSummary['profitNaira'], 2) }}</span>
-                                @else
-                                    <span>Profit unavailable</span>
-                                @endif
                             </td>
                             <td>
                                 <span class="contract-status contract-status--{{ $contract->status }}">

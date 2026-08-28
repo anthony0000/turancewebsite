@@ -71,8 +71,11 @@
         .pm-hero h2 { max-width: 760px; margin: 6px 0 0; font-size: clamp(24px, 3vw, 36px); line-height: 1.1; }
         .pm-hero p { max-width: 700px; margin: 12px 0 0; color: var(--muted); line-height: 1.6; }
         .pm-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-        .pm-staff-intro { display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(320px, .92fr); gap: 18px; align-items: stretch; }
-        .pm-staff-intro .pm-hero { align-items: center; min-height: 100%; }
+        .pm-staff-task-summary { display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, .72fr); gap: 18px; align-items: stretch; }
+        .pm-staff-task-summary .pm-hero { align-items: center; min-height: 100%; }
+        .pm-dashboard-countdown { min-width: 0; min-height: 132px; }
+        .pm-dashboard-countdown__task { position: relative; z-index: 1; overflow: hidden; color: var(--muted-strong); font-size: 12px; font-weight: 750; text-overflow: ellipsis; white-space: nowrap; }
+        .pm-dashboard-countdown__task:hover { color: var(--primary-strong); }
         .pm-daily-motivation { position: relative; isolation: isolate; display: grid; grid-template-columns: 42px minmax(0, 1fr); align-items: center; gap: 16px; min-height: 132px; padding: 20px 22px; overflow: hidden; border: 1px solid rgba(184,134,11,.22); border-radius: 14px; background: radial-gradient(circle at 93% 12%, rgba(255,255,255,.9), transparent 28%), linear-gradient(120deg, #fff8e6 0%, #fffdf8 57%, #f8f0dd 100%); box-shadow: 0 13px 30px rgba(102,76,20,.07); animation: pm-motivation-rise .72s cubic-bezier(.2,.75,.25,1) both; }
         .pm-daily-motivation::before { position: absolute; inset: -80% 30% -80% -20%; z-index: -1; content: ''; background: linear-gradient(105deg, transparent 35%, rgba(255,255,255,.58) 50%, transparent 65%); transform: translateX(-55%); animation: pm-motivation-sheen 7s ease-in-out 1s infinite; }
         .pm-daily-motivation__mark { display: grid; width: 42px; height: 42px; place-items: center; border: 1px solid rgba(184,134,11,.28); border-radius: 13px; background: rgba(255,255,255,.68); color: var(--primary); box-shadow: 0 0 0 6px rgba(184,134,11,.06); animation: pm-motivation-pulse 3.8s ease-in-out infinite; }
@@ -456,7 +459,7 @@
             .pm-board--trello { margin-inline: -2px; padding: 10px; }
             .pm-board--trello .pm-column { width: min(86vw, 306px); min-width: min(86vw, 306px); }
         }
-        @media (max-width: 980px) { .pm-staff-intro { grid-template-columns: 1fr; } }
+        @media (max-width: 980px) { .pm-staff-task-summary { grid-template-columns: 1fr; } }
         @media (max-width: 640px) { .pm-kpis, .pm-grid-wide, .pm-form-grid { grid-template-columns: 1fr; } .pm-hero { align-items: flex-start; flex-direction: column; padding: 18px; } .pm-daily-motivation { grid-template-columns: 34px minmax(0, 1fr); gap: 12px; min-height: 0; padding: 18px; } .pm-daily-motivation__mark { width: 34px; height: 34px; border-radius: 10px; } .pm-daily-motivation__mark svg { width: 19px; height: 19px; } .pm-daily-motivation blockquote { font-size: 16px; } .pm-daily-motivation__orbit { right: -54px; opacity: .7; } .pm-task-countdown { width: 100%; flex-basis: 100%; } .pm-task-hero__actions { justify-content: flex-start; margin-left: 0; } .pm-subnav { overflow-x: auto; flex-wrap: nowrap; } .pm-subnav a { flex: 0 0 auto; } .pm-panel { padding: 14px; } .pm-project-view .pm-stat-row { grid-template-columns: 1fr; } .pm-project-view .pm-tabs { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 3px; } .pm-project-view .pm-tabs a { flex: 0 0 auto; } .pm-project-view .pm-hero .pm-actions { width: 100%; } .pm-project-view .pm-hero .pm-actions > * { flex: 1 1 0; } }
         @media (prefers-reduced-motion: reduce) { .pm-daily-motivation, .pm-daily-motivation::before, .pm-daily-motivation__mark, .pm-daily-motivation__content, .pm-daily-motivation__orbit { animation: none !important; } }
     </style>
@@ -464,6 +467,10 @@
 
 @section('content')
     <div class="pm-shell">
+        @if (isset($dailyMotivation))
+            @include('admin.project-management.partials.daily-motivation')
+        @endif
+
         <nav class="pm-subnav" aria-label="Project management navigation">
         @if (\App\Support\AdminAccess::isFullAdmin())
         @php

@@ -107,6 +107,7 @@ it('creates an invoice-linked staff contract with price terms and signing detail
         ->assertSee('Agreements created')
         ->assertSee('Fee by currency')
         ->assertSee('Profit left (NGN)')
+        ->assertDontSee('Profit left: NGN')
         ->assertSee('Invoice TT-INV-STAFF-001');
 
     $pdfResponse = $this

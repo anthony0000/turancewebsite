@@ -1,5 +1,5 @@
 <div class="pm-dashboard pm-dashboard--staff">
-    <div class="pm-staff-intro">
+    <div class="pm-staff-task-summary">
     <section class="panel pm-hero">
         <div>
             <span class="eyebrow">Assigned work</span>
@@ -8,18 +8,21 @@
         </div>
     </section>
 
-    <section class="pm-daily-motivation" aria-labelledby="daily-motivation-title">
-        <div class="pm-daily-motivation__mark" aria-hidden="true">
-            <svg viewBox="0 0 32 32" role="presentation"><path d="M16 3v7M16 22v7M3 16h7M22 16h7M6.8 6.8l4.9 4.9M20.3 20.3l4.9 4.9M25.2 6.8l-4.9 4.9M11.7 20.3l-4.9 4.9"/><circle cx="16" cy="16" r="4.5"/></svg>
-        </div>
-        <div class="pm-daily-motivation__content">
-            <div class="pm-daily-motivation__eyebrow"><span id="daily-motivation-title">Daily motivation</span><span>{{ $dailyMotivation['greeting'] }}</span><span>{{ $dailyMotivation['date'] }}</span></div>
-            <blockquote>“{{ $dailyMotivation['quote'] }}”</blockquote>
-            <cite>{{ $dailyMotivation['attribution'] }}</cite>
-        </div>
-        <div class="pm-daily-motivation__orbit" aria-hidden="true"><span></span><span></span><span></span></div>
+    @php
+        $nextTaskDeadline = $nextDueTask?->due_on?->copy()->endOfDay();
+    @endphp
+    <section class="pm-task-countdown pm-dashboard-countdown" data-dashboard-countdown data-countdown-deadline="{{ $nextTaskDeadline?->toIso8601String() }}" aria-live="polite">
+        <span>Next deadline</span>
+        @if ($nextDueTask)
+            <strong data-countdown-value>Calculating&hellip;</strong>
+            <small data-countdown-context>Until the end of the due date</small>
+            <a class="pm-dashboard-countdown__task" href="{{ route('admin.project-management.tasks.show', $nextDueTask) }}">{{ $nextDueTask->title }}</a>
+        @else
+            <strong>No deadline</strong>
+            <small>Open tasks with due dates will appear here.</small>
+        @endif
     </section>
-    </div>
+</div>
 
     <section class="pm-kpis">
         @foreach ([['Assigned tasks', $myTasks], ['Due today', $todayTasks], ['Overdue', $overdueTasks], ['Completed this week', $completedThisWeek]] as $kpi)
@@ -122,3 +125,47 @@
         </div>
     </section>
 </div>
+
+@if ($nextDueTask)
+    @push('scripts')
+        <script>
+            (() => {
+                const countdown = document.querySelector('[data-dashboard-countdown]');
+                const value = countdown?.querySelector('[data-countdown-value]');
+                const context = countdown?.querySelector('[data-countdown-context]');
+                const deadline = countdown ? new Date(countdown.dataset.countdownDeadline) : null;
+
+                if (!countdown || !value || !context || !deadline || Number.isNaN(deadline.getTime())) return;
+
+                const update = () => {
+                    const remaining = deadline.getTime() - Date.now();
+                    const absolute = Math.abs(remaining);
+                    const days = Math.floor(absolute / 86400000);
+                    const hours = Math.floor((absolute % 86400000) / 3600000);
+                    const minutes = Math.floor((absolute % 3600000) / 60000);
+                    const seconds = Math.floor((absolute % 60000) / 1000);
+                    const formatted = [
+                        days ? `${days}d` : '',
+                        `${String(hours).padStart(2, '0')}h`,
+                        `${String(minutes).padStart(2, '0')}m`,
+                        `${String(seconds).padStart(2, '0')}s`,
+                    ].filter(Boolean).join(' ');
+
+                    if (remaining <= 0) {
+                        countdown.dataset.countdownState = 'overdue';
+                        value.textContent = `${formatted} overdue`;
+                        context.textContent = 'This task needs attention';
+                        return;
+                    }
+
+                    countdown.dataset.countdownState = remaining <= 86400000 ? 'urgent' : 'active';
+                    value.textContent = formatted;
+                    context.textContent = remaining <= 86400000 ? 'Due within the next day' : 'Until the end of the due date';
+                };
+
+                update();
+                window.setInterval(update, 1000);
+            })();
+        </script>
+    @endpush
+@endif

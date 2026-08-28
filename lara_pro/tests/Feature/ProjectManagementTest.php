@@ -128,11 +128,13 @@ it('limits members to their assigned tasks across web and API surfaces', functio
     $project = Project::query()->create(['project_number' => 'SCOPE', 'name' => 'Scoped Work', 'status' => 'active', 'priority' => 'medium']);
     $column = $project->boardColumns()->create(['name' => 'To Do', 'position' => 0]);
     $project->members()->attach($member->id, ['role' => 'member']);
-    $assigned = $project->tasks()->create(['task_number' => 1, 'title' => 'Member task', 'type' => 'task', 'priority' => 'medium', 'status' => 'to_do', 'board_column_id' => $column->id, 'assignee_id' => $member->id, 'reporter_id' => $admin->id, 'position' => 0]);
+    $assigned = $project->tasks()->create(['task_number' => 1, 'title' => 'Member task', 'type' => 'task', 'priority' => 'medium', 'status' => 'to_do', 'board_column_id' => $column->id, 'assignee_id' => $member->id, 'reporter_id' => $admin->id, 'position' => 0, 'due_on' => now()->addDays(2)->toDateString()]);
     $hidden = $project->tasks()->create(['task_number' => 2, 'title' => 'Private teammate task', 'type' => 'task', 'priority' => 'high', 'status' => 'to_do', 'board_column_id' => $column->id, 'assignee_id' => $admin->id, 'reporter_id' => $admin->id, 'position' => 1]);
     $session = projectManagementSession($member);
 
-    $this->withSession($session)->get(route('admin.project-management.dashboard'))->assertOk()->assertSee('My tasks')->assertSee('Workspace')->assertSee('Member task')->assertSee('Daily motivation')->assertSee('Work status')->assertSee('Due-date health')->assertSee('Open work by project')->assertDontSee('Private teammate task')->assertDontSee('Project overview')->assertDontSee('<span class="admin-nav-label">Create</span>')->assertDontSee('Search anything...')->assertDontSee('New Project');
+    $dashboardResponse = $this->withSession($session)->get(route('admin.project-management.dashboard'));
+    $dashboardResponse->assertOk()->assertSee('My tasks')->assertSee('Workspace')->assertSee('Member task')->assertSee('Daily motivation')->assertSee('Next deadline')->assertSee('data-dashboard-countdown', false)->assertSee('Work status')->assertSee('Due-date health')->assertSee('Open work by project')->assertDontSee('Private teammate task')->assertDontSee('Project overview')->assertDontSee('<span class="admin-nav-label">Create</span>')->assertDontSee('Search anything...')->assertDontSee('New Project');
+    expect(strpos($dashboardResponse->getContent(), 'id="daily-motivation-title"'))->toBeLessThan(strpos($dashboardResponse->getContent(), 'class="pm-subnav"'));
     $this->withSession($session)->get(route('admin.project-management.board', $project))->assertForbidden();
     $this->withSession($session)->get(route('admin.project-management.tasks.show', $assigned))->assertOk()->assertSee('Member task');
     $this->withSession($session)->get(route('admin.project-management.tasks.show', $hidden))->assertForbidden();

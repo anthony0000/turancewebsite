@@ -878,6 +878,10 @@ class AdminProjectManagementController extends Controller
         $today = today();
         $nextWeek = today()->addDays(7);
         $openTasks = $tasks->whereNull('completed_at');
+        $nextDueTask = $openTasks
+            ->filter(fn (Task $task): bool => $task->due_on !== null)
+            ->sortBy(fn (Task $task): int => $task->due_on->timestamp)
+            ->first();
         $dueBreakdown = collect([
             ['label' => 'Overdue', 'count' => $openTasks->filter(fn (Task $task) => $task->is_overdue)->count(), 'tone' => 'danger'],
             ['label' => 'Due today', 'count' => $openTasks->filter(fn (Task $task) => $task->due_on?->isToday())->count(), 'tone' => 'warning'],
@@ -895,6 +899,7 @@ class AdminProjectManagementController extends Controller
         return view('admin.project-management.dashboard', [
             'projects' => $projects,
             'tasks' => $tasks,
+            'nextDueTask' => $nextDueTask,
             'myTasks' => $tasks->count(),
             'todayTasks' => $tasks->filter(fn (Task $task) => $task->due_on?->isToday())->count(),
             'overdueTasks' => $tasks->filter(fn (Task $task) => $task->is_overdue)->count(),
