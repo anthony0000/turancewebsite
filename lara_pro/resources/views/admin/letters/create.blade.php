@@ -154,18 +154,6 @@
             padding: 22.5% 9.5% 15.5%;
         }
 
-        .letter-preview-sheet .letter-document-header {
-            min-height: 10px;
-        }
-
-        .letter-preview-sheet .letter-document-type {
-            font-size: clamp(6px, 0.8vw, 8px);
-        }
-
-        .letter-preview-sheet .letter-document-rule {
-            width: 21px;
-        }
-
         .letter-preview-sheet .letter-date {
             margin-top: 4.2%;
             font-size: clamp(7px, 0.95vw, 10.5px);

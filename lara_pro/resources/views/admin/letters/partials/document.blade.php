@@ -21,11 +21,6 @@
     @endif
 
     <div class="letter-content">
-        <header class="letter-document-header">
-            <span class="letter-document-type" data-letter-preview="document_type">{{ $letter['document_type'] }}</span>
-            <span class="letter-document-rule" aria-hidden="true"></span>
-        </header>
-
         <div class="letter-date" data-letter-preview="date">{{ $letter['date_label'] }}</div>
 
         <section class="letter-recipient" aria-label="Recipient">

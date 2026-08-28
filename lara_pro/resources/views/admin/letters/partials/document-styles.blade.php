@@ -37,28 +37,6 @@
     padding: 68mm 20mm 48mm;
 }
 
-.letter-document-header {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    min-height: 13px;
-}
-
-.letter-document-type {
-    color: #aa7600;
-    font-size: 8px;
-    font-weight: 700;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-}
-
-.letter-document-rule {
-    display: block;
-    width: 28px;
-    height: 1px;
-    background: #c79617;
-}
-
 .letter-date {
     margin-top: 19px;
     color: #56606c;
