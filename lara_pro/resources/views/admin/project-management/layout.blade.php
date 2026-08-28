@@ -71,7 +71,9 @@
         .pm-hero h2 { max-width: 760px; margin: 6px 0 0; font-size: clamp(24px, 3vw, 36px); line-height: 1.1; }
         .pm-hero p { max-width: 700px; margin: 12px 0 0; color: var(--muted); line-height: 1.6; }
         .pm-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-        .pm-daily-motivation { position: relative; isolation: isolate; display: grid; grid-template-columns: 42px minmax(0, 1fr); align-items: center; gap: 16px; min-height: 132px; padding: 22px 26px; overflow: hidden; border: 1px solid rgba(184,134,11,.22); border-radius: 14px; background: radial-gradient(circle at 93% 12%, rgba(255,255,255,.9), transparent 28%), linear-gradient(120deg, #fff8e6 0%, #fffdf8 57%, #f8f0dd 100%); box-shadow: 0 13px 30px rgba(102,76,20,.07); animation: pm-motivation-rise .72s cubic-bezier(.2,.75,.25,1) both; }
+        .pm-staff-intro { display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(320px, .92fr); gap: 18px; align-items: stretch; }
+        .pm-staff-intro .pm-hero { align-items: center; min-height: 100%; }
+        .pm-daily-motivation { position: relative; isolation: isolate; display: grid; grid-template-columns: 42px minmax(0, 1fr); align-items: center; gap: 16px; min-height: 132px; padding: 20px 22px; overflow: hidden; border: 1px solid rgba(184,134,11,.22); border-radius: 14px; background: radial-gradient(circle at 93% 12%, rgba(255,255,255,.9), transparent 28%), linear-gradient(120deg, #fff8e6 0%, #fffdf8 57%, #f8f0dd 100%); box-shadow: 0 13px 30px rgba(102,76,20,.07); animation: pm-motivation-rise .72s cubic-bezier(.2,.75,.25,1) both; }
         .pm-daily-motivation::before { position: absolute; inset: -80% 30% -80% -20%; z-index: -1; content: ''; background: linear-gradient(105deg, transparent 35%, rgba(255,255,255,.58) 50%, transparent 65%); transform: translateX(-55%); animation: pm-motivation-sheen 7s ease-in-out 1s infinite; }
         .pm-daily-motivation__mark { display: grid; width: 42px; height: 42px; place-items: center; border: 1px solid rgba(184,134,11,.28); border-radius: 13px; background: rgba(255,255,255,.68); color: var(--primary); box-shadow: 0 0 0 6px rgba(184,134,11,.06); animation: pm-motivation-pulse 3.8s ease-in-out infinite; }
         .pm-daily-motivation__mark svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.6; }
@@ -143,15 +145,17 @@
         .pm-card-labels span { padding: 3px 6px; border-radius: 5px; color: #684b00; background: #fff4cf; font-size: 10px; }
         .pm-task-bottom { color: var(--muted); font-size: 11px; }
         .pm-task-bottom .is-overdue { color: var(--danger); font-weight: 800; }
-        .pm-task-hero { align-items: center; }
+        .pm-task-hero { align-items: center; flex-wrap: wrap; }
         .pm-task-hero h2 { color: var(--text); letter-spacing: -.035em; }
-        .pm-task-hero__actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 8px; }
+        .pm-task-hero > div:first-child { min-width: min(340px, 100%); flex: 1 1 360px; }
+        .pm-task-hero__actions { display: flex; flex: 0 1 auto; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 8px; margin-left: auto; }
         .pm-danger-button { border-color: rgba(194,65,85,.24); color: var(--danger); }
         .pm-danger-button:hover { border-color: rgba(194,65,85,.42); background: #fff3f4; color: #a52f43; }
-        .pm-task-countdown { display: grid; min-width: 168px; gap: 3px; padding: 10px 12px; border: 1px solid rgba(184,134,11,.22); border-radius: 9px; background: #fffbed; }
-        .pm-task-countdown > span { color: var(--primary-strong); font-size: 9px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
-        .pm-task-countdown strong { color: var(--text); font-size: 17px; letter-spacing: -.025em; line-height: 1.1; white-space: nowrap; }
-        .pm-task-countdown small { color: var(--muted); font-size: 10px; line-height: 1.3; }
+        .pm-task-countdown { position: relative; display: grid; min-width: 226px; min-height: 88px; flex: 0 1 250px; align-content: center; gap: 5px; padding: 14px 16px 14px 19px; overflow: hidden; border: 1px solid rgba(184,134,11,.32); border-left: 4px solid var(--primary); border-radius: 12px; background: linear-gradient(135deg, #fffbed 0%, #fff8e8 100%); box-shadow: 0 8px 20px rgba(102,76,20,.09); }
+        .pm-task-countdown::after { position: absolute; right: -22px; bottom: -32px; width: 94px; height: 94px; border: 1px solid rgba(184,134,11,.13); border-radius: 50%; content: ''; }
+        .pm-task-countdown > span { color: var(--primary-strong); font-size: 10px; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
+        .pm-task-countdown strong { position: relative; z-index: 1; color: var(--text); font-size: 25px; font-variant-numeric: tabular-nums; letter-spacing: -.035em; line-height: 1; white-space: nowrap; }
+        .pm-task-countdown small { color: var(--muted); font-size: 11px; line-height: 1.3; }
         .pm-task-countdown[data-countdown-state="urgent"] { border-color: rgba(212,139,45,.42); background: #fff8e8; }
         .pm-task-countdown[data-countdown-state="urgent"] strong { color: #b56e22; }
         .pm-task-countdown[data-countdown-state="overdue"] { border-color: rgba(194,65,85,.3); background: #fff3f4; }
@@ -179,9 +183,6 @@
         .pm-notification-message { color: var(--text); font-size: 13px; }
         .pm-notification-meta { display: block; margin-top: 5px; color: var(--muted); font-size: 11px; }
         .pm-notification-type { display: inline-flex; margin-bottom: 5px; color: var(--primary-strong); font-size: 9px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
-        [data-pm-ajax-feedback] { margin-top: 8px; font-size: 11px; line-height: 1.4; }
-        [data-pm-ajax-feedback].is-success { color: var(--success); }
-        [data-pm-ajax-feedback].is-error { color: var(--danger); }
         form.is-saving { opacity: .72; pointer-events: none; }
         .pm-board-hero { border-bottom-left-radius: 10px; border-bottom-right-radius: 10px; }
         .pm-board-hero h2 { color: var(--text); letter-spacing: -.035em; }
@@ -455,7 +456,8 @@
             .pm-board--trello { margin-inline: -2px; padding: 10px; }
             .pm-board--trello .pm-column { width: min(86vw, 306px); min-width: min(86vw, 306px); }
         }
-        @media (max-width: 640px) { .pm-kpis, .pm-grid-wide, .pm-form-grid { grid-template-columns: 1fr; } .pm-hero { align-items: flex-start; flex-direction: column; padding: 18px; } .pm-daily-motivation { grid-template-columns: 34px minmax(0, 1fr); gap: 12px; min-height: 0; padding: 18px; } .pm-daily-motivation__mark { width: 34px; height: 34px; border-radius: 10px; } .pm-daily-motivation__mark svg { width: 19px; height: 19px; } .pm-daily-motivation blockquote { font-size: 16px; } .pm-daily-motivation__orbit { right: -54px; opacity: .7; } .pm-task-countdown { width: 100%; } .pm-task-hero__actions { justify-content: flex-start; } .pm-subnav { overflow-x: auto; flex-wrap: nowrap; } .pm-subnav a { flex: 0 0 auto; } .pm-panel { padding: 14px; } .pm-project-view .pm-stat-row { grid-template-columns: 1fr; } .pm-project-view .pm-tabs { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 3px; } .pm-project-view .pm-tabs a { flex: 0 0 auto; } .pm-project-view .pm-hero .pm-actions { width: 100%; } .pm-project-view .pm-hero .pm-actions > * { flex: 1 1 0; } }
+        @media (max-width: 980px) { .pm-staff-intro { grid-template-columns: 1fr; } }
+        @media (max-width: 640px) { .pm-kpis, .pm-grid-wide, .pm-form-grid { grid-template-columns: 1fr; } .pm-hero { align-items: flex-start; flex-direction: column; padding: 18px; } .pm-daily-motivation { grid-template-columns: 34px minmax(0, 1fr); gap: 12px; min-height: 0; padding: 18px; } .pm-daily-motivation__mark { width: 34px; height: 34px; border-radius: 10px; } .pm-daily-motivation__mark svg { width: 19px; height: 19px; } .pm-daily-motivation blockquote { font-size: 16px; } .pm-daily-motivation__orbit { right: -54px; opacity: .7; } .pm-task-countdown { width: 100%; flex-basis: 100%; } .pm-task-hero__actions { justify-content: flex-start; margin-left: 0; } .pm-subnav { overflow-x: auto; flex-wrap: nowrap; } .pm-subnav a { flex: 0 0 auto; } .pm-panel { padding: 14px; } .pm-project-view .pm-stat-row { grid-template-columns: 1fr; } .pm-project-view .pm-tabs { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 3px; } .pm-project-view .pm-tabs a { flex: 0 0 auto; } .pm-project-view .pm-hero .pm-actions { width: 100%; } .pm-project-view .pm-hero .pm-actions > * { flex: 1 1 0; } }
         @media (prefers-reduced-motion: reduce) { .pm-daily-motivation, .pm-daily-motivation::before, .pm-daily-motivation__mark, .pm-daily-motivation__content, .pm-daily-motivation__orbit { animation: none !important; } }
     </style>
 @endpush
@@ -521,22 +523,59 @@
                 return action.includes('/tasks') || action.includes('/notifications');
             };
 
-            const feedbackFor = (form) => {
-                let feedback = form.nextElementSibling;
+            const floatingNotificationStack = () => {
+                let stack = document.querySelector('[data-admin-alert-stack]');
 
-                if (!feedback?.matches('[data-pm-ajax-feedback]')) {
-                    feedback = document.createElement('div');
-                    feedback.dataset.pmAjaxFeedback = '';
-                    form.after(feedback);
+                if (!stack) {
+                    stack = document.createElement('div');
+                    stack.className = 'admin-alert-stack';
+                    stack.dataset.adminAlertStack = '';
+                    stack.setAttribute('aria-live', 'polite');
+                    stack.setAttribute('aria-atomic', 'true');
+                    document.body.append(stack);
                 }
 
-                return feedback;
+                return stack;
             };
 
-            const showFeedback = (form, message, isError = false) => {
-                const feedback = feedbackFor(form);
-                feedback.textContent = message;
-                feedback.className = `pm-ajax-feedback ${isError ? 'is-error' : 'is-success'}`;
+            const showFloatingNotification = (message, isError = false) => {
+                const stack = floatingNotificationStack();
+                const alert = document.createElement('div');
+                const content = document.createElement('span');
+                const close = document.createElement('button');
+                let dismissTimer;
+
+                alert.className = `alert ${isError ? 'alert-danger' : 'alert-success'}`;
+                alert.setAttribute('role', isError ? 'alert' : 'status');
+                content.textContent = message;
+                close.className = 'admin-alert-close';
+                close.type = 'button';
+                close.dataset.adminAlertClose = '';
+                close.setAttribute('aria-label', 'Dismiss notification');
+                close.textContent = '×';
+                alert.append(content, close);
+                stack.append(alert);
+
+                const dismiss = () => {
+                    window.clearTimeout(dismissTimer);
+                    if (!alert.isConnected) return;
+                    alert.classList.add('is-dismissing');
+                    window.setTimeout(() => alert.remove(), 220);
+                };
+
+                const scheduleDismissal = () => {
+                    window.clearTimeout(dismissTimer);
+                    dismissTimer = window.setTimeout(dismiss, 3500);
+                };
+
+                close.addEventListener('click', dismiss);
+                alert.addEventListener('mouseenter', () => window.clearTimeout(dismissTimer));
+                alert.addEventListener('mouseleave', scheduleDismissal);
+                scheduleDismissal();
+            };
+
+            const showFeedback = (message, isError = false) => {
+                showFloatingNotification(message, isError);
             };
 
             const responsePayload = async (response) => {
@@ -605,7 +644,18 @@
                 });
             };
 
-            const shouldReset = (action) => /\/projects\/\d+\/tasks$|\/comments$|\/time$|\/attachments$|\/checklists$|\/checklist-items$|\/sprint$/.test(action);
+            const normalizedAction = (action) => action.split('?')[0].replace(/\/+$/, '');
+
+            const shouldReset = (action) => /\/projects\/[^/]+\/tasks$|\/comments$|\/time$|\/attachments$|\/checklists$|\/checklist-items$|\/sprint$/.test(normalizedAction(action));
+
+            const resetAfterTaskCreation = (form, action) => {
+                const normalized = normalizedAction(action);
+
+                if (!/\/projects\/[^/]+\/tasks$/.test(normalized)) return;
+
+                form.reset();
+                form.querySelector('.pm-advanced-fields')?.removeAttribute('open');
+            };
 
             const escapeHtml = (value) => String(value ?? '')
                 .replaceAll('&', '&amp;')
@@ -701,9 +751,10 @@
 
                     if (/\/tasks\/[^/]+\/(complete|reopen)$/.test(action)) updateTaskState(form);
                     if (/\/notifications\/[^/]+\/read$/.test(action)) updateNotification(form);
-                    if (shouldReset(action)) form.reset();
+                    resetAfterTaskCreation(form, action);
+                    if (shouldReset(action) && !/\/projects\/[^/]+\/tasks$/.test(normalizedAction(action))) form.reset();
 
-                    showFeedback(form, payload.message || 'Saved.');
+                    showFeedback(payload.message || 'Saved.');
                     if (form.dataset.ajaxDeleteTask === '1') {
                         window.location.assign(form.dataset.ajaxSuccessUrl || document.referrer || '/');
                         return;
@@ -711,7 +762,7 @@
                     updateTaskContent({form, payload, action});
                     document.dispatchEvent(new CustomEvent('pm:ajax-success', {detail: {form, payload, action}}));
                 } catch (error) {
-                    showFeedback(form, error.message || 'This action could not be completed.', true);
+                    showFeedback(error.message || 'This action could not be completed.', true);
                 } finally {
                     form.dataset.ajaxSubmitting = '0';
                     form.classList.remove('is-saving');

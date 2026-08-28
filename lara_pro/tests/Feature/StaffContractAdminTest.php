@@ -91,6 +91,8 @@ it('creates an invoice-linked staff contract with price terms and signing detail
         ->assertSee('USD 583.94')
         ->assertSee('Naira equivalent')
         ->assertSee('NGN 817,516.00')
+        ->assertSee('Profit left')
+        ->assertSee('NGN 1,749,182,484.00')
         ->assertSee('Create the product interface direction')
         ->assertSee('RC No. 3646478')
         ->assertSee('Contract staff')
@@ -105,6 +107,7 @@ it('creates an invoice-linked staff contract with price terms and signing detail
         ->assertSee('Invoice-linked staff documents')
         ->assertSee('Agreements created')
         ->assertSee('Fee by currency')
+        ->assertSee('Profit left (NGN)')
         ->assertSee('Invoice TT-INV-STAFF-001');
 
     $pdfResponse = $this

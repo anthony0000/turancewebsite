@@ -48,6 +48,14 @@
             text-transform: uppercase;
         }
 
+        .staff-contract-profit-value {
+            color: var(--success);
+        }
+
+        .staff-contract-profit-value.is-negative {
+            color: var(--danger);
+        }
+
         .signed-document-preview {
             overflow: hidden;
             margin-top: 18px;
@@ -111,6 +119,16 @@
                 <span class="metric-label">Agreed fee</span>
                 <strong>{{ $contract->currency }} {{ number_format((float) $contract->agreed_fee, 2) }}</strong>
                 <p>{{ $contract->payment_terms }}</p>
+            </div>
+            <div class="callout-card">
+                <span class="metric-label">Profit left (NGN)</span>
+                @if ($financialSummary)
+                    <strong class="staff-contract-profit-value{{ $financialSummary['profitNaira'] < 0 ? ' is-negative' : '' }}">NGN {{ number_format($financialSummary['profitNaira'], 2) }}</strong>
+                    <p>Linked invoice value less this contract's converted fee.</p>
+                @else
+                    <strong>Unavailable</strong>
+                    <p>No linked invoice is available for this calculation.</p>
+                @endif
             </div>
         </div>
     </section>

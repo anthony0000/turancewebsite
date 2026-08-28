@@ -7,25 +7,115 @@
         .contract-status {
             display: inline-flex;
             align-items: center;
-            padding: 6px 10px;
+            gap: 8px;
+            min-height: 30px;
+            padding: 5px 11px 5px 9px;
             border-radius: 999px;
+            border: 1px solid transparent;
             background: rgba(184, 134, 11, 0.1);
-            color: var(--accent-soft);
-            font-size: 11px;
-            font-weight: 800;
-            letter-spacing: 0.08em;
+            color: var(--muted-strong, var(--muted));
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            line-height: 1;
             text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .contract-status::before {
+            content: "";
+            width: 7px;
+            height: 7px;
+            flex: 0 0 auto;
+            border-radius: 999px;
+            background: var(--accent);
+            box-shadow: 0 0 0 3px rgba(184, 134, 11, 0.12);
+        }
+
+        .quote-table td .contract-status {
+            display: inline-flex;
+            margin-top: 0;
+            color: var(--muted-strong, var(--muted));
+            font-size: 10px;
+        }
+
+        .quote-table td .contract-status > span {
+            display: inline;
+            margin-top: 0;
+            color: inherit;
+            font-size: inherit;
         }
 
         .contract-status--signed,
-        .contract-status--active {
-            background: rgba(47, 128, 84, 0.12);
-            color: var(--success);
+        .quote-table td .contract-status--signed {
+            border-color: rgba(47, 128, 84, 0.2);
+            background: #eaf5ee;
+            color: #34734e;
         }
 
-        .contract-status--terminated {
-            background: rgba(185, 74, 61, 0.11);
-            color: var(--danger);
+        .contract-status--signed::before {
+            background: var(--success);
+            box-shadow: 0 0 0 3px rgba(47, 128, 84, 0.13);
+        }
+
+        .contract-status--active,
+        .quote-table td .contract-status--active {
+            border-color: rgba(45, 126, 119, 0.2);
+            background: #e8f4f2;
+            color: #2e716b;
+        }
+
+        .contract-status--active::before {
+            background: #2d7e77;
+            box-shadow: 0 0 0 3px rgba(45, 126, 119, 0.13);
+        }
+
+        .contract-status--pending_signature,
+        .quote-table td .contract-status--pending_signature {
+            border-color: rgba(184, 134, 11, 0.22);
+            background: #fff6df;
+            color: #86630d;
+        }
+
+        .contract-status--pending_signature::before {
+            background: #d09a1e;
+            box-shadow: 0 0 0 3px rgba(208, 154, 30, 0.14);
+        }
+
+        .contract-status--draft,
+        .quote-table td .contract-status--draft {
+            border-color: #e1e5e9;
+            background: #f4f5f6;
+            color: #68717b;
+        }
+
+        .contract-status--draft::before {
+            background: #98a1ab;
+            box-shadow: 0 0 0 3px rgba(152, 161, 171, 0.14);
+        }
+
+        .contract-status--completed,
+        .quote-table td .contract-status--completed {
+            border-color: rgba(91, 107, 166, 0.2);
+            background: #eef1fb;
+            color: #5669a1;
+        }
+
+        .contract-status--completed::before {
+            background: #687fc1;
+            box-shadow: 0 0 0 3px rgba(104, 127, 193, 0.14);
+        }
+
+        .contract-status--terminated,
+        .quote-table td .contract-status--terminated {
+            border-color: rgba(185, 74, 61, 0.2);
+            background: #fff0ef;
+            color: #a24d48;
+        }
+
+        .contract-status--terminated::before {
+            background: var(--danger);
+            box-shadow: 0 0 0 3px rgba(185, 74, 61, 0.13);
         }
 
         .staff-contract-analytics {
@@ -97,6 +187,20 @@
             line-height: 1.6;
         }
 
+        .staff-contract-profit-value {
+            color: var(--success);
+        }
+
+        .staff-contract-profit-value.is-negative,
+        .staff-contract-profit-inline.is-negative {
+            color: var(--danger);
+        }
+
+        .staff-contract-profit-inline {
+            color: var(--success);
+            font-weight: 700;
+        }
+
         @media (max-width: 640px) {
             .staff-contract-month-chart {
                 gap: 6px;
@@ -137,6 +241,16 @@
                 <span class="metric-label">Agreement value</span>
                 <strong>{{ number_format($totalValue, 2) }}</strong>
                 <p>{{ number_format($signedCount) }} signed {{ $signedCount === 1 ? 'agreement' : 'agreements' }}. Each contract retains its own currency.</p>
+            </div>
+            <div class="callout-card">
+                <span class="metric-label">Profit left (NGN)</span>
+                @if ($profitSummary['available'])
+                    <strong class="staff-contract-profit-value{{ $profitSummary['value'] < 0 ? ' is-negative' : '' }}">NGN {{ number_format($profitSummary['value'], 2) }}</strong>
+                    <p>Invoice value less all staff fees across {{ number_format($profitSummary['invoiceCount']) }} linked {{ \Illuminate\Support\Str::plural('invoice', $profitSummary['invoiceCount']) }}.</p>
+                @else
+                    <strong>Unavailable</strong>
+                    <p>A linked invoice is needed to calculate profit.</p>
+                @endif
             </div>
         </div>
     </section>
@@ -289,9 +403,17 @@
                             <td>
                                 <strong>{{ $contract->currency }} {{ number_format((float) $contract->agreed_fee, 2) }}</strong>
                                 <span>Agreed fee</span>
+                                @php($financialSummary = $contractFinancials[$contract->getKey()] ?? null)
+                                @if ($financialSummary)
+                                    <span class="staff-contract-profit-inline{{ $financialSummary['profitNaira'] < 0 ? ' is-negative' : '' }}">Profit left: NGN {{ number_format($financialSummary['profitNaira'], 2) }}</span>
+                                @else
+                                    <span>Profit unavailable</span>
+                                @endif
                             </td>
                             <td>
-                                <span class="contract-status contract-status--{{ $contract->status }}">{{ str_replace('_', ' ', $contract->status) }}</span>
+                                <span class="contract-status contract-status--{{ $contract->status }}">
+                                    <span>{{ str_replace('_', ' ', $contract->status) }}</span>
+                                </span>
                             </td>
                             <td>
                                 <details class="action-menu">

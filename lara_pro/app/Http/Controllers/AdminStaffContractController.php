@@ -87,12 +87,35 @@ class AdminStaffContractController extends Controller
             'width' => round(($currency['value'] / $maxCurrencyValue) * 100, 1),
         ]);
 
+        $contractFinancials = $contracts->mapWithKeys(fn (StaffContract $contract): array => [
+            $contract->getKey() => $this->contractFinancialSummary($contract),
+        ]);
+
+        $linkedInvoiceGroups = $contracts
+            ->filter(fn (StaffContract $contract): bool => $contract->invoice !== null)
+            ->groupBy('luxury_quote_id');
+
+        $totalProfitNaira = round((float) $linkedInvoiceGroups->sum(function ($invoiceContracts): float {
+            $invoice = $invoiceContracts->first()->invoice;
+            $staffFeesNaira = $invoiceContracts->sum(
+                fn (StaffContract $contract): float => $this->contractFeeInNaira($contract),
+            );
+
+            return $this->invoiceValueInNaira($invoice) - $staffFeesNaira;
+        }), 2);
+
         return view('admin.staff-contracts.index', [
             'contracts' => $contracts,
             'statusBreakdown' => $statusBreakdown,
             'monthlyActivity' => $monthlyActivity,
             'currencyBreakdown' => $currencyBreakdown,
             'maxCurrencyValue' => $maxCurrencyValue,
+            'contractFinancials' => $contractFinancials,
+            'profitSummary' => [
+                'available' => $linkedInvoiceGroups->isNotEmpty(),
+                'value' => $totalProfitNaira,
+                'invoiceCount' => $linkedInvoiceGroups->count(),
+            ],
             'invoiceCount' => LuxuryQuote::query()->count(),
             'activeCount' => $contracts->whereIn('status', ['pending_signature', 'signed', 'active'])->count(),
             'signedCount' => $contracts->where('status', 'signed')->count(),
@@ -141,6 +164,7 @@ class AdminStaffContractController extends Controller
 
         return view('admin.staff-contracts.show', [
             'contract' => $contract,
+            'financialSummary' => $this->contractFinancialSummary($contract),
             'brand' => config('luxury-quotes.brand', []),
         ]);
     }
@@ -346,6 +370,46 @@ class AdminStaffContractController extends Controller
                 'description' => $this->nullableTrim($invoice->executive_summary),
             ],
         );
+    }
+
+    private function contractFinancialSummary(StaffContract $contract): ?array
+    {
+        if (! $contract->invoice) {
+            return null;
+        }
+
+        $invoiceValueNaira = $this->invoiceValueInNaira($contract->invoice);
+        $feeNaira = $this->contractFeeInNaira($contract);
+        $profitNaira = round($invoiceValueNaira - $feeNaira, 2);
+
+        return [
+            'invoiceValueNaira' => $invoiceValueNaira,
+            'feeNaira' => $feeNaira,
+            'profitNaira' => $profitNaira,
+            'marginPercent' => $invoiceValueNaira > 0
+                ? round(($profitNaira / $invoiceValueNaira) * 100, 1)
+                : null,
+        ];
+    }
+
+    private function invoiceValueInNaira(LuxuryQuote $invoice): float
+    {
+        $exchangeRate = max(1, (float) ($invoice->exchange_rate ?? 1370));
+
+        return round((float) $invoice->investment_amount * $exchangeRate, 2);
+    }
+
+    private function contractFeeInNaira(StaffContract $contract): float
+    {
+        $fee = (float) $contract->agreed_fee;
+
+        if (strtoupper((string) $contract->currency) === 'NGN') {
+            return round($fee, 2);
+        }
+
+        $exchangeRate = max(1, (float) ($contract->invoice?->exchange_rate ?? 1370));
+
+        return round($fee * $exchangeRate, 2);
     }
 
     private function contractAttributes(
