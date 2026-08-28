@@ -35,6 +35,8 @@
 
 @section('content')
     <style>
+        @include('admin.letters.partials.document-styles')
+
         .letter-generator {
             display: grid;
             gap: 24px;

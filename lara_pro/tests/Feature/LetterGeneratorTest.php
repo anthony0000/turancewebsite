@@ -18,7 +18,9 @@ it('renders the dynamic Turance letterhead workspace and downloads a PDF', funct
         ->assertSee('Write it on the Turance letterhead.')
         ->assertSee('Letterhead preview')
         ->assertSee('Download PDF')
-        ->assertSee('Corporate identity');
+        ->assertSee('Corporate identity')
+        ->assertSee('.letterhead-background')
+        ->assertSee('position: absolute');
 
     $pdfResponse = $this
         ->withSession($session)
