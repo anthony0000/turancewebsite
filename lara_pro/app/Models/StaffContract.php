@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Facades\Storage;
 
 class StaffContract extends Model
@@ -58,12 +57,8 @@ class StaffContract extends Model
             return false;
         }
 
-        if ($this->signedDocumentContent()->exists()) {
-            return true;
-        }
-
         $relativePath = ltrim((string) $this->signed_document_path, '/\\\\');
-        $disk = Storage::disk('local');
+        $disk = Storage::disk('public_uploads');
 
         if ($disk->exists($relativePath)) {
             return true;
@@ -88,8 +83,4 @@ class StaffContract extends Model
         return $this->belongsTo(LuxuryQuote::class, 'luxury_quote_id');
     }
 
-    public function signedDocumentContent(): HasOne
-    {
-        return $this->hasOne(StaffContractDocumentContent::class);
-    }
 }

@@ -15,11 +15,15 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use RuntimeException;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Throwable;
 
 class AdminProjectController extends Controller
 {
     private const PROJECT_FILES_DIRECTORY = 'projects/files';
+
+    private const PROJECT_FILES_DISK = 'public_uploads';
 
     private const FILE_MIMES = [
         'pdf', 'doc', 'docx', 'xls', 'xlsx', 'csv', 'ppt', 'pptx', 'txt', 'rtf',
@@ -173,25 +177,29 @@ class AdminProjectController extends Controller
     private function createProjectFile(Project $project, UploadedFile $file, ?string $description): ProjectFile
     {
         $path = $this->projectFilePath($project, $file);
-        $contents = $file->getContent();
+        $storedPath = $file->storeAs(dirname($path), basename($path), self::PROJECT_FILES_DISK);
 
-        return DB::transaction(function () use ($project, $file, $description, $path, $contents): ProjectFile {
-            $projectFile = ProjectFile::query()->create([
-                'project_id' => $project->id,
-                'uploaded_by' => AdminAccess::currentUser()?->id,
-                'original_name' => $this->originalName($file),
-                'path' => $path,
-                'mime_type' => $file->getMimeType() ?: $file->getClientMimeType(),
-                'size' => $file->getSize(),
-                'description' => filled($description) ? trim($description) : null,
-            ]);
+        if (! is_string($storedPath) || $storedPath === '') {
+            throw new RuntimeException('The uploaded project file could not be stored.');
+        }
 
-            $projectFile->content()->create([
-                'contents' => $contents,
-            ]);
+        try {
+            return DB::transaction(function () use ($project, $file, $description, $storedPath): ProjectFile {
+                return ProjectFile::query()->create([
+                    'project_id' => $project->id,
+                    'uploaded_by' => AdminAccess::currentUser()?->id,
+                    'original_name' => $this->originalName($file),
+                    'path' => $storedPath,
+                    'mime_type' => $file->getMimeType() ?: $file->getClientMimeType(),
+                    'size' => $file->getSize(),
+                    'description' => filled($description) ? trim($description) : null,
+                ]);
+            });
+        } catch (Throwable $exception) {
+            Storage::disk(self::PROJECT_FILES_DISK)->delete($storedPath);
 
-            return $projectFile;
-        });
+            throw $exception;
+        }
     }
 
     public function downloadFile(ProjectFile $projectFile): BinaryFileResponse|Response
@@ -218,16 +226,19 @@ class AdminProjectController extends Controller
         ]);
 
         $newPath = null;
-        $newContents = null;
         $oldPath = $projectFile->path;
 
         if ($request->hasFile('file')) {
             $newFile = $validated['file'];
-            $newPath = $this->projectFilePath(
+            $replacementPath = $this->projectFilePath(
                 Project::query()->findOrFail($projectFile->project_id),
                 $newFile
             );
-            $newContents = $newFile->getContent();
+            $newPath = $newFile->storeAs(dirname($replacementPath), basename($replacementPath), self::PROJECT_FILES_DISK);
+
+            if (! is_string($newPath) || $newPath === '') {
+                throw new RuntimeException('The replacement project file could not be stored.');
+            }
         }
 
         $attributes = [];
@@ -248,18 +259,20 @@ class AdminProjectController extends Controller
                 : null;
         }
 
-        DB::transaction(function () use ($projectFile, $attributes, $newPath, $newContents): void {
-            $projectFile->forceFill($attributes)->save();
-
+        try {
+            DB::transaction(function () use ($projectFile, $attributes): void {
+                $projectFile->forceFill($attributes)->save();
+            });
+        } catch (Throwable $exception) {
             if ($newPath !== null) {
-                $projectFile->content()->updateOrCreate([], [
-                    'contents' => $newContents,
-                ]);
+                Storage::disk(self::PROJECT_FILES_DISK)->delete($newPath);
             }
-        });
+
+            throw $exception;
+        }
 
         if ($newPath !== null && $oldPath !== $newPath) {
-            Storage::disk('local')->delete($oldPath);
+            Storage::disk(self::PROJECT_FILES_DISK)->delete($oldPath);
         }
 
         $message = $newPath !== null
@@ -306,10 +319,9 @@ class AdminProjectController extends Controller
     {
         abort_unless(AdminAccess::isFullAdmin(), 403);
         $projectId = $projectFile->project_id;
-        if (! $projectFile->content()->exists()) {
-            Storage::disk('local')->delete($projectFile->path);
-        }
+        $path = $projectFile->path;
         $projectFile->delete();
+        Storage::disk(self::PROJECT_FILES_DISK)->delete($path);
 
         return $this->projectFileRedirect(request(), $projectFile, $projectId)
             ->with('status', 'File removed from the project workspace.');
@@ -321,7 +333,9 @@ class AdminProjectController extends Controller
             return redirect()->route('admin.projects.index');
         }
 
-        return redirect()->route('admin.projects.show', $projectId ?? $projectFile->project_id);
+        $project = Project::query()->findOrFail($projectId ?? $projectFile->project_id);
+
+        return redirect()->route('admin.projects.show', $project);
     }
 
     public function sharedFile(ProjectFile $projectFile): View
@@ -364,19 +378,7 @@ class AdminProjectController extends Controller
             'X-Content-Type-Options' => 'nosniff',
         ];
 
-        $content = $projectFile->content()->first(['contents']);
-
-        if ($content !== null) {
-            $headers['Content-Disposition'] = ($inline ? 'inline' : 'attachment').'; filename="'.addslashes($projectFile->original_name).'"';
-
-            if ($projectFile->size !== null) {
-                $headers['Content-Length'] = (string) $projectFile->size;
-            }
-
-            return response($content->contents, 200, $headers);
-        }
-
-        $path = Storage::disk('local')->path($projectFile->path);
+        $path = Storage::disk(self::PROJECT_FILES_DISK)->path($projectFile->path);
 
         if ($inline) {
             $headers['Content-Disposition'] = 'inline; filename="'.addslashes($projectFile->original_name).'"';

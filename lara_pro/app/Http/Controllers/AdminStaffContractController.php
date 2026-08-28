@@ -17,11 +17,15 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use RuntimeException;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Throwable;
 
 class AdminStaffContractController extends Controller
 {
     private const SIGNED_DOCUMENT_DIRECTORY = 'staff-contracts/signed-documents';
+
+    private const SIGNED_DOCUMENT_DISK = 'public_uploads';
 
     private const STATUSES = [
         'draft',
@@ -246,18 +250,6 @@ class AdminStaffContractController extends Controller
             'Content-Type' => $contract->signed_document_mime ?: 'application/octet-stream',
             'X-Content-Type-Options' => 'nosniff',
         ];
-        $content = $contract->signedDocumentContent()->first(['contents']);
-
-        if ($content !== null) {
-            $headers['Content-Disposition'] = ($inline ? 'inline' : 'attachment').'; filename="'.addslashes($filename).'"';
-
-            if ($contract->signed_document_size !== null) {
-                $headers['Content-Length'] = (string) $contract->signed_document_size;
-            }
-
-            return response($content->contents, 200, $headers);
-        }
-
         $absolutePath = $this->signedDocumentAbsolutePath($contract);
 
         if ($inline) {
@@ -274,7 +266,7 @@ class AdminStaffContractController extends Controller
         abort_unless($contract->hasSignedDocument(), 404);
 
         $relativePath = ltrim((string) $contract->signed_document_path, '/\\\\');
-        $disk = Storage::disk('local');
+        $disk = Storage::disk(self::SIGNED_DOCUMENT_DISK);
 
         if ($disk->exists($relativePath)) {
             return $disk->path($relativePath);
@@ -323,25 +315,32 @@ class AdminStaffContractController extends Controller
     private function replaceSignedDocument(StaffContract $contract, UploadedFile $file): void
     {
         $filename = $this->signedDocumentFilename($contract, $file);
-        $path = self::SIGNED_DOCUMENT_DIRECTORY.'/'.$filename;
-        $contents = $file->getContent();
+        $path = self::SIGNED_DOCUMENT_DIRECTORY.'/'.Str::uuid().'-'.$filename;
         $oldPath = $contract->signed_document_path;
 
-        DB::transaction(function () use ($contract, $path, $filename, $file, $contents): void {
-            $contract->forceFill([
-                'signed_document_path' => $path,
-                'signed_document_original_name' => $filename,
-                'signed_document_mime' => $file->getMimeType() ?: $file->getClientMimeType(),
-                'signed_document_size' => $file->getSize() ?: null,
-            ])->save();
+        $storedPath = $file->storeAs(dirname($path), basename($path), self::SIGNED_DOCUMENT_DISK);
 
-            $contract->signedDocumentContent()->updateOrCreate([], [
-                'contents' => $contents,
-            ]);
-        });
+        if (! is_string($storedPath) || $storedPath === '') {
+            throw new RuntimeException('The signed document could not be stored.');
+        }
 
-        if (filled($oldPath) && $oldPath !== $path) {
-            Storage::disk('local')->delete($oldPath);
+        try {
+            DB::transaction(function () use ($contract, $storedPath, $filename, $file): void {
+                $contract->forceFill([
+                    'signed_document_path' => $storedPath,
+                    'signed_document_original_name' => $filename,
+                    'signed_document_mime' => $file->getMimeType() ?: $file->getClientMimeType(),
+                    'signed_document_size' => $file->getSize() ?: null,
+                ])->save();
+            });
+        } catch (Throwable $exception) {
+            Storage::disk(self::SIGNED_DOCUMENT_DISK)->delete($storedPath);
+
+            throw $exception;
+        }
+
+        if (filled($oldPath) && $oldPath !== $storedPath) {
+            Storage::disk(self::SIGNED_DOCUMENT_DISK)->delete($oldPath);
         }
     }
 

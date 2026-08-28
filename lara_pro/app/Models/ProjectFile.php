@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Facades\Storage;
 
 class ProjectFile extends Model
@@ -41,15 +40,10 @@ class ProjectFile extends Model
         return $this->belongsTo(User::class, 'uploaded_by');
     }
 
-    public function content(): HasOne
-    {
-        return $this->hasOne(ProjectFileContent::class);
-    }
-
     public function hasStoredFile(): bool
     {
         return filled($this->path)
-            && ($this->content()->exists() || Storage::disk('local')->exists($this->path));
+            && Storage::disk('public_uploads')->exists($this->path);
     }
 
     public function sizeLabel(): string

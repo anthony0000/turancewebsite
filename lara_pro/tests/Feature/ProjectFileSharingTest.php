@@ -2,11 +2,11 @@
 
 use App\Models\Project;
 use App\Models\ProjectFile;
-use App\Models\ProjectFileContent;
 use App\Models\User;
 use App\Support\AdminAccess;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 
 uses(RefreshDatabase::class);
@@ -19,6 +19,11 @@ function projectAdminSession(): array
         'admin_role' => 'admin',
     ];
 }
+
+it('does not keep file payload tables in the database', function () {
+    expect(Schema::hasTable('project_file_contents'))->toBeFalse()
+        ->and(Schema::hasTable('staff_contract_document_contents'))->toBeFalse();
+});
 
 it('shows project portfolio charts and the file workspace entry point', function () {
     $project = Project::query()->create([
@@ -59,7 +64,7 @@ it('shows project portfolio charts and the file workspace entry point', function
 });
 
 it('uploads an external project file with ajax even when the project has no staff contract', function () {
-    Storage::fake('local');
+    Storage::fake('public_uploads');
 
     $project = Project::query()->create([
         'project_number' => 'TT-PRJ-EXTERNAL-001',
@@ -84,11 +89,11 @@ it('uploads an external project file with ajax even when the project has no staf
         ->and($projectFile->original_name)->toBe('client-reference.docx')
         ->and($projectFile->description)->toBe('Reference material for the staff handoff.');
 
-    expect(ProjectFileContent::query()->where('project_file_id', $projectFile->id)->exists())->toBeTrue();
+    Storage::disk('public_uploads')->assertExists($projectFile->path);
 });
 
 it('stores project files privately, shares one file, and can revoke the link', function () {
-    Storage::fake('local');
+    Storage::fake('public_uploads');
 
     $project = Project::query()->create([
         'project_number' => 'TT-PRJ-SHARE-001',
@@ -112,15 +117,14 @@ it('stores project files privately, shares one file, and can revoke the link', f
         ->and($projectFile->is_shared)->toBeFalse()
         ->and($projectFile->description)->toBe('Approved reference file for the final handoff.');
 
-    expect(ProjectFileContent::query()->where('project_file_id', $projectFile->id)->exists())->toBeTrue();
+    Storage::disk('public_uploads')->assertExists($projectFile->path);
     Storage::disk('public')->assertMissing($projectFile->path);
-    Storage::disk('local')->deleteDirectory('projects');
 
     $this
         ->withSession(projectAdminSession())
         ->get(route('admin.projects.files.download', $projectFile))
         ->assertOk()
-        ->assertHeader('Content-Disposition', 'attachment; filename="approved-reference.pdf"');
+        ->assertHeader('Content-Disposition', 'attachment; filename=approved-reference.pdf');
 
     $this
         ->withSession(projectAdminSession())
@@ -143,7 +147,7 @@ it('stores project files privately, shares one file, and can revoke the link', f
     $this
         ->get(route('project-files.download', $projectFile->share_token))
         ->assertOk()
-        ->assertHeader('Content-Disposition', 'attachment; filename="approved-reference.pdf"');
+        ->assertHeader('Content-Disposition', 'attachment; filename=approved-reference.pdf');
 
     $this
         ->withSession(projectAdminSession())
@@ -158,7 +162,7 @@ it('stores project files privately, shares one file, and can revoke the link', f
 });
 
 it('updates project file details and replaces the stored file without creating a duplicate', function () {
-    Storage::fake('local');
+    Storage::fake('public_uploads');
 
     $project = Project::query()->create([
         'project_number' => 'TT-PRJ-UPDATE-001',
@@ -167,7 +171,7 @@ it('updates project file details and replaces the stored file without creating a
     ]);
 
     $oldPath = 'projects/files/'.$project->id.'/original.pdf';
-    Storage::disk('local')->put($oldPath, 'original project file');
+    Storage::disk('public_uploads')->put($oldPath, 'original project file');
     $projectFile = ProjectFile::query()->create([
         'project_id' => $project->id,
         'original_name' => 'original.pdf',
@@ -198,20 +202,19 @@ it('updates project file details and replaces the stored file without creating a
         ->and($projectFile->description)->toBe('Updated reference material.')
         ->and($projectFile->path)->not->toBe($oldPath);
 
-    Storage::disk('local')->assertMissing($oldPath);
-    expect(ProjectFileContent::query()->where('project_file_id', $projectFile->id)->value('contents'))
+    Storage::disk('public_uploads')->assertMissing($oldPath);
+    expect(Storage::disk('public_uploads')->get($projectFile->path))
         ->toBe('updated document bytes');
 
     $this
         ->withSession(projectAdminSession())
         ->get(route('admin.projects.files.download', $projectFile))
         ->assertOk()
-        ->assertHeader('Content-Disposition', 'attachment; filename="updated-reference.txt"')
-        ->assertContent('updated document bytes');
+        ->assertHeader('Content-Disposition', 'attachment; filename=updated-reference.txt');
 });
 
 it('removes the stored project file and keeps project access permission scoped', function () {
-    Storage::fake('local');
+    Storage::fake('public_uploads');
 
     $project = Project::query()->create([
         'project_number' => 'TT-PRJ-REMOVE-001',
@@ -220,7 +223,7 @@ it('removes the stored project file and keeps project access permission scoped',
     ]);
 
     $path = 'projects/files/'.$project->id.'/remove-me.pdf';
-    Storage::disk('local')->put($path, 'private project file');
+    Storage::disk('public_uploads')->put($path, 'private project file');
     $projectFile = ProjectFile::query()->create([
         'project_id' => $project->id,
         'original_name' => 'remove-me.pdf',
@@ -244,11 +247,11 @@ it('removes the stored project file and keeps project access permission scoped',
         ->assertRedirect(route('admin.projects.show', $project));
 
     expect(ProjectFile::query()->find($projectFile->id))->toBeNull();
-    Storage::disk('local')->assertMissing($path);
+    Storage::disk('public_uploads')->assertMissing($path);
 });
 
 it('lets subaccounts view projects while limiting project file access separately', function () {
-    Storage::fake('local');
+    Storage::fake('public_uploads');
 
     $project = Project::query()->create([
         'project_number' => 'TT-PRJ-LIMIT-001',
@@ -257,7 +260,7 @@ it('lets subaccounts view projects while limiting project file access separately
     ]);
 
     $path = 'projects/files/'.$project->id.'/restricted.pdf';
-    Storage::disk('local')->put($path, 'restricted project file');
+    Storage::disk('public_uploads')->put($path, 'restricted project file');
     $projectFile = ProjectFile::query()->create([
         'project_id' => $project->id,
         'original_name' => 'restricted.pdf',
@@ -301,7 +304,7 @@ it('lets subaccounts view projects while limiting project file access separately
 });
 
 it('shows limited members shared project files only', function () {
-    Storage::fake('local');
+    Storage::fake('public_uploads');
 
     $member = User::factory()->create([
         'role' => AdminAccess::ROLE_SUBACCOUNT,
@@ -316,8 +319,8 @@ it('shows limited members shared project files only', function () {
     $project->members()->attach($member->id, ['role' => 'member']);
     $sharedPath = 'projects/files/'.$project->id.'/shared.pdf';
     $privatePath = 'projects/files/'.$project->id.'/private.pdf';
-    Storage::disk('local')->put($sharedPath, 'shared project file');
-    Storage::disk('local')->put($privatePath, 'private project file');
+    Storage::disk('public_uploads')->put($sharedPath, 'shared project file');
+    Storage::disk('public_uploads')->put($privatePath, 'private project file');
     $sharedFile = ProjectFile::query()->create([
         'project_id' => $project->id,
         'original_name' => 'shared.pdf',
