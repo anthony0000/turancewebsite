@@ -128,6 +128,51 @@
         .pm-table th { color: var(--muted); font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
         .pm-table td { color: var(--text); font-size: 13px; }
         .pm-table td strong { display: block; }
+        .pm-chip--warning { border-color: rgba(212,139,45,.28); background: #fff8e8; color: #a35f18; }
+        .pm-backlog-view { gap: 16px; }
+        .pm-backlog-hero { align-items: center; padding: 22px 26px; }
+        .pm-backlog-hero h2 { color: var(--text); font-size: clamp(24px, 2.6vw, 32px); letter-spacing: -.04em; }
+        .pm-backlog-hero p { max-width: 620px; margin-top: 9px; font-size: 12px; line-height: 1.5; }
+        .pm-backlog-overview { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+        .pm-backlog-stat { display: flex; min-height: 76px; align-items: center; gap: 12px; padding: 13px 16px; border: 1px solid var(--line-soft); border-radius: 10px; background: rgba(255,255,255,.82); }
+        .pm-backlog-stat--accent { border-top: 2px solid var(--primary); }
+        .pm-backlog-stat__icon { display: grid; width: 30px; height: 30px; flex: 0 0 30px; place-items: center; border: 1px solid rgba(184,134,11,.2); border-radius: 9px; background: var(--primary-soft); color: var(--primary-strong); font-size: 16px; font-weight: 800; }
+        .pm-backlog-stat > div { display: grid; min-width: 0; gap: 3px; }
+        .pm-backlog-stat strong { overflow: hidden; color: var(--text); font-size: 19px; line-height: 1.1; text-overflow: ellipsis; white-space: nowrap; }
+        .pm-backlog-stat span:not(.pm-backlog-stat__icon) { color: var(--muted); font-size: 10px; font-weight: 700; }
+        .pm-backlog-panel { padding: 20px; }
+        .pm-backlog-panel__head { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; margin-bottom: 16px; }
+        .pm-backlog-panel__head .pm-panel-head { margin: 0; }
+        .pm-section-kicker { display: block; margin-bottom: 5px; color: var(--primary-strong); font-size: 9px; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
+        .pm-backlog-panel__head h3 { font-size: 18px; letter-spacing: -.025em; }
+        .pm-backlog-panel__head .pm-panel-head p { margin-top: 6px; }
+        .pm-backlog-count { display: inline-flex; align-items: baseline; gap: 4px; padding: 7px 10px; border: 1px solid var(--line-soft); border-radius: 8px; color: var(--muted); font-size: 10px; white-space: nowrap; }
+        .pm-backlog-count strong { color: var(--text); font-size: 15px; }
+        .pm-backlog-table { overflow: hidden; border: 1px solid var(--line-soft); border-radius: 10px; background: #fff; }
+        .pm-backlog-row { display: grid; grid-template-columns: minmax(250px, 1.45fr) minmax(105px, .55fr) minmax(150px, .8fr) minmax(300px, 1.25fr); gap: 18px; align-items: center; padding: 14px 16px; border-top: 1px solid var(--line-soft); }
+        .pm-backlog-row:first-child { border-top: 0; }
+        .pm-backlog-row--head { padding-top: 11px; padding-bottom: 10px; background: #fcfaf5; border-top: 0; color: var(--muted); font-size: 9px; font-weight: 850; letter-spacing: .1em; text-transform: uppercase; }
+        .pm-backlog-cell { min-width: 0; }
+        .pm-backlog-cell--task { display: flex; align-items: center; gap: 11px; }
+        .pm-backlog-task-mark { display: grid; width: 30px; height: 30px; flex: 0 0 30px; place-items: center; border-radius: 9px; background: #f4eee2; color: var(--primary-strong); font-size: 11px; font-weight: 850; }
+        .pm-backlog-cell--task > div { display: grid; min-width: 0; gap: 2px; }
+        .pm-backlog-task-key { color: var(--primary-strong); font-size: 9px; font-weight: 850; letter-spacing: .07em; }
+        .pm-backlog-cell--task strong { overflow: hidden; font-size: 13px; line-height: 1.3; text-overflow: ellipsis; white-space: nowrap; }
+        .pm-backlog-cell--task strong a:hover { color: var(--primary-strong); }
+        .pm-backlog-task-meta { color: var(--muted); font-size: 10px; }
+        .pm-backlog-cell--owner { display: flex; align-items: center; gap: 8px; color: var(--muted-strong); font-size: 11px; }
+        .pm-backlog-cell--owner .pm-avatar { flex: 0 0 25px; }
+        .pm-backlog-assign { display: flex; align-items: center; gap: 7px; }
+        .pm-backlog-assign select { min-width: 0; flex: 1 1 auto; height: 34px; padding-inline: 9px 27px; border-color: var(--line); border-radius: 7px; background-color: #fffdf8; font-size: 11px; }
+        .pm-assign-button { display: inline-flex; min-height: 34px; flex: 0 0 auto; align-items: center; gap: 8px; padding: 0 11px; border: 1px solid #1c1e22; border-radius: 7px; background: #1c1e22; color: #fff; cursor: pointer; font-size: 11px; font-weight: 800; }
+        .pm-assign-button:hover { background: var(--primary-strong); border-color: var(--primary-strong); }
+        .pm-backlog-empty { display: flex; min-height: 142px; align-items: center; justify-content: center; gap: 13px; padding: 22px; text-align: left; }
+        .pm-backlog-empty__icon { display: grid; width: 38px; height: 38px; place-items: center; border-radius: 50%; background: #ecfdf5; color: var(--success); font-weight: 850; }
+        .pm-backlog-empty > div { display: grid; gap: 3px; }
+        .pm-backlog-empty strong { color: var(--text); font-size: 13px; }
+        .pm-backlog-empty span { color: var(--muted); font-size: 11px; }
+        .pm-backlog-empty .pm-icon-link { margin-left: 13px; }
+        .pm-backlog-pagination { margin-top: 14px; }
         .pm-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
         .pm-form-grid .field-full { grid-column: 1 / -1; }
         .pm-form-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
@@ -148,6 +193,15 @@
         .pm-card-labels span { padding: 3px 6px; border-radius: 5px; color: #684b00; background: #fff4cf; font-size: 10px; }
         .pm-task-bottom { color: var(--muted); font-size: 11px; }
         .pm-task-bottom .is-overdue { color: var(--danger); font-weight: 800; }
+        @media (max-width: 900px) {
+            .pm-backlog-row--head { display: none; }
+            .pm-backlog-row { grid-template-columns: 1fr; gap: 12px; padding: 15px; }
+            .pm-backlog-cell:not(.pm-backlog-cell--task) { display: grid; grid-template-columns: 105px minmax(0, 1fr); align-items: center; gap: 10px; }
+            .pm-backlog-cell:not(.pm-backlog-cell--task)::before { content: attr(data-label); color: var(--muted); font-size: 9px; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; }
+            .pm-backlog-cell--action .pm-backlog-assign { min-width: 0; }
+            .pm-backlog-empty { flex-direction: column; text-align: center; }
+            .pm-backlog-empty .pm-icon-link { margin: 0; }
+        }
         .pm-task-hero { display: grid; grid-template-columns: minmax(0, 1fr) minmax(286px, 320px) auto; align-items: center; gap: 28px; min-height: 164px; padding: 27px 30px; }
         .pm-task-hero h2 { max-width: 720px; margin-top: 10px; color: var(--text); font-size: clamp(26px, 3vw, 38px); letter-spacing: -.045em; line-height: 1.06; }
         .pm-task-hero > div:first-child { min-width: 0; }
@@ -466,7 +520,7 @@
         }
         @media (max-width: 1100px) { .pm-task-hero { grid-template-columns: minmax(0, 1fr) minmax(260px, .65fr); } .pm-task-hero__actions { grid-column: 1 / -1; justify-content: flex-start; } }
         @media (max-width: 980px) { .pm-staff-task-summary { grid-template-columns: 1fr; } }
-        @media (max-width: 640px) { .pm-kpis, .pm-grid-wide, .pm-form-grid { grid-template-columns: 1fr; } .pm-hero { align-items: flex-start; flex-direction: column; padding: 18px; } .pm-daily-motivation { grid-template-columns: 34px minmax(0, 1fr); gap: 12px; min-height: 0; padding: 18px; } .pm-daily-motivation__mark { width: 34px; height: 34px; border-radius: 10px; } .pm-daily-motivation__mark svg { width: 19px; height: 19px; } .pm-daily-motivation blockquote { font-size: 16px; } .pm-daily-motivation__orbit { right: -54px; opacity: .7; } .pm-task-countdown { width: 100%; flex-basis: 100%; } .pm-task-hero__actions { justify-content: flex-start; margin-left: 0; } .pm-subnav { overflow-x: auto; flex-wrap: nowrap; } .pm-subnav a { flex: 0 0 auto; } .pm-panel { padding: 14px; } .pm-project-view .pm-stat-row { grid-template-columns: 1fr; } .pm-project-view .pm-tabs { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 3px; } .pm-project-view .pm-tabs a { flex: 0 0 auto; } .pm-project-view .pm-hero .pm-actions { width: 100%; } .pm-project-view .pm-hero .pm-actions > * { flex: 1 1 0; } }
+        @media (max-width: 640px) { .pm-kpis, .pm-grid-wide, .pm-form-grid, .pm-backlog-overview { grid-template-columns: 1fr; } .pm-hero { align-items: flex-start; flex-direction: column; padding: 18px; } .pm-backlog-panel__head { flex-direction: column; } .pm-backlog-hero .pm-actions { width: 100%; } .pm-backlog-hero .pm-actions > * { flex: 1 1 0; justify-content: center; } .pm-daily-motivation { grid-template-columns: 34px minmax(0, 1fr); gap: 12px; min-height: 0; padding: 18px; } .pm-daily-motivation__mark { width: 34px; height: 34px; border-radius: 10px; } .pm-daily-motivation__mark svg { width: 19px; height: 19px; } .pm-daily-motivation blockquote { font-size: 16px; } .pm-daily-motivation__orbit { right: -54px; opacity: .7; } .pm-task-countdown { width: 100%; flex-basis: 100%; } .pm-task-hero__actions { justify-content: flex-start; margin-left: 0; } .pm-subnav { overflow-x: auto; flex-wrap: nowrap; } .pm-subnav a { flex: 0 0 auto; } .pm-panel { padding: 14px; } .pm-project-view .pm-stat-row { grid-template-columns: 1fr; } .pm-project-view .pm-tabs { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 3px; } .pm-project-view .pm-tabs a { flex: 0 0 auto; } .pm-project-view .pm-hero .pm-actions { width: 100%; } .pm-project-view .pm-hero .pm-actions > * { flex: 1 1 0; } }
         @media (prefers-reduced-motion: reduce) { .pm-daily-motivation, .pm-daily-motivation::before, .pm-daily-motivation__mark, .pm-daily-motivation__content, .pm-daily-motivation__orbit { animation: none !important; } }
     </style>
 @endpush
