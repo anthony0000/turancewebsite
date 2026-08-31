@@ -254,14 +254,14 @@
 
             const bindCard = card => {
                 card.addEventListener('dragstart', event => {
-                    dragState = {card, originList: card.parentElement, originNext: card.nextElementSibling, saved: false};
+                    dragState = {card, originList: card.parentElement, originNext: card.nextElementSibling, saved: false, dropStarted: false};
                     event.dataTransfer.effectAllowed = 'move';
                     event.dataTransfer.setData('text/plain', card.dataset.taskId);
                     card.classList.add('is-dragging');
                     board.classList.add('is-dragging-card');
                 });
                 card.addEventListener('dragend', () => {
-                    restoreDraggedCard();
+                    if (dragState && !dragState.dropStarted) restoreDraggedCard();
                     card.classList.remove('is-dragging');
                     board.classList.remove('is-dragging-card');
                     clearDropState();
@@ -306,14 +306,16 @@
                 list.addEventListener('drop', async event => {
                     event.preventDefault();
                     if (!dragState) return;
-                    const card = dragState.card;
+                    const state = dragState;
+                    const card = state.card;
+                    state.dropStarted = true;
                     const position = [...list.querySelectorAll('[data-task-card]')].indexOf(card);
                     try {
                         await saveMove(card, column, Math.max(0, position));
-                        dragState.saved = true;
+                        state.saved = true;
                         refreshCounts();
                     } catch (error) {
-                        restoreDraggedCard();
+                        if (dragState === state) restoreDraggedCard();
                         window.location.reload();
                     }
                 });
