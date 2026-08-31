@@ -3253,15 +3253,26 @@ body.is-dashboard-overview .admin-workspace--with-sidebar .admin-main {
 .tt-section-head h2 { margin: 4px 0 0; color: #1c1f24; font-family: var(--font-display); font-size: 17px; font-weight: 620; letter-spacing: -0.025em; }
 .tt-section-head .eyebrow { color: #9298a0; font-size: 9px; }
 .tt-chart-tools { display: grid; justify-items: end; gap: 9px; color: #9298a0; font-size: 10px; }
-.tt-chart-tools .dashboard-chart-periods { transform: scale(.9); transform-origin: right top; }
-.tt-chart-legend { display: flex; gap: 17px; margin: -3px 0 3px; color: #7d838c; font-size: 10px; }
-.tt-chart-legend span { display: inline-flex; align-items: center; gap: 6px; }
-.tt-legend-dot { width: 6px; height: 6px; border-radius: 50%; }
-.tt-legend-dot--visits { background: #c38d0a; }
-.tt-legend-dot--quotes { background: #454c55; }
-.tt-legend-dot--messages { background: #d37b47; }
-.tt-performance .line-chart-shell { min-height: 222px; padding: 0; border: 0; background: transparent; }
-.tt-performance .line-chart { height: 226px; }
+.tt-chart-tools > span { font-size: 9px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.tt-chart-tools .dashboard-chart-periods { transform: none; padding: 4px; border: 1px solid #e6eaed; border-radius: 9px; background: #f8fafb; box-shadow: inset 0 1px 0 rgba(255,255,255,.9); }
+.tt-chart-tools .dashboard-chart-periods a { min-width: 34px; height: 26px; border-radius: 6px; color: #8a929b; font-size: 9px; }
+.tt-chart-tools .dashboard-chart-periods a:hover,
+.tt-chart-tools .dashboard-chart-periods a.active { background: #ffffff; color: #a47708; box-shadow: 0 2px 5px rgba(31,38,48,.09); }
+.tt-chart-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; margin: 0 0 13px; color: #737c86; font-size: 10px; }
+.tt-chart-legend span { display: inline-flex; align-items: center; gap: 7px; padding: 6px 9px; border: 1px solid #edf0f2; border-radius: 999px; background: #fbfcfc; font-weight: 650; }
+.tt-legend-dot { width: 7px; height: 7px; border-radius: 50%; box-shadow: 0 0 0 3px rgba(38,42,49,.07); }
+.tt-legend-dot--visits { background: var(--traffic); }
+.tt-legend-dot--quotes { background: var(--quote); box-shadow: 0 0 0 3px rgba(195,141,10,.11); }
+.tt-legend-dot--messages { background: var(--lead); box-shadow: 0 0 0 3px rgba(211,107,46,.1); }
+.tt-performance .line-chart-shell { min-height: 0; padding: 12px 10px 6px; border: 1px solid #edf0f2; border-radius: 12px; background: linear-gradient(180deg, #fbfcfc 0%, #ffffff 100%); }
+.tt-performance .line-chart { height: 250px; }
+.tt-performance .chart-grid-line { stroke: #e7ebee; stroke-dasharray: 3 5; }
+.tt-performance .chart-grid-line--vertical { stroke: #f0f2f3; stroke-dasharray: none; }
+.tt-performance .chart-baseline { stroke: #dfe4e7; stroke-width: 1.2; vector-effect: non-scaling-stroke; }
+.tt-performance .chart-axis-label { fill: #8b949d; font-size: 9.5px; }
+.tt-performance .chart-line { stroke-width: 2.8; }
+.tt-performance .chart-dot { stroke-width: 2.2; }
+.tt-performance .chart-area { opacity: .8; }
 .tt-performance .chart-empty { padding-top: 75px; }
 
 .tt-pipeline-ring {

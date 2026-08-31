@@ -22,6 +22,15 @@
                 y="{{ $tick['y'] + 3.5 }}" text-anchor="end">{{ number_format($tick['value']) }}</text>
         @endforeach
 
+        @foreach ($chart['x_labels'] as $label)
+            <line class="chart-grid-line chart-grid-line--vertical" x1="{{ $label['x'] }}"
+                y1="{{ $chart['ticks'][0]['y'] }}" x2="{{ $label['x'] }}"
+                y2="{{ $chart['baseline'] }}" />
+        @endforeach
+
+        <line class="chart-baseline" x1="{{ $chart['plot_left'] }}" y1="{{ $chart['baseline'] }}"
+            x2="{{ $chart['plot_right'] }}" y2="{{ $chart['baseline'] }}" />
+
         <g class="chart-plot">
             <path class="chart-area" d="{{ $chart['series']['visits']['area'] }}" fill="url(#chart-fill-visits)" />
             <polyline class="chart-line chart-line--visits" points="{{ $chart['series']['visits']['line'] }}" />

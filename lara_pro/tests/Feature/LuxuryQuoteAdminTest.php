@@ -62,7 +62,9 @@ it('resolves the activity route before the quote wildcard route', function () {
         ->get(route('admin.quotes.activity'))
         ->assertOk()
         ->assertSee('Activity')
-        ->assertSee('Activity at a glance');
+        ->assertSee('Activity at a glance')
+        ->assertSee('chart-grid-line--vertical', false)
+        ->assertSee('tt-legend-dot--visits', false);
 });
 
 it('stores an invoice and exports invoice and mou pdfs', function () {
