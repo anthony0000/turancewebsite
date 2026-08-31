@@ -892,14 +892,16 @@ class AdminLuxuryQuoteController extends Controller
             })->all();
 
             $line = collect($points)->map(fn (array $point): string => $point['x'].','.$point['y'])->implode(' ');
+            $path = $this->smoothChartPath($points);
             $first = $points[0] ?? null;
             $last = $points[count($points) - 1] ?? null;
 
             $series[$key] = [
                 'points' => $points,
                 'line' => $line,
+                'path' => $path,
                 'area' => $first && $last
-                    ? 'M'.$first['x'].','.$baseline.' L'.str_replace(' ', ' L', $line).' L'.$last['x'].','.$baseline.' Z'
+                    ? $this->smoothChartArea($points, $baseline, $path)
                     : '',
             ];
         }
@@ -935,6 +937,49 @@ class AdminLuxuryQuoteController extends Controller
             'x_labels' => $xLabels,
             'has_data' => $days->sum('visits') + $days->sum('quotes') + $days->sum('messages') > 0,
         ];
+    }
+
+    /**
+     * Use a smooth-step curve between each pair of points while keeping the
+     * curve anchored to every recorded value.
+     */
+    private function smoothChartPath(array $points): string
+    {
+        $first = $points[0] ?? null;
+
+        if (! $first) {
+            return '';
+        }
+
+        $path = 'M'.$first['x'].','.$first['y'];
+
+        foreach (array_slice($points, 1) as $index => $next) {
+            $current = $points[$index];
+            $step = round(($next['x'] - $current['x']) / 3, 2);
+
+            $path .= ' C'.($current['x'] + $step).','.$current['y']
+                .' '.($next['x'] - $step).','.$next['y']
+                .' '.$next['x'].','.$next['y'];
+        }
+
+        return $path;
+    }
+
+    private function smoothChartArea(array $points, int $baseline, string $path): string
+    {
+        $first = $points[0] ?? null;
+        $last = $points[count($points) - 1] ?? null;
+
+        if (! $first || ! $last) {
+            return '';
+        }
+
+        $move = 'M'.$first['x'].','.$first['y'];
+
+        return 'M'.$first['x'].','.$baseline
+            .' L'.$first['x'].','.$first['y']
+            .substr($path, strlen($move))
+            .' L'.$last['x'].','.$baseline.' Z';
     }
 
     private function countMapByDay(string $modelClass, Carbon $start, Carbon $end): Collection

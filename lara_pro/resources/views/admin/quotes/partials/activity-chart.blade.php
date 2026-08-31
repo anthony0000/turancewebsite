@@ -33,9 +33,9 @@
 
         <g class="chart-plot">
             <path class="chart-area" d="{{ $chart['series']['visits']['area'] }}" fill="url(#chart-fill-visits)" />
-            <polyline class="chart-line chart-line--visits" points="{{ $chart['series']['visits']['line'] }}" />
-            <polyline class="chart-line chart-line--quotes" points="{{ $chart['series']['quotes']['line'] }}" />
-            <polyline class="chart-line chart-line--messages" points="{{ $chart['series']['messages']['line'] }}" />
+            <path class="chart-line chart-line--visits" d="{{ $chart['series']['visits']['path'] }}" />
+            <path class="chart-line chart-line--quotes" d="{{ $chart['series']['quotes']['path'] }}" />
+            <path class="chart-line chart-line--messages" d="{{ $chart['series']['messages']['path'] }}" />
 
             @foreach (['visits', 'quotes', 'messages'] as $seriesKey)
                 @foreach ($chart['series'][$seriesKey]['points'] as $point)

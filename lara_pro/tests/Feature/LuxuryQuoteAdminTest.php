@@ -64,7 +64,9 @@ it('resolves the activity route before the quote wildcard route', function () {
         ->assertSee('Activity')
         ->assertSee('Activity at a glance')
         ->assertSee('chart-grid-line--vertical', false)
-        ->assertSee('tt-legend-dot--visits', false);
+        ->assertSee('tt-legend-dot--visits', false)
+        ->assertSee('<path class="chart-line chart-line--visits"', false)
+        ->assertDontSee('<polyline class="chart-line', false);
 });
 
 it('stores an invoice and exports invoice and mou pdfs', function () {
