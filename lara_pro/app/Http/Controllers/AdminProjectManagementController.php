@@ -159,7 +159,7 @@ class AdminProjectManagementController extends Controller
 
     public function createProject(): View
     {
-        abort_unless(AdminAccess::isFullAdmin(), 403);
+        ProjectManagementAccess::ensureProjectCreation();
 
         return view('admin.project-management.create', [
             'clients' => Client::query()->orderBy('name')->get(),
@@ -171,7 +171,7 @@ class AdminProjectManagementController extends Controller
 
     public function storeProject(Request $request): RedirectResponse
     {
-        abort_unless(AdminAccess::isFullAdmin(), 403);
+        ProjectManagementAccess::ensureProjectCreation();
 
         $validated = $request->validate($this->projectRules());
         $client = ! empty($validated['client_id']) ? Client::query()->find($validated['client_id']) : null;

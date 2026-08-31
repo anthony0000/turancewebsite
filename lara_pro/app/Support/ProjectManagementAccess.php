@@ -87,6 +87,11 @@ final class ProjectManagementAccess
         abort_unless(AdminAccess::isFullAdmin(), 403);
     }
 
+    public static function ensureProjectCreation(): void
+    {
+        abort_unless(AdminAccess::isFullAdmin(), 403);
+    }
+
     public static function scopeVisibleTasks(Builder $query): Builder
     {
         if (! self::isLimitedMember()) {

@@ -42,6 +42,33 @@ it('creates a project with default workflow columns and team membership', functi
         ->and($project->activityLogs()->where('action', 'project.created')->exists())->toBeTrue();
 });
 
+it('keeps project creation restricted to full admins', function () {
+    $staff = User::factory()->create([
+        'role' => AdminAccess::ROLE_SUBACCOUNT,
+        'permissions' => ['projects', 'project-management'],
+        'is_active' => true,
+    ]);
+    $session = projectManagementSession($staff);
+    $payload = [
+        'project_key' => 'STAFF-PROJECT',
+        'name' => 'Staff-created project',
+        'status' => 'planning',
+        'priority' => 'medium',
+    ];
+
+    $this->withSession($session)
+        ->get(route('admin.project-management.projects.create'))
+        ->assertForbidden();
+    $this->withSession($session)
+        ->post(route('admin.project-management.projects.store'), $payload)
+        ->assertForbidden();
+    $this->withSession($session)
+        ->postJson(route('admin.project-management.api.projects.store'), $payload)
+        ->assertForbidden();
+
+    expect(Project::query()->where('project_number', 'STAFF-PROJECT')->exists())->toBeFalse();
+});
+
 it('creates tasks and persists status and ordering through the board endpoint', function () {
     $admin = User::factory()->create(['role' => AdminAccess::ROLE_ADMIN, 'permissions' => AdminAccess::permissionKeys(), 'is_active' => true]);
     $project = Project::query()->create(['project_number' => 'OPS', 'name' => 'Operations', 'status' => 'active', 'priority' => 'medium']);

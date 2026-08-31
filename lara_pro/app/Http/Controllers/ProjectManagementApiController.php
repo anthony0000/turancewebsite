@@ -51,7 +51,7 @@ class ProjectManagementApiController extends Controller
 
     public function storeProject(Request $request): JsonResponse
     {
-        abort_unless(AdminAccess::isFullAdmin(), 403);
+        ProjectManagementAccess::ensureProjectCreation();
 
         $validated = $request->validate(['project_key' => ['required', 'string', 'max:30', 'alpha_dash', 'unique:projects,project_number'], 'name' => ['required', 'string', 'max:255'], 'client_id' => ['nullable', 'integer', 'exists:clients,id'], 'status' => ['required', Rule::in(['planning', 'active', 'on_hold', 'completed', 'cancelled'])], 'priority' => ['required', Rule::in(['low', 'medium', 'high', 'urgent'])], 'starts_on' => ['nullable', 'date'], 'ends_on' => ['nullable', 'date', 'after_or_equal:starts_on'], 'project_manager_id' => ['nullable', 'integer', 'exists:users,id'], 'description' => ['nullable', 'string', 'max:10000']]);
         $project = DB::transaction(function () use ($validated): Project {
