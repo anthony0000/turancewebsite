@@ -245,11 +245,12 @@ class AdminProjectManagementController extends Controller
                     ->orWhereIn('task_id', $tasks->modelKeys() ?: [0]);
             });
         }
+        $existingMemberIds = $project->members->modelKeys();
 
         return view('admin.project-management.project', [
             'project' => $project,
             'tasks' => $tasks,
-            'members' => $this->availableUsers(),
+            'members' => $this->availableUsers()->reject(fn (User $member) => in_array($member->id, $existingMemberIds, true))->values(),
             'recentActivity' => $activityQuery->latest()->limit(12)->get(),
             'comments' => $project->comments()->whereNull('task_id')->with('user')->latest()->limit(8)->get(),
             'canManageWorkspace' => ProjectManagementAccess::canManageWorkspace(),

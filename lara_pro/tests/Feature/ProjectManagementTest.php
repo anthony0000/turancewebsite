@@ -90,6 +90,10 @@ it('gives project managers full access to existing project workflows', function 
     $task = Task::query()->where('title', 'Delegate implementation')->firstOrFail();
 
     $this->withSession($session)->post(route('admin.project-management.members.store', $project), ['user_id' => $assignee->id, 'role' => 'member'])->assertRedirect();
+    $this->withSession($session)
+        ->get(route('admin.project-management.projects.show', $project))
+        ->assertOk()
+        ->assertDontSee('value="'.$assignee->id.'">'.e($assignee->name).'</option>', false);
     $this->withSession($session)->getJson(route('admin.project-management.api.projects.show', $project))->assertOk();
 
     expect($task->assignee_id)->toBe($assignee->id)
