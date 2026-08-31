@@ -120,7 +120,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
                     : (AdminAccess::can('staff-contracts')
                         ? 'admin.staff-contracts.index'
                         : (AdminAccess::can('projects')
-                            ? 'admin.project-management.dashboard'
+                            ? (AdminAccess::isFullAdmin() || AdminAccess::can('project-management')
+                                ? 'admin.project-management.dashboard'
+                                : 'admin.project-management.projects')
                             : (AdminAccess::can('letters') ? 'admin.letters.create' : 'admin.profile'))));
 
             return redirect()->route($route);

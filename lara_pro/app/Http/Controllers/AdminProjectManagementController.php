@@ -35,9 +35,13 @@ class AdminProjectManagementController extends Controller
     private const PRIORITIES = ['low', 'medium', 'high', 'urgent'];
     private const TASK_TYPES = ['task', 'feature', 'bug', 'improvement', 'research', 'design', 'meeting', 'support'];
 
-    public function dashboard(Request $request): View
+    public function dashboard(Request $request): View|RedirectResponse
     {
         if (ProjectManagementAccess::isLimitedMember()) {
+            if (! AdminAccess::can('project-management')) {
+                return redirect()->route('admin.project-management.projects');
+            }
+
             return $this->staffDashboard($request);
         }
 
@@ -127,7 +131,7 @@ class AdminProjectManagementController extends Controller
 
     public function projects(Request $request): View
     {
-        ProjectManagementAccess::ensureFullWorkspace();
+        ProjectManagementAccess::ensureProjectWorkspace();
         $query = $this->visibleProjects()
             ->with(['client', 'projectManager'])
             ->withCount(['tasks' => fn (Builder $tasks) => ProjectManagementAccess::scopeVisibleTasks($tasks)->whereNull('archived_at'), 'members'])
@@ -217,9 +221,11 @@ class AdminProjectManagementController extends Controller
 
     public function showProject(Project $project): View
     {
-        ProjectManagementAccess::ensureFullWorkspace();
+        ProjectManagementAccess::ensureProjectWorkspace();
         ProjectManagementAccess::ensureVisible($project);
-        ProjectManagementAccess::ensureDefaultColumns($project);
+        if (AdminAccess::isFullAdmin()) {
+            ProjectManagementAccess::ensureDefaultColumns($project);
+        }
         $project->load(['client', 'projectManager', 'members', 'boardColumns', 'labels', 'milestones', 'sprints']);
         $project->loadCount(['tasks' => fn (Builder $tasks) => ProjectManagementAccess::scopeVisibleTasks($tasks)->whereNull('archived_at'), 'tasks as completed_tasks_count' => fn (Builder $tasks) => ProjectManagementAccess::scopeVisibleTasks($tasks)->whereNull('archived_at')->whereNotNull('completed_at')]);
 

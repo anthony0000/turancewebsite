@@ -25,7 +25,7 @@ class ProjectManagementApiController extends Controller
 {
     public function projects(Request $request): JsonResponse
     {
-        ProjectManagementAccess::ensureFullWorkspace();
+        ProjectManagementAccess::ensureProjectWorkspace();
         $projects = ProjectManagementAccess::scopeVisible(Project::query())
             ->where('status', '!=', 'archived')
             ->with(['client', 'projectManager'])
@@ -40,9 +40,11 @@ class ProjectManagementApiController extends Controller
 
     public function project(Project $project): JsonResponse
     {
-        ProjectManagementAccess::ensureFullWorkspace();
+        ProjectManagementAccess::ensureProjectWorkspace();
         ProjectManagementAccess::ensureVisible($project);
-        ProjectManagementAccess::ensureDefaultColumns($project);
+        if (AdminAccess::isFullAdmin()) {
+            ProjectManagementAccess::ensureDefaultColumns($project);
+        }
         $project->load(['client', 'projectManager', 'members', 'boardColumns', 'labels', 'milestones', 'sprints']);
         $project->loadCount(['tasks' => fn (Builder $tasks) => ProjectManagementAccess::scopeVisibleTasks($tasks)->whereNull('archived_at'), 'tasks as completed_tasks_count' => fn (Builder $tasks) => ProjectManagementAccess::scopeVisibleTasks($tasks)->whereNull('archived_at')->whereNotNull('completed_at')]);
 

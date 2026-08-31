@@ -25,6 +25,7 @@
     $canProposals = \App\Support\AdminAccess::can('proposals');
     $canStaffContracts = \App\Support\AdminAccess::can('staff-contracts');
     $canProjects = \App\Support\AdminAccess::can('projects');
+    $canProjectManagement = \App\Support\AdminAccess::can('project-management');
     $canLetters = \App\Support\AdminAccess::can('letters');
     $canActivity = \App\Support\AdminAccess::can('activity');
     $canInsights = \App\Support\AdminAccess::can('insights');
@@ -44,6 +45,7 @@
         $isProposalDashboard => 'Proposal Studio',
         $isStaffContractPreview => 'Staff Contract Preview',
         $isStaffContractEditor => 'Edit Staff Contract',
+        $isProjectManagementWorkspace && request()->routeIs('admin.project-management.projects*') && ! \App\Support\AdminAccess::isFullAdmin() => 'Projects',
         $isProjectManagementWorkspace && ! \App\Support\AdminAccess::isFullAdmin() => 'My tasks',
         $isProjectManagementWorkspace => 'Project Management',
         $isProjectPreview => 'Project Workspace',
@@ -68,6 +70,7 @@
         $isProposalDashboard => 'Build, review, and export client proposals.',
         $isStaffContractPreview => 'Review the project-bound staff agreement, signing details, and contract PDF.',
         $isStaffContractEditor => 'Update the project, commercial terms, staff details, and signing section.',
+        $isProjectManagementWorkspace && request()->routeIs('admin.project-management.projects*') && ! \App\Support\AdminAccess::isFullAdmin() => 'Review the project records available to your account.',
         $isProjectManagementWorkspace && ! \App\Support\AdminAccess::isFullAdmin() => 'Review the tasks assigned to you and open the relevant project file sharing area.',
         $isProjectManagementWorkspace => 'Plan projects, move work across the board, and keep delivery visible to the team.',
         $isProjectPreview => 'Keep project files private by default, then create a secure link for the right people.',
@@ -92,6 +95,7 @@
         $isProposalDashboard => 'Proposal Studio',
         $isStaffContractPreview => 'Staff Contract Preview',
         $isStaffContractEditor => 'Edit Staff Contract',
+        $isProjectManagementWorkspace && request()->routeIs('admin.project-management.projects*') && ! \App\Support\AdminAccess::isFullAdmin() => 'Projects',
         $isProjectManagementWorkspace && ! \App\Support\AdminAccess::isFullAdmin() => 'My tasks',
         $isProjectManagementWorkspace => 'Project Management',
         $isProjectPreview => 'Project Workspace',
@@ -2360,7 +2364,23 @@
                                 </div>
                                 </a>
                                 @else
-                                <a class="admin-nav-link {{ $isProjectManagementWorkspace ? 'active' : '' }}"
+                                @if ($canProjects)
+                                <a class="admin-nav-link {{ request()->routeIs('admin.project-management.projects*') ? 'active' : '' }}"
+                                    href="{{ route('admin.project-management.projects') }}">
+                                <span class="admin-nav-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24">
+                                        <path d="M3 7h7l2 2h9v10H3z" />
+                                        <path d="M3 7V5h7l2 2" />
+                                    </svg>
+                                </span>
+                                <div>
+                                    <strong>Projects</strong>
+                                    <span>Project records</span>
+                                </div>
+                                </a>
+                                @endif
+                                @if ($canProjectManagement)
+                                <a class="admin-nav-link {{ request()->routeIs('admin.project-management.dashboard') ? 'active' : '' }}"
                                     href="{{ route('admin.project-management.dashboard') }}">
                                 <span class="admin-nav-icon" aria-hidden="true">
                                     <svg viewBox="0 0 24 24">
@@ -2375,6 +2395,7 @@
                                     <span>Assigned work</span>
                                 </div>
                                 </a>
+                                @endif
                                 @endif
 
                                 <a class="admin-nav-link {{ $isProjectFileWorkspace ? 'active' : '' }}"
@@ -2613,7 +2634,10 @@
                         @if ($isFullAdmin)
                         <a class="command-palette__item" data-command-item data-command-label="Projects Delivery" href="{{ route('admin.project-management.dashboard') }}"><span class="command-palette__item-icon">□</span><span><strong>Projects</strong><small>Delivery workspace</small></span><span class="command-palette__arrow">↵</span></a>
                         @else
+                        <a class="command-palette__item" data-command-item data-command-label="Projects" href="{{ route('admin.project-management.projects') }}"><span class="command-palette__item-icon">□</span><span><strong>Projects</strong><small>Project records</small></span><span class="command-palette__arrow">↵</span></a>
+                        @if ($canProjectManagement)
                         <a class="command-palette__item" data-command-item data-command-label="My Tasks" href="{{ route('admin.project-management.dashboard') }}"><span class="command-palette__item-icon">□</span><span><strong>My tasks</strong><small>Assigned work</small></span><span class="command-palette__arrow">↵</span></a>
+                        @endif
                         @endif
                         <a class="command-palette__item" data-command-item data-command-label="File Sharing" href="{{ route('admin.projects.index') }}"><span class="command-palette__item-icon">▱</span><span><strong>File sharing</strong><small>Shared files</small></span><span class="command-palette__arrow">↵</span></a>
                     @endif

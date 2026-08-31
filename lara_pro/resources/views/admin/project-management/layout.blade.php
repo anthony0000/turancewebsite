@@ -558,7 +558,12 @@
                 </div>
             </details>
         @else
-            <a class="active" href="{{ route('admin.project-management.dashboard') }}">My tasks</a>
+            @if (\App\Support\AdminAccess::can('projects'))
+                <a class="{{ request()->routeIs('admin.project-management.projects*') ? 'active' : '' }}" href="{{ route('admin.project-management.projects') }}">Projects</a>
+            @endif
+            @if (\App\Support\AdminAccess::can('project-management'))
+                <a class="{{ request()->routeIs('admin.project-management.dashboard') ? 'active' : '' }}" href="{{ route('admin.project-management.dashboard') }}">My tasks</a>
+            @endif
             <a class="{{ request()->routeIs('admin.project-management.notifications') ? 'active' : '' }}" href="{{ route('admin.project-management.notifications') }}">Notifications @if ($pmUnreadNotifications)<span class="pm-notification-count">{{ $pmUnreadNotifications > 99 ? '99+' : $pmUnreadNotifications }}</span>@endif</a>
         @endif
         </nav>

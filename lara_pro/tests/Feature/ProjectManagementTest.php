@@ -137,7 +137,7 @@ it('uses public project and task keys for links and route binding', function () 
         ->assertNotFound();
 });
 
-it('keeps limited accounts out of the project management workspace', function () {
+it('shows assigned project records to staff with project access', function () {
     $admin = User::factory()->create(['role' => AdminAccess::ROLE_ADMIN, 'permissions' => AdminAccess::permissionKeys(), 'is_active' => true]);
     $member = User::factory()->create(['role' => AdminAccess::ROLE_SUBACCOUNT, 'permissions' => ['projects'], 'is_active' => true]);
     $other = User::factory()->create(['role' => AdminAccess::ROLE_SUBACCOUNT, 'permissions' => ['projects'], 'is_active' => true]);
@@ -145,7 +145,20 @@ it('keeps limited accounts out of the project management workspace', function ()
     $project->members()->attach($member->id, ['role' => 'member']);
 
     $this->withSession(projectManagementSession($other))->get(route('admin.project-management.projects.show', $project))->assertForbidden();
-    $this->withSession(projectManagementSession($member))->get(route('admin.project-management.projects.show', $project))->assertForbidden();
+    $this->withSession(projectManagementSession($member))
+        ->get(route('admin.project-management.dashboard'))
+        ->assertRedirect(route('admin.project-management.projects'));
+    $this->withSession(projectManagementSession($member))
+        ->get(route('admin.project-management.projects'))
+        ->assertOk()
+        ->assertSee('Projects')
+        ->assertSee('Private Work')
+        ->assertDontSee('New project');
+    $this->withSession(projectManagementSession($member))->get(route('admin.project-management.projects.show', $project))->assertOk()->assertSee('Private Work')->assertDontSee('Open board')->assertDontSee('Edit settings');
+    $this->withSession(projectManagementSession($member))
+        ->getJson(route('admin.project-management.api.projects'))
+        ->assertOk()
+        ->assertJsonPath('data.0.key', 'PRIVATE');
     $this->withSession(projectManagementSession($admin))->get(route('admin.project-management.projects.show', $project))->assertOk();
 });
 
@@ -159,13 +172,12 @@ it('limits members to their assigned tasks across web and API surfaces', functio
     $hidden = $project->tasks()->create(['task_number' => 2, 'title' => 'Private teammate task', 'type' => 'task', 'priority' => 'high', 'status' => 'to_do', 'board_column_id' => $column->id, 'assignee_id' => $admin->id, 'reporter_id' => $admin->id, 'position' => 1]);
     $session = projectManagementSession($member);
 
-    $dashboardResponse = $this->withSession($session)->get(route('admin.project-management.dashboard'));
-    $dashboardResponse->assertOk()->assertSee('My tasks')->assertSee('Workspace')->assertSee('Member task')->assertSee('Daily motivation')->assertSee('Next deadline')->assertSee('data-dashboard-countdown', false)->assertSee('Work status')->assertSee('Due-date health')->assertSee('Open work by project')->assertDontSee('Private teammate task')->assertDontSee('Project overview')->assertDontSee('<span class="admin-nav-label">Create</span>')->assertDontSee('Search anything...')->assertDontSee('New Project');
-    expect(strpos($dashboardResponse->getContent(), 'id="daily-motivation-title"'))->toBeLessThan(strpos($dashboardResponse->getContent(), 'class="pm-subnav"'));
+    $this->withSession($session)->get(route('admin.project-management.dashboard'))->assertRedirect(route('admin.project-management.projects'));
+    $this->withSession($session)->get(route('admin.project-management.projects'))->assertOk()->assertSee('Scoped Work')->assertDontSee('New project');
     $this->withSession($session)->get(route('admin.project-management.board', $project))->assertForbidden();
     $this->withSession($session)->get(route('admin.project-management.tasks.show', $assigned))->assertOk()->assertSee('Member task');
     $this->withSession($session)->get(route('admin.project-management.tasks.show', $hidden))->assertForbidden();
-    $this->withSession($session)->getJson(route('admin.project-management.api.projects.show', $project))->assertForbidden();
+    $this->withSession($session)->getJson(route('admin.project-management.api.projects.show', $project))->assertOk();
     $this->withSession($session)->getJson(route('admin.project-management.api.search', ['q' => 'task']))->assertForbidden();
 });
 

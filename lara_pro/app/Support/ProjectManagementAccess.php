@@ -87,6 +87,11 @@ final class ProjectManagementAccess
         abort_unless(AdminAccess::isFullAdmin(), 403);
     }
 
+    public static function ensureProjectWorkspace(): void
+    {
+        abort_unless(AdminAccess::can('projects'), 403);
+    }
+
     public static function ensureProjectCreation(): void
     {
         abort_unless(AdminAccess::isFullAdmin(), 403);
