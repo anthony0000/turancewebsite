@@ -17,7 +17,7 @@
         $exchangeRateDefault = old('exchange_rate', $defaultExchangeRate ?? 1370);
         $outcomesDefault = old('outcomes', implode(PHP_EOL, $defaults['outcomes'] ?? []));
         $milestonesDefault = old('milestones', implode(PHP_EOL, $defaults['milestones'] ?? []));
-        $addonsDefault = old('optional_addons', implode(PHP_EOL, $defaults['optional_addons'] ?? []));
+        $addonsDefault = old('optional_addons', '');
         $introDefault = old(
             'intro_message',
             'We have prepared this invoice to help your company move forward with clarity, confidence, and premium execution across the digital experience.'
@@ -776,7 +776,7 @@
                             <div class="field-full">
                                 <label for="optional_addons">Optional Add-ons</label>
                                 <textarea id="optional_addons" name="optional_addons" data-rich-editor>{{ $addonsDefault }}</textarea>
-                                <p class="field-hint">Optional extensions for the invoice.</p>
+                                <p class="field-hint">Optional extensions for the invoice and MOU. Leave blank if none apply.</p>
                             </div>
 
                             @include('admin.quotes.partials.discount-control', [

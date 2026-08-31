@@ -218,6 +218,7 @@ it('allows small website upgrade invoices below the old premium floor', function
     expect($quote)->not->toBeNull();
     expect((float) $quote->investment_amount)->toBe(25.0);
     expect((float) $quote->exchange_rate)->toBe(1500.0);
+    expect($quote->optional_addons)->toBe([]);
 
     $response->assertRedirect(route('admin.quotes.show', $quote));
 
@@ -230,6 +231,23 @@ it('allows small website upgrade invoices below the old premium floor', function
         ->assertOk()
         ->assertSee('NGN 37,500')
         ->assertSee('$1 = NGN 1,500.00');
+
+    $invoiceHtml = view('admin.quotes.pdf', [
+        'quote' => $quote,
+        'template' => config('luxury-quotes.templates.obsidian'),
+        'brand' => config('luxury-quotes.brand'),
+    ])->render();
+
+    expect($invoiceHtml)->not->toContain('Optional Add-ons');
+
+    $mouHtml = view('admin.quotes.mou-pdf', [
+        'quote' => $quote,
+        'template' => config('luxury-quotes.templates.obsidian'),
+        'brand' => config('luxury-quotes.brand'),
+        'mouNumber' => str_replace('-INV-', '-MOU-', $quote->quote_number),
+    ])->render();
+
+    expect($mouHtml)->not->toContain('Add-Ons Available By Separate Approval');
 });
 
 it('edits an existing invoice and regenerates the pdf from the saved details', function () {

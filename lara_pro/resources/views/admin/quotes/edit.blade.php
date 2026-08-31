@@ -192,6 +192,7 @@
                         <div class="field-full">
                             <label for="optional_addons">Optional Add-ons</label>
                             <textarea id="optional_addons" name="optional_addons" data-rich-editor>{{ $addonsValue }}</textarea>
+                            <p class="field-hint">Optional extensions for the invoice and MOU. Leave blank if none apply.</p>
                         </div>
                     </div>
                 </div>

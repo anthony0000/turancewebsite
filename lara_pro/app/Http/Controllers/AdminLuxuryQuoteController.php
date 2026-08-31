@@ -547,7 +547,7 @@ class AdminLuxuryQuoteController extends Controller
             ),
             'optional_addons' => $this->normalizeList(
                 $validated['optional_addons'] ?? '',
-                config('luxury-quotes.defaults.optional_addons', [])
+                []
             ),
             'intro_message' => filled($validated['intro_message'] ?? null)
                 ? $this->sanitizeRichText($validated['intro_message'])
