@@ -310,6 +310,7 @@
         .pm-task-stats { display: inline-flex; align-items: center; gap: 7px; color: #89919a; font-size: 10px; }
         .pm-task-card__keyboard { display: none; }
         .pm-drop-placeholder { display: grid; min-height: 86px; align-content: center; justify-items: center; gap: 3px; padding: 12px; border: 1px dashed #c4c9cf; border-radius: 8px; color: #7e8790; text-align: center; }
+        .pm-drop-placeholder[hidden] { display: none !important; }
         .pm-drop-placeholder span { color: #a4abb2; font-size: 20px; line-height: 1; }
         .pm-drop-placeholder strong { font-size: 11px; }
         .pm-drop-placeholder small { color: #9aa1a8; font-size: 9px; }
