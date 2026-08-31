@@ -31,7 +31,7 @@ final class ProjectManagementAccess
             return false;
         }
 
-        if (AdminAccess::isFullAdmin()) {
+        if (self::canManageWorkspace()) {
             return true;
         }
 
@@ -64,12 +64,12 @@ final class ProjectManagementAccess
 
     public static function canManage(Project $project): bool
     {
-        return self::canView($project) && AdminAccess::isFullAdmin();
+        return self::canView($project) && self::canManageWorkspace();
     }
 
     public static function canManageTaskStatus(Task $task): bool
     {
-        return self::canView($task->project) && (AdminAccess::isFullAdmin() || AdminAccess::can('project-management'));
+        return self::canView($task->project) && self::canManageWorkspace();
     }
 
     public static function ensureNotificationsWorkspace(): void
@@ -79,12 +79,17 @@ final class ProjectManagementAccess
 
     public static function isLimitedMember(): bool
     {
-        return ! AdminAccess::isFullAdmin();
+        return ! self::canManageWorkspace();
     }
 
     public static function ensureFullWorkspace(): void
     {
-        abort_unless(AdminAccess::isFullAdmin(), 403);
+        abort_unless(self::canManageWorkspace(), 403);
+    }
+
+    public static function canManageWorkspace(): bool
+    {
+        return AdminAccess::isFullAdmin() || AdminAccess::can('project-management');
     }
 
     public static function ensureProjectWorkspace(): void
@@ -126,7 +131,7 @@ final class ProjectManagementAccess
 
     public static function scopeVisible(Builder $query): Builder
     {
-        if (AdminAccess::isFullAdmin()) {
+        if (self::canManageWorkspace()) {
             return $query;
         }
 

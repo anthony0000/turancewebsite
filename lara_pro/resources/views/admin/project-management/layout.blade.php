@@ -532,7 +532,7 @@
         @endif
 
         <nav class="pm-subnav" aria-label="Project management navigation">
-        @if (\App\Support\AdminAccess::isFullAdmin())
+        @if (\App\Support\ProjectManagementAccess::canManageWorkspace())
         @php
             $moreNavActive = request()->routeIs('admin.project-management.search', 'admin.project-management.calendar', 'admin.project-management.team', 'admin.project-management.reports', 'admin.project-management.archived', 'admin.project-management.settings');
         @endphp
@@ -552,7 +552,7 @@
                     <a class="{{ request()->routeIs('admin.project-management.team') ? 'active' : '' }}" href="{{ route('admin.project-management.team') }}">Team</a>
                     <a class="{{ request()->routeIs('admin.project-management.reports') ? 'active' : '' }}" href="{{ route('admin.project-management.reports') }}">Reports</a>
                     <a class="{{ request()->routeIs('admin.project-management.archived') ? 'active' : '' }}" href="{{ route('admin.project-management.archived') }}">Archived</a>
-                    @if (\App\Support\AdminAccess::isFullAdmin() && isset($project) && $project)
+                    @if (isset($project) && $project)
                         <a class="{{ request()->routeIs('admin.project-management.settings') ? 'active' : '' }}" href="{{ route('admin.project-management.settings', $project) }}">Settings</a>
                     @endif
                 </div>

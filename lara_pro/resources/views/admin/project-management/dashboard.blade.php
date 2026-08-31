@@ -11,7 +11,7 @@
             <h2>Assign and track work</h2>
         </div>
         <div class="pm-actions">
-            @if ($canManageWorkspace)
+            @if ($canCreateProject)
                 <a class="button" href="{{ route('admin.project-management.projects.create') }}">New project</a>
             @endif
             <a class="ghost-button" href="{{ route('admin.project-management.reports') }}">View reports</a>
@@ -56,7 +56,7 @@
                         <strong>{{ $project->progress_percentage }}%</strong>
                     </div>
                 @empty
-                    <div class="pm-empty pm-empty--actionable"><strong>No active projects yet.</strong><span>Start a project to see delivery progress here.</span>@if ($canManageWorkspace)<a class="pm-icon-link" href="{{ route('admin.project-management.projects.create') }}">Create project <span aria-hidden="true">→</span></a>@endif</div>
+                    <div class="pm-empty pm-empty--actionable"><strong>No active projects yet.</strong><span>Start a project to see delivery progress here.</span>@if ($canCreateProject)<a class="pm-icon-link" href="{{ route('admin.project-management.projects.create') }}">Create project <span aria-hidden="true">→</span></a>@endif</div>
                 @endforelse
             </div>
         </section>

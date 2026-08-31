@@ -42,7 +42,7 @@ class ProjectManagementApiController extends Controller
     {
         ProjectManagementAccess::ensureProjectWorkspace();
         ProjectManagementAccess::ensureVisible($project);
-        if (AdminAccess::isFullAdmin()) {
+        if (ProjectManagementAccess::canManageWorkspace()) {
             ProjectManagementAccess::ensureDefaultColumns($project);
         }
         $project->load(['client', 'projectManager', 'members', 'boardColumns', 'labels', 'milestones', 'sprints']);

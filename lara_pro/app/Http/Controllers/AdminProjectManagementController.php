@@ -107,7 +107,8 @@ class AdminProjectManagementController extends Controller
             'filters' => $request->only(['project_id', 'assignee_id', 'priority', 'status', 'date_from', 'date_to']),
             'assignees' => $this->availableTaskAssignees(),
             'savedFilters' => SavedFilter::query()->where('user_id', ProjectManagementAccess::user()?->id)->latest()->get(),
-            'canManageWorkspace' => AdminAccess::isFullAdmin(),
+            'canManageWorkspace' => ProjectManagementAccess::canManageWorkspace(),
+            'canCreateProject' => AdminAccess::isFullAdmin(),
         ]);
     }
 
@@ -157,7 +158,8 @@ class AdminProjectManagementController extends Controller
             'members' => $this->availableUsers(),
             'statuses' => self::STATUSES,
             'priorities' => self::PRIORITIES,
-            'canManageWorkspace' => AdminAccess::isFullAdmin(),
+            'canManageWorkspace' => ProjectManagementAccess::canManageWorkspace(),
+            'canCreateProject' => AdminAccess::isFullAdmin(),
         ]);
     }
 
@@ -223,7 +225,7 @@ class AdminProjectManagementController extends Controller
     {
         ProjectManagementAccess::ensureProjectWorkspace();
         ProjectManagementAccess::ensureVisible($project);
-        if (AdminAccess::isFullAdmin()) {
+        if (ProjectManagementAccess::canManageWorkspace()) {
             ProjectManagementAccess::ensureDefaultColumns($project);
         }
         $project->load(['client', 'projectManager', 'members', 'boardColumns', 'labels', 'milestones', 'sprints']);
@@ -250,7 +252,7 @@ class AdminProjectManagementController extends Controller
             'members' => $this->availableUsers(),
             'recentActivity' => $activityQuery->latest()->limit(12)->get(),
             'comments' => $project->comments()->whereNull('task_id')->with('user')->latest()->limit(8)->get(),
-            'canManageWorkspace' => AdminAccess::isFullAdmin(),
+            'canManageWorkspace' => ProjectManagementAccess::canManageWorkspace(),
         ]);
     }
 
@@ -315,7 +317,7 @@ class AdminProjectManagementController extends Controller
 
     public function destroyProject(Project $project): RedirectResponse
     {
-        abort_unless(AdminAccess::isFullAdmin(), 403);
+        abort_unless(ProjectManagementAccess::canManage($project), 403);
         ProjectManagementAccess::ensureVisible($project);
         $project->delete();
 
@@ -347,7 +349,7 @@ class AdminProjectManagementController extends Controller
             'parentTasks' => $this->visibleProjectTasks($project)->whereNull('parent_task_id')->whereNull('archived_at')->with('project')->orderBy('task_number')->get(),
             'taskTypes' => self::TASK_TYPES,
             'priorities' => self::PRIORITIES,
-            'canManageWorkspace' => AdminAccess::isFullAdmin(),
+            'canManageWorkspace' => ProjectManagementAccess::canManageWorkspace(),
         ]);
     }
 
@@ -361,7 +363,7 @@ class AdminProjectManagementController extends Controller
             'project' => $project,
             'tasks' => $this->visibleProjectTasks($project)->whereNull('sprint_id')->whereNull('archived_at')->with(['assignee', 'labels'])->orderBy('position')->paginate(30),
             'sprints' => $project->sprints()->latest('starts_on')->get(),
-            'canManageWorkspace' => AdminAccess::isFullAdmin(),
+            'canManageWorkspace' => ProjectManagementAccess::canManageWorkspace(),
         ]);
     }
 
@@ -371,7 +373,7 @@ class AdminProjectManagementController extends Controller
         ProjectManagementAccess::ensureVisible($project);
         $sprints = $project->sprints()->withCount(['tasks' => fn (Builder $tasks) => ProjectManagementAccess::scopeVisibleTasks($tasks)])->with(['tasks' => fn (Builder $tasks) => ProjectManagementAccess::scopeVisibleTasks($tasks)->whereNotNull('completed_at')])->latest('starts_on')->get();
 
-        return view('admin.project-management.sprints', ['project' => $project, 'sprints' => $sprints, 'canManageWorkspace' => AdminAccess::isFullAdmin()]);
+        return view('admin.project-management.sprints', ['project' => $project, 'sprints' => $sprints, 'canManageWorkspace' => ProjectManagementAccess::canManageWorkspace()]);
     }
 
     public function assignTaskSprint(Request $request, Task $task): RedirectResponse|JsonResponse
@@ -472,7 +474,7 @@ class AdminProjectManagementController extends Controller
             'sprints' => $project->sprints()->get(),
             'taskTypes' => self::TASK_TYPES,
             'priorities' => self::PRIORITIES,
-            'canManageWorkspace' => AdminAccess::isFullAdmin(),
+            'canManageWorkspace' => ProjectManagementAccess::canManageWorkspace(),
             'canManageTaskStatus' => ProjectManagementAccess::canManageTaskStatus($task),
         ]);
     }
@@ -572,7 +574,7 @@ class AdminProjectManagementController extends Controller
     {
         ProjectManagementAccess::ensureTaskVisible($task);
         $userId = ProjectManagementAccess::user()?->id;
-        abort_unless(AdminAccess::isFullAdmin() || (int) $task->assignee_id === (int) $userId, 403);
+        abort_unless(ProjectManagementAccess::canManageWorkspace() || (int) $task->assignee_id === (int) $userId, 403);
 
         if (! $task->completed_at) {
             $task = $this->setTaskCompletion($task, true);

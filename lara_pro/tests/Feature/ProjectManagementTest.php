@@ -69,6 +69,33 @@ it('keeps project creation restricted to full admins', function () {
     expect(Project::query()->where('project_number', 'STAFF-PROJECT')->exists())->toBeFalse();
 });
 
+it('gives project managers full access to existing project workflows', function () {
+    $manager = User::factory()->create(['role' => AdminAccess::ROLE_SUBACCOUNT, 'permissions' => ['projects', 'project-management'], 'is_active' => true]);
+    $assignee = User::factory()->create(['role' => AdminAccess::ROLE_SUBACCOUNT, 'permissions' => ['projects'], 'is_active' => true]);
+    $project = Project::query()->create(['project_number' => 'MANAGE', 'name' => 'Managed project', 'status' => 'active', 'priority' => 'medium']);
+    $column = $project->boardColumns()->create(['name' => 'To Do', 'position' => 0]);
+    $session = projectManagementSession($manager);
+
+    $this->withSession($session)->get(route('admin.project-management.dashboard'))->assertOk()->assertSee('Assign and track work')->assertDontSee('New project');
+    $this->withSession($session)->get(route('admin.project-management.projects'))->assertOk()->assertSee('Managed project')->assertDontSee('New project');
+    $this->withSession($session)->get(route('admin.project-management.board', $project))->assertOk()->assertSee('New task');
+    $this->withSession($session)->get(route('admin.project-management.settings', $project))->assertOk()->assertSee('Save project settings');
+    $this->withSession($session)->post(route('admin.project-management.tasks.store', $project), [
+        'title' => 'Delegate implementation',
+        'type' => 'task',
+        'priority' => 'high',
+        'board_column_id' => $column->id,
+        'assignee_id' => $assignee->id,
+    ])->assertRedirect();
+    $task = Task::query()->where('title', 'Delegate implementation')->firstOrFail();
+
+    $this->withSession($session)->post(route('admin.project-management.members.store', $project), ['user_id' => $assignee->id, 'role' => 'member'])->assertRedirect();
+    $this->withSession($session)->getJson(route('admin.project-management.api.projects.show', $project))->assertOk();
+
+    expect($task->assignee_id)->toBe($assignee->id)
+        ->and($project->members()->whereKey($assignee->id)->exists())->toBeTrue();
+});
+
 it('creates tasks and persists status and ordering through the board endpoint', function () {
     $admin = User::factory()->create(['role' => AdminAccess::ROLE_ADMIN, 'permissions' => AdminAccess::permissionKeys(), 'is_active' => true]);
     $project = Project::query()->create(['project_number' => 'OPS', 'name' => 'Operations', 'status' => 'active', 'priority' => 'medium']);
@@ -305,7 +332,8 @@ it('lets assigned staff complete tasks and authorized staff reopen them', functi
     $this->withSession(projectManagementSession($staff))
         ->get(route('admin.project-management.tasks.show', $teammateTask))
         ->assertOk()
-        ->assertSee('Assigned to '.$teammate->name)
+        ->assertSee('Task details')
+        ->assertSee($teammate->name)
         ->assertSee('Mark not completed');
 
     $this->withSession(projectManagementSession($staff))

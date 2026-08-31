@@ -31,7 +31,7 @@ final class AdminAccess
         ],
         'project-management' => [
             'label' => 'Manage projects',
-            'description' => 'Update project tasks, completion, assignments, and delivery workflow. Project creation remains admin-only.',
+            'description' => 'Manage existing projects, tasks, assignments, team members, and delivery workflow. Project creation remains admin-only.',
         ],
         'project-files' => [
             'label' => 'File sharing',
