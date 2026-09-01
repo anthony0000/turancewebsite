@@ -98,9 +98,7 @@ class AdminAuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()
-            ->route('admin.login')
-            ->with('status', 'Admin session closed.');
+        return redirect()->route('admin.login');
     }
 
     private function credentialsConfigured(): bool

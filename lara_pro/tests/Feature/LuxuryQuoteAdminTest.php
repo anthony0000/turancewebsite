@@ -12,7 +12,6 @@ it('renders the redesigned admin login page', function () {
     config()->set('luxury-quotes.admin.password', 'luxury-pass-123');
 
     $this
-        ->withSession(['status' => 'Admin session closed.'])
         ->get(route('admin.login'))
         ->assertOk()
         ->assertSee('Sign in')
@@ -23,10 +22,8 @@ it('renders the redesigned admin login page', function () {
         ->assertDontSee('Sign in to manage projects, clients, and company operations.')
         ->assertSee('workspace-team-1440.webp')
         ->assertDontSee('login-scene')
-        ->assertSee('Admin session closed.')
-        ->assertSee('alert-success', false)
-        ->assertSee('body.is-auth .admin-alert-stack', false)
-        ->assertSee('admin-alert-close', false);
+        ->assertDontSee('Admin session closed.')
+        ->assertDontSee('<div class="admin-alert-stack"', false);
 });
 
 it('allows an admin to sign in to the invoice generator', function () {
@@ -43,6 +40,25 @@ it('allows an admin to sign in to the invoice generator', function () {
         ->assertRedirect(route('admin.quotes.index'))
         ->assertSessionHas('luxury_quote_admin_authenticated', true)
         ->assertSessionHas('admin_remember', true);
+});
+
+it('ends an admin session without showing a close notification', function () {
+    $sessionKey = config('luxury-quotes.admin.session_key', 'luxury_quote_admin_authenticated');
+
+    $this
+        ->withSession([
+            $sessionKey => true,
+            'luxury_quote_admin_email' => 'admin@example.com',
+        ])
+        ->post(route('admin.logout'))
+        ->assertRedirect(route('admin.login'))
+        ->assertSessionMissing('status');
+
+    $this
+        ->get(route('admin.login'))
+        ->assertOk()
+        ->assertDontSee('Admin session closed.')
+        ->assertDontSee('<div class="admin-alert-stack"', false);
 });
 
 it('limits admin sign-in attempts to three per minute', function () {
