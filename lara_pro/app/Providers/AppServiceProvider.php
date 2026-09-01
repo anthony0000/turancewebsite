@@ -50,11 +50,31 @@ class AppServiceProvider extends ServiceProvider
 
         RateLimiter::for('admin-login', function (Request $request): array {
             $email = Str::lower(trim((string) $request->input('email')));
+            $maxAttempts = max(1, (int) config('luxury-quotes.admin.login_attempts', 3));
+            $decayMinutes = max(1, (int) config('luxury-quotes.admin.login_decay_minutes', 1));
+            $lockoutResponse = static function (Request $request, array $headers) {
+                return redirect()
+                    ->route('admin.login')
+                    ->withErrors([
+                        'email' => 'Too many sign-in attempts. Please wait a minute before trying again.',
+                    ])
+                    ->withInput($request->only('email'))
+                    ->withHeaders($headers);
+            };
 
-            return [
-                Limit::perMinute(5)->by('admin-login-ip:'.hash('sha256', (string) $request->ip())),
-                Limit::perHour(20)->by('admin-login-email:'.hash('sha256', $email)),
+            $limits = [
+                Limit::perMinutes($decayMinutes, $maxAttempts)
+                    ->by('admin-login-ip:'.hash('sha256', (string) $request->ip()))
+                    ->response($lockoutResponse),
             ];
+
+            if ($email !== '') {
+                $limits[] = Limit::perMinutes($decayMinutes, $maxAttempts)
+                    ->by('admin-login-email:'.hash('sha256', $email))
+                    ->response($lockoutResponse);
+            }
+
+            return $limits;
         });
     }
 }

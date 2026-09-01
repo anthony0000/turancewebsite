@@ -19,6 +19,8 @@ it('renders the redesigned admin login page', function () {
         ->assertSee('auth-card', false)
         ->assertSee('Remember me')
         ->assertSee('Forgot password?')
+        ->assertSee('3 attempts per minute')
+        ->assertDontSee('Sign in to manage projects, clients, and company operations.')
         ->assertSee('workspace-team-1440.webp')
         ->assertDontSee('login-scene')
         ->assertSee('Admin session closed.')
@@ -41,6 +43,38 @@ it('allows an admin to sign in to the invoice generator', function () {
         ->assertRedirect(route('admin.quotes.index'))
         ->assertSessionHas('luxury_quote_admin_authenticated', true)
         ->assertSessionHas('admin_remember', true);
+});
+
+it('limits admin sign-in attempts to three per minute', function () {
+    $email = 'lockout-'.uniqid().'@example.com';
+    $ip = '198.51.100.'.random_int(1, 254);
+
+    config()->set('luxury-quotes.admin.email', $email);
+    config()->set('luxury-quotes.admin.password', 'luxury-pass-123');
+
+    foreach (range(1, 3) as $attempt) {
+        $this
+            ->withServerVariables(['REMOTE_ADDR' => $ip])
+            ->from(route('admin.login'))
+            ->post(route('admin.login.store'), [
+                'email' => $email,
+                'password' => 'wrong-password',
+            ])
+            ->assertRedirect(route('admin.login'))
+            ->assertSessionHasErrors('email');
+    }
+
+    $this
+        ->withServerVariables(['REMOTE_ADDR' => $ip])
+        ->from(route('admin.login'))
+        ->post(route('admin.login.store'), [
+            'email' => $email,
+            'password' => 'wrong-password',
+        ])
+        ->assertRedirect(route('admin.login'))
+        ->assertSessionHasErrors([
+            'email' => 'Too many sign-in attempts. Please wait a minute before trying again.',
+        ]);
 });
 
 it('resolves the invoice archive route before the quote wildcard route', function () {

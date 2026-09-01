@@ -26,7 +26,6 @@
                     <div class="auth-card-head">
                         <span class="eyebrow">Secure workspace access</span>
                         <h1 id="login-title">Welcome back</h1>
-                        <p>Sign in to manage projects, clients, and company operations.</p>
                     </div>
 
                     @if (! $configured)
@@ -128,7 +127,7 @@
                             <rect x="5" y="10" width="14" height="10" rx="2"></rect>
                             <path d="M8 10V7a4 4 0 0 1 8 0v3"></path>
                         </svg>
-                        <span>Protected workspace access. Your session is secured.</span>
+                        <span>Protected access. Sign-in is limited to 3 attempts per minute.</span>
                     </p>
                 </div>
             </section>
@@ -158,8 +157,8 @@
 
                 <div class="auth-visual-content">
                     <div class="auth-visual-copy">
-                        <span class="eyebrow">One clear view of the work</span>
-                        <h2>Everything your team needs to operate with clarity.</h2>
+                        <span class="eyebrow">Your team’s workspace</span>
+                        <h2>Keep the work moving.</h2>
                         <span class="auth-visual-rule" aria-hidden="true"></span>
                     </div>
                 </div>

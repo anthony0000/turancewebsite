@@ -578,23 +578,33 @@ body.is-auth .auth-field input.auth-input.auth-input--password {
     top: clamp(28px, 5vw, 64px);
     left: clamp(30px, 6vw, 82px);
     display: flex;
-    align-items: center;
-    gap: 12px;
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
 }
 
 .auth-visual-brand img {
-    width: clamp(142px, 15vw, 190px);
+    width: clamp(178px, 17vw, 220px);
     height: auto;
 }
 
 .auth-visual-brand span {
-    padding-left: 12px;
-    border-left: 1px solid rgba(255, 255, 255, .35);
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding-left: 0;
     color: rgba(255, 255, 255, .76);
-    font-size: 10px;
+    font-size: 9px;
     font-weight: 700;
-    letter-spacing: .14em;
+    letter-spacing: .18em;
     text-transform: uppercase;
+}
+
+.auth-visual-brand span::before {
+    width: 28px;
+    height: 1px;
+    background: #d4af37;
+    content: "";
 }
 
 .auth-visual-copy {
@@ -715,7 +725,7 @@ body.is-auth .auth-visual-copy { animation-delay: 220ms; }
     }
 
     .auth-visual-brand img {
-        width: 142px;
+        width: 156px;
     }
 
     .auth-visual-brand span {
