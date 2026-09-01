@@ -5,6 +5,7 @@ return [
         'email' => env('LUXURY_INVOICE_ADMIN_EMAIL', env('LUXURY_QUOTE_ADMIN_EMAIL')),
         'password' => env('LUXURY_INVOICE_ADMIN_PASSWORD', env('LUXURY_QUOTE_ADMIN_PASSWORD')),
         'session_key' => 'luxury_quote_admin_authenticated',
+        'remember_lifetime' => 43200,
     ],
 
     'brand' => [

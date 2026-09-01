@@ -53,6 +53,13 @@ class EnsureLuxuryQuoteAdminAuthenticated
         }
 
         if ($request->session()->has('admin_user_id')) {
+            if ((bool) $request->session()->get('admin_remember', false)) {
+                config()->set(
+                    'session.lifetime',
+                    (int) config('luxury-quotes.admin.remember_lifetime', 43200)
+                );
+            }
+
             $user = User::query()->find($request->session()->get('admin_user_id'));
 
             if (! $user || ! $user->is_active) {

@@ -17,6 +17,10 @@ it('renders the redesigned admin login page', function () {
         ->assertOk()
         ->assertSee('Sign in')
         ->assertSee('auth-card', false)
+        ->assertSee('Remember me')
+        ->assertSee('Forgot password?')
+        ->assertSee('workspace-team-1440.webp')
+        ->assertDontSee('login-scene')
         ->assertSee('Admin session closed.')
         ->assertSee('alert-success', false)
         ->assertSee('body.is-auth .admin-alert-stack', false)
@@ -30,11 +34,13 @@ it('allows an admin to sign in to the invoice generator', function () {
     $response = $this->post(route('admin.login.store'), [
         'email' => 'admin@example.com',
         'password' => 'luxury-pass-123',
+        'remember' => '1',
     ]);
 
     $response
         ->assertRedirect(route('admin.quotes.index'))
-        ->assertSessionHas('luxury_quote_admin_authenticated', true);
+        ->assertSessionHas('luxury_quote_admin_authenticated', true)
+        ->assertSessionHas('admin_remember', true);
 });
 
 it('resolves the invoice archive route before the quote wildcard route', function () {

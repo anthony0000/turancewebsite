@@ -31,6 +31,7 @@ class AdminAuthController extends Controller
         ]);
 
         $email = Str::lower(trim($validated['email']));
+        $remember = $request->boolean('remember');
         $user = User::query()->where('email', $email)->first();
 
         if ($user) {
@@ -44,7 +45,7 @@ class AdminAuthController extends Controller
                     ->onlyInput('email');
             }
 
-            $request->session()->regenerate();
+            $this->establishSession($request, $remember);
             AdminAccess::signIn($request, $user);
 
             return redirect()
@@ -83,7 +84,7 @@ class AdminAuthController extends Controller
             'is_active' => true,
         ]);
 
-        $request->session()->regenerate();
+        $this->establishSession($request, $remember);
         AdminAccess::signIn($request, $user);
 
         return redirect()
@@ -106,6 +107,19 @@ class AdminAuthController extends Controller
     {
         return filled(config('luxury-quotes.admin.email'))
             && filled(config('luxury-quotes.admin.password'));
+    }
+
+    private function establishSession(Request $request, bool $remember): void
+    {
+        if ($remember) {
+            config()->set(
+                'session.lifetime',
+                (int) config('luxury-quotes.admin.remember_lifetime', 43200)
+            );
+        }
+
+        $request->session()->regenerate();
+        $request->session()->put('admin_remember', $remember);
     }
 
     private function sessionKey(): string
