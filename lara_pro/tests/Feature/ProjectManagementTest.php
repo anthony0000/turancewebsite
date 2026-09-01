@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\ActivityLog;
 use App\Models\BoardColumn;
 use App\Models\Project;
 use App\Models\Task;
@@ -240,6 +241,27 @@ it('renders the operational project-management surfaces with live records', func
     $this->withSession($session)->get(route('admin.project-management.tasks.show', $task))->assertOk()->assertSee('Task details');
     $this->withSession($session)->get(route('admin.project-management.reports'))->assertOk()->assertSee('Operational reporting');
     $this->withSession($session)->get(route('admin.project-management.calendar'))->assertOk()->assertSee('Planning calendar');
+});
+
+it('keeps the project summary activity feed compact', function () {
+    $admin = User::factory()->create(['role' => AdminAccess::ROLE_ADMIN, 'permissions' => AdminAccess::permissionKeys(), 'is_active' => true]);
+    $project = Project::query()->create(['project_number' => 'ACTIVITY', 'name' => 'Activity Project', 'status' => 'active', 'priority' => 'medium']);
+
+    foreach (range(1, 6) as $index) {
+        ActivityLog::query()->create([
+            'project_id' => $project->id,
+            'actor_id' => $admin->id,
+            'action' => 'activity-'.$index,
+            'created_at' => now()->subMinutes(6 - $index),
+            'updated_at' => now()->subMinutes(6 - $index),
+        ]);
+    }
+
+    $this->withSession(projectManagementSession($admin))
+        ->get(route('admin.project-management.projects.show', $project))
+        ->assertOk()
+        ->assertSee('Activity 6')
+        ->assertDontSee('Activity 1');
 });
 
 it('prevents administrators from being assigned tasks through web and API requests', function () {

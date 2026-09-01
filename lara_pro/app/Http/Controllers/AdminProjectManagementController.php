@@ -251,7 +251,7 @@ class AdminProjectManagementController extends Controller
             'project' => $project,
             'tasks' => $tasks,
             'members' => $this->availableUsers()->reject(fn (User $member) => in_array($member->id, $existingMemberIds, true))->values(),
-            'recentActivity' => $activityQuery->latest()->limit(12)->get(),
+            'recentActivity' => $activityQuery->latest()->limit(5)->get(),
             'comments' => $project->comments()->whereNull('task_id')->with('user')->latest()->limit(8)->get(),
             'canManageWorkspace' => ProjectManagementAccess::canManageWorkspace(),
         ]);

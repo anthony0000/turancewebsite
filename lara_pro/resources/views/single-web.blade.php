@@ -81,10 +81,12 @@
                         <div class="wt-service-single-details-wrap mb-65">
                             <div class="wt-service-single-details-content mb-45 wt_fade_anim">
                                 <h2 class="wt-service-single-details-title wt-char-animation">How we build websites that
-                                    win trust and generate leads</h2>
+                                    win trust and generate leads
+                                </h2>
                                 <p class="wt-service-single-details-paragraph">Our process keeps the creative work sharp
                                     and the business goals clear. Every decision is built around helping your website
-                                    communicate better, convert better, and stay useful as your company grows.</p>
+                                    communicate better, convert better, and stay useful as your company grows.
+                                </p>
                             </div>
                             <div class="wt-faq-accordion accordion-flush wt_fade_anim" data-delay=".5"
                                 id="accordionWebsiteProcess">
@@ -103,7 +105,8 @@
                                             <p class="wt-faq-accordion-paragraph">We start by understanding your offer,
                                                 target audience, competitive landscape, and business goals. This helps us
                                                 define the right structure, messaging direction, and user journey before
-                                                design begins.</p>
+                                                design begins.
+                                            </p>
                                         </div>
                                     </div>
                                 </div>

@@ -45,8 +45,10 @@
         .pm-project-view .pm-stat { min-height: 76px; display: grid; align-content: center; gap: 5px; padding: 13px 15px; }
         .pm-project-view .pm-stat strong { color: var(--text); font-size: 23px; line-height: 1; }
         .pm-project-view .pm-tabs { gap: 6px; margin: 0; }
-        .pm-project-view .pm-tabs a { display: inline-flex; min-height: 38px; align-items: center; padding-inline: 13px; }
-        .pm-project-view .pm-tabs a.active { border-color: #1c1e22; background: #1c1e22; color: #fff; }
+        .pm-project-view .pm-tabs a { display: inline-flex; min-height: 38px; align-items: center; padding-inline: 13px; border-color: #e1e5e9; background: #fff; color: var(--muted-strong); transition: border-color .16s ease, background .16s ease, color .16s ease; }
+        .pm-project-view .pm-tabs a:hover { border-color: rgba(195,141,10,.38); background: #fffbed; color: var(--primary-strong); }
+        .pm-project-view .pm-tabs a.active,
+        .pm-project-view .pm-tabs a.active:hover { border-color: #1c1e22; background: #1c1e22; color: #fff; }
         .pm-project-view .pm-detail-grid { align-items: start; }
         .pm-project-view .pm-stack { align-content: start; }
         .pm-project-view .pm-stack > .pm-panel { min-height: 0; }
