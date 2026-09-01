@@ -5,9 +5,11 @@ use App\Models\BoardColumn;
 use App\Models\Project;
 use App\Models\Task;
 use App\Models\User;
+use App\Mail\ProjectActivityMail;
 use App\Support\AdminAccess;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 
 uses(RefreshDatabase::class);
 
@@ -262,6 +264,79 @@ it('keeps the project summary activity feed compact', function () {
         ->assertOk()
         ->assertSee('Activity 6')
         ->assertDontSee('Activity 1');
+});
+
+it('sends a branded email when a task is assigned', function () {
+    Mail::fake();
+
+    $admin = User::factory()->create(['role' => AdminAccess::ROLE_ADMIN, 'permissions' => AdminAccess::permissionKeys(), 'is_active' => true]);
+    $staff = User::factory()->create(['role' => AdminAccess::ROLE_SUBACCOUNT, 'permissions' => ['projects'], 'is_active' => true]);
+    $project = Project::query()->create(['project_number' => 'MAIL', 'name' => 'Mail Project', 'status' => 'active', 'priority' => 'medium']);
+    $column = $project->boardColumns()->create(['name' => 'To Do', 'position' => 0]);
+
+    $this->withSession(projectManagementSession($admin))
+        ->post(route('admin.project-management.tasks.store', $project), [
+            'title' => 'Review the handoff',
+            'type' => 'task',
+            'priority' => 'medium',
+            'board_column_id' => $column->id,
+            'assignee_id' => $staff->id,
+        ])
+        ->assertRedirect();
+
+    $mail = null;
+    Mail::assertSent(ProjectActivityMail::class, function (ProjectActivityMail $sent) use (&$mail, $staff, $project): bool {
+        $mail = $sent;
+
+        return $sent->hasTo($staff->email)
+            && $sent->type === 'task.assigned'
+            && $sent->project->is($project);
+    });
+
+    expect($mail)->not->toBeNull()
+        ->and($mail->render())->toContain('Task Assigned')
+        ->toContain('Review the handoff')
+        ->toContain('Open workspace');
+});
+
+it('sends assignment emails when an API task is assigned', function () {
+    Mail::fake();
+
+    $admin = User::factory()->create(['role' => AdminAccess::ROLE_ADMIN, 'permissions' => AdminAccess::permissionKeys(), 'is_active' => true]);
+    $staff = User::factory()->create(['role' => AdminAccess::ROLE_SUBACCOUNT, 'permissions' => ['projects'], 'is_active' => true]);
+    $project = Project::query()->create(['project_number' => 'API-MAIL', 'name' => 'API Mail Project', 'status' => 'active', 'priority' => 'medium']);
+    $column = $project->boardColumns()->create(['name' => 'To Do', 'position' => 0]);
+    $task = $project->tasks()->create(['task_number' => 1, 'title' => 'Assign through API', 'type' => 'task', 'priority' => 'medium', 'status' => 'to_do', 'board_column_id' => $column->id, 'reporter_id' => $admin->id, 'position' => 0]);
+
+    $this->withSession(projectManagementSession($admin))
+        ->patchJson(route('admin.project-management.api.tasks.update', $task), ['assignee_id' => $staff->id])
+        ->assertOk()
+        ->assertJsonPath('message', 'Task updated.');
+
+    Mail::assertSent(ProjectActivityMail::class, function (ProjectActivityMail $mail) use ($staff, $project): bool {
+        return $mail->hasTo($staff->email)
+            && $mail->type === 'task.assigned'
+            && $mail->project->is($project);
+    });
+});
+
+it('sends a project invitation email only to the new member', function () {
+    Mail::fake();
+
+    $admin = User::factory()->create(['role' => AdminAccess::ROLE_ADMIN, 'permissions' => AdminAccess::permissionKeys(), 'is_active' => true]);
+    $staff = User::factory()->create(['role' => AdminAccess::ROLE_SUBACCOUNT, 'permissions' => ['projects'], 'is_active' => true]);
+    $project = Project::query()->create(['project_number' => 'INVITE', 'name' => 'Invitation Project', 'status' => 'active', 'priority' => 'medium']);
+
+    $this->withSession(projectManagementSession($admin))
+        ->post(route('admin.project-management.members.store', $project), ['user_id' => $staff->id, 'role' => 'member'])
+        ->assertRedirect();
+
+    Mail::assertSent(ProjectActivityMail::class, function (ProjectActivityMail $mail) use ($staff, $project): bool {
+        return $mail->hasTo($staff->email)
+            && $mail->type === 'project.invitation'
+            && $mail->project->is($project);
+    });
+    Mail::assertSentCount(1);
 });
 
 it('prevents administrators from being assigned tasks through web and API requests', function () {

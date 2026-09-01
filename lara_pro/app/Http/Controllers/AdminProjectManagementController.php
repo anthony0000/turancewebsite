@@ -218,6 +218,14 @@ class AdminProjectManagementController extends Controller
             return $project;
         });
 
+        ProjectManagementAccess::notify(
+            $project,
+            'project.created',
+            'You were added to '.$project->name,
+            route('admin.project-management.projects.show', $project),
+            ProjectManagementAccess::user()?->id,
+        );
+
         return redirect()->route('admin.project-management.projects.show', $project)->with('status', 'Project created and ready for planning.');
     }
 
@@ -294,6 +302,7 @@ class AdminProjectManagementController extends Controller
         }
 
         ProjectManagementAccess::log($project, 'project.updated', Project::class, $project->id, $old, $project->only(array_keys($old)));
+        ProjectManagementAccess::notify($project, 'project.updated', 'Project updated: '.$project->name, route('admin.project-management.projects.show', $project), ProjectManagementAccess::user()?->id);
 
         return redirect()->route('admin.project-management.projects.show', $project)->with('status', 'Project settings saved.');
     }
@@ -303,6 +312,7 @@ class AdminProjectManagementController extends Controller
         abort_unless(ProjectManagementAccess::canManage($project), 403);
         $project->update(['status' => 'archived', 'archived_at' => now()]);
         ProjectManagementAccess::log($project, 'project.archived', Project::class, $project->id);
+        ProjectManagementAccess::notify($project, 'project.archived', 'Project archived: '.$project->name, route('admin.project-management.archived'), ProjectManagementAccess::user()?->id);
 
         return redirect()->route('admin.project-management.archived')->with('status', 'Project archived.');
     }
@@ -312,6 +322,7 @@ class AdminProjectManagementController extends Controller
         abort_unless(ProjectManagementAccess::canManage($project), 403);
         $project->update(['status' => 'active', 'archived_at' => null]);
         ProjectManagementAccess::log($project, 'project.restored', Project::class, $project->id);
+        ProjectManagementAccess::notify($project, 'project.restored', 'Project restored: '.$project->name, route('admin.project-management.projects.show', $project), ProjectManagementAccess::user()?->id);
 
         return redirect()->route('admin.project-management.projects.show', $project)->with('status', 'Project restored.');
     }
@@ -500,12 +511,13 @@ class AdminProjectManagementController extends Controller
             ]);
             $task->labels()->sync($this->projectLabelIds($project, $validated['label_ids'] ?? []));
             ProjectManagementAccess::log($lockedProject, 'task.created', Task::class, $task->id, null, ['title' => $task->title], taskId: $task->id);
-            if ($task->assignee_id) {
-                ProjectManagementAccess::notify($lockedProject, 'task.assigned', 'You were assigned '.$task->title, route('admin.project-management.tasks.show', $task), ProjectManagementAccess::user()?->id, [$task->assignee_id]);
-            }
 
             return $task;
         });
+
+        if ($task->assignee_id) {
+            ProjectManagementAccess::notify($project, 'task.assigned', 'You were assigned '.$task->title, route('admin.project-management.tasks.show', $task), ProjectManagementAccess::user()?->id, [$task->assignee_id]);
+        }
 
         if ($request->expectsJson()) {
             return response()->json(['data' => $task->load(['assignee', 'column', 'labels']), 'message' => 'Task created.'], 201);
@@ -719,7 +731,7 @@ class AdminProjectManagementController extends Controller
         abort_unless(ProjectManagementAccess::canManage($project), 403);
         $validated = $request->validate(['user_id' => ['required', 'integer', 'exists:users,id'], 'role' => ['required', Rule::in(['manager', 'member', 'viewer'])]]);
         $project->members()->syncWithoutDetaching([$validated['user_id'] => ['role' => $validated['role']]]);
-        ProjectManagementAccess::notify($project, 'project.invitation', 'You were added to '.$project->name, route('admin.project-management.projects.show', $project), ProjectManagementAccess::user()?->id);
+        ProjectManagementAccess::notify($project, 'project.invitation', 'You were added to '.$project->name, route('admin.project-management.projects.show', $project), ProjectManagementAccess::user()?->id, [(int) $validated['user_id']]);
 
         return back()->with('status', 'Team member added.');
     }

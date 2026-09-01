@@ -2,12 +2,16 @@
 
 namespace App\Support;
 
+use App\Mail\ProjectActivityMail;
 use App\Models\Project;
 use App\Models\Task;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Mail\Mailables\Address;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
+use Throwable;
 
 final class ProjectManagementAccess
 {
@@ -227,6 +231,28 @@ final class ProjectManagementAccess
                 'updated_at' => now(),
             ]);
         }
+
+        if (! config('project-management.notifications.email_enabled', true)) {
+            return;
+        }
+
+        User::query()
+            ->whereKey($recipientIds)
+            ->where('is_active', true)
+            ->whereNotNull('email')
+            ->get()
+            ->each(function (User $recipient) use ($project, $type, $message, $url): void {
+                if (! filled(trim((string) $recipient->email))) {
+                    return;
+                }
+
+                try {
+                    Mail::to(new Address($recipient->email, $recipient->name))
+                        ->send(new ProjectActivityMail($recipient, $project, $type, $message, $url));
+                } catch (Throwable $exception) {
+                    report($exception);
+                }
+            });
     }
 
     public static function ensureDefaultColumns(Project $project): void

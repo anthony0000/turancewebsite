@@ -67,6 +67,14 @@ class ProjectManagementApiController extends Controller
             return $project;
         });
 
+        ProjectManagementAccess::notify(
+            $project,
+            'project.created',
+            'You were added to '.$project->name,
+            route('admin.project-management.projects.show', $project),
+            ProjectManagementAccess::user()?->id,
+        );
+
         return response()->json(['data' => $this->projectData($project->fresh()->load(['client', 'projectManager'])), 'message' => 'Project created.'], 201);
     }
 
@@ -83,6 +91,7 @@ class ProjectManagementApiController extends Controller
         abort_unless(ProjectManagementAccess::canManage($project), 403);
         $validated = $request->validate(['user_id' => ['required', 'integer', 'exists:users,id'], 'role' => ['required', Rule::in(['manager', 'member', 'viewer'])]]);
         $project->members()->syncWithoutDetaching([$validated['user_id'] => ['role' => $validated['role']]]);
+        ProjectManagementAccess::notify($project, 'project.invitation', 'You were added to '.$project->name, route('admin.project-management.projects.show', $project), ProjectManagementAccess::user()?->id, [(int) $validated['user_id']]);
 
         return response()->json(['data' => ['user_id' => (int) $validated['user_id'], 'role' => $validated['role']], 'message' => 'Member added.'], 201);
     }
@@ -166,18 +175,29 @@ class ProjectManagementApiController extends Controller
             return $task;
         });
 
+        if ($task->assignee_id) {
+            ProjectManagementAccess::notify($project, 'task.assigned', 'You were assigned '.$task->title, route('admin.project-management.tasks.show', $task), ProjectManagementAccess::user()?->id, [$task->assignee_id]);
+        }
+
         return response()->json(['data' => $task->load(['project', 'column', 'assignee']), 'message' => 'Task created.'], 201);
     }
 
     public function updateTask(Request $request, Task $task): JsonResponse
     {
-        abort_unless(ProjectManagementAccess::canManage($task->project), 403);
+        $project = $task->project;
+        abort_unless(ProjectManagementAccess::canManage($project), 403);
         $validated = $request->validate(['title' => ['sometimes', 'required', 'string', 'max:255'], 'priority' => ['sometimes', Rule::in(['low', 'medium', 'high', 'urgent'])], 'assignee_id' => ['nullable', 'integer', Rule::exists('users', 'id')->where('role', AdminAccess::ROLE_SUBACCOUNT)->where('is_active', true)], 'due_on' => ['nullable', 'date'], 'description' => ['nullable', 'string', 'max:20000'], 'parent_task_id' => ['nullable', 'integer', Rule::exists('tasks', 'id')->where('project_id', $task->project_id)->where('id', '!=', $task->id)] ]);
+        $old = $task->only(['title', 'priority', 'assignee_id', 'due_on', 'parent_task_id']);
         $task->fill($validated);
         if (array_key_exists('description', $validated)) {
             $task->description = ProjectManagementAccess::sanitize($validated['description']);
         }
         $task->save();
+        ProjectManagementAccess::log($project, 'task.updated', Task::class, $task->id, $old, $task->only(array_keys($old)), taskId: $task->id);
+
+        if ($task->assignee_id && (int) $old['assignee_id'] !== (int) $task->assignee_id) {
+            ProjectManagementAccess::notify($project, 'task.assigned', 'You were assigned '.$task->title, route('admin.project-management.tasks.show', $task), ProjectManagementAccess::user()?->id, [$task->assignee_id]);
+        }
 
         return response()->json(['data' => $task->fresh()->load(['project', 'column', 'assignee']), 'message' => 'Task updated.']);
     }
