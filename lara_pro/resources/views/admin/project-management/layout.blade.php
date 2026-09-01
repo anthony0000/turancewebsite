@@ -270,8 +270,8 @@
         .pm-team-filter.is-active { border-color: rgba(184,134,11,.62); background: #fffbed; color: var(--primary-strong); box-shadow: inset 0 0 0 1px rgba(184,134,11,.08); }
         .pm-team-filter b { min-width: 16px; color: var(--muted); font-size: 10px; text-align: center; }
         .pm-team-filter .pm-avatar { width: 24px; height: 24px; }
-        .pm-board--trello { display: flex; gap: 13px; overflow-x: auto; align-items: stretch; padding: 15px; border: 1px solid #e1e4e7; border-radius: 12px; background: #f1f2f4; scrollbar-color: #c6c9ce transparent; }
-        .pm-board--trello .pm-column { display: flex; width: 306px; min-width: 306px; flex-direction: column; padding: 0; border: 0; border-radius: 9px; background: #e7e9ec; box-shadow: 0 1px 1px rgba(31,35,40,.05); }
+        .pm-board--trello { display: flex; height: min(620px, calc(100vh - 300px)); min-height: 340px; gap: 13px; overflow-x: auto; overflow-y: hidden; align-items: stretch; padding: 15px; border: 1px solid #e1e4e7; border-radius: 12px; background: #f1f2f4; scrollbar-color: #c6c9ce transparent; }
+        .pm-board--trello .pm-column { display: flex; width: 306px; min-width: 306px; min-height: 0; max-height: 100%; flex-direction: column; padding: 0; border: 0; border-radius: 9px; background: #e7e9ec; box-shadow: 0 1px 1px rgba(31,35,40,.05); }
         .pm-board--trello .pm-column-head { min-height: 48px; padding: 11px 12px 9px; }
         .pm-column-title { display: inline-flex; min-width: 0; align-items: center; gap: 8px; }
         .pm-column-title strong { overflow: hidden; color: #3d4650; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
@@ -279,9 +279,9 @@
         .pm-column-count { display: inline-grid; min-width: 22px; height: 20px; align-items: center; justify-content: center; padding: 0 5px; border-radius: 5px; background: rgba(255,255,255,.72); color: #737b84 !important; font-size: 10px !important; font-weight: 800; }
         .pm-column-add { display: inline-grid; width: 26px; height: 26px; place-items: center; border-radius: 6px; color: #68717b; font-size: 20px; line-height: 1; transition: background .16s ease, color .16s ease; }
         .pm-column-add:hover { background: rgba(255,255,255,.75); color: var(--primary-strong); }
-        .pm-board--trello .pm-column-list { position: relative; display: flex; min-height: 155px; flex: 1 1 auto; flex-direction: column; gap: 9px; padding: 0 8px 9px; border-radius: 0 0 9px 9px; }
+        .pm-board--trello .pm-column-list { position: relative; display: flex; min-height: 0; flex: 1 1 auto; flex-direction: column; gap: 8px; overflow-y: auto; padding: 0 8px 9px; border-radius: 0 0 9px 9px; scrollbar-color: #c6c9ce transparent; scrollbar-width: thin; }
         .pm-board--trello .pm-column-list:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; }
-        .pm-task-card { position: relative; display: grid; gap: 10px; padding: 12px; border: 1px solid #dfe2e5; border-radius: 8px; background: #fff; box-shadow: 0 1px 1px rgba(31,35,40,.09); cursor: grab; transition: box-shadow .16s ease, border-color .16s ease, opacity .16s ease, transform .16s ease; }
+        .pm-task-card { position: relative; display: grid; gap: 8px; padding: 10px; border: 1px solid #dfe2e5; border-radius: 8px; background: #fff; box-shadow: 0 1px 1px rgba(31,35,40,.09); cursor: grab; transition: box-shadow .16s ease, border-color .16s ease, opacity .16s ease, transform .16s ease; }
         .pm-task-card:hover { border-color: #c9cdd2; box-shadow: 0 4px 10px rgba(31,35,40,.12); transform: translateY(-1px); }
         .pm-task-card:focus-within { border-color: rgba(184,134,11,.6); box-shadow: 0 0 0 2px rgba(184,134,11,.14); }
         .pm-task-card.is-dragging { opacity: .42; transform: rotate(1deg); }
@@ -303,9 +303,9 @@
         .pm-chip--priority-low { color: #43725a; background: #eef8f1; border-color: #d7ecdd; }
         .pm-chip--priority-medium { color: #75601c; background: #fff8dc; border-color: #f1e4a7; }
         .pm-chip--priority-high { color: #a25b24; background: #fff1e6; border-color: #f2d6bd; }
-        .pm-task-card__footer { min-height: 27px; padding-top: 9px; border-top: 1px solid #eef0f1; }
+        .pm-task-card__footer { min-height: 25px; padding-top: 7px; border-top: 1px solid #eef0f1; }
         .pm-task-assignee { display: inline-flex; min-width: 0; align-items: center; gap: 6px; color: #68717b; cursor: pointer; }
-        .pm-task-assignee .pm-avatar { width: 25px; height: 25px; flex: 0 0 25px; }
+        .pm-task-assignee .pm-avatar { width: 23px; height: 23px; flex: 0 0 23px; }
         .pm-task-assignee select { max-width: 112px; overflow: hidden; padding: 0 14px 0 0; border: 0; background: transparent; color: #68717b; cursor: pointer; font: inherit; font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
         .pm-task-assignee select:focus { outline: 1px solid rgba(184,134,11,.55); border-radius: 4px; }
         .pm-avatar--empty { background: #f1f2f4; color: #9aa1a8; }
@@ -480,6 +480,50 @@
         .pm-member-option:hover { border-color: rgba(184,134,11,.45); background: #fffdf5; }
         .pm-member-option:has(input:checked) { border-color: rgba(184,134,11,.62); background: #fffbed; color: var(--primary-strong); box-shadow: inset 0 0 0 1px rgba(184,134,11,.12); }
         .pm-member-option span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .pm-settings-view { display: grid; gap: 18px; align-content: start; }
+        .pm-settings-view .pm-hero { align-items: center; }
+        .pm-settings-view .pm-settings-panel { min-height: 0; }
+        .pm-settings-form { display: grid; gap: 16px; }
+        .pm-settings-form .pm-form-grid { gap: 12px 14px; }
+        .pm-settings-form .field,
+        .pm-settings-form .field-full { gap: 6px; }
+        .pm-settings-form .field > label,
+        .pm-settings-form .field-full > label,
+        .pm-settings-field-label { color: #68717c; font-size: 10px; font-weight: 750; letter-spacing: .08em; line-height: 1.2; text-transform: uppercase; }
+        .pm-settings-form .field input:not([type="checkbox"]):not([type="radio"]),
+        .pm-settings-form .field select,
+        .pm-settings-form .field textarea,
+        .pm-settings-form .field-full input:not([type="checkbox"]):not([type="radio"]),
+        .pm-settings-form .field-full select,
+        .pm-settings-form .field-full textarea { min-height: 40px; padding: 9px 12px; border-color: #e1e5e9; border-radius: 8px; background: #fbfcfc; color: #20262c; }
+        .pm-settings-form .field textarea,
+        .pm-settings-form .field-full textarea { min-height: 100px; }
+        .pm-settings-members { gap: 8px !important; }
+        .pm-settings-member-grid { grid-template-columns: repeat(auto-fill, minmax(165px, 1fr)); gap: 8px; margin-top: 1px; }
+        .pm-settings-view input[type="checkbox"] { width: 16px !important; min-width: 16px !important; max-width: 16px; height: 16px !important; min-height: 16px !important; margin: 0; padding: 0 !important; border: 0; border-radius: 4px; box-shadow: none; accent-color: var(--primary); flex: 0 0 16px; }
+        .pm-settings-view .pm-member-option { min-width: 0; color: #343942; }
+        .pm-settings-view .pm-member-option:has(input:checked) { color: var(--primary-strong); }
+        .pm-settings-lower { align-items: start; }
+        .pm-settings-lower > .pm-panel { min-height: 0; align-self: start; }
+        .pm-column-table { display: grid; gap: 0; }
+        .pm-column-table-head,
+        .pm-column-form { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(125px, .8fr) auto auto; align-items: center; gap: 10px; }
+        .pm-column-table-head { padding: 0 10px 7px; color: #68717c; font-size: 10px; font-weight: 750; letter-spacing: .08em; text-transform: uppercase; }
+        .pm-column-row { padding: 9px 0; border-top: 1px solid var(--line-soft); }
+        .pm-column-form { width: 100%; }
+        .pm-column-form .field { display: block; min-width: 0; }
+        .pm-column-form .field > label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
+        .pm-column-form .field input { width: 100%; min-height: 38px; padding: 8px 11px; border-color: #e1e5e9; border-radius: 8px; background: #fbfcfc; color: #20262c; }
+        .pm-column-complete { display: inline-flex; min-height: 36px; align-items: center; gap: 7px; padding: 0 10px; border: 1px solid #e1e5e9; border-radius: 8px; background: #fbfcfc; color: #343942; cursor: pointer; font-size: 11px; white-space: nowrap; }
+        .pm-settings-view .pm-column-form .ghost-button { min-height: 36px; padding: 0 12px; border-radius: 8px; background: #fff; color: #343942; font-size: 11px; }
+        .pm-settings-view .pm-column-form .ghost-button:hover { border-color: rgba(184,134,11,.45); background: #fffdf5; color: var(--primary-strong); }
+        @media (max-width: 720px) {
+            .pm-column-table-head { display: none; }
+            .pm-column-form { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+            .pm-column-form .field:first-child { grid-column: 1 / -1; }
+            .pm-column-complete,
+            .pm-settings-view .pm-column-form .ghost-button { justify-self: start; }
+        }
         .pm-create-main .pm-form-actions { margin-top: 0; padding-top: 16px; border-top: 1px solid var(--line-soft); }
         .pm-create-aside { display: grid; gap: 12px; position: sticky; top: 18px; }
         .pm-create-summary { padding: 20px; }
@@ -518,7 +562,7 @@
             .pm-board-toolbar__controls .field { flex: 1 1 100%; }
             .pm-board-toolbar__controls .pm-chip--check,
             .pm-board-toolbar__controls .ghost-button { flex: 0 0 auto; }
-            .pm-board--trello { margin-inline: -2px; padding: 10px; }
+            .pm-board--trello { height: min(540px, calc(100vh - 260px)); min-height: 320px; margin-inline: -2px; padding: 10px; }
             .pm-board--trello .pm-column { width: min(86vw, 306px); min-width: min(86vw, 306px); }
         }
         @media (max-width: 1100px) { .pm-task-hero { grid-template-columns: minmax(0, 1fr) minmax(260px, .65fr); } .pm-task-hero__actions { grid-column: 1 / -1; justify-content: flex-start; } }

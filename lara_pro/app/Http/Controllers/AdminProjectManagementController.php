@@ -229,6 +229,18 @@ class AdminProjectManagementController extends Controller
         return redirect()->route('admin.project-management.projects.show', $project)->with('status', 'Project created and ready for planning.');
     }
 
+    public function projectLanding(Project $project): View|RedirectResponse
+    {
+        ProjectManagementAccess::ensureProjectWorkspace();
+        ProjectManagementAccess::ensureVisible($project);
+
+        if (ProjectManagementAccess::canManageWorkspace()) {
+            return redirect()->route('admin.project-management.board', $project);
+        }
+
+        return $this->showProject($project);
+    }
+
     public function showProject(Project $project): View
     {
         ProjectManagementAccess::ensureProjectWorkspace();

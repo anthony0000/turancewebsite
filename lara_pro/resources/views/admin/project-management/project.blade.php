@@ -6,7 +6,7 @@
 
     <div class="pm-stat-row"><div class="panel pm-stat"><strong>{{ $project->progress_percentage }}%</strong><span>Project progress</span></div><div class="panel pm-stat"><strong>{{ $project->tasks_count }}</strong><span>Total tasks</span></div><div class="panel pm-stat"><strong>{{ $project->completed_tasks_count }}</strong><span>Completed tasks</span></div></div>
 
-    <nav class="pm-tabs"><a class="active" href="{{ route('admin.project-management.projects.show', $project) }}">Summary</a>@if ($canManageWorkspace)<a href="{{ route('admin.project-management.board', $project) }}">Board</a><a href="{{ route('admin.project-management.backlog', $project) }}">Backlog</a><a href="{{ route('admin.project-management.sprints', $project) }}">Sprints</a><a href="{{ route('admin.project-management.settings', $project) }}">Settings</a>@endif</nav>
+    <nav class="pm-tabs"><a class="active" href="{{ route('admin.project-management.projects.summary', $project) }}">Summary</a>@if ($canManageWorkspace)<a href="{{ route('admin.project-management.board', $project) }}">Board</a><a href="{{ route('admin.project-management.backlog', $project) }}">Backlog</a><a href="{{ route('admin.project-management.sprints', $project) }}">Sprints</a><a href="{{ route('admin.project-management.settings', $project) }}">Settings</a>@endif</nav>
 
     <div class="pm-detail-grid">
         <div class="pm-stack">

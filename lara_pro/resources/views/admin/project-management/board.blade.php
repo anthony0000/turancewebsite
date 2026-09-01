@@ -14,7 +14,7 @@
                 <p>Move work through the lists, keep ownership visible, and give every task a clear next step.</p>
             </div>
             <div class="pm-actions">
-                <a class="ghost-button" href="{{ route('admin.project-management.projects.show', $project) }}">Project summary</a>
+                <a class="ghost-button" href="{{ route('admin.project-management.projects.summary', $project) }}">Project summary</a>
                 @if ($canManageWorkspace)
                     <a class="button" href="#new-task">+ New task</a>
                 @endif

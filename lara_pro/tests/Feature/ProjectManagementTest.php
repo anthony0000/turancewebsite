@@ -82,7 +82,7 @@ it('gives project managers full access to existing project workflows', function 
     $this->withSession($session)->get(route('admin.project-management.dashboard'))->assertOk()->assertSee('Assign and track work')->assertDontSee('New project');
     $this->withSession($session)->get(route('admin.project-management.projects'))->assertOk()->assertSee('Managed project')->assertDontSee('New project');
     $this->withSession($session)->get(route('admin.project-management.board', $project))->assertOk()->assertSee('New task');
-    $this->withSession($session)->get(route('admin.project-management.settings', $project))->assertOk()->assertSee('Save project settings');
+    $this->withSession($session)->get(route('admin.project-management.settings', $project))->assertOk()->assertSee('Save project settings')->assertSee('pm-settings-view', false)->assertSee('pm-column-table-head', false)->assertSee('pm-settings-member-grid', false);
     $this->withSession($session)->post(route('admin.project-management.tasks.store', $project), [
         'title' => 'Delegate implementation',
         'type' => 'task',
@@ -94,7 +94,7 @@ it('gives project managers full access to existing project workflows', function 
 
     $this->withSession($session)->post(route('admin.project-management.members.store', $project), ['user_id' => $assignee->id, 'role' => 'member'])->assertRedirect();
     $this->withSession($session)
-        ->get(route('admin.project-management.projects.show', $project))
+        ->get(route('admin.project-management.projects.summary', $project))
         ->assertOk()
         ->assertDontSee('value="'.$assignee->id.'">'.e($assignee->name).'</option>', false);
     $this->withSession($session)->getJson(route('admin.project-management.api.projects.show', $project))->assertOk();
@@ -161,7 +161,7 @@ it('uses public project and task keys for links and route binding', function () 
 
     $this->withSession($session)
         ->get('/admin/project-management/projects/PUBLIC')
-        ->assertOk();
+        ->assertRedirect(route('admin.project-management.board', $project));
     $this->withSession($session)
         ->get('/admin/project-management/tasks/PUBLIC-7')
         ->assertOk()
@@ -193,7 +193,7 @@ it('shows assigned project records to staff with project access', function () {
         ->getJson(route('admin.project-management.api.projects'))
         ->assertOk()
         ->assertJsonPath('data.0.key', 'PRIVATE');
-    $this->withSession(projectManagementSession($admin))->get(route('admin.project-management.projects.show', $project))->assertOk();
+    $this->withSession(projectManagementSession($admin))->get(route('admin.project-management.projects.show', $project))->assertRedirect(route('admin.project-management.board', $project));
 });
 
 it('limits members to their assigned tasks across web and API surfaces', function () {
@@ -260,10 +260,50 @@ it('keeps the project summary activity feed compact', function () {
     }
 
     $this->withSession(projectManagementSession($admin))
-        ->get(route('admin.project-management.projects.show', $project))
+        ->get(route('admin.project-management.projects.summary', $project))
         ->assertOk()
         ->assertSee('Activity 6')
         ->assertDontSee('Activity 1');
+});
+
+it('opens full project links on the board and keeps the summary available', function () {
+    $admin = User::factory()->create(['role' => AdminAccess::ROLE_ADMIN, 'permissions' => AdminAccess::permissionKeys(), 'is_active' => true]);
+    $project = Project::query()->create(['project_number' => 'LANDING', 'name' => 'Landing Project', 'status' => 'active', 'priority' => 'medium']);
+
+    $this->withSession(projectManagementSession($admin))
+        ->get(route('admin.project-management.projects.show', $project))
+        ->assertRedirect(route('admin.project-management.board', $project));
+
+    $this->withSession(projectManagementSession($admin))
+        ->get(route('admin.project-management.projects.summary', $project))
+        ->assertOk()
+        ->assertSee('Work in this project');
+});
+
+it('keeps large boards compact with independently scrollable columns', function () {
+    $admin = User::factory()->create(['role' => AdminAccess::ROLE_ADMIN, 'permissions' => AdminAccess::permissionKeys(), 'is_active' => true]);
+    $project = Project::query()->create(['project_number' => 'COMPACT', 'name' => 'Compact Board', 'status' => 'active', 'priority' => 'medium']);
+    $column = $project->boardColumns()->create(['name' => 'To Do', 'position' => 0]);
+
+    foreach (range(1, 21) as $number) {
+        $project->tasks()->create([
+            'task_number' => $number,
+            'title' => 'Board task '.$number,
+            'type' => 'task',
+            'priority' => 'medium',
+            'status' => 'to_do',
+            'board_column_id' => $column->id,
+            'reporter_id' => $admin->id,
+            'position' => $number - 1,
+        ]);
+    }
+
+    $this->withSession(projectManagementSession($admin))
+        ->get(route('admin.project-management.board', $project))
+        ->assertOk()
+        ->assertSee('Board task 21')
+        ->assertSee('height: min(620px, calc(100vh - 300px));', false)
+        ->assertSee('overflow-y: auto;', false);
 });
 
 it('sends a branded email when a task is assigned', function () {

@@ -1,7 +1,186 @@
 @extends('admin.project-management.layout', ['title' => 'Settings'])
 
 @section('project-content')
-    <section class="panel pm-hero"><div><span class="eyebrow">{{ $project->project_number }} · Configuration</span><h2>Keep the workspace aligned with how the team delivers.</h2><p>Project metadata, manual progress rules, board columns, and labels are managed here.</p></div><a class="ghost-button" href="{{ route('admin.project-management.projects.show', $project) }}">Back to project</a></section>
-    <section class="panel pm-panel"><form method="POST" action="{{ route('admin.project-management.projects.update', $project) }}">@csrf @method('PUT')<div class="pm-form-grid"><div class="field"><label for="settings-key">Project key</label><input id="settings-key" name="project_key" value="{{ $project->project_number }}" required></div><div class="field"><label for="settings-name">Name</label><input id="settings-name" name="name" value="{{ $project->name }}" required></div><div class="field"><label for="settings-status">Status</label><select id="settings-status" name="status">@foreach (['planning','active','on_hold','completed','cancelled','archived'] as $status)<option value="{{ $status }}" @selected($project->status === $status)>{{ Str::headline($status) }}</option>@endforeach</select></div><div class="field"><label for="settings-priority">Priority</label><select id="settings-priority" name="priority">@foreach (['low','medium','high','urgent'] as $priority)<option value="{{ $priority }}" @selected($project->priority === $priority)>{{ Str::headline($priority) }}</option>@endforeach</select></div><div class="field"><label for="settings-manager">Project manager</label><select id="settings-manager" name="project_manager_id"><option value="">Unassigned</option>@foreach (\App\Models\User::query()->whereIn('role', ['admin','subaccount'])->where('is_active', true)->orderBy('name')->get() as $member)<option value="{{ $member->id }}" @selected($project->project_manager_id == $member->id)>{{ $member->name }}</option>@endforeach</select></div><div class="field"><label for="settings-client">Client</label><select id="settings-client" name="client_id"><option value="">No client</option>@foreach (\App\Models\Client::query()->orderBy('name')->get() as $client)<option value="{{ $client->id }}" @selected($project->client_id == $client->id)>{{ $client->name }}{{ $client->company ? ' · '.$client->company : '' }}</option>@endforeach</select></div><div class="field"><label for="settings-start">Start date</label><input id="settings-start" type="date" name="starts_on" value="{{ optional($project->starts_on)->format('Y-m-d') }}"></div><div class="field"><label for="settings-end">Due date</label><input id="settings-end" type="date" name="ends_on" value="{{ optional($project->ends_on)->format('Y-m-d') }}"></div><div class="field"><label for="settings-mode">Progress mode</label><select id="settings-mode" name="progress_mode"><option value="tasks" @selected($project->progress_mode !== 'manual')>Calculated from tasks</option><option value="manual" @selected($project->progress_mode === 'manual')>Manual override</option></select></div><div class="field"><label for="settings-override">Manual percentage</label><input id="settings-override" type="number" min="0" max="100" name="progress_override" value="{{ $project->progress_override ?? 0 }}"></div><div class="field"><label for="settings-budget">Budget</label><input id="settings-budget" type="number" min="0" step="0.01" name="budget" value="{{ $project->budget }}"></div><div class="field"><label for="settings-hours">Estimated hours</label><input id="settings-hours" type="number" min="0" step="0.25" name="estimated_hours" value="{{ $project->estimated_hours }}"></div><div class="field-full"><label for="settings-description">Description</label><textarea id="settings-description" name="description" rows="4">{{ $project->description }}</textarea></div><div class="field-full"><label for="settings-brief">Project brief</label><textarea id="settings-brief" name="project_brief" rows="6">{{ $project->project_brief }}</textarea></div><div class="field-full"><label>Members</label><div class="pm-actions" style="margin-top:8px">@foreach (\App\Models\User::query()->whereIn('role', ['admin','subaccount'])->where('is_active', true)->orderBy('name')->get() as $member)<label class="pm-chip" style="gap:6px"><input type="checkbox" name="member_ids[]" value="{{ $member->id }}" @checked($project->members->contains($member->id))>{{ $member->name }}</label>@endforeach</div></div></div><div class="pm-form-actions"><button class="button" type="submit">Save project settings</button></div></form></section>
-    <div class="pm-grid-wide"><section class="panel pm-panel"><div class="pm-panel-head"><div><h3>Board columns</h3><p>Tasks must be moved before a column can be removed.</p></div></div><div class="pm-list">@foreach ($project->boardColumns as $column)<div class="pm-list-item"><form class="pm-inline-form" method="POST" action="{{ route('admin.project-management.columns.update', $column) }}" style="width:100%">@csrf @method('PUT')<div class="field"><label for="column-{{ $column->id }}">Name</label><input id="column-{{ $column->id }}" name="name" value="{{ $column->name }}" required></div><div class="field"><label for="color-{{ $column->id }}">Colour</label><input id="color-{{ $column->id }}" name="color" value="{{ $column->color }}" required></div><label class="pm-chip" style="gap:6px"><input type="checkbox" name="is_done" value="1" @checked($column->is_done)> Done</label><button class="ghost-button" type="submit">Save</button></form></div>@endforeach</div></section><section class="panel pm-panel"><div class="pm-panel-head"><div><h3>Archive controls</h3><p>Archived projects remain read-only in the archive view.</p></div></div>@if ($project->status === 'archived')<form method="POST" action="{{ route('admin.project-management.projects.restore', $project) }}">@csrf @method('PATCH')<button class="button" type="submit">Restore project</button></form>@else<form method="POST" action="{{ route('admin.project-management.projects.archive', $project) }}">@csrf @method('PATCH')<button class="ghost-button" type="submit">Archive project</button></form>@endif @if (\App\Support\ProjectManagementAccess::canManageWorkspace())<form method="POST" action="{{ route('admin.project-management.projects.destroy', $project) }}" style="margin-top:10px" onsubmit="return confirm('Delete this project and its task history?')">@csrf @method('DELETE')<button class="pm-icon-link" type="submit">Delete permanently</button></form>@endif</section></div>
+    <div class="pm-settings-view">
+        <section class="panel pm-hero">
+            <div>
+                <span class="eyebrow">{{ $project->project_number }} &middot; Configuration</span>
+                <h2>Keep the workspace aligned with how the team delivers.</h2>
+                <p>Project metadata, manual progress rules, board columns, and labels are managed here.</p>
+            </div>
+            <a class="ghost-button" href="{{ route('admin.project-management.projects.show', $project) }}">Back to project</a>
+        </section>
+
+        <section class="panel pm-panel pm-settings-panel">
+            <form class="pm-settings-form" method="POST" action="{{ route('admin.project-management.projects.update', $project) }}">
+                @csrf
+                @method('PUT')
+
+                <div class="pm-form-grid">
+                    <div class="field">
+                        <label for="settings-key">Project key</label>
+                        <input id="settings-key" name="project_key" value="{{ $project->project_number }}" required>
+                    </div>
+                    <div class="field">
+                        <label for="settings-name">Name</label>
+                        <input id="settings-name" name="name" value="{{ $project->name }}" required>
+                    </div>
+                    <div class="field">
+                        <label for="settings-status">Status</label>
+                        <select id="settings-status" name="status">
+                            @foreach (['planning', 'active', 'on_hold', 'completed', 'cancelled', 'archived'] as $status)
+                                <option value="{{ $status }}" @selected($project->status === $status)>{{ Str::headline($status) }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="settings-priority">Priority</label>
+                        <select id="settings-priority" name="priority">
+                            @foreach (['low', 'medium', 'high', 'urgent'] as $priority)
+                                <option value="{{ $priority }}" @selected($project->priority === $priority)>{{ Str::headline($priority) }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="settings-manager">Project manager</label>
+                        <select id="settings-manager" name="project_manager_id">
+                            <option value="">Unassigned</option>
+                            @foreach (\App\Models\User::query()->whereIn('role', ['admin', 'subaccount'])->where('is_active', true)->orderBy('name')->get() as $member)
+                                <option value="{{ $member->id }}" @selected($project->project_manager_id == $member->id)>{{ $member->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="settings-client">Client</label>
+                        <select id="settings-client" name="client_id">
+                            <option value="">No client</option>
+                            @foreach (\App\Models\Client::query()->orderBy('name')->get() as $client)
+                                <option value="{{ $client->id }}" @selected($project->client_id == $client->id)>{{ $client->name }}{{ $client->company ? ' · '.$client->company : '' }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="settings-start">Start date</label>
+                        <input id="settings-start" type="date" name="starts_on" value="{{ optional($project->starts_on)->format('Y-m-d') }}">
+                    </div>
+                    <div class="field">
+                        <label for="settings-end">Due date</label>
+                        <input id="settings-end" type="date" name="ends_on" value="{{ optional($project->ends_on)->format('Y-m-d') }}">
+                    </div>
+                    <div class="field">
+                        <label for="settings-mode">Progress mode</label>
+                        <select id="settings-mode" name="progress_mode">
+                            <option value="tasks" @selected($project->progress_mode !== 'manual')>Calculated from tasks</option>
+                            <option value="manual" @selected($project->progress_mode === 'manual')>Manual override</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="settings-override">Manual percentage</label>
+                        <input id="settings-override" type="number" min="0" max="100" name="progress_override" value="{{ $project->progress_override ?? 0 }}">
+                    </div>
+                    <div class="field">
+                        <label for="settings-budget">Budget</label>
+                        <input id="settings-budget" type="number" min="0" step="0.01" name="budget" value="{{ $project->budget }}">
+                    </div>
+                    <div class="field">
+                        <label for="settings-hours">Estimated hours</label>
+                        <input id="settings-hours" type="number" min="0" step="0.25" name="estimated_hours" value="{{ $project->estimated_hours }}">
+                    </div>
+                    <div class="field-full">
+                        <label for="settings-description">Description</label>
+                        <textarea id="settings-description" name="description" rows="4">{{ $project->description }}</textarea>
+                    </div>
+                    <div class="field-full">
+                        <label for="settings-brief">Project brief</label>
+                        <textarea id="settings-brief" name="project_brief" rows="6">{{ $project->project_brief }}</textarea>
+                    </div>
+                    <div class="field-full pm-settings-members">
+                        <span class="pm-settings-field-label">Members</span>
+                        <div class="pm-member-grid pm-settings-member-grid">
+                            @foreach (\App\Models\User::query()->whereIn('role', ['admin', 'subaccount'])->where('is_active', true)->orderBy('name')->get() as $member)
+                                <label class="pm-member-option">
+                                    <input type="checkbox" name="member_ids[]" value="{{ $member->id }}" @checked($project->members->contains($member->id))>
+                                    <span>{{ $member->name }}</span>
+                                </label>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pm-form-actions">
+                    <button class="button" type="submit">Save project settings</button>
+                </div>
+            </form>
+        </section>
+
+        <div class="pm-grid-wide pm-settings-lower">
+            <section class="panel pm-panel">
+                <div class="pm-panel-head">
+                    <div>
+                        <h3>Board columns</h3>
+                        <p>Tasks must be moved before a column can be removed.</p>
+                    </div>
+                </div>
+
+                <div class="pm-column-table" aria-label="Board columns">
+                    <div class="pm-column-table-head" aria-hidden="true">
+                        <span>Name</span>
+                        <span>Colour</span>
+                        <span>Status</span>
+                        <span></span>
+                    </div>
+                    @foreach ($project->boardColumns as $column)
+                        <div class="pm-column-row">
+                            <form class="pm-column-form" method="POST" action="{{ route('admin.project-management.columns.update', $column) }}">
+                                @csrf
+                                @method('PUT')
+                                <div class="field">
+                                    <label for="column-{{ $column->id }}">Name</label>
+                                    <input id="column-{{ $column->id }}" name="name" value="{{ $column->name }}" required>
+                                </div>
+                                <div class="field">
+                                    <label for="color-{{ $column->id }}">Colour</label>
+                                    <input id="color-{{ $column->id }}" name="color" value="{{ $column->color }}" required>
+                                </div>
+                                <label class="pm-column-complete">
+                                    <input type="checkbox" name="is_done" value="1" @checked($column->is_done)>
+                                    <span>Done</span>
+                                </label>
+                                <button class="ghost-button pm-column-save" type="submit">Save</button>
+                            </form>
+                        </div>
+                    @endforeach
+                </div>
+            </section>
+
+            <section class="panel pm-panel">
+                <div class="pm-panel-head">
+                    <div>
+                        <h3>Archive controls</h3>
+                        <p>Archived projects remain read-only in the archive view.</p>
+                    </div>
+                </div>
+                @if ($project->status === 'archived')
+                    <form method="POST" action="{{ route('admin.project-management.projects.restore', $project) }}">
+                        @csrf
+                        @method('PATCH')
+                        <button class="button" type="submit">Restore project</button>
+                    </form>
+                @else
+                    <form method="POST" action="{{ route('admin.project-management.projects.archive', $project) }}">
+                        @csrf
+                        @method('PATCH')
+                        <button class="ghost-button" type="submit">Archive project</button>
+                    </form>
+                @endif
+                @if (\App\Support\ProjectManagementAccess::canManageWorkspace())
+                    <form method="POST" action="{{ route('admin.project-management.projects.destroy', $project) }}" style="margin-top:10px" onsubmit="return confirm('Delete this project and its task history?')">
+                        @csrf
+                        @method('DELETE')
+                        <button class="pm-icon-link" type="submit">Delete permanently</button>
+                    </form>
+                @endif
+            </section>
+        </div>
+    </div>
 @endsection

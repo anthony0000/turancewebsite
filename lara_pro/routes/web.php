@@ -187,7 +187,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/projects/create', [AdminProjectManagementController::class, 'createProject'])->name('projects.create');
             Route::post('/projects', [AdminProjectManagementController::class, 'storeProject'])->name('projects.store');
             Route::get('/projects/archived', [AdminProjectManagementController::class, 'projects'])->name('archived');
-            Route::get('/projects/{project}', [AdminProjectManagementController::class, 'showProject'])->name('projects.show');
+            Route::get('/projects/{project}', [AdminProjectManagementController::class, 'projectLanding'])->name('projects.show');
+            Route::get('/projects/{project}/summary', [AdminProjectManagementController::class, 'showProject'])->name('projects.summary');
             Route::put('/projects/{project}', [AdminProjectManagementController::class, 'updateProject'])->name('projects.update');
             Route::patch('/projects/{project}/archive', [AdminProjectManagementController::class, 'archiveProject'])->name('projects.archive');
             Route::patch('/projects/{project}/restore', [AdminProjectManagementController::class, 'restoreProject'])->name('projects.restore');
