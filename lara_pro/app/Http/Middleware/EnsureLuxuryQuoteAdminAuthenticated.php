@@ -19,9 +19,7 @@ class EnsureLuxuryQuoteAdminAuthenticated
         );
 
         if (! $request->session()->get($sessionKey)) {
-            return redirect()
-                ->route('admin.login')
-                ->with('admin_notice', 'Sign in to access the invoice generator.');
+            return redirect()->route('admin.login');
         }
 
         if (! $request->session()->has('admin_user_id') && filled($request->session()->get('luxury_quote_admin_email'))) {

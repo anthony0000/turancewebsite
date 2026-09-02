@@ -580,19 +580,21 @@ body.is-auth .auth-field input.auth-input.auth-input--password {
     display: flex;
     align-items: flex-start;
     flex-direction: column;
-    gap: 10px;
+    gap: 12px;
 }
 
 .auth-visual-brand img {
+    display: block;
     width: clamp(178px, 17vw, 220px);
     height: auto;
 }
 
 .auth-visual-brand span {
     display: inline-flex;
+    align-self: center;
     align-items: center;
     gap: 10px;
-    padding-left: 0;
+    padding: 0 4px;
     color: rgba(255, 255, 255, .76);
     font-size: 9px;
     font-weight: 700;
@@ -601,9 +603,16 @@ body.is-auth .auth-field input.auth-input.auth-input--password {
 }
 
 .auth-visual-brand span::before {
-    width: 28px;
+    width: 24px;
     height: 1px;
     background: #d4af37;
+    content: "";
+}
+
+.auth-visual-brand span::after {
+    width: 24px;
+    height: 1px;
+    background: rgba(212, 175, 55, .72);
     content: "";
 }
 
