@@ -168,7 +168,8 @@ it('does not allow completed tasks to be deleted', function () {
     $this->withSession(projectManagementSession($admin))
         ->get(route('admin.project-management.tasks.show', $task))
         ->assertOk()
-        ->assertDontSee('Delete task');
+        ->assertDontSee('Delete task')
+        ->assertDontSee('Mark not completed');
 
     $this->withSession(projectManagementSession($admin))
         ->deleteJson(route('admin.project-management.tasks.destroy', $task))
@@ -458,6 +459,9 @@ it('lets assigned staff complete tasks and authorized staff reopen them', functi
         ->get(route('admin.project-management.tasks.show', $task))
         ->assertOk()
         ->assertSee('Mark as done')
+        ->assertSee('data-ajax-confirm-title="Complete this task"', false)
+        ->assertSee('Mark this task as completed?', false)
+        ->assertDontSee('Mark not completed')
         ->assertSee('What needs to happen')
         ->assertSee('Due countdown')
         ->assertSee('data-task-countdown', false);
@@ -470,6 +474,12 @@ it('lets assigned staff complete tasks and authorized staff reopen them', functi
     expect($task->fresh()->completed_at)->not->toBeNull()
         ->and($task->fresh()->board_column_id)->toBe($doneColumn->id)
         ->and(DB::table('notifications')->where('notifiable_id', $admin->id)->where('type', 'task.completed')->exists())->toBeTrue();
+
+    $this->withSession($staffSession)
+        ->get(route('admin.project-management.tasks.show', $task))
+        ->assertOk()
+        ->assertSee('Completed')
+        ->assertDontSee('Mark not completed');
 
     $this->withSession($staffSession)
         ->patch(route('admin.project-management.tasks.reopen', $task))
@@ -505,7 +515,7 @@ it('lets assigned staff complete tasks and authorized staff reopen them', functi
         ->assertOk()
         ->assertSee('Task details')
         ->assertSee($teammate->name)
-        ->assertSee('Mark not completed');
+        ->assertDontSee('Mark not completed');
 
     $this->withSession(projectManagementSession($staff))
         ->patchJson(route('admin.project-management.tasks.reopen', $teammateTask))

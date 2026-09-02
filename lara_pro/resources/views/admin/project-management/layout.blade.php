@@ -213,6 +213,19 @@
         .pm-task-hero__actions > form > button { min-height: 42px; padding-inline: 15px; }
         .pm-danger-button { border-color: rgba(194,65,85,.24); color: var(--danger); }
         .pm-danger-button:hover { border-color: rgba(194,65,85,.42); background: #fff3f4; color: #a52f43; }
+        .pm-confirm-backdrop { position: fixed; inset: 0; z-index: 1200; display: grid; place-items: center; padding: 22px; background: rgba(24,28,35,.38); backdrop-filter: blur(8px); animation: pm-confirm-fade .16s ease-out both; }
+        .pm-confirm-backdrop[hidden] { display: none !important; }
+        .pm-confirm-dialog { display: grid; width: min(430px, 100%); gap: 18px; padding: 20px; border: 1px solid rgba(184,134,11,.22); border-radius: 14px; background: #fff; box-shadow: 0 24px 70px rgba(24,28,35,.22); animation: pm-confirm-rise .18s ease-out both; }
+        .pm-confirm-mark { display: grid; width: 42px; height: 42px; place-items: center; border: 1px solid rgba(47,128,84,.22); border-radius: 12px; background: #ecfdf5; color: #166534; font-size: 11px; font-weight: 850; letter-spacing: .06em; }
+        .pm-confirm-copy { display: grid; gap: 7px; }
+        .pm-confirm-copy h3 { margin: 0; color: var(--text); font-size: 20px; letter-spacing: -.03em; }
+        .pm-confirm-copy p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.55; }
+        .pm-confirm-actions { display: flex; justify-content: flex-end; gap: 9px; }
+        .pm-confirm-actions .button,
+        .pm-confirm-actions .ghost-button { min-height: 40px; padding-inline: 15px; }
+        .pm-confirm-actions .pm-danger-button { background: #fff3f4; }
+        @keyframes pm-confirm-fade { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes pm-confirm-rise { from { opacity: 0; transform: translateY(10px) scale(.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
         .pm-task-countdown { position: relative; display: grid; width: 100%; min-width: 0; min-height: 110px; align-content: center; gap: 6px; padding: 16px 18px 15px 20px; overflow: hidden; border: 1px solid rgba(184,134,11,.32); border-left: 4px solid var(--primary); border-radius: 14px; background: linear-gradient(135deg, #fffbed 0%, #fff8e8 100%); box-shadow: 0 10px 24px rgba(102,76,20,.09); }
         .pm-task-countdown::after { position: absolute; right: -22px; bottom: -32px; width: 94px; height: 94px; border: 1px solid rgba(184,134,11,.13); border-radius: 50%; content: ''; }
         .pm-task-countdown > span:first-child { position: relative; z-index: 1; color: var(--primary-strong); font-size: 10px; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
@@ -719,30 +732,22 @@
             const updateTaskState = (form) => {
                 const action = form.getAttribute('action') || '';
                 const isCompleting = action.endsWith('/complete');
-                const nextAction = action.replace(/\/(complete|reopen)$/, isCompleting ? '/reopen' : '/complete');
-                const button = form.querySelector('button[type="submit"]');
                 const actions = form.closest('.pm-task-hero__actions');
 
-                form.action = nextAction;
-                form.querySelector('[name="_method"]')?.setAttribute('value', 'PATCH');
+                if (!actions) return;
 
-                if (button) {
-                    button.textContent = isCompleting ? 'Mark not completed' : 'Mark as done';
-                    button.classList.toggle('button', !isCompleting);
-                    button.classList.toggle('ghost-button', isCompleting);
-                }
+                const existingBadge = actions.querySelector('.pm-chip--success');
 
-                if (actions) {
-                    const existingBadge = actions.querySelector('.pm-chip--success');
-
-                    if (isCompleting && !existingBadge) {
+                if (isCompleting) {
+                    if (!existingBadge) {
                         const badge = document.createElement('span');
                         badge.className = 'pm-chip pm-chip--success';
                         badge.textContent = 'Done just now';
                         actions.insertBefore(badge, form);
-                    } else if (!isCompleting) {
-                        existingBadge?.remove();
                     }
+
+                    actions.querySelectorAll('[data-ajax-delete-task="1"]').forEach((deleteForm) => deleteForm.remove());
+                    form.remove();
                 }
             };
 
@@ -841,9 +846,74 @@
                 }
             };
 
+            const askForActionConfirmation = (form) => {
+                const message = form.dataset.ajaxConfirm;
+
+                if (!message) return Promise.resolve(true);
+
+                return new Promise((resolve) => {
+                    const backdrop = document.createElement('div');
+                    const dialog = document.createElement('section');
+                    const mark = document.createElement('div');
+                    const copy = document.createElement('div');
+                    const title = document.createElement('h3');
+                    const body = document.createElement('p');
+                    const actions = document.createElement('div');
+                    const cancel = document.createElement('button');
+                    const confirm = document.createElement('button');
+                    const titleId = `pm-confirm-title-${Date.now()}`;
+                    const descriptionId = `pm-confirm-description-${Date.now()}`;
+
+                    backdrop.className = 'pm-confirm-backdrop';
+                    dialog.className = 'pm-confirm-dialog';
+                    dialog.setAttribute('role', 'dialog');
+                    dialog.setAttribute('aria-modal', 'true');
+                    dialog.setAttribute('aria-labelledby', titleId);
+                    dialog.setAttribute('aria-describedby', descriptionId);
+                    mark.className = 'pm-confirm-mark';
+                    mark.setAttribute('aria-hidden', 'true');
+                    mark.textContent = 'DONE';
+                    copy.className = 'pm-confirm-copy';
+                    title.id = titleId;
+                    title.textContent = form.dataset.ajaxConfirmTitle || 'Confirm action';
+                    body.id = descriptionId;
+                    body.textContent = message;
+                    actions.className = 'pm-confirm-actions';
+                    cancel.className = 'ghost-button';
+                    cancel.type = 'button';
+                    cancel.textContent = form.dataset.ajaxConfirmCancel || 'Cancel';
+                    confirm.className = form.dataset.ajaxConfirmDanger === '1' ? 'ghost-button pm-danger-button' : 'button';
+                    confirm.type = 'button';
+                    confirm.textContent = form.dataset.ajaxConfirmAction || 'Continue';
+
+                    copy.append(title, body);
+                    actions.append(cancel, confirm);
+                    dialog.append(mark, copy, actions);
+                    backdrop.append(dialog);
+                    document.body.append(backdrop);
+
+                    const settle = (confirmed) => {
+                        document.removeEventListener('keydown', onKeydown);
+                        backdrop.remove();
+                        resolve(confirmed);
+                    };
+                    const onKeydown = (event) => {
+                        if (event.key === 'Escape') settle(false);
+                    };
+
+                    backdrop.addEventListener('click', (event) => {
+                        if (event.target === backdrop) settle(false);
+                    });
+                    cancel.addEventListener('click', () => settle(false));
+                    confirm.addEventListener('click', () => settle(true));
+                    document.addEventListener('keydown', onKeydown);
+                    confirm.focus();
+                });
+            };
+
             const submitAjax = async (form) => {
                 if (form.dataset.ajaxSubmitting === '1') return;
-                if (form.dataset.ajaxConfirm && !window.confirm(form.dataset.ajaxConfirm)) return;
+                if (! await askForActionConfirmation(form)) return;
 
                 form.dataset.ajaxSubmitting = '1';
                 form.classList.add('is-saving');

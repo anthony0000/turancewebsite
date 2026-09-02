@@ -19,14 +19,8 @@
                 <a class="ghost-button" href="{{ route('admin.project-management.dashboard') }}">Back to my tasks</a>
                 @if ($task->completed_at)
                     <span class="pm-chip pm-chip--success">Completed {{ $task->completed_at->format('M d, Y') }}</span>
-                    @if ($canManageTaskStatus)
-                        <form method="POST" action="{{ route('admin.project-management.tasks.reopen', $task) }}">
-                            @csrf @method('PATCH')
-                            <button class="ghost-button" type="submit">Mark not completed</button>
-                        </form>
-                    @endif
                 @elseif ($canCompleteTask)
-                    <form method="POST" action="{{ route('admin.project-management.tasks.complete', $task) }}">
+                    <form method="POST" action="{{ route('admin.project-management.tasks.complete', $task) }}" data-ajax-confirm-title="Complete this task" data-ajax-confirm="Mark this task as completed? Completed tasks are locked from deletion on this page." data-ajax-confirm-action="Mark completed">
                         @csrf @method('PATCH')
                         <button class="button" type="submit">Mark as done</button>
                     </form>

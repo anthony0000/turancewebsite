@@ -12,20 +12,14 @@
                 <a class="ghost-button" href="{{ route('admin.project-management.board', $project) }}">Back to board</a>
                 @if ($task->completed_at)
                     <span class="pm-chip pm-chip--success">Done {{ $task->completed_at->format('M d, Y') }}</span>
-                    @if ($canManageTaskStatus)
-                        <form method="POST" action="{{ route('admin.project-management.tasks.reopen', $task) }}" data-ajax-form data-ajax-task-state="reopen" data-ajax-next-action="{{ route('admin.project-management.tasks.complete', $task) }}">
-                            @csrf @method('PATCH')
-                            <button class="ghost-button" type="submit">Mark not completed</button>
-                        </form>
-                    @endif
                 @else
-                    <form method="POST" action="{{ route('admin.project-management.tasks.complete', $task) }}" data-ajax-form data-ajax-task-state="complete" data-ajax-next-action="{{ route('admin.project-management.tasks.reopen', $task) }}">
+                    <form method="POST" action="{{ route('admin.project-management.tasks.complete', $task) }}" data-ajax-form data-ajax-task-state="complete" data-ajax-confirm-title="Complete this task" data-ajax-confirm="Mark this task as completed? Completed tasks are locked from deletion on this page." data-ajax-confirm-action="Mark completed">
                         @csrf @method('PATCH')
                         <button class="button" type="submit">Mark as done</button>
                     </form>
                 @endif
                 @if ($canManageWorkspace && ! $task->completed_at)
-                    <form method="POST" action="{{ route('admin.project-management.tasks.destroy', $task) }}" data-ajax-form data-ajax-delete-task="1" data-ajax-success-url="{{ route('admin.project-management.board', $project) }}" data-ajax-confirm="Delete this task permanently? This cannot be undone.">
+                    <form method="POST" action="{{ route('admin.project-management.tasks.destroy', $task) }}" data-ajax-form data-ajax-delete-task="1" data-ajax-success-url="{{ route('admin.project-management.board', $project) }}" data-ajax-confirm-title="Delete this task" data-ajax-confirm="Delete this task permanently? This cannot be undone." data-ajax-confirm-action="Delete task" data-ajax-confirm-danger="1">
                         @csrf @method('DELETE')
                         <button class="ghost-button pm-danger-button" type="submit">Delete task</button>
                     </form>
