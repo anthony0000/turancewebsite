@@ -24,7 +24,7 @@
                         <button class="button" type="submit">Mark as done</button>
                     </form>
                 @endif
-                @if ($canManageWorkspace)
+                @if ($canManageWorkspace && ! $task->completed_at)
                     <form method="POST" action="{{ route('admin.project-management.tasks.destroy', $task) }}" data-ajax-form data-ajax-delete-task="1" data-ajax-success-url="{{ route('admin.project-management.board', $project) }}" data-ajax-confirm="Delete this task permanently? This cannot be undone.">
                         @csrf @method('DELETE')
                         <button class="ghost-button pm-danger-button" type="submit">Delete task</button>

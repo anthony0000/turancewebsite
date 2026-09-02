@@ -579,6 +579,12 @@ class AdminProjectManagementController extends Controller
         $project = $task->project;
         abort_unless(ProjectManagementAccess::canManage($project), 403);
 
+        if ($task->completed_at) {
+            return $request->expectsJson()
+                ? response()->json(['message' => 'Completed tasks cannot be deleted.'], 422)
+                : back()->withErrors(['task' => 'Completed tasks cannot be deleted.']);
+        }
+
         $taskKey = $task->task_key;
         $attachmentPaths = $task->attachments()->pluck('path');
         $task->delete();

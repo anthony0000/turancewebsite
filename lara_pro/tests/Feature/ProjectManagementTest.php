@@ -149,6 +149,36 @@ it('updates and deletes tasks through ajax endpoints', function () {
         ->and($project->activityLogs()->where('action', 'task.deleted')->exists())->toBeTrue();
 });
 
+it('does not allow completed tasks to be deleted', function () {
+    $admin = User::factory()->create(['role' => AdminAccess::ROLE_ADMIN, 'permissions' => AdminAccess::permissionKeys(), 'is_active' => true]);
+    $project = Project::query()->create(['project_number' => 'DONE', 'name' => 'Completed work', 'status' => 'active', 'priority' => 'medium']);
+    $column = $project->boardColumns()->create(['name' => 'Completed', 'position' => 0, 'is_done' => true]);
+    $task = $project->tasks()->create([
+        'task_number' => 1,
+        'title' => 'Keep completed history',
+        'type' => 'task',
+        'priority' => 'medium',
+        'status' => 'completed',
+        'board_column_id' => $column->id,
+        'reporter_id' => $admin->id,
+        'position' => 0,
+        'completed_at' => now(),
+    ]);
+
+    $this->withSession(projectManagementSession($admin))
+        ->get(route('admin.project-management.tasks.show', $task))
+        ->assertOk()
+        ->assertDontSee('Delete task');
+
+    $this->withSession(projectManagementSession($admin))
+        ->deleteJson(route('admin.project-management.tasks.destroy', $task))
+        ->assertStatus(422)
+        ->assertJsonPath('message', 'Completed tasks cannot be deleted.');
+
+    expect(Task::query()->find($task->id))->not->toBeNull()
+        ->and($project->activityLogs()->where('action', 'task.deleted')->exists())->toBeFalse();
+});
+
 it('uses public project and task keys for links and route binding', function () {
     $admin = User::factory()->create(['role' => AdminAccess::ROLE_ADMIN, 'permissions' => AdminAccess::permissionKeys(), 'is_active' => true]);
     $project = Project::query()->create(['project_number' => 'PUBLIC', 'name' => 'Public keys', 'status' => 'active', 'priority' => 'medium']);
