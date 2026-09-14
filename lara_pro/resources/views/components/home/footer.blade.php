@@ -8,6 +8,7 @@
                 </a>
                 <span class="tt-footer__tagline">{{ config('seo.tagline', 'Excellence Delivered') }}</span>
                 <p>Software and digital products shaped with clarity, precision and lasting purpose.</p>
+                <x-preferred-source />
             </div>
             <div class="tt-footer__links">
                 <nav aria-label="Footer navigation">

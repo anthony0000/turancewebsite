@@ -256,6 +256,7 @@
         <link rel="stylesheet" href="{{ asset('/assets/css/main.css') }}?v=1.3">
     @endunless
     @stack('styles')
+    <link rel="stylesheet" href="{{ asset('/assets/css/preferred-source.css') }}?v=1.0">
 </head>
 
 <body class="{{ $minimalPage ? 'tt-minimal-page' : 'page-wrapper wt-magic-cursor' }}">
@@ -463,6 +464,7 @@
                                     </div>
                                     <div class="wt-footer-content">
                                         <p class="text-center">Premium web, app, SaaS, and branding agency.</p>
+                                        <x-preferred-source />
                                     </div>
                                 </div>
                             </div>

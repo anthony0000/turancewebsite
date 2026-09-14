@@ -1,0 +1,21 @@
+.tt-preferred-source {
+    margin-top: 24px;
+}
+
+.tt-preferred-source > a {
+    display: block;
+    width: 270px;
+    max-width: 100%;
+    border-radius: 13px;
+}
+
+.tt-preferred-source > a:focus-visible {
+    outline: 2px solid #e9c46a;
+    outline-offset: 5px;
+}
+
+.tt-preferred-source > a > img {
+    display: block;
+    width: 100%;
+    height: auto;
+}
