@@ -52,6 +52,9 @@ it('shows the company and project document library', function () {
         ->assertSee('Add to the library')
         ->assertSee('role="dialog"', false)
         ->assertSee('data-upload-open', false)
+        ->assertSee('data-file-dropzone', false)
+        ->assertSee('name="files[]"', false)
+        ->assertSee('multiple', false)
         ->assertSee('Add folder and description')
         ->assertSee('Choose a project')
         ->assertSee('All documents')
@@ -152,6 +155,58 @@ it('uploads an external project file with ajax even when the project has no staf
         ->and($projectFile->description)->toBe('Reference material for the staff handoff.');
 
     Storage::disk('public_uploads')->assertExists($projectFile->path);
+});
+
+it('uploads multiple project files in one ajax request', function () {
+    Storage::fake('public_uploads');
+
+    $project = Project::query()->create([
+        'project_number' => 'TT-PRJ-BATCH-001',
+        'name' => 'Batch Upload Project',
+        'status' => 'active',
+    ]);
+
+    $this
+        ->withSession(projectAdminSession())
+        ->postJson(route('admin.projects.files.external.store'), [
+            'document_scope' => 'project',
+            'project_id' => $project->id,
+            'folder' => 'Handover',
+            'files' => [
+                UploadedFile::fake()->create('project-brief.pdf', 24, 'application/pdf'),
+                UploadedFile::fake()->create('project-budget.xlsx', 32, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'),
+            ],
+        ])
+        ->assertCreated()
+        ->assertJsonPath('data.count', 2)
+        ->assertJsonPath('data.files.0.original_name', 'project-brief.pdf')
+        ->assertJsonPath('data.files.1.original_name', 'project-budget.xlsx');
+
+    $projectFiles = ProjectFile::query()->where('project_id', $project->id)->orderBy('id')->get();
+
+    expect($projectFiles)->toHaveCount(2)
+        ->and($projectFiles->pluck('folder')->all())->toBe(['Handover', 'Handover']);
+
+    $projectFiles->each(fn (ProjectFile $file) => Storage::disk('public_uploads')->assertExists($file->path));
+});
+
+it('limits each upload batch to ten files', function () {
+    Storage::fake('public_uploads');
+
+    $files = collect(range(1, 11))
+        ->map(fn (int $number) => UploadedFile::fake()->create("document-{$number}.pdf", 4, 'application/pdf'))
+        ->all();
+
+    $this
+        ->withSession(projectAdminSession())
+        ->postJson(route('admin.projects.files.external.store'), [
+            'document_scope' => 'company',
+            'files' => $files,
+        ])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors('files');
+
+    expect(ProjectFile::query()->count())->toBe(0);
 });
 
 it('stores project files privately, shares one file, and can revoke the link', function () {

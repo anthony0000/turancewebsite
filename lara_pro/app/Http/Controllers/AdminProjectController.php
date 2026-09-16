@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use RuntimeException;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Throwable;
@@ -197,38 +198,68 @@ class AdminProjectController extends Controller
             'document_scope' => ['required', Rule::in(['company', 'project'])],
             'project_id' => [Rule::requiredIf(fn () => $request->input('document_scope') === 'project'), 'nullable', 'integer', 'exists:projects,id'],
             'folder' => ['nullable', 'string', 'max:100'],
-            'file' => ['required', 'file', 'max:51200', 'mimes:'.implode(',', self::FILE_MIMES)],
+            'files' => ['nullable', 'array', 'min:1', 'max:10'],
+            'files.*' => ['file', 'max:51200', 'mimes:'.implode(',', self::FILE_MIMES)],
+            'file' => ['nullable', 'file', 'max:51200', 'mimes:'.implode(',', self::FILE_MIMES)],
             'description' => ['nullable', 'string', 'max:500'],
         ]);
+
+        $uploads = collect($validated['files'] ?? []);
+
+        if (isset($validated['file'])) {
+            $uploads->push($validated['file']);
+        }
+
+        if ($uploads->isEmpty()) {
+            throw ValidationException::withMessages([
+                'files' => 'Choose at least one document to upload.',
+            ]);
+        }
+
+        if ($uploads->count() > 10) {
+            throw ValidationException::withMessages([
+                'files' => 'You may upload a maximum of 10 documents at once.',
+            ]);
+        }
 
         $project = $validated['document_scope'] === 'project'
             ? Project::query()->findOrFail($validated['project_id'])
             : null;
-        $projectFile = $this->createProjectFile(
-            $project,
-            $validated['file'],
-            $validated['description'] ?? null,
-            $validated['folder'] ?? null,
-            $validated['document_scope']
-        );
-        $message = $project
-            ? 'File added to the project workspace.'
-            : 'Company document added to the library.';
+        $projectFiles = collect();
+
+        try {
+            foreach ($uploads as $upload) {
+                $projectFiles->push($this->createProjectFile(
+                    $project,
+                    $upload,
+                    $validated['description'] ?? null,
+                    $validated['folder'] ?? null,
+                    $validated['document_scope']
+                ));
+            }
+        } catch (Throwable $exception) {
+            foreach ($projectFiles as $storedFile) {
+                $storedPath = $storedFile->path;
+                $storedFile->delete();
+                Storage::disk(self::PROJECT_FILES_DISK)->delete($storedPath);
+            }
+
+            throw $exception;
+        }
+
+        $count = $projectFiles->count();
+        $message = $count === 1
+            ? ($project ? 'File added to the project workspace.' : 'Company document added to the library.')
+            : ($project ? $count.' files added to the project workspace.' : $count.' company documents added to the library.');
+        $firstFile = $projectFiles->first();
 
         if ($request->expectsJson() || $request->ajax()) {
             return response()->json([
                 'message' => $message,
                 'data' => [
-                    'id' => $projectFile->id,
-                    'project_id' => $projectFile->project_id,
-                    'document_scope' => $projectFile->document_scope,
-                    'folder' => $projectFile->folder,
-                    'original_name' => $projectFile->original_name,
-                    'description' => $projectFile->description,
-                    'file_kind' => $projectFile->fileKind(),
-                    'size_label' => $projectFile->sizeLabel(),
-                    'download_url' => route('admin.projects.files.download', $projectFile),
-                    'preview_url' => route('admin.projects.files.preview', $projectFile),
+                    ...$this->projectFilePayload($firstFile),
+                    'count' => $count,
+                    'files' => $projectFiles->map(fn (ProjectFile $file) => $this->projectFilePayload($file))->values(),
                 ],
             ], 201);
         }
@@ -274,6 +305,22 @@ class AdminProjectController extends Controller
 
             throw $exception;
         }
+    }
+
+    private function projectFilePayload(ProjectFile $projectFile): array
+    {
+        return [
+            'id' => $projectFile->id,
+            'project_id' => $projectFile->project_id,
+            'document_scope' => $projectFile->document_scope,
+            'folder' => $projectFile->folder,
+            'original_name' => $projectFile->original_name,
+            'description' => $projectFile->description,
+            'file_kind' => $projectFile->fileKind(),
+            'size_label' => $projectFile->sizeLabel(),
+            'download_url' => route('admin.projects.files.download', $projectFile),
+            'preview_url' => route('admin.projects.files.preview', $projectFile),
+        ];
     }
 
     public function downloadFile(ProjectFile $projectFile): BinaryFileResponse|Response
