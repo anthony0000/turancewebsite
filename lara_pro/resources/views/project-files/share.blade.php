@@ -1,6 +1,6 @@
 @extends('layouts.master')
 
-@section('title', $projectFile->original_name.' · Shared project file')
+@section('title', $projectFile->original_name.' · Shared document')
 
 @section('content')
     <style>
@@ -23,12 +23,12 @@
     <main class="shared-file-page">
         <section class="shared-file-card">
             <div class="shared-file-mark" aria-hidden="true">TT</div>
-            <span class="eyebrow">Secure file sharing</span>
+            <span class="eyebrow">Secure document sharing</span>
             <h1>{{ $projectFile->original_name }}</h1>
-            <p>{{ $projectFile->description ?: 'A project file shared securely by Turance Technologies.' }}</p>
+            <p>{{ $projectFile->description ?: 'A document shared securely by Turance Technologies.' }}</p>
 
             <div class="shared-file-meta">
-                <div><span>Project</span><strong>{{ $projectFile->project->name }}</strong></div>
+                <div><span>Location</span><strong>{{ $projectFile->project?->name ?: 'Company documents' }}</strong></div>
                 <div><span>File type</span><strong>{{ $projectFile->fileKind() }}</strong></div>
                 <div><span>Size</span><strong>{{ $projectFile->sizeLabel() }}</strong></div>
             </div>

@@ -49,7 +49,7 @@
         $isProjectManagementWorkspace && ! \App\Support\ProjectManagementAccess::canManageWorkspace() => 'My tasks',
         $isProjectManagementWorkspace => 'Project Management',
         $isProjectPreview => 'Project Workspace',
-        $isProjectDashboard => 'File sharing',
+        $isProjectDashboard => 'File Management',
         $isLetterBuilder => 'Letter Generator',
         $isSubaccountWorkspace => 'Staff accounts',
         $isAdminProfile => 'Profile & Settings',
@@ -71,10 +71,10 @@
         $isStaffContractPreview => 'Review the project-bound staff agreement, signing details, and contract PDF.',
         $isStaffContractEditor => 'Update the project, commercial terms, staff details, and signing section.',
         $isProjectManagementWorkspace && request()->routeIs('admin.project-management.projects*') && ! \App\Support\ProjectManagementAccess::canManageWorkspace() => 'Review the project records available to your account.',
-        $isProjectManagementWorkspace && ! \App\Support\ProjectManagementAccess::canManageWorkspace() => 'Review the tasks assigned to you and open the relevant project file sharing area.',
+        $isProjectManagementWorkspace && ! \App\Support\ProjectManagementAccess::canManageWorkspace() => 'Review the tasks assigned to you and open the relevant project file management area.',
         $isProjectManagementWorkspace => 'Plan projects, move work across the board, and keep delivery visible to the team.',
         $isProjectPreview => 'Keep project files private by default, then create a secure link for the right people.',
-        $isProjectDashboard => 'Review project health, file activity, and the files attached to each engagement.',
+        $isProjectDashboard => 'Organise company documents and project files in one secure library.',
         $isLetterBuilder => 'Write letters and basic company documents on the Turance letterhead, then export them as PDF.',
         $isSubaccountWorkspace => 'Create staff accounts and limit the parts of the admin workspace they can access.',
         $isAdminProfile => 'Manage your admin identity, contact details, and account security.',
@@ -99,7 +99,7 @@
         $isProjectManagementWorkspace && ! \App\Support\ProjectManagementAccess::canManageWorkspace() => 'My tasks',
         $isProjectManagementWorkspace => 'Project Management',
         $isProjectPreview => 'Project Workspace',
-        $isProjectDashboard => 'File sharing',
+        $isProjectDashboard => 'File Management',
         $isLetterBuilder => 'Letter Generator',
         $isSubaccountWorkspace => 'Staff accounts',
         $isAdminProfile => 'Profile & Settings',
@@ -2406,8 +2406,8 @@
                                     </svg>
                                 </span>
                                 <div>
-                                    <strong>File sharing</strong>
-                                    <span>Shared project files</span>
+                                    <strong>File management</strong>
+                                    <span>Company and project files</span>
                                 </div>
                                 </a>
                             @endif
@@ -2635,7 +2635,7 @@
                         @else
                         <a class="command-palette__item" data-command-item data-command-label="Projects" href="{{ route('admin.project-management.projects') }}"><span class="command-palette__item-icon">□</span><span><strong>Projects</strong><small>Project records</small></span><span class="command-palette__arrow">↵</span></a>
                         @endif
-                        <a class="command-palette__item" data-command-item data-command-label="File Sharing" href="{{ route('admin.projects.index') }}"><span class="command-palette__item-icon">▱</span><span><strong>File sharing</strong><small>Shared files</small></span><span class="command-palette__arrow">↵</span></a>
+                        <a class="command-palette__item" data-command-item data-command-label="File Management Documents" href="{{ route('admin.projects.index') }}"><span class="command-palette__item-icon">▱</span><span><strong>File management</strong><small>Company and project files</small></span><span class="command-palette__arrow">↵</span></a>
                     @endif
                     <a class="command-palette__item" data-command-item data-command-label="Profile Settings" href="{{ route('admin.profile') }}"><span class="command-palette__item-icon">◎</span><span><strong>Profile</strong><small>Account settings</small></span><span class="command-palette__arrow">↵</span></a>
                     <p class="command-palette__empty" data-command-empty hidden>No matching workspace items.</p>

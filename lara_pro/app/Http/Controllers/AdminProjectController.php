@@ -15,6 +15,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use RuntimeException;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Throwable;
@@ -30,7 +31,7 @@ class AdminProjectController extends Controller
         'jpg', 'jpeg', 'png', 'webp', 'zip',
     ];
 
-    public function index(): View
+    public function index(Request $request): View
     {
         $canManageProjectFiles = AdminAccess::isFullAdmin();
         $projectsQuery = ProjectManagementAccess::scopeVisibleSharedProjects(Project::query())
@@ -45,48 +46,92 @@ class AdminProjectController extends Controller
             ->get();
         $canViewProjectFiles = $canManageProjectFiles || $projects->isNotEmpty();
 
-        $statusCounts = $projects
-            ->groupBy(fn (Project $project) => $this->statusLabel($project->status))
-            ->map(fn ($group, string $label) => [
-                'label' => $label,
-                'count' => $group->count(),
-            ])
-            ->sortByDesc('count')
-            ->values();
+        $visibleFilesQuery = ProjectFile::query()
+            ->when(! $canManageProjectFiles, fn ($query) => $query
+                ->where('document_scope', 'project')
+                ->where('is_shared', true)
+                ->whereIn('project_id', $projects->modelKeys() ?: [0]));
+        $availableFolders = $canManageProjectFiles
+            ? (clone $visibleFilesQuery)
+                ->where('document_scope', 'company')
+                ->whereNotNull('folder')
+                ->distinct()
+                ->orderBy('folder')
+                ->pluck('folder')
+            : collect();
 
-        $maxFileCount = max(1, (int) $projects->max('files_count'));
-        $fileLeaders = $projects
-            ->filter(fn (Project $project) => $project->files_count > 0)
-            ->sortByDesc('files_count')
-            ->take(6)
-            ->map(fn (Project $project) => [
-                'name' => $project->name,
-                'project_number' => $project->project_number,
-                'count' => $project->files_count,
-                'width' => round(($project->files_count / $maxFileCount) * 100, 1),
-            ])
-            ->values();
+        $search = $request->string('q')->trim()->toString();
+        $scope = in_array($request->string('scope')->toString(), ['company', 'project'], true)
+            ? $request->string('scope')->toString()
+            : 'all';
+        $type = in_array($request->string('type')->toString(), ['pdf', 'image', 'document', 'spreadsheet', 'other'], true)
+            ? $request->string('type')->toString()
+            : 'all';
+        $sharing = in_array($request->string('sharing')->toString(), ['shared', 'private'], true)
+            ? $request->string('sharing')->toString()
+            : 'all';
+        $sort = in_array($request->string('sort')->toString(), ['oldest', 'name', 'size'], true)
+            ? $request->string('sort')->toString()
+            : 'newest';
+        $projectFilter = $request->integer('project');
+        $folderFilter = $request->string('folder')->trim()->toString();
+
+        $filesQuery = (clone $visibleFilesQuery)->with(['project', 'uploader'])
+            ->when($search !== '', fn ($query) => $query->where(function ($searchQuery) use ($search): void {
+                $searchQuery
+                    ->where('original_name', 'like', '%'.$search.'%')
+                    ->orWhere('description', 'like', '%'.$search.'%')
+                    ->orWhere('folder', 'like', '%'.$search.'%')
+                    ->orWhereHas('project', fn ($projectQuery) => $projectQuery
+                        ->where('name', 'like', '%'.$search.'%')
+                        ->orWhere('project_number', 'like', '%'.$search.'%'));
+            }))
+            ->when($scope !== 'all', fn ($query) => $query->where('document_scope', $scope))
+            ->when($projectFilter > 0, fn ($query) => $query->where('project_id', $projectFilter))
+            ->when($folderFilter !== '', fn ($query) => $query->where('folder', $folderFilter))
+            ->when($sharing === 'shared', fn ($query) => $query->where('is_shared', true))
+            ->when($sharing === 'private', fn ($query) => $query->where('is_shared', false));
+
+        $this->applyFileTypeFilter($filesQuery, $type);
+
+        $recentFiles = $canViewProjectFiles
+            ? (clone $filesQuery)->latest()->limit(6)->get()
+            : collect();
+
+        match ($sort) {
+            'oldest' => $filesQuery->oldest(),
+            'name' => $filesQuery->orderBy('original_name'),
+            'size' => $filesQuery->orderByDesc('size'),
+            default => $filesQuery->latest(),
+        };
 
         $files = $canViewProjectFiles
-            ? ProjectFile::query()
-                ->with('project')
-                ->when(! $canManageProjectFiles, fn ($query) => $query
-                    ->where('is_shared', true)
-                    ->whereIn('project_id', $projects->modelKeys() ?: [0]))
-                ->latest()
-                ->get()
-            : collect();
+            ? $filesQuery->paginate(12)->withQueryString()
+            : ProjectFile::query()->whereRaw('1 = 0')->paginate(12);
+        $fileCount = $canViewProjectFiles ? (clone $visibleFilesQuery)->count() : 0;
+        $companyFileCount = $canManageProjectFiles
+            ? (clone $visibleFilesQuery)->where('document_scope', 'company')->count()
+            : 0;
+        $projectFileCount = $canViewProjectFiles
+            ? (clone $visibleFilesQuery)->where('document_scope', 'project')->count()
+            : 0;
+        $sharedFileCount = $canViewProjectFiles
+            ? (clone $visibleFilesQuery)->where('is_shared', true)->count()
+            : 0;
+        $storageUsed = $canViewProjectFiles ? (int) (clone $visibleFilesQuery)->sum('size') : 0;
 
         return view('admin.projects.index', [
             'projects' => $projects,
             'files' => $files,
-            'statusCounts' => $statusCounts,
-            'statusChartStyle' => $this->statusChartStyle($statusCounts, $projects->count()),
-            'fileLeaders' => $fileLeaders,
+            'recentFiles' => $recentFiles,
+            'availableFolders' => $availableFolders,
             'projectCount' => $projects->count(),
-            'activeCount' => $projects->whereIn('status', ['active', 'in_progress'])->count(),
-            'fileCount' => (int) $projects->sum('files_count'),
-            'sharedFileCount' => (int) $projects->sum('shared_files_count'),
+            'fileCount' => $fileCount,
+            'companyFileCount' => $companyFileCount,
+            'projectFileCount' => $projectFileCount,
+            'sharedFileCount' => $sharedFileCount,
+            'storageUsed' => $storageUsed,
+            'filters' => compact('search', 'scope', 'type', 'sharing', 'sort', 'projectFilter', 'folderFilter'),
             'canViewProjectFiles' => $canViewProjectFiles,
             'canManageProjectFiles' => $canManageProjectFiles,
         ]);
@@ -144,21 +189,40 @@ class AdminProjectController extends Controller
     {
         abort_unless(AdminAccess::isFullAdmin(), 403);
 
+        $request->merge([
+            'document_scope' => $request->input('document_scope', 'project'),
+        ]);
+
         $validated = $request->validate([
-            'project_id' => ['required', 'integer', 'exists:projects,id'],
+            'document_scope' => ['required', Rule::in(['company', 'project'])],
+            'project_id' => [Rule::requiredIf(fn () => $request->input('document_scope') === 'project'), 'nullable', 'integer', 'exists:projects,id'],
+            'folder' => ['nullable', 'string', 'max:100'],
             'file' => ['required', 'file', 'max:51200', 'mimes:'.implode(',', self::FILE_MIMES)],
             'description' => ['nullable', 'string', 'max:500'],
         ]);
 
-        $project = Project::query()->findOrFail($validated['project_id']);
-        $projectFile = $this->createProjectFile($project, $validated['file'], $validated['description'] ?? null);
+        $project = $validated['document_scope'] === 'project'
+            ? Project::query()->findOrFail($validated['project_id'])
+            : null;
+        $projectFile = $this->createProjectFile(
+            $project,
+            $validated['file'],
+            $validated['description'] ?? null,
+            $validated['folder'] ?? null,
+            $validated['document_scope']
+        );
+        $message = $project
+            ? 'File added to the project workspace.'
+            : 'Company document added to the library.';
 
         if ($request->expectsJson() || $request->ajax()) {
             return response()->json([
-                'message' => 'External file added to the project workspace.',
+                'message' => $message,
                 'data' => [
                     'id' => $projectFile->id,
                     'project_id' => $projectFile->project_id,
+                    'document_scope' => $projectFile->document_scope,
+                    'folder' => $projectFile->folder,
                     'original_name' => $projectFile->original_name,
                     'description' => $projectFile->description,
                     'file_kind' => $projectFile->fileKind(),
@@ -170,11 +234,17 @@ class AdminProjectController extends Controller
         }
 
         return redirect()
-            ->route('admin.projects.show', $project)
-            ->with('status', 'External file added to the project workspace.');
+            ->route($project ? 'admin.projects.show' : 'admin.projects.index', $project ? [$project] : [])
+            ->with('status', $message);
     }
 
-    private function createProjectFile(Project $project, UploadedFile $file, ?string $description): ProjectFile
+    private function createProjectFile(
+        ?Project $project,
+        UploadedFile $file,
+        ?string $description,
+        ?string $folder = null,
+        string $documentScope = 'project'
+    ): ProjectFile
     {
         $path = $this->projectFilePath($project, $file);
         $storedPath = $file->storeAs(dirname($path), basename($path), self::PROJECT_FILES_DISK);
@@ -184,9 +254,13 @@ class AdminProjectController extends Controller
         }
 
         try {
-            return DB::transaction(function () use ($project, $file, $description, $storedPath): ProjectFile {
+            return DB::transaction(function () use ($project, $file, $description, $folder, $documentScope, $storedPath): ProjectFile {
                 return ProjectFile::query()->create([
-                    'project_id' => $project->id,
+                    'project_id' => $project?->id,
+                    'document_scope' => $documentScope,
+                    'folder' => filled($folder)
+                        ? Str::limit(trim($folder), 100, '')
+                        : ($documentScope === 'company' ? 'General' : null),
                     'uploaded_by' => AdminAccess::currentUser()?->id,
                     'original_name' => $this->originalName($file),
                     'path' => $storedPath,
@@ -222,6 +296,7 @@ class AdminProjectController extends Controller
 
         $validated = $request->validate([
             'file' => ['nullable', 'file', 'max:51200', 'mimes:'.implode(',', self::FILE_MIMES)],
+            'folder' => ['nullable', 'string', 'max:100'],
             'description' => ['nullable', 'string', 'max:500'],
         ]);
 
@@ -231,7 +306,7 @@ class AdminProjectController extends Controller
         if ($request->hasFile('file')) {
             $newFile = $validated['file'];
             $replacementPath = $this->projectFilePath(
-                Project::query()->findOrFail($projectFile->project_id),
+                $projectFile->project_id ? Project::query()->findOrFail($projectFile->project_id) : null,
                 $newFile
             );
             $newPath = $newFile->storeAs(dirname($replacementPath), basename($replacementPath), self::PROJECT_FILES_DISK);
@@ -256,6 +331,12 @@ class AdminProjectController extends Controller
         if ($request->exists('description')) {
             $attributes['description'] = filled($validated['description'] ?? null)
                 ? trim($validated['description'])
+                : null;
+        }
+
+        if ($request->exists('folder')) {
+            $attributes['folder'] = filled($validated['folder'] ?? null)
+                ? Str::limit(trim($validated['folder']), 100, '')
                 : null;
         }
 
@@ -286,6 +367,7 @@ class AdminProjectController extends Controller
                     'id' => $projectFile->id,
                     'original_name' => $projectFile->original_name,
                     'description' => $projectFile->description,
+                    'folder' => $projectFile->folder,
                     'file_kind' => $projectFile->fileKind(),
                     'size_label' => $projectFile->sizeLabel(),
                     'mime_type' => $projectFile->mime_type,
@@ -324,7 +406,7 @@ class AdminProjectController extends Controller
         Storage::disk(self::PROJECT_FILES_DISK)->delete($path);
 
         return $this->projectFileRedirect(request(), $projectFile, $projectId)
-            ->with('status', 'File removed from the project workspace.');
+            ->with('status', 'File removed from the document library.');
     }
 
     private function projectFileRedirect(Request $request, ProjectFile $projectFile, ?int $projectId = null): RedirectResponse
@@ -333,7 +415,13 @@ class AdminProjectController extends Controller
             return redirect()->route('admin.projects.index');
         }
 
-        $project = Project::query()->findOrFail($projectId ?? $projectFile->project_id);
+        $resolvedProjectId = $projectId ?? $projectFile->project_id;
+
+        if ($resolvedProjectId === null) {
+            return redirect()->route('admin.projects.index');
+        }
+
+        $project = Project::query()->findOrFail($resolvedProjectId);
 
         return redirect()->route('admin.projects.show', $project);
     }
@@ -354,12 +442,14 @@ class AdminProjectController extends Controller
         return $this->fileResponse($projectFile, false);
     }
 
-    private function projectFilePath(Project $project, UploadedFile $file): string
+    private function projectFilePath(?Project $project, UploadedFile $file): string
     {
         $extension = strtolower($file->getClientOriginalExtension() ?: $file->guessExtension() ?: 'file');
         $extension = preg_replace('/[^a-z0-9]+/i', '', $extension) ?: 'file';
 
-        return self::PROJECT_FILES_DIRECTORY.'/'.$project->id.'/'.Str::uuid().'.'.$extension;
+        $location = $project ? (string) $project->id : 'company';
+
+        return self::PROJECT_FILES_DIRECTORY.'/'.$location.'/'.Str::uuid().'.'.$extension;
     }
 
     private function originalName(UploadedFile $file): string
@@ -400,31 +490,49 @@ class AdminProjectController extends Controller
             return;
         }
 
-        abort_unless($projectFile->is_shared && ProjectManagementAccess::canViewSharedFiles($projectFile->project), 403);
+        abort_unless(
+            ! $projectFile->isCompanyDocument()
+            && $projectFile->is_shared
+            && $projectFile->project
+            && ProjectManagementAccess::canViewSharedFiles($projectFile->project),
+            403
+        );
     }
 
-    private function statusLabel(?string $status): string
+    private function applyFileTypeFilter($query, string $type): void
     {
-        return filled($status) ? Str::headline($status) : 'Uncategorised';
+        $documentMimes = [
+            'application/msword',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'application/vnd.ms-powerpoint',
+            'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+            'text/plain',
+            'application/rtf',
+            'text/rtf',
+        ];
+        $spreadsheetMimes = [
+            'application/vnd.ms-excel',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'text/csv',
+        ];
+
+        match ($type) {
+            'pdf' => $query->where('mime_type', 'application/pdf'),
+            'image' => $query->where('mime_type', 'like', 'image/%'),
+            'document' => $query->whereIn('mime_type', $documentMimes),
+            'spreadsheet' => $query->whereIn('mime_type', $spreadsheetMimes),
+            'other' => $query->where(function ($otherQuery) use ($documentMimes, $spreadsheetMimes): void {
+                $otherQuery
+                    ->whereNull('mime_type')
+                    ->orWhere(function ($knownQuery) use ($documentMimes, $spreadsheetMimes): void {
+                        $knownQuery
+                            ->where('mime_type', '!=', 'application/pdf')
+                            ->where('mime_type', 'not like', 'image/%')
+                            ->whereNotIn('mime_type', [...$documentMimes, ...$spreadsheetMimes]);
+                    });
+            }),
+            default => null,
+        };
     }
 
-    private function statusChartStyle($statusCounts, int $total): string
-    {
-        if ($total === 0) {
-            return 'background: conic-gradient(#ece7dd 0deg 360deg);';
-        }
-
-        $colors = ['#b8860b', '#2f8054', '#6f5015', '#c08a4a', '#343b48', '#b94a3d'];
-        $cursor = 0;
-        $stops = [];
-
-        foreach ($statusCounts as $index => $status) {
-            $next = $cursor + (($status['count'] / $total) * 360);
-            $color = $colors[$index % count($colors)];
-            $stops[] = $color.' '.round($cursor, 2).'deg '.round($next, 2).'deg';
-            $cursor = $next;
-        }
-
-        return 'background: conic-gradient('.implode(', ', $stops).');';
-    }
 }

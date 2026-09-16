@@ -25,7 +25,7 @@ it('does not keep file payload tables in the database', function () {
         ->and(Schema::hasTable('staff_contract_document_contents'))->toBeFalse();
 });
 
-it('shows project portfolio charts and the file workspace entry point', function () {
+it('shows the company and project document library', function () {
     $project = Project::query()->create([
         'project_number' => 'TT-PRJ-CHART-001',
         'name' => 'Northstar Client Portal',
@@ -45,12 +45,13 @@ it('shows project portfolio charts and the file workspace entry point', function
         ->withSession(projectAdminSession())
         ->get(route('admin.projects.index'))
         ->assertOk()
-        ->assertSee('Projects by status')
-        ->assertSee('Files by project')
-        ->assertSee('Upload a file for the project team')
-        ->assertSee('Shared files')
+        ->assertSee('File management')
+        ->assertSee('Company documents')
+        ->assertSee('Browse by location')
+        ->assertSee('Recent files')
+        ->assertSee('Add to the library')
         ->assertSee('Choose a project')
-        ->assertSee('Project file library')
+        ->assertSee('All documents')
         ->assertSee('Download')
         ->assertSee('Update')
         ->assertSee('Remove')
@@ -61,6 +62,64 @@ it('shows project portfolio charts and the file workspace entry point', function
         ->get(route('admin.projects.show', $project))
         ->assertOk()
         ->assertSee('Create share link');
+});
+
+it('stores and filters company documents without a project record', function () {
+    Storage::fake('public_uploads');
+
+    $project = Project::query()->create([
+        'project_number' => 'TT-PRJ-FILTER-001',
+        'name' => 'Website Delivery',
+        'status' => 'active',
+    ]);
+    ProjectFile::query()->create([
+        'project_id' => $project->id,
+        'document_scope' => 'project',
+        'original_name' => 'website-handover.pdf',
+        'path' => 'projects/files/'.$project->id.'/handover.pdf',
+        'mime_type' => 'application/pdf',
+        'size' => 1024,
+    ]);
+
+    $this
+        ->withSession(projectAdminSession())
+        ->postJson(route('admin.projects.files.external.store'), [
+            'document_scope' => 'company',
+            'folder' => 'Finance',
+            'file' => UploadedFile::fake()->create('annual-budget.xlsx', 64, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'),
+            'description' => 'Approved company budget.',
+        ])
+        ->assertCreated()
+        ->assertJsonPath('data.project_id', null)
+        ->assertJsonPath('data.document_scope', 'company')
+        ->assertJsonPath('data.folder', 'Finance');
+
+    $companyDocument = ProjectFile::query()->where('document_scope', 'company')->firstOrFail();
+
+    expect($companyDocument->project_id)->toBeNull()
+        ->and($companyDocument->locationLabel())->toBe('Company / Finance')
+        ->and($companyDocument->path)->toContain('/company/');
+
+    Storage::disk('public_uploads')->assertExists($companyDocument->path);
+
+    $this
+        ->withSession(projectAdminSession())
+        ->get(route('admin.projects.index', ['scope' => 'company', 'q' => 'budget']))
+        ->assertOk()
+        ->assertSee('annual-budget.xlsx')
+        ->assertSee('Finance')
+        ->assertDontSee('website-handover.pdf');
+
+    $this
+        ->withSession(projectAdminSession())
+        ->post(route('admin.projects.files.share', $companyDocument), ['return_to' => 'index'])
+        ->assertRedirect(route('admin.projects.index'));
+
+    $companyDocument->refresh();
+    $this->get(route('project-files.share', $companyDocument->share_token))
+        ->assertOk()
+        ->assertSee('Company documents')
+        ->assertSee('annual-budget.xlsx');
 });
 
 it('uploads an external project file with ajax even when the project has no staff contract', function () {
@@ -280,7 +339,7 @@ it('lets subaccounts view projects while limiting project file access separately
         ->withSession($limitedSession)
         ->get(route('admin.projects.index'))
         ->assertOk()
-        ->assertSee('Project file access is limited for this account.')
+        ->assertSee('File access is limited for this account.')
         ->assertDontSee('Limited File Access Project')
         ->assertDontSee('Upload a file for the project team');
 

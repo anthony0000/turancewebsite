@@ -8,7 +8,9 @@
         @endif
         <label for="project-file-replacement-{{ $file->id }}">Replace file <span>(optional)</span></label>
         <input id="project-file-replacement-{{ $file->id }}" type="file" name="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.ppt,.pptx,.txt,.rtf,.jpg,.jpeg,.png,.webp,.zip">
-        <small>Leave this empty to update only the description.</small>
+        <small>Leave this empty to update only the document details.</small>
+        <label for="project-file-update-folder-{{ $file->id }}">Folder <span>(optional)</span></label>
+        <input id="project-file-update-folder-{{ $file->id }}" type="text" name="folder" maxlength="100" value="{{ old('folder', $file->folder) }}" placeholder="e.g. Legal, Finance, Deliverables">
         <label for="project-file-update-description-{{ $file->id }}">Description <span>(optional)</span></label>
         <textarea id="project-file-update-description-{{ $file->id }}" name="description" rows="3" maxlength="500">{{ old('description', $file->description) }}</textarea>
         <button class="button" type="submit">Save update</button>
@@ -138,7 +140,7 @@
                             }
 
                             if (meta) {
-                                meta.textContent = data.file_kind + ' \u00b7 ' + data.size_label;
+                                meta.textContent = data.file_kind + ' \u00b7 ' + data.size_label + (data.folder ? ' \u00b7 ' + data.folder : '');
                             }
 
                             if (data.description) {

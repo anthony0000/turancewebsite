@@ -10,6 +10,8 @@ class ProjectFile extends Model
 {
     protected $fillable = [
         'project_id',
+        'document_scope',
+        'folder',
         'uploaded_by',
         'original_name',
         'path',
@@ -33,6 +35,20 @@ class ProjectFile extends Model
     public function project(): BelongsTo
     {
         return $this->belongsTo(Project::class);
+    }
+
+    public function isCompanyDocument(): bool
+    {
+        return $this->document_scope === 'company' || $this->project_id === null;
+    }
+
+    public function locationLabel(): string
+    {
+        if ($this->isCompanyDocument()) {
+            return filled($this->folder) ? 'Company / '.$this->folder : 'Company documents';
+        }
+
+        return $this->project?->name ?? 'Project unavailable';
     }
 
     public function uploader(): BelongsTo

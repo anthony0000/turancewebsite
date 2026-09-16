@@ -1,6 +1,6 @@
 @extends('admin.layouts.app')
 
-@section('title', $project->name.' | File sharing')
+@section('title', $project->name.' | Project documents')
 
 @section('content')
     @php
@@ -10,7 +10,7 @@
 
     <section class="panel hero-banner project-detail-hero">
         <div>
-            <span class="eyebrow">Project file sharing · {{ $project->project_number }}</span>
+            <span class="eyebrow">Project documents · {{ $project->project_number }}</span>
             <h1>{{ $project->name }}</h1>
             <p>{{ $project->description ?: 'A shared project room for working files, signed documents, and references.' }}</p>
             <div class="hero-actions">
@@ -27,7 +27,7 @@
                 <p>{{ $clientLabel }}</p>
             </div>
             <div class="callout-card">
-                <span class="metric-label">File sharing</span>
+                <span class="metric-label">Document access</span>
                 @if ($canViewProjectFiles)
                     <strong>{{ number_format($sharedFileCount) }} shared</strong>
                     <p>{{ number_format($files->count()) }} total project {{ \Illuminate\Support\Str::plural('file', $files->count()) }}</p>
