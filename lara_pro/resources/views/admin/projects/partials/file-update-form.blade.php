@@ -1,5 +1,11 @@
 <details class="project-file-edit">
-    <summary class="ghost-button">Update</summary>
+    <summary class="ghost-button" @if($compact ?? false) title="Update document" aria-label="Update {{ $file->original_name }}" @endif>
+        @if ($compact ?? false)
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 16-.5 4.5L8 20l10.5-10.5-4-4Z"/><path d="m12.5 7.5 4 4"/></svg>
+        @else
+            Update
+        @endif
+    </summary>
     <form method="POST" action="{{ route('admin.projects.files.update', $file) }}" enctype="multipart/form-data" class="project-file-edit__form" data-project-file-update data-project-file-update-id="{{ $file->id }}">
         @csrf
         @method('PUT')
