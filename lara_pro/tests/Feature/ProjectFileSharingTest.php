@@ -53,6 +53,9 @@ it('shows the company and project document library', function () {
         ->assertSee('role="dialog"', false)
         ->assertSee('data-upload-open', false)
         ->assertSee('data-file-dropzone', false)
+        ->assertSee('data-file-preview', false)
+        ->assertSee('data-file-preview-modal', false)
+        ->assertDontSee('target="_blank" rel="noopener" title="Preview"', false)
         ->assertSee('name="files[]"', false)
         ->assertSee('multiple', false)
         ->assertSee('Add folder and description')
@@ -67,6 +70,8 @@ it('shows the company and project document library', function () {
         ->withSession(projectAdminSession())
         ->get(route('admin.projects.show', $project))
         ->assertOk()
+        ->assertSee('data-file-preview', false)
+        ->assertSee('data-file-preview-modal', false)
         ->assertSee('Create share link');
 });
 
@@ -242,6 +247,12 @@ it('stores project files privately, shares one file, and can revoke the link', f
         ->get(route('admin.projects.files.download', $projectFile))
         ->assertOk()
         ->assertHeader('Content-Disposition', 'attachment; filename=approved-reference.pdf');
+
+    $this
+        ->withSession(projectAdminSession())
+        ->get(route('admin.projects.files.preview', $projectFile))
+        ->assertOk()
+        ->assertHeader('Content-Disposition', 'inline; filename="approved-reference.pdf"');
 
     $this
         ->withSession(projectAdminSession())

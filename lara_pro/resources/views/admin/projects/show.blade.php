@@ -80,7 +80,7 @@
 
                                     <div class="project-file-card__actions">
                                         @if (in_array($file->mime_type, $previewableMimes, true))
-                                            <a class="ghost-button" href="{{ route('admin.projects.files.preview', $file) }}" target="_blank" rel="noopener">Preview</a>
+                                            <a class="ghost-button" href="{{ route('admin.projects.files.preview', $file) }}" data-file-preview data-file-name="{{ $file->original_name }}" data-download-url="{{ route('admin.projects.files.download', $file) }}">Preview</a>
                                         @endif
                                         <a class="ghost-button" href="{{ route('admin.projects.files.download', $file) }}">Download</a>
                                         @if ($canManageProjectFiles)
@@ -224,6 +224,7 @@
             </div>
         </section>
     @endif
+    @include('admin.projects.partials.file-preview-modal')
 @endsection
 
 @push('scripts')

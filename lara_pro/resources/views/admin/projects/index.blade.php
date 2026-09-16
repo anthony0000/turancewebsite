@@ -108,7 +108,7 @@
                                 <div class="fm-file-cell"><small>Access</small><span class="{{ $file->is_shared ? 'file-share-badge' : 'file-private-badge' }}">{{ $file->is_shared ? 'Shared' : 'Private' }}</span></div>
                                 <div class="fm-file-actions">
                                     @if (in_array($file->mime_type, $previewableMimes, true))
-                                        <a class="fm-icon-action" href="{{ route('admin.projects.files.preview', $file) }}" target="_blank" rel="noopener" title="Preview" aria-label="Preview {{ $file->original_name }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"/><circle cx="12" cy="12" r="2.5"/></svg></a>
+                                        <a class="fm-icon-action" href="{{ route('admin.projects.files.preview', $file) }}" data-file-preview data-file-name="{{ $file->original_name }}" data-download-url="{{ route('admin.projects.files.download', $file) }}" title="Preview" aria-label="Preview {{ $file->original_name }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"/><circle cx="12" cy="12" r="2.5"/></svg></a>
                                     @endif
                                     <a class="fm-icon-action" href="{{ route('admin.projects.files.download', $file) }}" title="Download" aria-label="Download {{ $file->original_name }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11"/><path d="m7 11 5 5 5-5"/><path d="M5 20h14"/></svg></a>
                                     @if ($canManageProjectFiles)
@@ -174,6 +174,8 @@
                 </section>
             </div>
         @endif
+
+        @include('admin.projects.partials.file-preview-modal')
     </div>
 @endsection
 
