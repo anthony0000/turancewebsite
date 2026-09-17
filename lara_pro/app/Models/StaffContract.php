@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
+use App\Support\PersistentUploadStorage;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Support\Facades\Storage;
 
 class StaffContract extends Model
 {
@@ -58,9 +58,7 @@ class StaffContract extends Model
         }
 
         $relativePath = ltrim((string) $this->signed_document_path, '/\\\\');
-        $disk = Storage::disk('public_uploads');
-
-        if ($disk->exists($relativePath)) {
+        if (PersistentUploadStorage::exists($relativePath)) {
             return true;
         }
 

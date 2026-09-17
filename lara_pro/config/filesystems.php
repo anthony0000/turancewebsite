@@ -40,9 +40,21 @@ return [
 
         'public_uploads' => [
             'driver' => 'local',
+            'root' => env(
+                'PERSISTENT_UPLOADS_PATH',
+                env('APP_ENV') === 'testing'
+                    ? storage_path('framework/testing/disks/persistent-uploads')
+                    : dirname(base_path(), 2).DIRECTORY_SEPARATOR.'turance-persistent-uploads'
+            ),
+            'visibility' => 'private',
+            'throw' => false,
+            'report' => false,
+        ],
+
+        'legacy_public_uploads' => [
+            'driver' => 'local',
             'root' => public_path('uploads'),
-            'url' => env('APP_URL').'/uploads',
-            'visibility' => 'public',
+            'visibility' => 'private',
             'throw' => false,
             'report' => false,
         ],

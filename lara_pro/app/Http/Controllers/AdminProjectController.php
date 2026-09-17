@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Project;
 use App\Models\ProjectFile;
 use App\Support\AdminAccess;
+use App\Support\PersistentUploadStorage;
 use App\Support\ProjectManagementAccess;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
@@ -13,7 +14,6 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -241,7 +241,7 @@ class AdminProjectController extends Controller
             foreach ($projectFiles as $storedFile) {
                 $storedPath = $storedFile->path;
                 $storedFile->delete();
-                Storage::disk(self::PROJECT_FILES_DISK)->delete($storedPath);
+                PersistentUploadStorage::delete($storedPath);
             }
 
             throw $exception;
@@ -301,7 +301,7 @@ class AdminProjectController extends Controller
                 ]);
             });
         } catch (Throwable $exception) {
-            Storage::disk(self::PROJECT_FILES_DISK)->delete($storedPath);
+            PersistentUploadStorage::delete($storedPath);
 
             throw $exception;
         }
@@ -393,14 +393,14 @@ class AdminProjectController extends Controller
             });
         } catch (Throwable $exception) {
             if ($newPath !== null) {
-                Storage::disk(self::PROJECT_FILES_DISK)->delete($newPath);
+                PersistentUploadStorage::delete($newPath);
             }
 
             throw $exception;
         }
 
         if ($newPath !== null && $oldPath !== $newPath) {
-            Storage::disk(self::PROJECT_FILES_DISK)->delete($oldPath);
+            PersistentUploadStorage::delete($oldPath);
         }
 
         $message = $newPath !== null
@@ -450,7 +450,7 @@ class AdminProjectController extends Controller
         $projectId = $projectFile->project_id;
         $path = $projectFile->path;
         $projectFile->delete();
-        Storage::disk(self::PROJECT_FILES_DISK)->delete($path);
+        PersistentUploadStorage::delete($path);
 
         return $this->projectFileRedirect(request(), $projectFile, $projectId)
             ->with('status', 'File removed from the document library.');
@@ -515,7 +515,9 @@ class AdminProjectController extends Controller
             'X-Content-Type-Options' => 'nosniff',
         ];
 
-        $path = Storage::disk(self::PROJECT_FILES_DISK)->path($projectFile->path);
+        $path = PersistentUploadStorage::absolutePath($projectFile->path);
+
+        abort_unless($path !== null, 404);
 
         if ($inline) {
             $headers['Content-Disposition'] = 'inline; filename="'.addslashes($projectFile->original_name).'"';

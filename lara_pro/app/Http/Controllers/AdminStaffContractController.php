@@ -6,6 +6,7 @@ use App\Models\LuxuryQuote;
 use App\Models\Project;
 use App\Models\StaffContract;
 use App\Support\DocumentTypography;
+use App\Support\PersistentUploadStorage;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -14,7 +15,6 @@ use Illuminate\Http\Response;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use RuntimeException;
@@ -261,10 +261,10 @@ class AdminStaffContractController extends Controller
         abort_unless($contract->hasSignedDocument(), 404);
 
         $relativePath = ltrim((string) $contract->signed_document_path, '/\\\\');
-        $disk = Storage::disk(self::SIGNED_DOCUMENT_DISK);
+        $persistentPath = PersistentUploadStorage::absolutePath($relativePath);
 
-        if ($disk->exists($relativePath)) {
-            return $disk->path($relativePath);
+        if ($persistentPath !== null) {
+            return $persistentPath;
         }
 
         // Keep documents uploaded before the private local disk was enabled
@@ -329,13 +329,13 @@ class AdminStaffContractController extends Controller
                 ])->save();
             });
         } catch (Throwable $exception) {
-            Storage::disk(self::SIGNED_DOCUMENT_DISK)->delete($storedPath);
+            PersistentUploadStorage::delete($storedPath);
 
             throw $exception;
         }
 
         if (filled($oldPath) && $oldPath !== $storedPath) {
-            Storage::disk(self::SIGNED_DOCUMENT_DISK)->delete($oldPath);
+            PersistentUploadStorage::delete($oldPath);
         }
     }
 
