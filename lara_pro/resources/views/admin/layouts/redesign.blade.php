@@ -1200,9 +1200,7 @@ body.is-admin .admin-profile-panel form { margin: 0; }
     line-height: 1.6;
 }
 
-.project-status-badge,
-.file-share-badge,
-.file-private-badge {
+.project-status-badge {
     display: inline-flex;
     align-items: center;
     min-height: 26px;
@@ -1214,15 +1212,50 @@ body.is-admin .admin-profile-panel form { margin: 0; }
     text-transform: uppercase;
 }
 
-.project-status-badge,
-.file-private-badge {
+.project-status-badge {
     background: var(--surface-soft);
     color: var(--muted-strong);
 }
 
-.file-share-badge {
-    background: #eaf7f1;
-    color: var(--success);
+.file-access-badge {
+    display: inline-flex;
+    width: max-content;
+    min-height: 24px;
+    align-items: center;
+    gap: 5px;
+    padding: 0 8px;
+    border: 1px solid var(--file-access-border);
+    border-radius: 7px;
+    background: var(--file-access-background);
+    color: var(--file-access-color);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0;
+    line-height: 1;
+    text-transform: none;
+    white-space: nowrap;
+}
+
+.file-access-badge svg {
+    width: 12px;
+    height: 12px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.file-access-badge--private {
+    --file-access-background: #f7f5f1;
+    --file-access-border: #e3ded5;
+    --file-access-color: #686158;
+}
+
+.file-access-badge--shared {
+    --file-access-background: #edf8f3;
+    --file-access-border: #cce8db;
+    --file-access-color: #27704c;
 }
 
 .project-detail-grid {

@@ -68,9 +68,9 @@
                                             <p><span data-project-file-meta>{{ $file->fileKind() }} · {{ $file->sizeLabel() }}</span> · Added {{ optional($file->created_at)->format('M d, Y') }}</p>
                                         </div>
                                         @if ($file->is_shared)
-                                            <span class="file-share-badge">Shared</span>
+                                            <span class="file-access-badge file-access-badge--shared"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.5 14.5 14.5 9.5"/><path d="m7.5 16.5-1.7 1.7a3 3 0 0 1-4.2-4.2l3.2-3.2A3 3 0 0 1 9 10.7"/><path d="M15 13.3a3 3 0 0 1 .2-4.1L18.4 6a3 3 0 0 1 4.2 4.2l-1.7 1.7"/></svg>Shared</span>
                                         @else
-                                            <span class="file-private-badge">Private</span>
+                                            <span class="file-access-badge file-access-badge--private"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>Private</span>
                                         @endif
                                     </div>
 

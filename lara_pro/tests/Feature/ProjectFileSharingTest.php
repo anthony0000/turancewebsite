@@ -64,6 +64,7 @@ it('shows the company and project document library', function () {
         ->assertSee('Download')
         ->assertSee('Update')
         ->assertSee('Remove')
+        ->assertSee('file-access-badge--private', false)
         ->assertSee('Northstar Client Portal');
 
     $this
