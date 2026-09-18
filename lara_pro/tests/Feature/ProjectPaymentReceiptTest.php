@@ -103,7 +103,9 @@ it('stores a project payment receipt as a private persistent file and only metad
         ->get(route('admin.project-payments.show', $invoice))
         ->assertOk()
         ->assertSee('transfer-receipt.pdf')
-        ->assertSee('Private persistent storage');
+        ->assertSee('Payment evidence')
+        ->assertSee('Add payment receipt')
+        ->assertDontSee('The file is stored privately outside the application release');
 
     $this->withSession(paymentReceiptSession($admin))
         ->get(route('admin.project-payments.receipts.preview', $receipt))

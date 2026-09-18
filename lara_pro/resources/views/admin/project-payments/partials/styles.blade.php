@@ -121,6 +121,54 @@
     .ppi-register-table tbody tr:hover { background: #fdfbf7; }
     .ppi-register-table .ppi-status { border: 1px solid rgba(148,102,0,.11); }
     .ppi-register-table .ppi-status--paid { border-color: rgba(21,115,71,.11); }
+    body.is-admin .ppi-invoice-topbar { display: flex; align-items: flex-end; justify-content: space-between; gap: 28px; padding: 4px 2px 20px; border-bottom: 1px solid #e6e9ec; }
+    .ppi-invoice-heading { min-width: 0; }
+    .ppi-invoice-heading__eyebrow { display: flex; align-items: center; gap: 10px; }
+    .ppi-invoice-heading__eyebrow .ppi-status { padding: 4px 8px; font-size: 10px; }
+    body.is-admin .ppi-invoice-heading h2 { margin: 8px 0 7px; color: #17191d; font-family: var(--font-display); font-size: clamp(26px, 3vw, 36px); font-weight: 600; letter-spacing: -.045em; line-height: 1.05; }
+    .ppi-invoice-heading__meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; color: #747b85; font-size: 12px; }
+    .ppi-invoice-heading__meta i { width: 3px; height: 3px; border-radius: 50%; background: #b6bbc2; }
+    body.is-admin .ppi-invoice-topbar__actions { flex: 0 0 auto; gap: 8px; }
+    body.is-admin .ppi-invoice-topbar__actions .button, body.is-admin .ppi-invoice-topbar__actions .ghost-button { min-height: 38px; padding-inline: 13px; border-radius: 7px; }
+    .ppi-invoice-topbar__actions svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+    .ppi-back-link { display: inline-flex; min-height: 38px; align-items: center; padding-inline: 5px; color: #6d747e; font-size: 11px; font-weight: 650; text-decoration: none; }
+    .ppi-back-link:hover { color: #8b691b; }
+    body.is-admin .admin-main .ppi-receipt-workspace.panel { overflow: hidden; border-color: #e4e7ea; border-radius: 11px; background: #fff; }
+    .ppi-receipt-workspace__head { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; padding: 20px; border-bottom: 1px solid #eceef0; }
+    .ppi-receipt-workspace__head h3 { margin: 4px 0 5px; color: #20242a; font-size: 19px; letter-spacing: -.025em; }
+    .ppi-receipt-workspace__head p { margin: 0; color: #7a818b; font-size: 12px; }
+    .ppi-receipt-count { padding: 5px 9px; border-radius: 999px; background: #f0f2f4; color: #656d77; font-size: 10px; font-weight: 700; white-space: nowrap; }
+    .ppi-proof-list { display: grid; }
+    .ppi-proof-row { display: grid; grid-template-columns: 38px minmax(0, 1fr) minmax(135px, auto) auto; gap: 14px; align-items: center; padding: 16px 20px; border-bottom: 1px solid #edf0f2; }
+    .ppi-proof-row:hover { background: #fdfcf9; }
+    .ppi-proof-icon { display: grid; width: 36px; height: 36px; flex: 0 0 auto; place-items: center; border-radius: 9px; background: #f5efe1; color: #9a741d; }
+    .ppi-proof-icon svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+    .ppi-proof-row__main { min-width: 0; }
+    .ppi-proof-row__main h4, .ppi-receipt-empty h4 { margin: 0; color: #252a31; font-size: 13px; font-weight: 650; }
+    .ppi-proof-row__main p { margin: 4px 0 0; color: #747b85; font-size: 11px; }
+    .ppi-proof-row__main small { display: block; margin-top: 4px; overflow: hidden; color: #9a9fa7; font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
+    .ppi-proof-row__amount { color: #20242a; font-size: 13px; text-align: right; white-space: nowrap; }
+    body.is-admin .ppi-proof-row__actions { flex-wrap: nowrap; gap: 7px; }
+    body.is-admin .ppi-proof-row__actions .ghost-button { min-height: 34px; padding-inline: 11px; border-radius: 7px; font-size: 11px; }
+    .ppi-receipt-empty { display: flex; align-items: center; gap: 13px; padding: 22px 20px; border-bottom: 1px solid #edf0f2; }
+    .ppi-receipt-empty p { margin: 4px 0 0; color: #7a818b; font-size: 11px; }
+    .ppi-receipt-compose { background: #fbfcfd; }
+    .ppi-receipt-compose > summary { display: grid; grid-template-columns: minmax(0, 1fr) auto 18px; gap: 14px; align-items: center; padding: 15px 20px; cursor: pointer; list-style: none; }
+    .ppi-receipt-compose > summary::-webkit-details-marker { display: none; }
+    .ppi-receipt-compose > summary > span { display: inline-flex; align-items: center; gap: 9px; color: #242930; font-size: 12px; font-weight: 650; }
+    .ppi-receipt-compose > summary > span b { display: grid; width: 23px; height: 23px; place-items: center; border-radius: 6px; background: #1d2025; color: #fff; font-size: 16px; font-weight: 400; }
+    .ppi-receipt-compose > summary small { color: #868c95; font-size: 10px; }
+    .ppi-receipt-compose > summary svg { width: 16px; height: 16px; fill: none; stroke: #69717b; stroke-width: 1.8; transition: transform .16s ease; }
+    .ppi-receipt-compose[open] > summary svg { transform: rotate(180deg); }
+    .ppi-receipt-compose__body { padding: 20px; border-top: 1px solid #e7eaed; background: #fff; }
+    .ppi-receipt-form-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+    .ppi-receipt-form-span-2 { grid-column: span 2; }
+    .ppi-receipt-form-grid .field label span { color: #9298a0; font-weight: 400; }
+    body.is-admin .ppi-receipt-form-grid input, body.is-admin .ppi-receipt-form-grid select, body.is-admin .ppi-receipt-form-grid textarea { border-color: #dde1e5; border-radius: 7px; background: #fbfcfd; }
+    body.is-admin .ppi-receipt-form-grid .ppi-file-input { min-height: 44px; padding: 6px; border-style: solid; }
+    .ppi-file-input::file-selector-button { height: 30px; margin-right: 10px; padding: 0 11px; border: 0; border-radius: 5px; background: #e9ecef; color: #30363d; cursor: pointer; font-size: 11px; font-weight: 650; }
+    .ppi-receipt-submit { display: flex; justify-content: flex-end; padding-top: 4px; }
+    body.is-admin .ppi-receipt-submit .button { min-height: 39px; border-radius: 7px; }
     @media (max-width: 1050px) {
         .ppi-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
         .ppi-form-layout, .ppi-detail-grid, .ppi-receipt-grid { grid-template-columns: 1fr; }
@@ -129,6 +177,8 @@
         body.is-admin .ppi-summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
         .ppi-filter-bar { grid-template-columns: minmax(240px, 1fr) minmax(140px, .4fr) minmax(190px, .6fr) auto; }
         .ppi-clear-filter { grid-column: 1 / -1; min-height: auto; padding: 0; }
+        body.is-admin .ppi-invoice-topbar { align-items: flex-start; flex-direction: column; }
+        .ppi-receipt-form-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
     @media (max-width: 680px) {
         .ppi-hero { align-items: flex-start; flex-direction: column; }
@@ -143,5 +193,15 @@
         body.is-admin .ppi-summary-grid { grid-template-columns: 1fr; }
         .ppi-filter-bar { grid-template-columns: 1fr; }
         body.is-admin .ppi-filter-bar .button { width: 100%; }
+        body.is-admin .ppi-invoice-topbar__actions { width: 100%; }
+        body.is-admin .ppi-invoice-topbar__actions .button, body.is-admin .ppi-invoice-topbar__actions .ghost-button { flex: 1; }
+        .ppi-back-link { width: 100%; justify-content: center; }
+        .ppi-proof-row { grid-template-columns: 38px minmax(0, 1fr); }
+        .ppi-proof-row__amount { grid-column: 2; text-align: left; }
+        .ppi-proof-row__actions { grid-column: 1 / -1; }
+        .ppi-receipt-compose > summary { grid-template-columns: minmax(0, 1fr) 18px; }
+        .ppi-receipt-compose > summary small { display: none; }
+        .ppi-receipt-form-grid { grid-template-columns: 1fr; }
+        .ppi-receipt-form-span-2 { grid-column: auto; }
     }
 </style>

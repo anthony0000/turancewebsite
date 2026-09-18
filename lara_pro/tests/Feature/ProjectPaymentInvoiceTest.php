@@ -117,6 +117,8 @@ it('builds an editable payment invoice from project completion and calculates to
         ->get(route('admin.project-payments.show', $invoice))
         ->assertOk()
         ->assertSee('Mark as paid')
+        ->assertSee('Back to payments')
+        ->assertDontSee('is ready for review')
         ->assertSee('$1,364.50')
         ->assertSee('NGN 1,869,365');
 });
