@@ -60,6 +60,11 @@ class Project extends Model
         return $this->hasMany(ProjectPaymentInvoice::class);
     }
 
+    public function paymentReceipts(): HasMany
+    {
+        return $this->hasMany(ProjectPaymentReceipt::class);
+    }
+
     public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class);

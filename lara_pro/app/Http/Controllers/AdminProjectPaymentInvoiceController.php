@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\LuxuryQuote;
 use App\Models\Project;
 use App\Models\ProjectPaymentInvoice;
+use App\Models\ProjectPaymentReceipt;
 use App\Support\AdminAccess;
 use App\Support\DocumentTypography;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -98,9 +99,16 @@ class AdminProjectPaymentInvoiceController extends Controller
     public function show(ProjectPaymentInvoice $projectPaymentInvoice): View
     {
         return view('admin.project-payments.show', [
-            'invoice' => $projectPaymentInvoice->load(['project', 'originalInvoice', 'paidBy']),
+            'invoice' => $projectPaymentInvoice->load([
+                'project.staffContracts',
+                'originalInvoice',
+                'paidBy',
+                'receipts' => fn ($receipts) => $receipts->with(['staffContract', 'uploader'])->latest('paid_on')->latest('id'),
+            ]),
             'brand' => config('luxury-quotes.brand', []),
             'canMarkPaid' => AdminAccess::isFullAdmin() && ! $projectPaymentInvoice->isPaid(),
+            'canManagePayments' => AdminAccess::isFullAdmin(),
+            'paymentTypes' => ProjectPaymentReceipt::TYPES,
         ]);
     }
 

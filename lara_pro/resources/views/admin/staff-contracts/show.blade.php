@@ -106,6 +106,9 @@
                 @else
                     <a class="ghost-button" href="{{ route('admin.staff-contracts.edit', $contract) }}">Edit Contract</a>
                 @endif
+                @if (\App\Support\AdminAccess::isFullAdmin())
+                    <a class="ghost-button" href="{{ route('admin.project-payments.receipts.create', ['project' => $contract->project->project_number, 'staff_contract' => $contract->id]) }}">Record staff payment</a>
+                @endif
                 <a class="ghost-button" href="{{ route('admin.staff-contracts.index') }}">Back to Register</a>
             </div>
         </div>
@@ -167,6 +170,25 @@
         </section>
 
         <aside class="sticky-stack">
+            <section class="panel panel-padded">
+                <span class="eyebrow">Payment receipts</span>
+                <h3 class="panel-title">{{ $contract->paymentReceipts->count() }} recorded</h3>
+                @forelse ($contract->paymentReceipts as $receipt)
+                    <div class="meta-list" style="margin-top: 14px;">
+                        <div class="meta-item">
+                            <span>{{ $receipt->typeLabel() }} · {{ $receipt->paid_on->format('M d, Y') }}</span>
+                            <strong>{{ $receipt->currency }} {{ number_format((float) $receipt->amount, 2) }}</strong>
+                            @if (\App\Support\AdminAccess::can('invoices'))
+                                <p><a href="{{ route('admin.project-payments.receipts.preview', $receipt) }}" target="_blank" rel="noopener">Preview receipt</a> · <a href="{{ route('admin.project-payments.receipts.download', $receipt) }}">Download</a></p>
+                            @else
+                                <p>{{ $receipt->receipt_original_name }}</p>
+                            @endif
+                        </div>
+                    </div>
+                @empty
+                    <p class="form-help" style="margin-top: 10px;">No staff payment receipt has been attached yet.</p>
+                @endforelse
+            </section>
             <section class="panel panel-padded">
                 <span class="eyebrow">Project relationship</span>
                 <h3 class="panel-title">{{ $contract->project->name }}</h3>

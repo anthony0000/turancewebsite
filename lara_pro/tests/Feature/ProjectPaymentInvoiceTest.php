@@ -91,6 +91,14 @@ it('builds an editable payment invoice from project completion and calculates to
         ->and($invoice->invoice_number)->toStartWith('TT-INV-20260918-');
 
     $this->withSession(projectPaymentSession($admin))
+        ->get(route('admin.project-payments.index'))
+        ->assertOk()
+        ->assertSee('Turn project progress')
+        ->assertSee('Collection rate')
+        ->assertSee('View payment receipts')
+        ->assertSee($invoice->invoice_number);
+
+    $this->withSession(projectPaymentSession($admin))
         ->put(route('admin.project-payments.update', $invoice), projectPaymentPayload($project, [
             'completion_percentage' => '50',
             'payment_description' => '50% Project Payment',
@@ -141,6 +149,7 @@ it('lets only a full admin mark a project payment invoice as paid', function () 
         ->get(route('admin.project-payments.show', $invoice))
         ->assertOk()
         ->assertSee('Payment received')
+        ->assertSee('pd-paid-status', false)
         ->assertSee('TRF-0042')
         ->assertDontSee('Mark as paid');
 });

@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Support\PersistentUploadStorage;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class StaffContract extends Model
 {
@@ -81,4 +82,8 @@ class StaffContract extends Model
         return $this->belongsTo(LuxuryQuote::class, 'luxury_quote_id');
     }
 
+    public function paymentReceipts(): HasMany
+    {
+        return $this->hasMany(ProjectPaymentReceipt::class);
+    }
 }

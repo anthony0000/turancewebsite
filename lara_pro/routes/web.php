@@ -1,17 +1,18 @@
 <?php
 
 use App\Http\Controllers\AdminAuthController;
-use App\Http\Controllers\AdminLuxuryQuoteController;
 use App\Http\Controllers\AdminLetterController;
-use App\Http\Controllers\AdminProposalController;
+use App\Http\Controllers\AdminLuxuryQuoteController;
 use App\Http\Controllers\AdminProfileController;
 use App\Http\Controllers\AdminProjectController;
 use App\Http\Controllers\AdminProjectManagementController;
 use App\Http\Controllers\AdminProjectPaymentInvoiceController;
-use App\Http\Controllers\ProjectManagementApiController;
+use App\Http\Controllers\AdminProjectPaymentReceiptController;
+use App\Http\Controllers\AdminProposalController;
 use App\Http\Controllers\AdminStaffContractController;
 use App\Http\Controllers\AdminSubaccountController;
 use App\Http\Controllers\ContactController;
+use App\Http\Controllers\ProjectManagementApiController;
 use App\Http\Middleware\EnsureLuxuryQuoteAdminAuthenticated;
 use App\Support\AdminAccess;
 use Illuminate\Support\Facades\Route;
@@ -266,6 +267,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/project-payments', [AdminProjectPaymentInvoiceController::class, 'index'])->name('project-payments.index');
             Route::get('/project-payments/create', [AdminProjectPaymentInvoiceController::class, 'create'])->name('project-payments.create');
             Route::post('/project-payments', [AdminProjectPaymentInvoiceController::class, 'store'])->name('project-payments.store');
+            Route::get('/project-payments/receipts', [AdminProjectPaymentReceiptController::class, 'index'])->name('project-payments.receipts.index');
+            Route::get('/project-payments/receipts/create', [AdminProjectPaymentReceiptController::class, 'create'])->name('project-payments.receipts.create');
+            Route::post('/project-payments/receipts', [AdminProjectPaymentReceiptController::class, 'store'])->name('project-payments.receipts.store');
+            Route::get('/project-payments/receipts/{projectPaymentReceipt}/preview', [AdminProjectPaymentReceiptController::class, 'preview'])->name('project-payments.receipts.preview');
+            Route::get('/project-payments/receipts/{projectPaymentReceipt}/download', [AdminProjectPaymentReceiptController::class, 'download'])->name('project-payments.receipts.download');
             Route::get('/project-payments/{projectPaymentInvoice}/edit', [AdminProjectPaymentInvoiceController::class, 'edit'])->name('project-payments.edit');
             Route::put('/project-payments/{projectPaymentInvoice}', [AdminProjectPaymentInvoiceController::class, 'update'])->name('project-payments.update');
             Route::patch('/project-payments/{projectPaymentInvoice}/paid', [AdminProjectPaymentInvoiceController::class, 'markPaid'])->name('project-payments.paid');

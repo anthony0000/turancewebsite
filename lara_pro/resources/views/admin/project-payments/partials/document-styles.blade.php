@@ -29,6 +29,8 @@
 .payment-document .pd-amount-box { padding: 14px 10px; background: #d2a128; color: #fff; font-size: 22px; font-weight: 600; text-align: center; }
 .payment-document .pd-local-amount { margin-top: 15px; font-size: 15px; font-weight: 600; }
 .payment-document .pd-progress-due { margin-top: 14px; color: #b98000; font-size: 10px; text-transform: uppercase; }
+.payment-document .pd-paid-status { display: inline-block; margin-top: 12px; padding: 6px 10px; border: 1px solid #168052; border-radius: 999px; background: #edf8f2; color: #12663f; font-size: 9px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+.payment-document .pd-paid-status::before { content: ''; display: inline-block; width: 6px; height: 6px; margin-right: 6px; border-radius: 50%; background: #168052; vertical-align: 1px; }
 .payment-document .pd-project { margin-top: 22px; }
 .payment-document .pd-project h1 { margin: 7px 0 10px; font-size: 23px; line-height: 1.15; }
 .payment-document .pd-project p { margin: 0; color: #596274; font-size: 11px; line-height: 1.5; }
@@ -62,5 +64,4 @@
 .payment-document .pd-footer td:nth-child(2) { text-align: center; }
 .payment-document .pd-footer td:last-child { text-align: right; }
 .payment-document .pd-footer span { display: block; margin-bottom: 5px; color: #667085; font-size: 8px; text-transform: uppercase; }
-.payment-document .pd-paid-stamp { position: absolute; top: 282px; right: 54px; padding: 6px 14px; border: 2px solid #198754; color: #198754; font-size: 14px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; transform: rotate(-8deg); }
 @media screen and (max-width: 820px) { .payment-document { min-height: 1020px; } }

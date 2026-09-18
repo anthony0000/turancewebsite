@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ProjectPaymentInvoice extends Model
 {
@@ -82,6 +83,11 @@ class ProjectPaymentInvoice extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function receipts(): HasMany
+    {
+        return $this->hasMany(ProjectPaymentReceipt::class);
     }
 
     public function isPaid(): bool

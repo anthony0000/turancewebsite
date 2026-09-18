@@ -5,7 +5,6 @@
     $percent = rtrim(rtrim(number_format((float) $invoice->completion_percentage, 2, '.', ''), '0'), '.');
 @endphp
 <article class="payment-document">
-    @if ($invoice->isPaid())<div class="pd-paid-stamp">Paid</div>@endif
     <table class="pd-header"><tr>
         <td>
             <div class="pd-invoice-title">INVOICE</div>
@@ -38,7 +37,11 @@
         <td class="amount">
             <div class="pd-amount-box">{{ $symbol }}{{ number_format((float) $invoice->total_amount, 2) }}</div>
             <div class="pd-local-amount">{{ $invoice->local_currency }} {{ number_format($invoice->local_total_amount, 0) }}</div>
-            <div class="pd-progress-due">{{ $percent }}% payment due</div>
+            @if ($invoice->isPaid())
+                <div class="pd-paid-status">Payment received</div>
+            @else
+                <div class="pd-progress-due">{{ $percent }}% payment due</div>
+            @endif
         </td>
     </tr></table>
 
