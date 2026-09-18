@@ -17,6 +17,7 @@
     $isProjectPreview = request()->routeIs('admin.projects.show');
     $isProjectFileWorkspace = request()->routeIs('admin.projects.*');
     $isProjectManagementWorkspace = request()->routeIs('admin.project-management.*');
+    $isProjectPaymentWorkspace = request()->routeIs('admin.project-payments.*');
     $isLetterBuilder = request()->routeIs('admin.letters.create');
     $isLetterWorkspace = request()->routeIs('admin.letters.*');
     $isAdminProfile = request()->routeIs('admin.profile');
@@ -38,6 +39,7 @@
     $isQuoteBuilder = request()->routeIs('admin.quotes.create');
     $isQuoteArchive = request()->routeIs('admin.quotes.archive');
     $currentAdminView = match (true) {
+        $isProjectPaymentWorkspace => 'Project Payment Invoices',
         $isInvoicePreview => 'Invoice Preview',
         $isInvoiceEditor => 'Edit Invoice',
         $isProposalPreview => 'Proposal Preview',
@@ -63,6 +65,7 @@
         default => 'Analytics Dashboard',
     };
     $currentAdminHint = match (true) {
+        $isProjectPaymentWorkspace => 'Generate progress-payment invoices from live projects and record when each request is paid.',
         $isInvoicePreview => 'Review invoice details, inspect the layout, and export the PDF or MOU when everything looks right.',
         $isInvoiceEditor => 'Edit saved invoice details, return to preview, and regenerate the PDF or MOU from the updated record.',
         $isProposalPreview => 'Review the complete proposal, share it online, or export the PDF, Word, and printable versions.',
@@ -88,6 +91,7 @@
         default => 'Track demand and create the next invoice.',
     };
     $adminPageTitle = match (true) {
+        $isProjectPaymentWorkspace => 'Project Payments',
         $isInvoicePreview => 'Invoice Preview',
         $isInvoiceEditor => 'Edit Invoice',
         $isProposalPreview => 'Proposal Preview',
@@ -2307,6 +2311,21 @@
                                     <span>Builder</span>
                                 </div>
                                 </a>
+
+                                <a class="admin-nav-link {{ $isProjectPaymentWorkspace ? 'active' : '' }}"
+                                    href="{{ route('admin.project-payments.index') }}">
+                                <span class="admin-nav-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24">
+                                        <path d="M5 4h14v16H5z" />
+                                        <path d="M8 9h8M8 13h5" />
+                                        <path d="M15 16h1" />
+                                    </svg>
+                                </span>
+                                <div>
+                                    <strong>Project Payments</strong>
+                                    <span>Progress invoices</span>
+                                </div>
+                                </a>
                             @endif
 
                             @if ($canProposals)
@@ -2544,6 +2563,8 @@
                                 @if ($isFullAdmin)
                                     <a class="ghost-button" href="{{ route('admin.subaccounts.index') }}">Manage Staff accounts</a>
                                 @endif
+                            @elseif ($isProjectPaymentWorkspace)
+                                <a class="button" href="{{ route('admin.project-payments.create') }}">New Payment Invoice</a>
                             @elseif ($isProposalWorkspace)
                                 <a class="button" href="{{ route('admin.proposals.index') }}">New Proposal</a>
                               @elseif ($isProjectPreview)

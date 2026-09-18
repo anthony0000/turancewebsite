@@ -7,6 +7,7 @@ use App\Http\Controllers\AdminProposalController;
 use App\Http\Controllers\AdminProfileController;
 use App\Http\Controllers\AdminProjectController;
 use App\Http\Controllers\AdminProjectManagementController;
+use App\Http\Controllers\AdminProjectPaymentInvoiceController;
 use App\Http\Controllers\ProjectManagementApiController;
 use App\Http\Controllers\AdminStaffContractController;
 use App\Http\Controllers\AdminSubaccountController;
@@ -262,6 +263,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
             ->name('quotes.promotion.update');
 
         Route::middleware('admin.permission:invoices')->group(function () {
+            Route::get('/project-payments', [AdminProjectPaymentInvoiceController::class, 'index'])->name('project-payments.index');
+            Route::get('/project-payments/create', [AdminProjectPaymentInvoiceController::class, 'create'])->name('project-payments.create');
+            Route::post('/project-payments', [AdminProjectPaymentInvoiceController::class, 'store'])->name('project-payments.store');
+            Route::get('/project-payments/{projectPaymentInvoice}/edit', [AdminProjectPaymentInvoiceController::class, 'edit'])->name('project-payments.edit');
+            Route::put('/project-payments/{projectPaymentInvoice}', [AdminProjectPaymentInvoiceController::class, 'update'])->name('project-payments.update');
+            Route::patch('/project-payments/{projectPaymentInvoice}/paid', [AdminProjectPaymentInvoiceController::class, 'markPaid'])->name('project-payments.paid');
+            Route::get('/project-payments/{projectPaymentInvoice}/pdf', [AdminProjectPaymentInvoiceController::class, 'downloadPdf'])->name('project-payments.pdf');
+            Route::get('/project-payments/{projectPaymentInvoice}', [AdminProjectPaymentInvoiceController::class, 'show'])->name('project-payments.show');
+
             Route::get('/quotes', [AdminLuxuryQuoteController::class, 'index'])->name('quotes.index');
             Route::get('/quotes/create', [AdminLuxuryQuoteController::class, 'create'])->name('quotes.create');
             Route::post('/quotes', [AdminLuxuryQuoteController::class, 'store'])->name('quotes.store');
