@@ -93,9 +93,11 @@ it('builds an editable payment invoice from project completion and calculates to
     $this->withSession(projectPaymentSession($admin))
         ->get(route('admin.project-payments.index'))
         ->assertOk()
-        ->assertSee('Turn project progress')
-        ->assertSee('Collection rate')
-        ->assertSee('View payment receipts')
+        ->assertSee('Project finance')
+        ->assertSee('Collection performance')
+        ->assertSee('Receipts')
+        ->assertSee('Payment register')
+        ->assertDontSee('Turn project progress')
         ->assertDontSee('Project payments, tied directly')
         ->assertSee($invoice->invoice_number);
 

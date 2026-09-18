@@ -67,70 +67,6 @@
     .ppi-receipt-item .ppi-actions { justify-content: flex-end; }
     .ppi-secure-badge { display: inline-flex; align-items: center; gap: 7px; color: #24633f; font-size: 12px; font-weight: 800; }
     .ppi-secure-badge::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: #2f9d60; box-shadow: 0 0 0 4px #e7f6ed; }
-    .ppi-index-page { gap: 16px; }
-    .ppi-index-hero { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: clamp(28px, 5vw, 72px); min-height: 224px; padding: clamp(28px, 3.2vw, 46px); overflow: hidden; border-color: #262a31; background: #191c22; color: #fff; box-shadow: 0 20px 42px rgba(24, 27, 33, .12); }
-    .ppi-index-hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 86% 6%, rgba(209, 170, 75, .19), transparent 31%), linear-gradient(115deg, transparent 60%, rgba(255,255,255,.025)); pointer-events: none; }
-    .ppi-index-hero__copy, .ppi-collection-card { position: relative; z-index: 1; }
-    .ppi-kicker { display: inline-flex; align-items: center; gap: 9px; color: #d7b864; font-size: 11px; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; }
-    .ppi-kicker > span { width: 22px; height: 1px; background: currentColor; }
-    .ppi-index-hero h2 { margin: 12px 0 10px; max-width: 700px; color: #fff; font-size: clamp(31px, 3.2vw, 47px); line-height: 1.02; letter-spacing: -.035em; }
-    .ppi-index-hero h2 em { color: #d7b864; font-family: Georgia, serif; font-weight: 500; }
-    .ppi-index-hero__copy > p { max-width: 670px; margin: 0; color: #b7bbc3; font-size: 14px; line-height: 1.65; }
-    .ppi-index-hero__actions { margin-top: 24px; }
-    .ppi-index-hero .ppi-primary-action { min-height: 43px; border-color: #d0aa4e; background: #d0aa4e; color: #17191d; box-shadow: none; }
-    .ppi-index-hero .ppi-primary-action:hover { border-color: #e0c173; background: #e0c173; }
-    .ppi-primary-action svg, .ppi-text-action svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-    .ppi-text-action { display: inline-flex; min-height: 42px; align-items: center; gap: 7px; padding: 0 7px; color: #e1e3e7; font-size: 13px; font-weight: 720; text-decoration: none; }
-    .ppi-text-action:hover { color: #d7b864; }
-    .ppi-collection-card { align-self: stretch; padding: 18px; border: 1px solid rgba(255,255,255,.1); border-radius: 14px; background: rgba(255,255,255,.055); }
-    .ppi-collection-card__top { display: flex; align-items: center; justify-content: space-between; color: #c5c8ce; font-size: 11px; font-weight: 750; letter-spacing: .08em; text-transform: uppercase; }
-    .ppi-live-dot { display: inline-flex; align-items: center; gap: 6px; color: #8bd5aa; letter-spacing: .04em; }
-    .ppi-live-dot::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: #55bd7e; box-shadow: 0 0 0 4px rgba(85,189,126,.12); }
-    .ppi-collection-card__body { display: grid; grid-template-columns: 112px 1fr; gap: 18px; align-items: center; margin-top: 18px; }
-    .ppi-rate-ring { position: relative; display: grid; width: 108px; aspect-ratio: 1; place-content: center; border-radius: 50%; background: conic-gradient(#d6b258 calc(var(--ppi-rate) * 1%), rgba(255,255,255,.1) 0); text-align: center; }
-    .ppi-rate-ring::before { content: ''; position: absolute; inset: 8px; border-radius: inherit; background: #25282e; }
-    .ppi-rate-ring strong, .ppi-rate-ring span { position: relative; z-index: 1; }
-    .ppi-rate-ring strong { font-size: 24px; line-height: 1; }
-    .ppi-rate-ring span { margin-top: 4px; color: #aeb2b9; font-size: 10px; text-transform: uppercase; }
-    .ppi-collection-summary { display: grid; }
-    .ppi-collection-summary > strong { font-size: 18px; }
-    .ppi-collection-summary > span { margin-top: 2px; color: #9fa4ac; font-size: 12px; }
-    .ppi-collection-summary__line { display: flex; justify-content: space-between; gap: 10px; margin-top: 18px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,.09); color: #b6bac1; font-size: 11px; }
-    .ppi-collection-summary__line b { color: #fff; }
-    .ppi-index-page .ppi-kpis { gap: 12px; }
-    .ppi-index-page .ppi-kpi { position: relative; min-height: 126px; padding: 18px 19px; overflow: hidden; box-shadow: none; }
-    .ppi-index-page .ppi-kpi::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 3px; background: var(--kpi-color, #8c929c); opacity: .75; }
-    .ppi-kpi__head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-    .ppi-index-page .ppi-kpi__head > span:first-child { color: var(--muted); font-size: 10px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
-    .ppi-kpi__icon { display: grid; width: 30px; height: 30px; place-items: center; border-radius: 9px; background: color-mix(in srgb, var(--kpi-color, #8c929c) 11%, white); color: var(--kpi-color, #8c929c); }
-    .ppi-kpi__icon svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
-    .ppi-index-page .ppi-kpi strong { margin-top: 8px; overflow: hidden; font-size: clamp(22px, 2vw, 29px); line-height: 1.05; text-overflow: ellipsis; white-space: nowrap; }
-    .ppi-index-page .ppi-kpi small { display: block; margin-top: 7px; color: var(--muted); font-size: 11px; }
-    .ppi-kpi--neutral { --kpi-color: #667085; }
-    .ppi-kpi--paid { --kpi-color: #248557; }
-    .ppi-kpi--open { --kpi-color: #bd7b16; }
-    .ppi-kpi--collected { --kpi-color: #a67c19; }
-    .ppi-index-page .ppi-toolbar { padding: 18px 19px 19px; box-shadow: none; }
-    .ppi-toolbar__head, .ppi-table-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 15px; }
-    .ppi-toolbar__head h3, .ppi-table-heading h3 { margin: 3px 0 0; font-size: 17px; letter-spacing: -.01em; }
-    .ppi-result-count { padding: 5px 9px; border-radius: 999px; background: #f1f3f5; color: #666d77; font-size: 11px; font-weight: 750; }
-    .ppi-index-page .ppi-filter-grid { grid-template-columns: minmax(280px, 1.4fr) minmax(150px, .42fr) minmax(210px, .65fr) auto; }
-    .ppi-index-page .field label { font-size: 10px; letter-spacing: .09em; }
-    .ppi-index-page .field input, .ppi-index-page .field select { min-height: 43px; border-color: #dfe3e8; border-radius: 9px; background-color: #fbfcfd; }
-    .ppi-input-shell { position: relative; }
-    .ppi-input-shell svg { position: absolute; top: 50%; left: 13px; width: 17px; height: 17px; transform: translateY(-50%); fill: none; stroke: #8a9099; stroke-width: 1.8; stroke-linecap: round; }
-    .ppi-input-shell input { width: 100%; padding-left: 40px !important; }
-    .ppi-filter-actions { flex-wrap: nowrap; }
-    .ppi-filter-actions .button, .ppi-filter-actions .ghost-button { min-height: 43px; }
-    .ppi-invoice-panel { overflow: hidden; box-shadow: none; }
-    .ppi-table-heading { margin: 0; padding: 19px 20px 15px; border-bottom: 1px solid var(--line); }
-    .ppi-table-heading > a { color: #8c6a18; font-size: 12px; font-weight: 750; text-decoration: none; }
-    .ppi-table-heading > a span { display: inline-block; margin-left: 4px; transition: transform .16s ease; }
-    .ppi-table-heading > a:hover span { transform: translateX(3px); }
-    .ppi-index-page .ppi-table th { padding: 11px 17px; background: #fafbfc; color: #7b818a; font-size: 10px; }
-    .ppi-index-page .ppi-table td { padding: 17px; }
-    .ppi-index-page .ppi-table tbody tr { transition: background .16s ease; }
-    .ppi-index-page .ppi-table tbody tr:hover { background: #fcfbf7; }
     .ppi-invoice-identity { display: flex; align-items: center; gap: 11px; min-width: 230px; }
     .ppi-invoice-icon { display: grid; width: 35px; height: 35px; flex: 0 0 auto; place-items: center; border-radius: 10px; background: #f6f0df; color: #9a741d; }
     .ppi-invoice-icon svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
@@ -141,22 +77,58 @@
     .ppi-progress-track span { display: block; height: 100%; border-radius: inherit; background: #c69a36; }
     .ppi-amount-primary, .ppi-date-primary { color: var(--text); font-size: 14px; white-space: nowrap; }
     .ppi-date-primary { font-size: 13px; }
-    .ppi-index-page .ppi-status { padding: 6px 10px; border: 1px solid rgba(148,102,0,.12); }
-    .ppi-index-page .ppi-status--paid { border-color: rgba(21,115,71,.12); }
     .ppi-row-action { display: grid !important; width: 34px; height: 34px; place-items: center; border: 1px solid var(--line); border-radius: 9px; background: #fff; color: #59606a !important; transition: border-color .16s ease, background .16s ease, color .16s ease; }
     .ppi-row-action:hover { border-color: #d3b15d; background: #fbf6e9; color: #8e6a16 !important; }
     .ppi-row-action svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+    body.is-admin .ppi-dashboard { gap: 18px; }
+    body.is-admin .ppi-dashboard-header { display: flex; align-items: flex-end; justify-content: space-between; gap: 28px; padding: 5px 2px 21px; border-bottom: 1px solid #e7e9ec; }
+    body.is-admin .ppi-dashboard-header h2 { margin: 5px 0 6px; color: #17191d; font-family: var(--font-display); font-size: clamp(28px, 3vw, 38px); font-weight: 600; letter-spacing: -.045em; line-height: 1.05; }
+    body.is-admin .ppi-dashboard-header p { max-width: 680px; margin: 0; color: #747b85; font-size: 13px; line-height: 1.55; }
+    body.is-admin .ppi-dashboard-header__actions { flex: 0 0 auto; }
+    body.is-admin .ppi-dashboard-header__actions a { min-height: 40px; padding-inline: 15px; border-radius: 8px; }
+    body.is-admin .ppi-dashboard-header__actions svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+    body.is-admin .ppi-summary-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+    body.is-admin .admin-main .ppi-summary-card.panel { position: relative; min-height: 132px; padding: 18px; overflow: hidden; border-color: #e5e8eb; border-radius: 11px; background: #fff; box-shadow: 0 1px 1px rgba(17, 24, 39, .02); }
+    body.is-admin .admin-main .ppi-summary-card--collected.panel { border-color: #ded7c4; background: #fcfaf5; }
+    .ppi-summary-card__top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .ppi-summary-card__top > span:first-child { color: #747b85; font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+    .ppi-summary-icon { display: grid; width: 31px; height: 31px; place-items: center; border-radius: 8px; background: #f0f2f4; color: #69717c; }
+    .ppi-summary-icon--amber { background: #fbf2df; color: #a87017; }
+    .ppi-summary-icon--green { background: #e9f6ef; color: #217a4e; }
+    .ppi-summary-icon svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+    body.is-admin .ppi-summary-card > strong { display: block; margin-top: 11px; overflow: hidden; color: #17191d; font-size: clamp(22px, 2vw, 29px); font-weight: 600; letter-spacing: -.035em; line-height: 1; text-overflow: ellipsis; white-space: nowrap; }
+    .ppi-summary-card__foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 12px; color: #858b94; font-size: 10px; }
+    .ppi-summary-card__foot b { color: #555d68; font-weight: 600; }
+    .ppi-summary-progress { height: 3px; margin: 11px -18px -18px; overflow: hidden; background: #eee9dc; }
+    .ppi-summary-progress span { display: block; height: 100%; border-radius: 999px; background: #2e9161; }
+    body.is-admin .admin-main .ppi-register.panel { overflow: hidden; border-color: #e5e8eb; border-radius: 11px; background: #fff; }
+    .ppi-register__head { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 18px 20px 14px; }
+    .ppi-register__head h3 { margin: 3px 0 0; color: #20242a; font-size: 18px; letter-spacing: -.02em; }
+    .ppi-register__count { padding: 5px 9px; border-radius: 999px; background: #f1f3f5; color: #69717c; font-size: 10px; font-weight: 700; }
+    .ppi-filter-bar { display: grid; grid-template-columns: minmax(260px, 1fr) minmax(150px, .25fr) minmax(210px, .42fr) auto auto; gap: 10px; padding: 13px 20px; border-top: 1px solid #eef0f2; border-bottom: 1px solid #e8ebee; background: #fafbfc; }
+    .ppi-filter-search, .ppi-filter-select { position: relative; }
+    .ppi-filter-search svg { position: absolute; top: 50%; left: 12px; width: 16px; height: 16px; transform: translateY(-50%); fill: none; stroke: #858c96; stroke-width: 1.8; stroke-linecap: round; }
+    body.is-admin .ppi-filter-bar input, body.is-admin .ppi-filter-bar select { width: 100%; min-height: 39px; border: 1px solid #dde1e5; border-radius: 7px; background-color: #fff; color: #252a31; font-size: 12px; }
+    body.is-admin .ppi-filter-bar input { padding-left: 38px; }
+    body.is-admin .ppi-filter-bar input:focus, body.is-admin .ppi-filter-bar select:focus { border-color: #c9a34c; box-shadow: 0 0 0 3px rgba(201, 163, 76, .1); }
+    body.is-admin .ppi-filter-bar .button { min-height: 39px; padding-inline: 17px; border-radius: 7px; }
+    .ppi-clear-filter { display: inline-flex; min-height: 39px; align-items: center; padding-inline: 7px; color: #69717c; font-size: 11px; font-weight: 650; text-decoration: none; }
+    .ppi-clear-filter:hover { color: #8a6818; }
+    .sr-only { position: absolute !important; width: 1px !important; height: 1px !important; padding: 0 !important; margin: -1px !important; overflow: hidden !important; clip: rect(0, 0, 0, 0) !important; white-space: nowrap !important; border: 0 !important; }
+    .ppi-register-table th { padding: 11px 18px; background: #fff; color: #7d848e; font-size: 9px; }
+    .ppi-register-table td { padding: 16px 18px; }
+    .ppi-register-table tbody tr { transition: background .15s ease; }
+    .ppi-register-table tbody tr:hover { background: #fdfbf7; }
+    .ppi-register-table .ppi-status { border: 1px solid rgba(148,102,0,.11); }
+    .ppi-register-table .ppi-status--paid { border-color: rgba(21,115,71,.11); }
     @media (max-width: 1050px) {
         .ppi-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
         .ppi-form-layout, .ppi-detail-grid, .ppi-receipt-grid { grid-template-columns: 1fr; }
         .ppi-live-card { position: static; }
         .ppi-filter-grid { grid-template-columns: 1fr 1fr; }
-        .ppi-index-hero { grid-template-columns: minmax(0, 1fr) 270px; }
-        .ppi-index-page .ppi-filter-grid { grid-template-columns: 1fr 1fr; }
-    }
-    @media (max-width: 820px) {
-        .ppi-index-hero { grid-template-columns: 1fr; }
-        .ppi-collection-card { max-width: 420px; }
+        body.is-admin .ppi-summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .ppi-filter-bar { grid-template-columns: minmax(240px, 1fr) minmax(140px, .4fr) minmax(190px, .6fr) auto; }
+        .ppi-clear-filter { grid-column: 1 / -1; min-height: auto; padding: 0; }
     }
     @media (max-width: 680px) {
         .ppi-hero { align-items: flex-start; flex-direction: column; }
@@ -165,14 +137,11 @@
         .ppi-table th:nth-child(3), .ppi-table td:nth-child(3), .ppi-table th:nth-child(5), .ppi-table td:nth-child(5) { display: none; }
         .ppi-receipt-item { grid-template-columns: 1fr; }
         .ppi-receipt-item .ppi-actions { justify-content: flex-start; }
-        .ppi-index-hero { min-height: 0; padding: 25px 21px; }
-        .ppi-index-hero h2 { font-size: 34px; }
-        .ppi-index-hero__actions > * { width: 100%; justify-content: center; }
-        .ppi-collection-card { max-width: none; }
-        .ppi-index-page .ppi-kpis, .ppi-index-page .ppi-filter-grid { grid-template-columns: 1fr; }
-        .ppi-index-page .ppi-kpi { min-height: 112px; }
-        .ppi-filter-actions > * { flex: 1; }
-        .ppi-toolbar__head, .ppi-table-heading { align-items: flex-start; }
-        .ppi-table-heading > a { display: none; }
+        body.is-admin .ppi-dashboard-header { align-items: flex-start; flex-direction: column; }
+        body.is-admin .ppi-dashboard-header__actions { width: 100%; }
+        body.is-admin .ppi-dashboard-header__actions > * { flex: 1; }
+        body.is-admin .ppi-summary-grid { grid-template-columns: 1fr; }
+        .ppi-filter-bar { grid-template-columns: 1fr; }
+        body.is-admin .ppi-filter-bar .button { width: 100%; }
     }
 </style>
