@@ -3,17 +3,22 @@
 @section('title', 'Profile & Settings | Admin')
 
 @section('content')
-    <section class="panel hero-banner">
+    <section class="panel hero-banner profile-hero">
         <div>
             <span class="eyebrow">Account centre</span>
             <h1>Admin profile & settings.</h1>
             <p>Keep your identity and security details current. Your account access level is shown alongside your profile.</p>
         </div>
-        <div class="hero-callout">
-            <div class="callout-card">
-                <span class="metric-label">Access level</span>
-                <strong>{{ $isFullAdmin ? 'Full administrator' : 'Staff account' }}</strong>
-                <p>{{ $isFullAdmin ? 'All admin modules and account controls.' : 'Access is limited by the permissions assigned to this account.' }}</p>
+        <div class="hero-callout profile-hero__summary">
+            <div class="callout-card profile-access-card">
+                <span class="profile-access-card__icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><path d="M12 3 20 6v5c0 5.1-3.4 8.6-8 10-4.6-1.4-8-4.9-8-10V6l8-3Z"/><path d="m9 12 2 2 4-4"/></svg>
+                </span>
+                <div>
+                    <span class="metric-label">Access level</span>
+                    <strong>{{ $isFullAdmin ? 'Full administrator' : 'Staff account' }}</strong>
+                    <p>{{ $isFullAdmin ? 'All admin modules and account controls.' : 'Access is limited by the permissions assigned to this account.' }}</p>
+                </div>
             </div>
         </div>
     </section>

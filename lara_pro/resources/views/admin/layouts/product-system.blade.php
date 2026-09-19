@@ -329,6 +329,66 @@ body.is-admin .hero-callout .callout-card p {
     line-height: 1.45;
 }
 
+/* Profile has one account summary, so it should not inherit the two-metric grid. */
+body.is-admin .admin-main > .hero-banner.profile-hero,
+body.is-admin:not(.is-dashboard-overview) .admin-main > .hero-banner.profile-hero {
+    grid-template-columns: minmax(0, 1fr) minmax(300px, 360px);
+    min-height: 0 !important;
+    padding-block: 28px;
+}
+
+body.is-admin .profile-hero__summary,
+body.is-admin:not(.is-dashboard-overview) .profile-hero__summary {
+    display: block;
+    width: 100%;
+    max-width: 360px;
+    justify-self: end;
+}
+
+body.is-admin .profile-hero__summary .profile-access-card,
+body.is-admin:not(.is-dashboard-overview) .admin-main > .profile-hero .profile-access-card {
+    display: grid;
+    grid-template-columns: 42px minmax(0, 1fr);
+    min-height: 0;
+    align-items: center;
+    gap: 13px;
+    padding: 16px;
+}
+
+body.is-admin .profile-access-card__icon {
+    display: grid;
+    width: 42px;
+    height: 42px;
+    place-items: center;
+    border-radius: 11px;
+    background: rgba(225, 182, 83, .14);
+    color: #e4bb5c;
+}
+
+body.is-admin .profile-access-card__icon svg {
+    width: 21px;
+    height: 21px;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.7;
+}
+
+body.is-admin .hero-callout .profile-access-card strong {
+    display: block;
+    margin-top: 5px;
+    overflow-wrap: normal;
+    font-size: 19px;
+    line-height: 1.2;
+    word-break: keep-all;
+}
+
+body.is-admin .hero-callout .profile-access-card p {
+    max-width: 250px;
+    margin: 5px 0 0;
+}
+
 /* Content cards, metrics, and controls. */
 body.is-admin .panel:not(.hero-banner):not(.page-header):not(.pm-hero),
 body.is-admin:not(.is-dashboard-overview) .panel:not(.hero-banner):not(.page-header):not(.pm-hero),
@@ -644,6 +704,17 @@ body.is-admin .admin-alert-stack .alert {
     body.is-admin .hero-callout,
     body.is-admin:not(.is-dashboard-overview) .hero-callout {
         grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    body.is-admin .admin-main > .hero-banner.profile-hero,
+    body.is-admin:not(.is-dashboard-overview) .admin-main > .hero-banner.profile-hero {
+        grid-template-columns: 1fr;
+    }
+
+    body.is-admin .profile-hero__summary,
+    body.is-admin:not(.is-dashboard-overview) .profile-hero__summary {
+        max-width: none;
+        justify-self: stretch;
     }
 }
 
