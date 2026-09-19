@@ -5,6 +5,7 @@ use App\Http\Controllers\AdminLetterController;
 use App\Http\Controllers\AdminLuxuryQuoteController;
 use App\Http\Controllers\AdminProfileController;
 use App\Http\Controllers\AdminProjectController;
+use App\Http\Controllers\AdminProjectCredentialController;
 use App\Http\Controllers\AdminProjectManagementController;
 use App\Http\Controllers\AdminProjectPaymentInvoiceController;
 use App\Http\Controllers\AdminProjectPaymentReceiptController;
@@ -136,6 +137,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::middleware('admin.permission:projects')->prefix('projects')->name('projects.')->group(function () {
             Route::get('/', [AdminProjectController::class, 'index'])->name('index');
+            Route::get('/{project}/credentials/collation.pdf', [AdminProjectCredentialController::class, 'downloadPdf'])->name('credentials.pdf');
+            Route::post('/{project}/credentials', [AdminProjectCredentialController::class, 'store'])->name('credentials.store');
+            Route::put('/{project}/credentials/{projectCredential}', [AdminProjectCredentialController::class, 'update'])->name('credentials.update');
+            Route::post('/{project}/credentials/{projectCredential}/reveal', [AdminProjectCredentialController::class, 'reveal'])->name('credentials.reveal');
+            Route::delete('/{project}/credentials/{projectCredential}', [AdminProjectCredentialController::class, 'destroy'])->name('credentials.destroy');
             Route::get('/{project}', [AdminProjectController::class, 'show'])->name('show');
             Route::get('/files/{projectFile}/download', [AdminProjectController::class, 'downloadFile'])->name('files.download');
             Route::get('/files/{projectFile}/preview', [AdminProjectController::class, 'previewFile'])->name('files.preview');

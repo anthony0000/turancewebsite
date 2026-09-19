@@ -55,6 +55,11 @@ class Project extends Model
         return $this->hasMany(ProjectFile::class);
     }
 
+    public function credentials(): HasMany
+    {
+        return $this->hasMany(ProjectCredential::class);
+    }
+
     public function paymentInvoices(): HasMany
     {
         return $this->hasMany(ProjectPaymentInvoice::class);
