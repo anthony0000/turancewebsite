@@ -8,7 +8,7 @@
         <div class="project-credentials__head-actions">
             <span class="admin-pill">{{ number_format($credentials->count()) }} {{ \Illuminate\Support\Str::plural('entry', $credentials->count()) }}</span>
             @if ($credentials->isNotEmpty())
-                <a class="button" href="{{ route('admin.projects.credentials.pdf', $project) }}">Download handover PDF</a>
+                <a class="button" href="{{ route('admin.credentials.pdf', $project) }}">Download handover PDF</a>
             @endif
         </div>
     </div>
@@ -51,7 +51,7 @@
                                         <dt>Password / secret</dt>
                                         <dd class="credential-secret">
                                             <code data-credential-secret>••••••••••••</code>
-                                            <button class="ghost-button" type="button" data-credential-reveal data-url="{{ route('admin.projects.credentials.reveal', [$project, $credential]) }}">Reveal</button>
+                                            <button class="ghost-button" type="button" data-credential-reveal data-url="{{ route('admin.credentials.reveal', [$project, $credential]) }}">Reveal</button>
                                             <button class="ghost-button" type="button" data-credential-copy hidden>Copy</button>
                                         </dd>
                                     </div>
@@ -64,7 +64,7 @@
                                 <div class="credential-card__actions">
                                     <details class="credential-edit">
                                         <summary class="ghost-button">Update</summary>
-                                        <form method="POST" action="{{ route('admin.projects.credentials.update', [$project, $credential]) }}" class="credential-edit__form">
+                                        <form method="POST" action="{{ route('admin.credentials.update', [$project, $credential]) }}" class="credential-edit__form">
                                             @csrf
                                             @method('PUT')
                                             <label>System or service
@@ -88,7 +88,7 @@
                                             <button class="button" type="submit">Save changes</button>
                                         </form>
                                     </details>
-                                    <form method="POST" action="{{ route('admin.projects.credentials.destroy', [$project, $credential]) }}" onsubmit="return confirm('Permanently remove this project credential?');">
+                                    <form method="POST" action="{{ route('admin.credentials.destroy', [$project, $credential]) }}" onsubmit="return confirm('Permanently remove this project credential?');">
                                         @csrf
                                         @method('DELETE')
                                         <button class="file-delete-button" type="submit">Remove</button>
@@ -112,7 +112,7 @@
             <h3>Store a credential</h3>
             <p>Secrets, usernames, and private notes are encrypted before they are written to the database.</p>
 
-            <form method="POST" action="{{ route('admin.projects.credentials.store', $project) }}" class="credential-create__form">
+            <form method="POST" action="{{ route('admin.credentials.store', $project) }}" class="credential-create__form">
                 @csrf
                 <label for="credential-service-name">System or service
                     <input id="credential-service-name" type="text" name="service_name" value="{{ old('service_name') }}" required maxlength="255" placeholder="e.g. Production hosting">

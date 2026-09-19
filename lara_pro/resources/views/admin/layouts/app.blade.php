@@ -16,6 +16,7 @@
     $isProjectDashboard = request()->routeIs('admin.projects.index');
     $isProjectPreview = request()->routeIs('admin.projects.show');
     $isProjectFileWorkspace = request()->routeIs('admin.projects.*');
+    $isCredentialWorkspace = request()->routeIs('admin.credentials.*');
     $isProjectManagementWorkspace = request()->routeIs('admin.project-management.*');
     $isProjectPaymentWorkspace = request()->routeIs('admin.project-payments.*');
     $isLetterBuilder = request()->routeIs('admin.letters.create');
@@ -39,6 +40,7 @@
     $isQuoteBuilder = request()->routeIs('admin.quotes.create');
     $isQuoteArchive = request()->routeIs('admin.quotes.archive');
     $currentAdminView = match (true) {
+        $isCredentialWorkspace => 'Credentials',
         $isProjectPaymentWorkspace => 'Project Payment Invoices',
         $isInvoicePreview => 'Invoice Preview',
         $isInvoiceEditor => 'Edit Invoice',
@@ -65,6 +67,7 @@
         default => 'Analytics Dashboard',
     };
     $currentAdminHint = match (true) {
+        $isCredentialWorkspace => 'Store encrypted project access details and export secure letterhead handover documents.',
         $isProjectPaymentWorkspace => 'Generate progress-payment invoices from live projects and record when each request is paid.',
         $isInvoicePreview => 'Review invoice details, inspect the layout, and export the PDF or MOU when everything looks right.',
         $isInvoiceEditor => 'Edit saved invoice details, return to preview, and regenerate the PDF or MOU from the updated record.',
@@ -91,6 +94,7 @@
         default => 'Track demand and create the next invoice.',
     };
     $adminPageTitle = match (true) {
+        $isCredentialWorkspace => 'Credentials',
         $isProjectPaymentWorkspace => 'Project Payments',
         $isInvoicePreview => 'Invoice Preview',
         $isInvoiceEditor => 'Edit Invoice',
@@ -2429,6 +2433,22 @@
                                     <span>Company and project files</span>
                                 </div>
                                 </a>
+
+                                @if ($isFullAdmin)
+                                <a class="admin-nav-link {{ $isCredentialWorkspace ? 'active' : '' }}"
+                                    href="{{ route('admin.credentials.index') }}">
+                                <span class="admin-nav-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24">
+                                        <circle cx="8" cy="12" r="3" />
+                                        <path d="M11 12h10M17 12v3M20 12v2" />
+                                    </svg>
+                                </span>
+                                <div>
+                                    <strong>Credentials</strong>
+                                    <span>Project access vaults</span>
+                                </div>
+                                </a>
+                                @endif
                             @endif
 
                             @if ($canLetters || $canArchive)
@@ -2649,6 +2669,9 @@
                         <a class="command-palette__item" data-command-item data-command-label="Activity Traffic Leads" href="{{ route('admin.quotes.activity') }}"><span class="command-palette__item-icon">↗</span><span><strong>Activity</strong><small>Traffic and leads</small></span><span class="command-palette__arrow">↵</span></a>
                     @endif
                     @if ($canProjects)
+                        @if ($isFullAdmin)
+                        <a class="command-palette__item" data-command-item data-command-label="Credentials Project Access Vaults" href="{{ route('admin.credentials.index') }}"><span class="command-palette__item-icon">&#9907;</span><span><strong>Credentials</strong><small>Project access vaults</small></span><span class="command-palette__arrow">&#8629;</span></a>
+                        @endif
                         @if ($isFullAdmin)
                         <a class="command-palette__item" data-command-item data-command-label="Projects Delivery" href="{{ route('admin.project-management.dashboard') }}"><span class="command-palette__item-icon">□</span><span><strong>Projects</strong><small>Delivery workspace</small></span><span class="command-palette__arrow">↵</span></a>
                         @elseif ($canProjectManagement)

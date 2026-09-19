@@ -147,11 +147,9 @@ class AdminProjectController extends Controller
         if ($canManageProjectFiles) {
             $project->load([
                 'staffContracts' => fn ($query) => $query->with('invoice')->latest('updated_at'),
-                'credentials' => fn ($query) => $query->orderBy('service_name')->orderBy('id'),
             ]);
         } else {
             $project->setRelation('staffContracts', collect());
-            $project->setRelation('credentials', collect());
         }
 
         if ($canViewProjectFiles) {
@@ -166,7 +164,6 @@ class AdminProjectController extends Controller
             'project' => $project,
             'files' => $project->files,
             'contracts' => $project->staffContracts,
-            'credentials' => $project->credentials,
             'sharedFileCount' => $project->files->where('is_shared', true)->count(),
             'canViewProjectFiles' => $canViewProjectFiles,
             'canManageProjectFiles' => $canManageProjectFiles,

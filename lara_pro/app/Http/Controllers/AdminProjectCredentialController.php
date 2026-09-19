@@ -9,6 +9,7 @@ use App\Support\DocumentBranding;
 use App\Support\DocumentTypography;
 use App\Support\ProjectManagementAccess;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -17,6 +18,40 @@ use Illuminate\Support\Str;
 
 class AdminProjectCredentialController extends Controller
 {
+    public function index(Request $request): View
+    {
+        $this->ensureFullAdmin();
+        $search = $request->string('q')->trim()->toString();
+        $projects = Project::query()
+            ->withCount('credentials')
+            ->when($search !== '', fn ($query) => $query->where(function ($projectsQuery) use ($search): void {
+                $projectsQuery
+                    ->where('name', 'like', '%'.$search.'%')
+                    ->orWhere('project_number', 'like', '%'.$search.'%')
+                    ->orWhere('client_name', 'like', '%'.$search.'%')
+                    ->orWhere('client_company', 'like', '%'.$search.'%');
+            }))
+            ->latest('updated_at')
+            ->get();
+
+        return view('admin.credentials.index', [
+            'projects' => $projects,
+            'search' => $search,
+            'credentialCount' => ProjectCredential::query()->count(),
+            'securedProjectCount' => ProjectCredential::query()->distinct()->count('project_id'),
+        ]);
+    }
+
+    public function show(Project $project): View
+    {
+        $this->ensureFullAdmin();
+
+        return view('admin.credentials.show', [
+            'project' => $project,
+            'credentials' => $project->credentials()->orderBy('service_name')->orderBy('id')->get(),
+        ]);
+    }
+
     public function store(Request $request, Project $project): RedirectResponse
     {
         $this->ensureFullAdmin();
@@ -39,7 +74,7 @@ class AdminProjectCredentialController extends Controller
         );
 
         return redirect()
-            ->route('admin.projects.show', $project)
+            ->route('admin.credentials.show', $project)
             ->with('status', 'Project credential stored securely.');
     }
 
@@ -76,7 +111,7 @@ class AdminProjectCredentialController extends Controller
         );
 
         return redirect()
-            ->route('admin.projects.show', $project)
+            ->route('admin.credentials.show', $project)
             ->with('status', 'Project credential updated.');
     }
 
@@ -102,7 +137,7 @@ class AdminProjectCredentialController extends Controller
         );
 
         return redirect()
-            ->route('admin.projects.show', $project)
+            ->route('admin.credentials.show', $project)
             ->with('status', 'Project credential removed.');
     }
 
@@ -138,7 +173,7 @@ class AdminProjectCredentialController extends Controller
             metadata: ['credential_count' => $credentials->count()],
         );
 
-        $pdf = Pdf::loadView('admin.projects.credentials-pdf', [
+        $pdf = Pdf::loadView('admin.credentials.pdf', [
             'project' => $project,
             'credentials' => $credentials,
             'backgroundSrc' => DocumentBranding::logoSource(config('letters.background_path')),

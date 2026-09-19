@@ -28,7 +28,7 @@ it('stores project credentials encrypted and keeps secrets out of the project pa
 
     $this
         ->withSession(credentialAdminSession())
-        ->post(route('admin.projects.credentials.store', $project), [
+        ->post(route('admin.credentials.store', $project), [
             'service_name' => 'Production hosting',
             'credential_type' => 'Control panel login',
             'access_url' => 'https://hosting.example.com/login',
@@ -36,7 +36,7 @@ it('stores project credentials encrypted and keeps secrets out of the project pa
             'secret' => 'Correct-Horse-Battery-99',
             'notes' => 'Rotate after client handover.',
         ])
-        ->assertRedirect(route('admin.projects.show', $project))
+        ->assertRedirect(route('admin.credentials.show', $project))
         ->assertSessionHas('status', 'Project credential stored securely.');
 
     $credential = ProjectCredential::query()->firstOrFail();
@@ -51,7 +51,7 @@ it('stores project credentials encrypted and keeps secrets out of the project pa
 
     $this
         ->withSession(credentialAdminSession())
-        ->get(route('admin.projects.show', $project))
+        ->get(route('admin.credentials.show', $project))
         ->assertOk()
         ->assertSee('Project credentials')
         ->assertSee('Production hosting')
@@ -59,6 +59,22 @@ it('stores project credentials encrypted and keeps secrets out of the project pa
         ->assertSee('Download handover PDF')
         ->assertSee('data-credential-reveal', false)
         ->assertDontSee('Correct-Horse-Battery-99');
+
+    $this
+        ->withSession(credentialAdminSession())
+        ->get(route('admin.credentials.index'))
+        ->assertOk()
+        ->assertSee('Secure access management')
+        ->assertSee('Atlas Platform')
+        ->assertSee('Project access vaults')
+        ->assertSee(route('admin.credentials.show', $project), false);
+
+    $this
+        ->withSession(credentialAdminSession())
+        ->get(route('admin.projects.show', $project))
+        ->assertOk()
+        ->assertDontSee('Project credentials')
+        ->assertDontSee('Production hosting');
 });
 
 it('reveals, updates, and removes only credentials belonging to the requested project', function () {
@@ -81,7 +97,7 @@ it('reveals, updates, and removes only credentials belonging to the requested pr
 
     $revealResponse = $this
         ->withSession(credentialAdminSession())
-        ->postJson(route('admin.projects.credentials.reveal', [$project, $credential]))
+        ->postJson(route('admin.credentials.reveal', [$project, $credential]))
         ->assertOk()
         ->assertJson(['secret' => 'Initial-Secret']);
 
@@ -93,7 +109,7 @@ it('reveals, updates, and removes only credentials belonging to the requested pr
 
     $this
         ->withSession(credentialAdminSession())
-        ->put(route('admin.projects.credentials.update', [$project, $credential]), [
+        ->put(route('admin.credentials.update', [$project, $credential]), [
             'service_name' => 'CMS administrator',
             'credential_type' => 'WordPress login',
             'access_url' => 'https://nova.example.com/wp-admin',
@@ -101,20 +117,20 @@ it('reveals, updates, and removes only credentials belonging to the requested pr
             'secret' => '',
             'notes' => 'Use only for content administration.',
         ])
-        ->assertRedirect(route('admin.projects.show', $project));
+        ->assertRedirect(route('admin.credentials.show', $project));
 
     expect($credential->refresh()->service_name)->toBe('CMS administrator')
         ->and($credential->secret)->toBe('Initial-Secret');
 
     $this
         ->withSession(credentialAdminSession())
-        ->postJson(route('admin.projects.credentials.reveal', [$otherProject, $credential]))
+        ->postJson(route('admin.credentials.reveal', [$otherProject, $credential]))
         ->assertNotFound();
 
     $this
         ->withSession(credentialAdminSession())
-        ->delete(route('admin.projects.credentials.destroy', [$project, $credential]))
-        ->assertRedirect(route('admin.projects.show', $project));
+        ->delete(route('admin.credentials.destroy', [$project, $credential]))
+        ->assertRedirect(route('admin.credentials.show', $project));
 
     expect(ProjectCredential::query()->count())->toBe(0);
 });
@@ -138,7 +154,7 @@ it('downloads a confidential credential collation PDF on the Turance letterhead'
 
     $response = $this
         ->withSession(credentialAdminSession())
-        ->get(route('admin.projects.credentials.pdf', $project));
+        ->get(route('admin.credentials.pdf', $project));
 
     $response
         ->assertOk()
@@ -186,9 +202,11 @@ it('keeps the credential vault and exports restricted to full administrators', f
         ->assertDontSee('Production database')
         ->assertDontSee('Database-Secret');
 
-    $this->withSession($session)->postJson(route('admin.projects.credentials.reveal', [$project, $credential]))->assertForbidden();
-    $this->withSession($session)->get(route('admin.projects.credentials.pdf', $project))->assertForbidden();
-    $this->withSession($session)->post(route('admin.projects.credentials.store', $project), [
+    $this->withSession($session)->get(route('admin.credentials.index'))->assertForbidden();
+    $this->withSession($session)->get(route('admin.credentials.show', $project))->assertForbidden();
+    $this->withSession($session)->postJson(route('admin.credentials.reveal', [$project, $credential]))->assertForbidden();
+    $this->withSession($session)->get(route('admin.credentials.pdf', $project))->assertForbidden();
+    $this->withSession($session)->post(route('admin.credentials.store', $project), [
         'service_name' => 'Attempted entry',
         'credential_type' => 'Login',
         'secret' => 'Blocked',

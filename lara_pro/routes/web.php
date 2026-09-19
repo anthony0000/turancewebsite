@@ -135,13 +135,18 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/profile', [AdminProfileController::class, 'edit'])->name('profile');
         Route::put('/profile', [AdminProfileController::class, 'update'])->name('profile.update');
 
+        Route::middleware('admin.permission:projects')->prefix('credentials')->name('credentials.')->group(function () {
+            Route::get('/', [AdminProjectCredentialController::class, 'index'])->name('index');
+            Route::get('/{project}', [AdminProjectCredentialController::class, 'show'])->name('show');
+            Route::get('/{project}/collation.pdf', [AdminProjectCredentialController::class, 'downloadPdf'])->name('pdf');
+            Route::post('/{project}', [AdminProjectCredentialController::class, 'store'])->name('store');
+            Route::put('/{project}/{projectCredential}', [AdminProjectCredentialController::class, 'update'])->name('update');
+            Route::post('/{project}/{projectCredential}/reveal', [AdminProjectCredentialController::class, 'reveal'])->name('reveal');
+            Route::delete('/{project}/{projectCredential}', [AdminProjectCredentialController::class, 'destroy'])->name('destroy');
+        });
+
         Route::middleware('admin.permission:projects')->prefix('projects')->name('projects.')->group(function () {
             Route::get('/', [AdminProjectController::class, 'index'])->name('index');
-            Route::get('/{project}/credentials/collation.pdf', [AdminProjectCredentialController::class, 'downloadPdf'])->name('credentials.pdf');
-            Route::post('/{project}/credentials', [AdminProjectCredentialController::class, 'store'])->name('credentials.store');
-            Route::put('/{project}/credentials/{projectCredential}', [AdminProjectCredentialController::class, 'update'])->name('credentials.update');
-            Route::post('/{project}/credentials/{projectCredential}/reveal', [AdminProjectCredentialController::class, 'reveal'])->name('credentials.reveal');
-            Route::delete('/{project}/credentials/{projectCredential}', [AdminProjectCredentialController::class, 'destroy'])->name('credentials.destroy');
             Route::get('/{project}', [AdminProjectController::class, 'show'])->name('show');
             Route::get('/files/{projectFile}/download', [AdminProjectController::class, 'downloadFile'])->name('files.download');
             Route::get('/files/{projectFile}/preview', [AdminProjectController::class, 'previewFile'])->name('files.preview');

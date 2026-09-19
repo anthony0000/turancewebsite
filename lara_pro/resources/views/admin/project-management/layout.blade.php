@@ -602,7 +602,10 @@
                 <a class="{{ request()->routeIs('admin.project-management.board') ? 'active' : '' }}" href="{{ route('admin.project-management.board', $project) }}">Board</a>
                 <a class="{{ request()->routeIs('admin.project-management.backlog') ? 'active' : '' }}" href="{{ route('admin.project-management.backlog', $project) }}">Backlog</a>
                 <a class="{{ request()->routeIs('admin.project-management.sprints') ? 'active' : '' }}" href="{{ route('admin.project-management.sprints', $project) }}">Sprints</a>
-                <a href="{{ route('admin.projects.show', $project) }}">{{ \App\Support\AdminAccess::isFullAdmin() ? 'Files & credentials' : 'Project files' }}</a>
+                <a href="{{ route('admin.projects.show', $project) }}">Project files</a>
+                @if (\App\Support\AdminAccess::isFullAdmin())
+                    <a href="{{ route('admin.credentials.show', $project) }}">Credentials</a>
+                @endif
             @endif
             <a class="{{ request()->routeIs('admin.project-management.notifications') ? 'active' : '' }}" href="{{ route('admin.project-management.notifications') }}">Notifications @if ($pmUnreadNotifications)<span class="pm-notification-count">{{ $pmUnreadNotifications > 99 ? '99+' : $pmUnreadNotifications }}</span>@endif</a>
             <details class="pm-subnav-more" @if ($moreNavActive) open @endif>
