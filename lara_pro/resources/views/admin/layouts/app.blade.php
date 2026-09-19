@@ -2201,6 +2201,11 @@
     }
     </style>
     @stack('styles')
+    @if ($isAuthenticated)
+        <style>
+            @include('admin.layouts.product-system')
+        </style>
+    @endif
 </head>
 
 <body class="{{ $isAuthenticated ? 'is-admin' : 'is-auth' }} {{ request()->routeIs('admin.quotes.index') ? 'is-dashboard-overview' : '' }} {{ request()->routeIs('admin.quotes.create') ? 'is-invoice-builder' : '' }} {{ request()->routeIs('admin.projects.index') ? 'is-project-files' : '' }}">

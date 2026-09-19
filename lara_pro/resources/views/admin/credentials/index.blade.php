@@ -25,7 +25,7 @@
             <form method="GET" action="{{ route('admin.credentials.index') }}" class="credential-search" role="search">
                 <label class="sr-only" for="credential-project-search">Search projects</label>
                 <input id="credential-project-search" type="search" name="q" value="{{ $search }}" placeholder="Search project or client">
-                <button class="ghost-button" type="submit">Search</button>
+                <button class="button" type="submit">Search</button>
                 @if ($search !== '')<a href="{{ route('admin.credentials.index') }}">Clear</a>@endif
             </form>
         </div>
@@ -61,8 +61,9 @@
 @push('styles')
     <style>
         .credential-directory__head { align-items: flex-end; }
-        .credential-search { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 8px; }
-        .credential-search input { width: min(280px, 100%); min-height: 40px; padding: 0 11px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface-soft); color: var(--text); }
+        .credential-search { display: grid; grid-template-columns: minmax(220px, 280px) auto auto; align-items: center; justify-content: end; gap: 8px; }
+        .credential-search input { width: 100%; min-height: 40px; padding: 0 11px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface-soft); color: var(--text); }
+        body.is-admin .credential-search .button { min-width: 78px; }
         .credential-search a { color: var(--muted); font-size: 11px; font-weight: 700; }
         .credential-project-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
         .credential-project-card { display: grid; min-height: 228px; align-content: space-between; gap: 18px; padding: 18px; border: 1px solid var(--line-soft); border-radius: 10px; background: linear-gradient(145deg, var(--surface), var(--surface-soft)); }
@@ -76,6 +77,6 @@
         .credential-project-card__footer .button { min-height: 36px; padding-inline: 12px; font-size: 11px; }
         .credential-directory__empty { grid-column: 1 / -1; min-height: 260px; }
         @media (max-width: 1050px) { .credential-project-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-        @media (max-width: 700px) { .credential-directory__head { display: block; } .credential-search { justify-content: flex-start; margin-top: 14px; } .credential-project-grid { grid-template-columns: 1fr; } }
+        @media (max-width: 700px) { .credential-directory__head { display: block; } .credential-search { grid-template-columns: minmax(0, 1fr) auto; justify-content: stretch; margin-top: 14px; } .credential-search a { grid-column: 1 / -1; } .credential-project-grid { grid-template-columns: 1fr; } }
     </style>
 @endpush

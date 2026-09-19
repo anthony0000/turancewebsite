@@ -57,6 +57,10 @@ it('stores project credentials encrypted and keeps secrets out of the project pa
         ->assertSee('Production hosting')
         ->assertSee('atlas-admin@example.com')
         ->assertSee('Download handover PDF')
+        ->assertSee('Add credential')
+        ->assertSee('data-credential-modal-open', false)
+        ->assertSee('data-credential-modal', false)
+        ->assertSee('aria-modal="true"', false)
         ->assertSee('data-credential-reveal', false)
         ->assertDontSee('Correct-Horse-Battery-99');
 
@@ -75,6 +79,35 @@ it('stores project credentials encrypted and keeps secrets out of the project pa
         ->assertOk()
         ->assertDontSee('Project credentials')
         ->assertDontSee('Production hosting');
+});
+
+it('reopens the add credential modal with validation feedback', function () {
+    $project = Project::query()->create([
+        'project_number' => 'TT-PRJ-CRED-006',
+        'name' => 'Modal Validation Project',
+        'status' => 'active',
+    ]);
+
+    $this
+        ->withSession(credentialAdminSession())
+        ->from(route('admin.credentials.show', $project))
+        ->post(route('admin.credentials.store', $project), [
+            '_credential_action' => 'create',
+            'service_name' => 'Production hosting',
+            'credential_type' => 'Login',
+            'access_url' => 'not-a-valid-url',
+            'secret' => '',
+        ])
+        ->assertRedirect(route('admin.credentials.show', $project))
+        ->assertSessionHasErrors(['access_url', 'secret']);
+
+    $this
+        ->withSession(credentialAdminSession())
+        ->get(route('admin.credentials.show', $project))
+        ->assertOk()
+        ->assertSee('data-open-on-load', false)
+        ->assertSee('Check the credential details.')
+        ->assertSee('value="Production hosting"', false);
 });
 
 it('reveals, updates, and removes only credentials belonging to the requested project', function () {
