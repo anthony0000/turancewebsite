@@ -202,6 +202,28 @@ it('downloads a confidential credential collation PDF on the Turance letterhead'
         ->toContain('must-revalidate');
 });
 
+it('reserves the letterhead area on every credential PDF page', function () {
+    $project = Project::query()->make([
+        'project_number' => 'TT-PRJ-CRED-PRINT',
+        'name' => 'Print layout',
+        'status' => 'active',
+    ]);
+
+    $html = view('admin.credentials.pdf', [
+        'project' => $project,
+        'credentials' => collect(),
+        'backgroundSrc' => 'data:image/png;base64,letterhead',
+        'generatedBy' => 'Test administrator',
+        'generatedAt' => now(),
+    ])->render();
+
+    expect($html)
+        ->toContain('@page { margin: 68mm 18mm 43mm;')
+        ->toContain('top: -68mm; left: -18mm;')
+        ->not->toContain('html, body { margin: 0;')
+        ->not->toContain('padding: 68mm 18mm 43mm;');
+});
+
 it('keeps the credential vault and exports restricted to full administrators', function () {
     $member = User::factory()->create([
         'role' => AdminAccess::ROLE_SUBACCOUNT,

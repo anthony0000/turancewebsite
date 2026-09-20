@@ -4,12 +4,13 @@
     <meta charset="utf-8">
     <title>Credential Collation | {{ $project->project_number }}</title>
     <style>
-        @page { margin: 0; size: A4 portrait; }
+        @page { margin: 68mm 18mm 43mm; size: A4 portrait; }
         @include('admin.partials.document-fonts')
         * { box-sizing: border-box; }
-        html, body { margin: 0; padding: 0; color: #17202b; background: #fff; font-family: 'Urbanist', sans-serif; font-size: 10px; line-height: 1.45; }
-        .letterhead-background { position: fixed; z-index: 0; inset: 0; width: 210mm; height: 297mm; object-fit: contain; object-position: center top; }
-        .document { position: relative; z-index: 1; padding: 68mm 18mm 43mm; }
+        html, body { padding: 0; color: #17202b; background: #fff; font-family: 'Urbanist', sans-serif; font-size: 10px; line-height: 1.45; }
+        body { margin: 0; }
+        .letterhead-background { position: fixed; z-index: 0; top: -68mm; left: -18mm; width: 210mm; height: 297mm; object-fit: contain; object-position: center top; }
+        .document { position: relative; z-index: 1; }
         .document-header { margin-bottom: 18px; padding-bottom: 12px; border-bottom: 2px solid #b8860b; }
         .confidential { margin: 0 0 6px; color: #9b6a00; font-size: 8px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; }
         h1 { margin: 0; font-size: 22px; line-height: 1.1; }
