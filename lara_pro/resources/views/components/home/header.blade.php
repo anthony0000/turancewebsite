@@ -8,10 +8,10 @@
 
     <nav class="tt-header__nav" aria-label="Primary navigation">
         <a href="{{ $homeAnchor('about') }}" data-nav-link>About Us</a>
-        <a href="{{ $homeAnchor('services') }}" data-nav-link>Services</a>
+        <a href="{{ $homeAnchor('services') }}" data-nav-link data-ai-sales>Services</a>
         <a href="{{ $homeAnchor('work') }}" data-nav-link>Work</a>
         <a href="{{ $homeAnchor('insights') }}" data-nav-link>Insights</a>
-        <a href="{{ request()->routeIs('home') ? '#contact' : route('contact.show') }}" data-nav-link>Contact</a>
+        <a href="{{ request()->routeIs('home') ? '#contact' : route('contact.show') }}" data-nav-link data-ai-sales>Contact</a>
     </nav>
 
     <div class="tt-header__actions">

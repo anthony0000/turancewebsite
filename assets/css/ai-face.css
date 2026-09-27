@@ -1,0 +1,61 @@
+/* Artwork only: retain the existing hero grid, content and responsive order. */
+.tt-hero-visual--ai { pointer-events: none; }
+.tt-hero-visual--ai .tt-hero-visual__orbit,
+.tt-hero-visual--ai .tt-hero-visual__orbit-inner { animation: none; }
+.tt-ai-face {
+  position: absolute;
+  top: 41%;
+  right: -3%;
+  width: min(38vw, 550px);
+  aspect-ratio: 1;
+  transform: translateY(-47%);
+  pointer-events: none;
+}
+.tt-ai-face__fallback, .tt-ai-face__cloud, .tt-ai-face canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+.tt-ai-face canvas { opacity: 0; }
+.tt-ai-face__fallback { opacity: 1; }
+.tt-ai-face__cloud { opacity: 0; }
+.tt-ai-face[data-formation="pending"] .tt-ai-face__cloud { opacity: 1; }
+.tt-ai-face[data-formation="pending"] .tt-ai-face__fallback { opacity: 0; }
+.tt-ai-face.is-ready canvas { opacity: 1; }
+.tt-ai-face.is-ready .tt-ai-face__fallback { opacity: 0; }
+.tt-ai-face.is-ready .tt-ai-face__cloud { opacity: 0; transition: opacity 240ms ease; }
+.tt-ai-face__shadow {
+  position: absolute;
+  bottom: 13%;
+  right: 18%;
+  width: 33%;
+  height: 14px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, #9d7a3530, #9d7a3500 70%);
+  filter: blur(8px);
+}
+.tt-ai-face__orbit-node {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #dbbd7d;
+  box-shadow: 0 0 10px #e4c99555;
+}
+.tt-ai-face__orbit-node--one { top: 17%; left: 12%; }
+.tt-ai-face__orbit-node--two { bottom: 10%; right: 19%; width: 4px; height: 4px; }
+@media (max-width: 991px) {
+  .tt-ai-face { top: 48%; right: -5%; width: 110%; }
+  .tt-ai-face__shadow { bottom: -2%; right: 25%; width: 45%; }
+}
+@media (min-width: 720px) and (max-width: 991px) {
+  .tt-ai-face { right: 0; width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tt-ai-face canvas, .tt-ai-face__fallback, .tt-ai-face__cloud { transition: none; }
+  .tt-ai-face[data-formation="pending"] .tt-ai-face__fallback { opacity: 1; }
+  .tt-ai-face[data-formation="pending"] .tt-ai-face__cloud { opacity: 0; }
+}

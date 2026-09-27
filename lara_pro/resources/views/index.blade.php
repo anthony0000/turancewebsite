@@ -186,7 +186,7 @@
                             data-conversion="home_hero_quote">
                             Get a project estimate
                         </x-home.primary-button>
-                        <a class="tt-hero__secondary" href="{{ route('service.show') }}">
+                        <a class="tt-hero__secondary" href="{{ route('service.show') }}" data-ai-sales>
                             View services &amp; pricing
                             <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5" /></svg>
                         </a>
@@ -293,14 +293,14 @@
                     <x-home.section-heading eyebrow="What we do" id="services-title"
                         title="Expertise built for meaningful digital progress."
                         copy="Focused capabilities, brought together around the needs of each product." />
-                    <a class="tt-text-link" href="{{ route('service.show') }}">Explore all capabilities
+                    <a class="tt-text-link" href="{{ route('service.show') }}" data-ai-sales>Explore all capabilities
                         <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5" /></svg>
                     </a>
                 </div>
 
                 <div class="tt-services__list">
                     @foreach ($services as $service)
-                        <a class="tt-service-row" href="{{ route($service['route']) }}" data-reveal>
+                        <a class="tt-service-row" href="{{ route($service['route']) }}" data-ai-sales data-reveal>
                             <span class="tt-service-row__number">{{ str_pad($loop->iteration, 2, '0', STR_PAD_LEFT) }}</span>
                             <span class="tt-service-row__body">
                                 <strong>{{ $service['name'] }}</strong>
@@ -368,7 +368,7 @@
 
                 <div class="tt-work__footer" data-reveal>
                     <p>Need to see work relevant to your brief?</p>
-                    <a class="tt-text-link" href="{{ route('contact.show') }}">Request a tailored portfolio
+                    <a class="tt-text-link" href="{{ route('contact.show') }}" data-ai-sales>Request a tailored portfolio
                         <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5" /></svg>
                     </a>
                 </div>
@@ -523,7 +523,7 @@
                     <x-home.section-heading eyebrow="Frequently asked questions" id="faq-title"
                         title="The details you may need before we begin."
                         copy="A concise view of how engagements are shaped. If your question is more specific, we are happy to discuss it." />
-                    <a class="tt-text-link" href="{{ route('contact.show') }}">Ask another question
+                    <a class="tt-text-link" href="{{ route('contact.show') }}" data-ai-sales>Ask another question
                         <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5" /></svg>
                     </a>
                 </div>
@@ -583,5 +583,5 @@
 @endsection
 
 @push('scripts')
-    <script src="{{ asset('/assets/js/home-reference.js') }}?v=2.6" defer></script>
+    <script src="{{ asset('/assets/js/home-reference.js') }}?v=2.7" defer></script>
 @endpush

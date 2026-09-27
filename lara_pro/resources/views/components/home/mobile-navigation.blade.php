@@ -38,7 +38,7 @@
                     <path d="M5 12h14M14 7l5 5-5 5" />
                 </svg>
             </a>
-            <a href="{{ $homeAnchor('services') }}" data-nav-link>
+            <a href="{{ $homeAnchor('services') }}" data-nav-link data-ai-sales>
                 <span class="tt-mobile-navigation__index" aria-hidden="true">02</span>
                 <span class="tt-mobile-navigation__link-copy">
                     <span class="tt-mobile-navigation__label">Services</span>
@@ -68,7 +68,7 @@
                     <path d="M5 12h14M14 7l5 5-5 5" />
                 </svg>
             </a>
-            <a href="{{ request()->routeIs('home') ? '#contact' : route('contact.show') }}" data-nav-link>
+            <a href="{{ request()->routeIs('home') ? '#contact' : route('contact.show') }}" data-nav-link data-ai-sales>
                 <span class="tt-mobile-navigation__index" aria-hidden="true">05</span>
                 <span class="tt-mobile-navigation__link-copy">
                     <span class="tt-mobile-navigation__label">Contact</span>

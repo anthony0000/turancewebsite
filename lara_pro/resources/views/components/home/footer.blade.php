@@ -14,17 +14,17 @@
                 <nav aria-label="Footer navigation">
                     <span>Explore</span>
                     <a href="{{ route('home') }}#about">About Us</a>
-                    <a href="{{ route('home') }}#services">Services</a>
+                    <a href="{{ route('home') }}#services" data-ai-sales>Services</a>
                     <a href="{{ route('home') }}#work">Work</a>
                     <a href="{{ route('home') }}#insights">Insights</a>
-                    <a href="{{ route('contact.show') }}">Contact</a>
+                    <a href="{{ route('contact.show') }}" data-ai-sales>Contact</a>
                 </nav>
                 <nav aria-label="Footer services">
                     <span>Services</span>
-                    <a href="{{ route('services.web') }}">Web development</a>
-                    <a href="{{ route('services.mobile') }}">Mobile products</a>
-                    <a href="{{ route('services.saas') }}">SaaS platforms</a>
-                    <a href="{{ route('services.branding') }}">Branding &amp; identity</a>
+                    <a href="{{ route('services.web') }}" data-ai-sales>Web development</a>
+                    <a href="{{ route('services.mobile') }}" data-ai-sales>Mobile products</a>
+                    <a href="{{ route('services.saas') }}" data-ai-sales>SaaS platforms</a>
+                    <a href="{{ route('services.branding') }}" data-ai-sales>Branding &amp; identity</a>
                 </nav>
                 <address>
                     <span>Connect</span>

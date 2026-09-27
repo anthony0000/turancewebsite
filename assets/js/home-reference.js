@@ -304,13 +304,14 @@ document.addEventListener("DOMContentLoaded", function () {
 document.addEventListener("DOMContentLoaded", function () {
   const hero = document.querySelector(".tt-hero");
   const canvas = document.querySelector("[data-particle-network]");
-  const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const motionPreference = window.matchMedia("(prefers-reduced-motion: reduce)");
 
-  if (!hero || !canvas || prefersReducedMotion) {
+  if (!hero || !canvas) {
     return;
   }
 
   const ctx = canvas.getContext("2d");
+  if (!ctx) return;
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
   const maxLinkDistance = 130;
   const cursorLinkDistance = 190;
@@ -354,13 +355,17 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function step() {
+    rafId = null;
     ctx.clearRect(0, 0, width, height);
+    const moving = !motionPreference.matches;
+    const pulse = moving ? canvas.aiPulse : null;
+    const pulseAt = (x, y) => pulse ? Math.exp(-Math.pow((Math.hypot(x - pulse.x, y - pulse.y) - pulse.radius) / 32, 2)) * pulse.opacity : 0;
 
     for (let i = 0; i < particles.length; i++) {
       const p = particles[i];
 
-      p.x += p.vx;
-      p.y += p.vy;
+      p.x += moving ? p.vx : 0;
+      p.y += moving ? p.vy : 0;
 
       if (p.x < 0 || p.x > width) {
         p.vx *= -1;
@@ -372,7 +377,7 @@ document.addEventListener("DOMContentLoaded", function () {
         p.y = Math.max(0, Math.min(height, p.y));
       }
 
-      if (pointer.x !== null) {
+      if (moving && pointer.x !== null) {
         const dx = p.x - pointer.x;
         const dy = p.y - pointer.y;
         const dist = Math.hypot(dx, dy);
@@ -385,7 +390,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
       ctx.beginPath();
       ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-      ctx.fillStyle = "rgba(201, 147, 33, 0.55)";
+      ctx.fillStyle = "rgba(201, 147, 33, " + (.55 + pulseAt(p.x, p.y)).toFixed(3) + ")";
       ctx.fill();
     }
 
@@ -395,7 +400,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const b = particles[j];
         const dist = Math.hypot(a.x - b.x, a.y - b.y);
         if (dist < maxLinkDistance) {
-          const alpha = (1 - dist / maxLinkDistance) * 0.35;
+          const alpha = (1 - dist / maxLinkDistance) * (0.35 + pulseAt((a.x + b.x) / 2, (a.y + b.y) / 2));
           ctx.beginPath();
           ctx.moveTo(a.x, a.y);
           ctx.lineTo(b.x, b.y);
@@ -406,7 +411,7 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     }
 
-    if (pointer.x !== null) {
+    if (moving && pointer.x !== null) {
       for (let i = 0; i < particles.length; i++) {
         const p = particles[i];
         const dist = Math.hypot(p.x - pointer.x, p.y - pointer.y);
@@ -422,8 +427,14 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     }
 
-    rafId = window.requestAnimationFrame(step);
+    if (moving && !document.hidden) rafId = window.requestAnimationFrame(step);
   }
+
+  motionPreference.addEventListener("change", function () {
+    window.cancelAnimationFrame(rafId);
+    pointer.x = pointer.y = null;
+    step();
+  });
 
   hero.addEventListener("pointermove", function (event) {
     const rect = hero.getBoundingClientRect();
@@ -438,7 +449,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   window.addEventListener("resize", function () {
     window.clearTimeout(resizeTimer);
-    resizeTimer = window.setTimeout(resize, 150);
+    resizeTimer = window.setTimeout(function () { resize(); if (!rafId) step(); }, 150);
   });
 
   document.addEventListener("visibilitychange", function () {
