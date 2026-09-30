@@ -35,11 +35,13 @@
     $canArchive = \App\Support\AdminAccess::can('archive');
     $isFullAdmin = \App\Support\AdminAccess::isFullAdmin();
     $isQuoteActivity = request()->routeIs('admin.quotes.activity');
+    $isVisitAnalytics = request()->routeIs('admin.visits.*');
     $isQuoteInsights = request()->routeIs('admin.quotes.insights');
     $isQuotePromotion = request()->routeIs('admin.quotes.promotion');
     $isQuoteBuilder = request()->routeIs('admin.quotes.create');
     $isQuoteArchive = request()->routeIs('admin.quotes.archive');
     $currentAdminView = match (true) {
+        $isVisitAnalytics => 'Website visits',
         $isCredentialWorkspace => 'Credentials',
         $isProjectPaymentWorkspace => 'Project Payment Invoices',
         $isInvoicePreview => 'Invoice Preview',
@@ -67,6 +69,7 @@
         default => 'Analytics Dashboard',
     };
     $currentAdminHint = match (true) {
+        $isVisitAnalytics => 'Explore traffic, pages, referrers, and visitor technology over time.',
         $isCredentialWorkspace => 'Store encrypted project access details and export secure letterhead handover documents.',
         $isProjectPaymentWorkspace => 'Generate progress-payment invoices from live projects and record when each request is paid.',
         $isInvoicePreview => 'Review invoice details, inspect the layout, and export the PDF or MOU when everything looks right.',
@@ -94,6 +97,7 @@
         default => 'Track demand and create the next invoice.',
     };
     $adminPageTitle = match (true) {
+        $isVisitAnalytics => 'Website visits',
         $isCredentialWorkspace => 'Credentials',
         $isProjectPaymentWorkspace => 'Project Payments',
         $isInvoicePreview => 'Invoice Preview',
@@ -2204,6 +2208,7 @@
     @if ($isAuthenticated)
         <style>
             @include('admin.layouts.product-system')
+            @include('admin.layouts.responsive')
         </style>
     @endif
 </head>
@@ -2231,6 +2236,8 @@
                                     <path d="M15 6l-6 6 6 6" />
                                 </svg>
                             </button>
+                            <button class="admin-icon-button admin-mobile-nav-close" type="button"
+                                data-mobile-nav-close aria-label="Close navigation">&times;</button>
                         </div>
 
                         <nav class="admin-nav">
@@ -2255,6 +2262,10 @@
                             @endif
 
                             @if ($canActivity)
+                                <a class="admin-nav-link {{ $isVisitAnalytics ? 'active' : '' }}" href="{{ route('admin.visits.index') }}">
+                                    <span class="admin-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a18 18 0 0 1 0 18 18 18 0 0 1 0-18Z"/></svg></span>
+                                    <div><strong>Website visits</strong><span>Traffic analytics</span></div>
+                                </a>
                                 <a class="admin-nav-link {{ request()->routeIs('admin.quotes.activity') ? 'active' : '' }}"
                                     href="{{ route('admin.quotes.activity') }}">
                                 <span class="admin-nav-icon" aria-hidden="true">
@@ -2561,7 +2572,7 @@
                     <header class="admin-pagebar">
                         <div class="admin-pagebar-title">
                             <button class="admin-icon-button admin-mobile-nav-button" type="button"
-                                data-mobile-nav-toggle aria-controls="admin-sidebar" aria-label="Open navigation">
+                                data-mobile-nav-toggle aria-controls="admin-sidebar" aria-expanded="false" aria-label="Open navigation">
                                 <svg viewBox="0 0 24 24" aria-hidden="true">
                                     <path d="M4 7h16" />
                                     <path d="M4 12h16" />
@@ -2576,13 +2587,15 @@
 
                         <div class="admin-pagebar-actions">
                             @if ($isFullAdmin)
-                            <button class="admin-search-trigger" type="button" data-command-open aria-haspopup="dialog" aria-keyshortcuts="Control+K Meta+K">
+                            <button class="admin-search-trigger" type="button" data-command-open aria-label="Search workspace" aria-haspopup="dialog" aria-keyshortcuts="Control+K Meta+K">
                                 <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5" /><path d="m16 16 4 4" /></svg>
                                 <span>Search anything...</span>
                                 <kbd>⌘ K</kbd>
                             </button>
                             @endif
-                            @if ($isSubaccountWorkspace)
+                            @if ($isVisitAnalytics)
+                                <a class="ghost-button" href="{{ route('admin.quotes.activity') }}">Activity overview</a>
+                            @elseif ($isSubaccountWorkspace)
                                 <a class="button" href="{{ route('admin.subaccounts.create') }}">New Staff account</a>
                             @elseif ($isAdminProfile)
                                 @if ($isFullAdmin)
@@ -2671,6 +2684,7 @@
                         <a class="command-palette__item" data-command-item data-command-label="New Invoice Builder" href="{{ route('admin.quotes.create') }}"><span class="command-palette__item-icon">＋</span><span><strong>New invoice</strong><small>Invoice builder</small></span><span class="command-palette__arrow">↵</span></a>
                     @endif
                     @if ($canActivity)
+                        <a class="command-palette__item" data-command-item data-command-label="Website visits Visitors Traffic Analytics" href="{{ route('admin.visits.index') }}"><span class="command-palette__item-icon">↗</span><span><strong>Website visits</strong><small>Detailed traffic analytics</small></span><span class="command-palette__arrow">↵</span></a>
                         <a class="command-palette__item" data-command-item data-command-label="Activity Traffic Leads" href="{{ route('admin.quotes.activity') }}"><span class="command-palette__item-icon">↗</span><span><strong>Activity</strong><small>Traffic and leads</small></span><span class="command-palette__arrow">↵</span></a>
                     @endif
                     @if ($canProjects)
@@ -2747,29 +2761,60 @@
             const body = document.body;
             const sidebarToggle = document.querySelector('[data-sidebar-toggle]');
             const mobileToggle = document.querySelector('[data-mobile-nav-toggle]');
-            const mobileClose = document.querySelector('[data-mobile-nav-close]');
+            const sidebar = document.querySelector('.admin-sidebar');
+            const main = document.querySelector('.admin-main');
+            const mobileClose = document.querySelectorAll('[data-mobile-nav-close]');
+            const mobileViewport = window.matchMedia('(max-width: 1100px)');
             const collapsedKey = 'tt-admin-sidebar-collapsed';
 
-            if (localStorage.getItem(collapsedKey) === 'true') {
-                body.classList.add('is-sidebar-collapsed');
-            }
+            // Navigation must keep working when browser storage is unavailable.
+            try {
+                body.classList.toggle('is-sidebar-collapsed', localStorage.getItem(collapsedKey) === 'true');
+            } catch (_) {}
 
             sidebarToggle?.addEventListener('click', () => {
                 body.classList.toggle('is-sidebar-collapsed');
-                localStorage.setItem(collapsedKey, body.classList.contains('is-sidebar-collapsed') ? 'true' : 'false');
+                try {
+                    localStorage.setItem(collapsedKey, body.classList.contains('is-sidebar-collapsed') ? 'true' : 'false');
+                } catch (_) {}
             });
 
-            mobileToggle?.addEventListener('click', () => {
-                body.classList.add('is-mobile-nav-open');
-            });
+            const setMobileNavigation = (open, restoreFocus = true) => {
+                open = open && mobileViewport.matches;
+                body.classList.toggle('is-mobile-nav-open', open);
+                mobileToggle?.setAttribute('aria-expanded', String(open));
+                if (main) main.inert = open;
+                if (sidebar) sidebar.inert = mobileViewport.matches && !open;
+                if (open) {
+                    sidebar?.querySelector('[data-mobile-nav-close]')?.focus();
+                } else if (restoreFocus && mobileViewport.matches) {
+                    mobileToggle?.focus();
+                }
+            };
 
-            mobileClose?.addEventListener('click', () => {
-                body.classList.remove('is-mobile-nav-open');
-            });
+            mobileToggle?.addEventListener('click', () => setMobileNavigation(true));
+            mobileClose.forEach((button) => button.addEventListener('click', () => setMobileNavigation(false)));
+            mobileViewport.addEventListener('change', () => setMobileNavigation(false, false));
+            setMobileNavigation(false, false);
 
             document.addEventListener('keydown', (event) => {
+                if (!body.classList.contains('is-mobile-nav-open')) return;
                 if (event.key === 'Escape') {
-                    body.classList.remove('is-mobile-nav-open');
+                    event.preventDefault();
+                    setMobileNavigation(false);
+                }
+                if (event.key === 'Tab') {
+                    const focusable = Array.from(sidebar.querySelectorAll('a[href], button:not([disabled])'))
+                        .filter((element) => element.getClientRects().length);
+                    const first = focusable[0];
+                    const last = focusable[focusable.length - 1];
+                    if (event.shiftKey && document.activeElement === first) {
+                        event.preventDefault();
+                        last?.focus();
+                    } else if (!event.shiftKey && document.activeElement === last) {
+                        event.preventDefault();
+                        first?.focus();
+                    }
                 }
             });
         })();

@@ -1,7 +1,7 @@
 <section class="tt-page tt-page--activity" id="performance-overview">
     <header class="tt-subpage-head">
         <div><span class="eyebrow">Performance</span><h1>Activity at a glance</h1><p>Recent traffic, leads, and invoice output.</p></div>
-        <span class="tt-page-badge"><i></i>Live view</span>
+        <a class="ghost-button" href="{{ route('admin.visits.index') }}">Explore website visits →</a>
     </header>
 
     <div class="tt-metric-band" aria-label="Performance metrics">

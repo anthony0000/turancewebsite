@@ -12,6 +12,7 @@ use App\Http\Controllers\AdminProjectPaymentReceiptController;
 use App\Http\Controllers\AdminProposalController;
 use App\Http\Controllers\AdminStaffContractController;
 use App\Http\Controllers\AdminSubaccountController;
+use App\Http\Controllers\AdminVisitAnalyticsController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\ProjectManagementApiController;
 use App\Http\Middleware\EnsureLuxuryQuoteAdminAuthenticated;
@@ -258,6 +259,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('/{user}', [AdminSubaccountController::class, 'update'])->name('update');
             Route::patch('/{user}/toggle', [AdminSubaccountController::class, 'toggle'])->name('toggle');
         });
+
+        Route::get('/visits', [AdminVisitAnalyticsController::class, 'index'])
+            ->middleware('admin.permission:activity')->name('visits.index');
+        Route::get('/visits/export', [AdminVisitAnalyticsController::class, 'export'])
+            ->middleware('admin.permission:activity')->name('visits.export');
 
         // Keep named quote sections ahead of the {luxuryQuote} wildcard so
         // values such as "activity" are not treated as invoice IDs.
