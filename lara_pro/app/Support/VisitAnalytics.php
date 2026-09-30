@@ -98,6 +98,20 @@ final class VisitAnalytics
             ->groupByRaw($date)->orderByRaw($date)->pluck('total', 'day')->all();
     }
 
+    private function aggregateByExpression(Builder $query, string $expression): array
+    {
+        $classifiedVisits = (clone $query)->selectRaw("$expression AS label");
+
+        // Some MySQL versions reject computed SELECT expressions under
+        // ONLY_FULL_GROUP_BY even when the same expression is repeated in
+        // GROUP BY. Materialise the label before aggregating it instead.
+        return $query->getModel()->getConnection()->query()
+            ->fromSub($classifiedVisits, 'classified_visits')
+            ->select('label')->selectRaw('COUNT(*) AS total')
+            ->groupBy('label')->orderByDesc('total')->get()
+            ->map(fn ($row) => ['label' => $row->label, 'count' => (int) $row->total])->all();
+    }
+
     public function report(array $filters): array
     {
         $start = Carbon::parse($filters['start'])->startOfDay();
@@ -140,17 +154,7 @@ final class VisitAnalytics
 
         $breakdowns = [];
         foreach (['device', 'browser', 'os'] as $dimension) {
-            $expression = $this->dimension($dimension);
-            $classifiedVisits = (clone $query)->selectRaw("$expression AS label");
-
-            // MySQL's ONLY_FULL_GROUP_BY can reject a repeated CASE expression
-            // that reads user_agent even when the SELECT and GROUP BY match.
-            // Classify first so the aggregate only needs to group by a column.
-            $breakdowns[$dimension] = $query->getModel()->getConnection()->query()
-                ->fromSub($classifiedVisits, 'classified_visits')
-                ->select('label')->selectRaw('COUNT(*) AS total')
-                ->groupBy('label')->orderByDesc('total')->get()
-                ->map(fn ($row) => ['label' => $row->label, 'count' => (int) $row->total])->all();
+            $breakdowns[$dimension] = $this->aggregateByExpression($query, $this->dimension($dimension));
         }
 
         // Group in SQL and stream the groups: do not load visit records to build charts.
@@ -172,9 +176,7 @@ final class VisitAnalytics
 
         $pages = (clone $query)->select('path')->selectRaw("COUNT(*) AS views, COUNT(DISTINCT NULLIF(session_id, '')) AS visitors, MAX(created_at) AS last_seen")
             ->groupBy('path')->orderByDesc('views')->orderBy('path')->paginate(15, ['*'], 'pages_page')->withQueryString();
-        $groups = (clone $query)->selectRaw("COALESCE(NULLIF(page_group, ''), 'Uncategorised') AS label, COUNT(*) AS total")
-            ->groupByRaw("COALESCE(NULLIF(page_group, ''), 'Uncategorised')")->orderByDesc('total')->get()
-            ->map(fn ($row) => ['label' => $row->label, 'count' => (int) $row->total])->all();
+        $groups = $this->aggregateByExpression($query, "COALESCE(NULLIF(page_group, ''), 'Uncategorised')");
         $recent = $this->withDimensions(clone $query)->orderByDesc('created_at')->orderByDesc('id')
             ->paginate(25, ['*'], 'visits_page')->withQueryString();
 
