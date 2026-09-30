@@ -141,8 +141,15 @@ final class VisitAnalytics
         $breakdowns = [];
         foreach (['device', 'browser', 'os'] as $dimension) {
             $expression = $this->dimension($dimension);
-            $breakdowns[$dimension] = (clone $query)->selectRaw("$expression AS label, COUNT(*) AS total")
-                ->groupByRaw($expression)->orderByDesc('total')->get()
+            $classifiedVisits = (clone $query)->selectRaw("$expression AS label");
+
+            // MySQL's ONLY_FULL_GROUP_BY can reject a repeated CASE expression
+            // that reads user_agent even when the SELECT and GROUP BY match.
+            // Classify first so the aggregate only needs to group by a column.
+            $breakdowns[$dimension] = $query->getModel()->getConnection()->query()
+                ->fromSub($classifiedVisits, 'classified_visits')
+                ->select('label')->selectRaw('COUNT(*) AS total')
+                ->groupBy('label')->orderByDesc('total')->get()
                 ->map(fn ($row) => ['label' => $row->label, 'count' => (int) $row->total])->all();
         }
 
