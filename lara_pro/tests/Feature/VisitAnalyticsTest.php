@@ -2,8 +2,10 @@
 
 use App\Models\PageVisit;
 use App\Support\VisitAnalytics;
+use App\Support\VisitCountryResolver;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Schema;
 
 uses(RefreshDatabase::class);
@@ -67,9 +69,55 @@ it('calculates periods, returning browsers, separate page paths and traffic brea
         ->and(collect($report['sources'])->firstWhere('label', 'google.com')['count'])->toBe(2)
         ->and(collect($report['breakdowns']['device'])->firstWhere('label', 'Bot')['count'])->toBe(1)
         ->and(collect($report['breakdowns']['browser'])->firstWhere('label', 'Edge')['count'])->toBe(1)
+        ->and(collect($report['countries'])->firstWhere('label', 'Unknown')['count'])->toBe(6)
         ->and($report['pages']->pluck('path')->all())->toContain('/services/design', '/services/development');
 
-    $response->assertDontSee('session-private-a')->assertDontSee('203.0.113.123')->assertDontSee('token=hidden');
+    $response->assertSee('Countries')->assertDontSee('session-private-a')->assertDontSee('203.0.113.123')->assertDontSee('token=hidden');
+});
+
+it('resolves countries once per public IP and backfills earlier visits', function () {
+    Http::fake([
+        'https://ipwho.is/8.8.8.8' => Http::response(['success' => true, 'country_code' => 'US', 'country' => 'United States']),
+        'https://ipwho.is/1.1.1.1' => Http::response(['success' => true, 'country_code' => 'AU', 'country' => 'Australia']),
+    ]);
+    analyticsVisit(['ip_address' => '8.8.8.8']);
+    analyticsVisit(['ip_address' => '8.8.8.8', 'session_id' => 'another-browser']);
+    analyticsVisit(['ip_address' => '1.1.1.1']);
+    analyticsVisit(['ip_address' => '127.0.0.1']);
+
+    $resolver = app(VisitCountryResolver::class);
+    expect($resolver->resolve('8.8.8.8'))->toBeTrue()
+        ->and($resolver->resolve('8.8.8.8'))->toBeTrue()
+        ->and($resolver->backfill(10))->toBe(2);
+    Http::assertSentCount(2);
+
+    $response = $this->get(route('admin.visits.index'))->assertOk();
+    $countries = $response->viewData('report')['countries'];
+    expect(collect($countries)->firstWhere('label', 'United States')['count'])->toBe(2)
+        ->and(collect($countries)->firstWhere('label', 'Australia')['count'])->toBe(1)
+        ->and(collect($countries)->firstWhere('label', 'Unknown')['count'])->toBe(1)
+        ->and(preg_match('/class="va-chart-current" d="M [^"]* C [^"]*"/', $response->getContent()))->toBe(1);
+
+    $csv = $this->get(route('admin.visits.export'))->assertOk()->streamedContent();
+    expect($csv)->toContain('Country', 'United States', 'Australia', 'Unknown')->not->toContain('8.8.8.8');
+
+    analyticsVisit(['ip_address' => '8.8.8.8', 'session_id' => 'new-browser']);
+    $resolver->resolve('8.8.8.8');
+    Http::assertSentCount(2);
+    expect(PageVisit::query()->where('ip_address', '8.8.8.8')->where('country_code', 'US')->count())->toBe(3);
+});
+
+it('keeps unresolved countries retryable when the lookup service is unavailable', function () {
+    analyticsVisit(['ip_address' => '8.8.4.4']);
+    Http::fakeSequence('https://ipwho.is/8.8.4.4')
+        ->push(['success' => false, 'message' => 'Rate limit exceeded'], 429)
+        ->push(['success' => true, 'country_code' => 'US', 'country' => 'United States']);
+
+    $resolver = app(VisitCountryResolver::class);
+    expect($resolver->resolve('8.8.4.4'))->toBeFalse()
+        ->and(PageVisit::query()->first()->country_name)->toBeNull()
+        ->and($resolver->resolve('8.8.4.4'))->toBeTrue()
+        ->and(PageVisit::query()->first()->country_name)->toBe('United States');
 });
 
 it('applies filters consistently to totals, charts, tables, and exports', function () {

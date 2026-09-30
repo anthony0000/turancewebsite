@@ -78,9 +78,22 @@
                 @php
                     $trend = $report['trend'];
                     $chartMax = max(4, ceil(max(collect($trend)->max('views'), collect($trend)->max('previous')) / 4) * 4);
-                    $point = fn ($index, $value) => (52 + ($index / max(1, count($trend) - 1)) * 896).','.round(218 - ($value / $chartMax) * 180, 2);
-                    $points = collect($trend)->map(fn ($day, $index) => $point($index, $day['views']))->implode(' ');
-                    $previousPoints = collect($trend)->map(fn ($day, $index) => $point($index, $day['previous']))->implode(' ');
+                    $chartPath = static function (array $values) use ($chartMax): string {
+                        $points = [];
+                        foreach ($values as $index => $value) {
+                            $points[] = [round(52 + $index / max(1, count($values) - 1) * 896, 2), round(218 - $value / $chartMax * 180, 2)];
+                        }
+                        $path = 'M '.$points[0][0].' '.$points[0][1];
+                        for ($index = 1; $index < count($points); $index++) {
+                            [$x0, $y0] = $points[$index - 1];
+                            [$x1, $y1] = $points[$index];
+                            $third = round(($x1 - $x0) / 3, 2);
+                            $path .= ' C '.round($x0 + $third, 2).' '.$y0.' '.round($x1 - $third, 2).' '.$y1.' '.$x1.' '.$y1;
+                        }
+                        return $path;
+                    };
+                    $currentPath = $chartPath(array_column($trend, 'views'));
+                    $previousPath = $chartPath(array_column($trend, 'previous'));
                 @endphp
                 <div class="va-chart" data-va-chart>
                     <svg viewBox="0 0 1000 262" role="img" aria-labelledby="va-chart-title va-chart-desc">
@@ -89,12 +102,12 @@
                             <line class="va-gridline" x1="52" x2="948" y1="{{ 218 - $tick * 45 }}" y2="{{ 218 - $tick * 45 }}"/>
                             <text class="va-axis" x="42" y="{{ 223 - $tick * 45 }}" text-anchor="end">{{ number_format($chartMax / 4 * $tick) }}</text>
                         @endfor
-                        @if (count($trend) > 1)<polygon class="va-chart-fill" points="52,218 {{ $points }} 948,218"/>@endif
+                        @if (count($trend) > 1)<path class="va-chart-fill" d="{{ $currentPath }} L 948 218 L 52 218 Z"/>@endif
                         <g data-va-previous>
-                            <polyline class="va-chart-previous" points="{{ $previousPoints }}"/>
+                            <path class="va-chart-previous" d="{{ $previousPath }}"/>
                             @if (count($trend) === 1)<circle cx="52" cy="{{ 218 - $trend[0]['previous'] / $chartMax * 180 }}" r="4" fill="#9da8ba"/>@endif
                         </g>
-                        <polyline class="va-chart-current" points="{{ $points }}"/>
+                        <path class="va-chart-current" d="{{ $currentPath }}"/>
                         @if (count($trend) === 1)<circle cx="52" cy="{{ 218 - $trend[0]['views'] / $chartMax * 180 }}" r="4" fill="#b98518"/>@endif
                         <line data-va-cursor x1="52" x2="52" y1="28" y2="218" class="va-chart-cursor" visibility="hidden"/>
                         <text class="va-axis" x="52" y="248">{{ $trend[0]['label'] }}</text><text class="va-axis" x="948" y="248" text-anchor="end">{{ $trend[count($trend) - 1]['label'] }}</text>
@@ -112,8 +125,11 @@
             </aside>
         </div>
 
-        <div class="va-three-grid">
+        <div class="va-two-grid">
+            @include('admin.visits.breakdown', ['eyebrow' => 'Audience location', 'heading' => 'Countries', 'description' => 'Page views by estimated visitor country. Unknown includes visits without a reliable location.', 'rows' => $report['countries'], 'filterKey' => null])
             @include('admin.visits.breakdown', ['eyebrow' => 'Acquisition', 'heading' => 'Referring websites', 'description' => 'Top 15 referrer hosts, including internal navigation. Not first-touch attribution.', 'rows' => $report['sources'], 'filterKey' => null])
+        </div>
+        <div class="va-two-grid">
             @include('admin.visits.breakdown', ['eyebrow' => 'Content', 'heading' => 'Page categories', 'description' => 'Select a category to explore its traffic.', 'rows' => $report['groups'], 'filterKey' => 'page_group'])
             @include('admin.visits.breakdown', ['eyebrow' => 'Technology', 'heading' => 'Devices', 'description' => 'Estimated from browser information. Select a device to filter.', 'rows' => $report['breakdowns']['device'], 'filterKey' => 'device'])
         </div>
@@ -142,15 +158,15 @@
 
         <div class="va-two-grid">
             @include('admin.visits.breakdown', ['eyebrow' => 'Technology', 'heading' => 'Operating systems', 'description' => 'Device software inferred from browser information.', 'rows' => $report['breakdowns']['os'], 'filterKey' => null])
-            <section class="panel va-card va-method"><span class="eyebrow">Reading the numbers</span><h2>What this report measures</h2><ul><li>Successful public HTML page requests recorded by the website. Repeat requests count again. Admin pages, redirects, and error responses are excluded.</li><li>Historical tracking includes HEAD requests. Cached pages that do not reach the application may not be recorded.</li><li>Bot detection and device classification are estimates. Some automated traffic may look like a regular browser.</li><li>“Direct / unavailable” means no referrer was recorded; it can include bookmarks, apps, or browsers that hide referrers.</li><li>Time on page, bounce rate, location, campaign tags, clicks, and individual conversion attribution are not currently measured.</li><li>Today may be incomplete. Comparisons use the immediately preceding range of the same length.</li></ul></section>
+            <section class="panel va-card va-method"><span class="eyebrow">Reading the numbers</span><h2>What this report measures</h2><ul><li>Successful public HTML page requests recorded by the website. Repeat requests count again. Admin pages, redirects, and error responses are excluded.</li><li>Historical tracking includes HEAD requests. Cached pages that do not reach the application may not be recorded.</li><li>Bot detection and device classification are estimates. Some automated traffic may look like a regular browser.</li><li>Countries are estimates from recorded IP addresses. Older visits are filled in gradually; private, missing, or unresolved addresses remain Unknown.</li><li>“Direct / unavailable” means no referrer was recorded; it can include bookmarks, apps, or browsers that hide referrers.</li><li>Time on page, bounce rate, campaign tags, clicks, and individual conversion attribution are not currently measured.</li><li>Today may be incomplete. Comparisons use the immediately preceding range of the same length.</li></ul></section>
         </div>
 
         <section class="panel va-card" id="recent-visits">
             <div class="va-section-head"><div><span class="eyebrow">Visit log</span><h2>Recorded visits</h2><p>Newest first. Visitor labels are pseudonymous; raw session IDs and IP addresses are not shown.</p></div><a class="ghost-button" href="{{ route('admin.visits.export', $filters) }}">Download CSV</a></div>
-            <div class="table-wrap"><table class="quote-table va-log-table"><thead><tr><th scope="col">Recorded at</th><th scope="col">Page / category</th><th scope="col">Visitor</th><th scope="col">Device</th><th scope="col">Browser / OS</th><th scope="col">Referrer host</th></tr></thead><tbody>
+            <div class="table-wrap"><table class="quote-table va-log-table"><thead><tr><th scope="col">Recorded at</th><th scope="col">Page / category</th><th scope="col">Visitor</th><th scope="col">Country</th><th scope="col">Device</th><th scope="col">Browser / OS</th><th scope="col">Referrer host</th></tr></thead><tbody>
                 @forelse ($report['recent'] as $visit)
-                    <tr><td><time datetime="{{ $visit->created_at->toIso8601String() }}">{{ $visit->created_at->format('M j, Y') }}<small>{{ $visit->created_at->format('H:i:s') }}</small></time></td><td><a class="va-path" href="{{ route('admin.visits.index', array_merge($filters, ['path' => $visit->path])) }}">{{ $visit->path }}</a><small>{{ $visit->page_group ?: 'Uncategorised' }}</small></td><td>{{ $analytics->visitor($visit->session_id) }}</td><td><span class="va-device {{ $visit->device === 'Bot' ? 'va-device--bot' : '' }}">{{ $visit->device }}</span></td><td>{{ $visit->browser }}<small>{{ $visit->os }}</small></td><td class="va-source">{{ $analytics->source($visit->referrer) }}</td></tr>
-                @empty<tr><td colspan="6">No recorded visits match these filters.</td></tr>@endforelse
+                    <tr><td><time datetime="{{ $visit->created_at->toIso8601String() }}">{{ $visit->created_at->format('M j, Y') }}<small>{{ $visit->created_at->format('H:i:s') }}</small></time></td><td><a class="va-path" href="{{ route('admin.visits.index', array_merge($filters, ['path' => $visit->path])) }}">{{ $visit->path }}</a><small>{{ $visit->page_group ?: 'Uncategorised' }}</small></td><td>{{ $analytics->visitor($visit->session_id) }}</td><td>{{ $visit->country_name ?: 'Unknown' }}</td><td><span class="va-device {{ $visit->device === 'Bot' ? 'va-device--bot' : '' }}">{{ $visit->device }}</span></td><td>{{ $visit->browser }}<small>{{ $visit->os }}</small></td><td class="va-source">{{ $analytics->source($visit->referrer) }}</td></tr>
+                @empty<tr><td colspan="7">No recorded visits match these filters.</td></tr>@endforelse
             </tbody></table></div>
             @include('admin.visits.pagination', ['paginator' => $report['recent'], 'label' => 'Recorded visits', 'anchor' => 'recent-visits'])
         </section>

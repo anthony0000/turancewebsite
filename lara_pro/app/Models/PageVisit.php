@@ -12,6 +12,8 @@ class PageVisit extends Model
         'page_group',
         'session_id',
         'ip_address',
+        'country_code',
+        'country_name',
         'user_agent',
         'referrer',
     ];

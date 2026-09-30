@@ -37,11 +37,11 @@ class AdminVisitAnalyticsController extends Controller
 
         return response()->streamDownload(function () use ($query, $analytics) {
             $file = fopen('php://output', 'w');
-            fputcsv($file, ['Recorded at ('.config('app.timezone').')', 'Page', 'Page group', 'Visitor', 'Device', 'Browser', 'Operating system', 'Referrer host'], ',', '"', '');
+            fputcsv($file, ['Recorded at ('.config('app.timezone').')', 'Page', 'Page group', 'Visitor', 'Device', 'Browser', 'Operating system', 'Referrer host', 'Country'], ',', '"', '');
 
             foreach ($query->lazyById(1000) as $visit) {
                 $row = [$visit->created_at->format('Y-m-d H:i:s'), $visit->path, $visit->page_group,
-                    $analytics->visitor($visit->session_id), $visit->device, $visit->browser, $visit->os, $analytics->source($visit->referrer)];
+                    $analytics->visitor($visit->session_id), $visit->device, $visit->browser, $visit->os, $analytics->source($visit->referrer), $visit->country_name ?: 'Unknown'];
                 // A downloaded page name must never become a spreadsheet formula.
                 $row = array_map(fn ($value) => preg_match('/^[\s]*[=+@-]|^[\t\r\n]/u', (string) $value) ? "'".$value : (string) $value, $row);
                 fputcsv($file, $row, ',', '"', '');

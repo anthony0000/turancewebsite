@@ -177,10 +177,14 @@ final class VisitAnalytics
         $pages = (clone $query)->select('path')->selectRaw("COUNT(*) AS views, COUNT(DISTINCT NULLIF(session_id, '')) AS visitors, MAX(created_at) AS last_seen")
             ->groupBy('path')->orderByDesc('views')->orderBy('path')->paginate(15, ['*'], 'pages_page')->withQueryString();
         $groups = $this->aggregateByExpression($query, "COALESCE(NULLIF(page_group, ''), 'Uncategorised')");
+        $countries = (clone $query)->select('country_code')
+            ->selectRaw('MAX(country_name) AS label, COUNT(*) AS total')
+            ->groupBy('country_code')->orderByDesc('total')->get()
+            ->map(fn ($row) => ['label' => $row->label ?: 'Unknown', 'count' => (int) $row->total])->all();
         $recent = $this->withDimensions(clone $query)->orderByDesc('created_at')->orderByDesc('id')
             ->paginate(25, ['*'], 'visits_page')->withQueryString();
 
-        return compact('summary', 'previous', 'previousStart', 'previousEnd', 'trend', 'hours', 'weekdays', 'breakdowns', 'sources', 'groups', 'pages', 'recent', 'returning') + [
+        return compact('summary', 'previous', 'previousStart', 'previousEnd', 'trend', 'hours', 'weekdays', 'breakdowns', 'sources', 'groups', 'countries', 'pages', 'recent', 'returning') + [
             'newVisitors' => $summary['visitors'] - $returning,
             'sourceCount' => count($sourceCounts),
             'peakDay' => collect($trend)->sortByDesc('views')->first(),
@@ -190,7 +194,7 @@ final class VisitAnalytics
 
     public function withDimensions(Builder $query): Builder
     {
-        return $query->select(['id', 'created_at', 'path', 'page_group', 'session_id', 'referrer'])
+        return $query->select(['id', 'created_at', 'path', 'page_group', 'session_id', 'referrer', 'country_name'])
             ->selectRaw($this->dimension('device').' AS device')
             ->selectRaw($this->dimension('browser').' AS browser')
             ->selectRaw($this->dimension('os').' AS os');

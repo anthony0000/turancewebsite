@@ -6,7 +6,7 @@ return [
         'eyebrow' => 'Your information, handled carefully',
         'title' => 'Privacy that respects the relationship.',
         'intro' => 'This policy explains what Turance Technologies collects through this website, why we use it and the choices available to you.',
-        'updated' => '23 July 2026',
+        'updated' => '30 September 2026',
         'sections' => [
             [
                 'title' => 'What we collect',
@@ -18,7 +18,7 @@ return [
             ],
             [
                 'title' => 'When information is shared',
-                'body' => 'We do not sell your personal information. We may share the minimum information needed with trusted providers that help us host the website, deliver email, protect forms or provide infrastructure. Those providers may process information only to provide their services to us.',
+                'body' => 'We do not sell your personal information. We may share the minimum information needed with providers that help us host the website, deliver email, protect forms or provide infrastructure. We send recorded visitor IP addresses to ipwho.is to estimate countries for aggregate website analytics.',
             ],
             [
                 'title' => 'How long we keep it',

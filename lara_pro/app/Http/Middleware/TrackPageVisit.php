@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Models\PageVisit;
+use App\Support\VisitCountryResolver;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
@@ -31,7 +32,7 @@ class TrackPageVisit
                 return $response;
             }
 
-            PageVisit::query()->create([
+            $visit = PageVisit::query()->create([
                 'path' => $request->getPathInfo(),
                 'route_name' => $request->route()?->getName(),
                 'page_group' => $this->resolvePageGroup($request),
@@ -40,6 +41,16 @@ class TrackPageVisit
                 'user_agent' => Str::limit((string) $request->userAgent(), 1000, ''),
                 'referrer' => Str::limit((string) $request->headers->get('referer'), 1000, ''),
             ]);
+
+            if ($visit->ip_address) {
+                app()->terminating(function () use ($visit): void {
+                    try {
+                        app(VisitCountryResolver::class)->resolve($visit->ip_address);
+                    } catch (Throwable $exception) {
+                        report($exception);
+                    }
+                });
+            }
         } catch (Throwable $exception) {
             report($exception);
         }
