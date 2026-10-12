@@ -78,6 +78,9 @@ return [
     ],
 
     'defaults' => [
+        'executive_summary' => 'This engagement is designed to turn your digital investment into a clearer customer experience. The proposed work connects strategy, design, and delivery so people can understand your offer, trust the experience, and take the next step with confidence.',
+        'intro_message' => 'Thank you for considering Turance Technologies. This invoice brings the proposed scope, investment, and delivery path together so you can decide with confidence.',
+        'closing_note' => 'To move forward, confirm the scope and payment terms or reply with any final questions. We will then schedule kickoff and begin delivery against the agreed plan.',
         'scope_items' => [
             'Strategic discovery and positioning alignment',
             'Premium visual direction tailored to the client brand',

@@ -37,7 +37,7 @@
         </div>
         <div class="tt-footer__bottom">
             <p>&copy; {{ date('Y') }} Turance Technologies. All rights reserved.</p>
-            <div><a href="{{ route('privacy.show') }}">Privacy policy</a><a href="{{ route('terms.show') }}">Terms</a></div>
+            <div><a href="{{ route('privacy.show') }}">Privacy policy</a><a href="{{ route('terms.show') }}">Terms</a><button type="button" class="tt-footer__cookie-link" data-cookie-preferences>Cookie preferences</button></div>
             <a class="tt-footer__top-link" href="#main-content">Back to top
                 <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 16V4M5 9l5-5 5 5" /></svg>
             </a>

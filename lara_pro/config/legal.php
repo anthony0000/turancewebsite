@@ -6,7 +6,7 @@ return [
         'eyebrow' => 'Your information, handled carefully',
         'title' => 'Privacy that respects the relationship.',
         'intro' => 'This policy explains what Turance Technologies collects through this website, why we use it and the choices available to you.',
-        'updated' => '30 September 2026',
+        'updated' => '12 October 2026',
         'sections' => [
             [
                 'title' => 'What we collect',
@@ -26,7 +26,7 @@ return [
             ],
             [
                 'title' => 'Cookies and similar technologies',
-                'body' => 'The website may use essential cookies for security, sessions and form functionality. Where analytics or optional technologies are enabled, we will use them to understand site performance and improve the experience. You can control cookies through your browser settings.',
+                'body' => 'The website uses essential cookies for security, sessions and form functionality. We record basic page visits on the server for aggregate analytics; this does not require an analytics cookie. The cookie prompt saves your choice in your browser so it is not shown on every visit. You can reopen it from Cookie preferences in the footer, and you can also manage cookies in your browser settings.',
             ],
             [
                 'title' => 'Your choices',

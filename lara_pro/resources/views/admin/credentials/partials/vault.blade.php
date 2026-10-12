@@ -66,7 +66,14 @@
                         </div>
                         <div>
                             <dt>Username / email</dt>
-                            <dd>{{ $credential->username ?: 'Not provided' }}</dd>
+                            <dd class="credential-card__username">
+                                @if (filled($credential->username))
+                                    <span data-credential-username title="{{ $credential->username }}">{{ $credential->username }}</span>
+                                    <button class="credential-text-button" type="button" data-credential-username-copy aria-label="Copy username for {{ $credential->service_name }}">Copy</button>
+                                @else
+                                    <span class="credential-card__empty">Not provided</span>
+                                @endif
+                            </dd>
                         </div>
                     </dl>
 

@@ -20,11 +20,11 @@
         $addonsDefault = old('optional_addons', '');
         $introDefault = old(
             'intro_message',
-            'We have prepared this invoice to help your company move forward with clarity, confidence, and premium execution across the digital experience.'
+            $defaults['intro_message'] ?? ''
         );
         $closingDefault = old(
             'closing_note',
-            'Once approved, we move into alignment, lock the delivery roadmap, and execute the engagement with focused polish from first payment to final handoff.'
+            $defaults['closing_note'] ?? ''
         );
         $wizardSteps = [
             [
@@ -671,7 +671,7 @@
                             <div class="field-full">
                                 <label for="executive_summary">Executive Summary</label>
                                 <textarea id="executive_summary" name="executive_summary" required data-rich-editor
-                                    placeholder="Summarize the project direction and business need.">{{ old('executive_summary') }}</textarea>
+                                    placeholder="Summarize the project direction and business need.">{{ old('executive_summary', $defaults['executive_summary'] ?? '') }}</textarea>
                             </div>
                         </div>
 

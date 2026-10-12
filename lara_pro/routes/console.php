@@ -14,7 +14,7 @@ Artisan::command('visits:resolve-countries {--limit=100}', function (VisitCountr
     $this->info("Resolved {$resolved} visitor IP addresses.");
 })->purpose('Backfill countries for recorded website visits');
 
-Schedule::command('visits:resolve-countries --limit=20')->hourly()->withoutOverlapping();
+Schedule::command('visits:resolve-countries --limit=35')->hourly()->withoutOverlapping();
 
 Schedule::command('db:backup')
     ->hourly()

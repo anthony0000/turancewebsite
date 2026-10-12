@@ -31,6 +31,9 @@
         .credential-card__details { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin: 18px 0 0; padding-top: 15px; border-top: 1px solid #eef0f2; }
         .credential-card__details dt, .credential-secret span { margin-bottom: 5px; color: var(--muted); font-size: 8px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
         .credential-card__details dd { min-width: 0; margin: 0; overflow: hidden; color: #3e4651; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+        .credential-card__username { display: flex; align-items: center; gap: 6px; }
+        .credential-card__username [data-credential-username] { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+        .credential-card__username .credential-text-button { flex: 0 0 auto; }
         .credential-card__details a { display: inline-flex; max-width: 100%; align-items: center; gap: 5px; overflow: hidden; color: #8b630d; text-decoration: none; text-overflow: ellipsis; white-space: nowrap; }
         .credential-card__details a svg { width: 12px; height: 12px; flex: 0 0 12px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.7; }
         .credential-card__empty { color: #9aa0a8; }
@@ -114,9 +117,41 @@
 
 @push('scripts')
     <script>
+        const copyCredentialText = async (value) => {
+            if (navigator.clipboard?.writeText) {
+                try {
+                    await navigator.clipboard.writeText(value);
+                    return;
+                } catch {
+                    // Try the selection-based fallback when clipboard access is denied.
+                }
+            }
+
+            const input = document.createElement('textarea');
+            const previousFocus = document.activeElement;
+            input.value = value;
+            input.setAttribute('readonly', '');
+            input.style.cssText = 'position:fixed;left:-9999px;top:0;';
+            document.body.appendChild(input);
+            input.select();
+            try {
+                if (!document.execCommand('copy')) throw new Error('Clipboard unavailable');
+            } finally {
+                input.remove();
+                previousFocus?.focus();
+            }
+        };
+
+        const showCredentialCopyResult = (button, success) => {
+            button.textContent = success ? 'Copied' : 'Copy failed';
+            window.setTimeout(() => { button.textContent = 'Copy'; }, 1600);
+        };
+
         document.querySelectorAll('[data-credential-card]').forEach((card) => {
             const revealButton = card.querySelector('[data-credential-reveal]');
             const copyButton = card.querySelector('[data-credential-copy]');
+            const usernameCopyButton = card.querySelector('[data-credential-username-copy]');
+            const username = card.querySelector('[data-credential-username]');
             const secret = card.querySelector('[data-credential-secret]');
             const maskedValue = '\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022';
             let revealedValue = null;
@@ -154,11 +189,20 @@
             copyButton?.addEventListener('click', async () => {
                 if (revealedValue === null) return;
                 try {
-                    await navigator.clipboard.writeText(revealedValue);
-                    copyButton.textContent = 'Copied';
-                    window.setTimeout(() => { copyButton.textContent = 'Copy'; }, 1600);
+                    await copyCredentialText(revealedValue);
+                    showCredentialCopyResult(copyButton, true);
                 } catch {
-                    copyButton.textContent = 'Copy failed';
+                    showCredentialCopyResult(copyButton, false);
+                }
+            });
+
+            usernameCopyButton?.addEventListener('click', async () => {
+                if (!username) return;
+                try {
+                    await copyCredentialText(username.textContent);
+                    showCredentialCopyResult(usernameCopyButton, true);
+                } catch {
+                    showCredentialCopyResult(usernameCopyButton, false);
                 }
             });
         });

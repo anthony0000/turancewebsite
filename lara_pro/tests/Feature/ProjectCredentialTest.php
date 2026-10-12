@@ -56,6 +56,8 @@ it('stores project credentials encrypted and keeps secrets out of the project pa
         ->assertSee('Project credentials')
         ->assertSee('Production hosting')
         ->assertSee('atlas-admin@example.com')
+        ->assertSee('data-credential-username-copy', false)
+        ->assertSee('Copy username for Production hosting')
         ->assertSee('Download handover PDF')
         ->assertSee('Add credential')
         ->assertSee('data-credential-modal-open', false)

@@ -52,6 +52,35 @@ function projectPaymentPayload(Project $project, array $overrides = []): array
     ], $overrides);
 }
 
+it('prefills project payment invoices with a helpful project context and closing note', function () {
+    $admin = User::factory()->create(['role' => AdminAccess::ROLE_ADMIN, 'permissions' => []]);
+    $project = Project::query()->create([
+        'project_number' => 'TT-PRJ-DEFAULT-001',
+        'name' => 'Customer portal',
+        'status' => 'active',
+        'budget' => 2500,
+    ]);
+
+    $this->withSession(projectPaymentSession($admin))
+        ->get(route('admin.project-payments.create', ['project' => $project->project_number]))
+        ->assertOk()
+        ->assertSee('This payment supports the agreed work for Customer portal')
+        ->assertSee(config('project-payments.closing_note'));
+
+    $this->withSession(projectPaymentSession($admin))
+        ->post(route('admin.project-payments.store'), projectPaymentPayload($project, [
+            'project_title' => 'Customer portal',
+            'description' => 'This payment supports the agreed work for Customer portal, with a focus on clear delivery and a dependable handover.',
+            'notes' => config('project-payments.closing_note'),
+        ]))->assertRedirect();
+
+    $invoice = ProjectPaymentInvoice::query()->firstOrFail();
+    $this->withSession(projectPaymentSession($admin))
+        ->get(route('admin.project-payments.show', $invoice))
+        ->assertOk()
+        ->assertSee(config('project-payments.closing_note'));
+});
+
 it('builds an editable payment invoice from project completion and calculates totals on the server', function () {
     $admin = User::factory()->create(['role' => AdminAccess::ROLE_ADMIN, 'permissions' => []]);
     $client = Client::query()->create(['name' => 'John Akinwumi', 'company' => '3H Consulting Limited', 'email' => 'john@example.com']);
@@ -88,7 +117,7 @@ it('builds an editable payment invoice from project completion and calculates to
         ->and((float) $invoice->tax_amount)->toBe(0.0)
         ->and((float) $invoice->total_amount)->toBe(1091.60)
         ->and($invoice->status)->toBe('unpaid')
-        ->and($invoice->invoice_number)->toStartWith('TT-INV-20260918-');
+        ->and($invoice->invoice_number)->toStartWith('TT-INV-'.now()->format('Ymd').'-');
 
     $this->withSession(projectPaymentSession($admin))
         ->get(route('admin.project-payments.index'))

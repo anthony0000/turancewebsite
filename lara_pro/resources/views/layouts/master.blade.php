@@ -257,6 +257,7 @@
     @endunless
     @stack('styles')
     <link rel="stylesheet" href="{{ asset('/assets/css/preferred-source.css') }}?v=1.0">
+    <link rel="stylesheet" href="{{ asset('/assets/css/cookie-consent.css') }}?v=1.0">
 </head>
 
 <body class="{{ $minimalPage ? 'tt-minimal-page' : 'page-wrapper wt-magic-cursor' }}">
@@ -554,7 +555,7 @@
                                 <div class="wt-footer-copyright text-center">
                                     <p class="wt-footer-copyright-pagaraph">Copyright © {{ date('Y') }} <a
                                             href="{{ url('#') }}">Turance tech</a>. All
-                                        Rights Reserved.</p>
+                                        Rights Reserved. <button type="button" class="tt-footer__cookie-link" data-cookie-preferences>Cookie preferences</button></p>
                                 </div>
                             </div>
                         </div>
@@ -566,6 +567,17 @@
     </div>
     <!-- End Contenet Area -->
     @endif
+
+    <aside class="tt-cookie-prompt" data-cookie-prompt aria-labelledby="tt-cookie-title" hidden>
+        <div class="tt-cookie-prompt__copy">
+            <strong id="tt-cookie-title">Your privacy matters</strong>
+            <p>We use essential cookies for site functions. We also record basic page activity to improve the website. <a href="{{ route('privacy.show') }}">Read our privacy policy</a>.</p>
+        </div>
+        <div class="tt-cookie-prompt__actions">
+            <button type="button" data-cookie-choice="essential">Essential only</button>
+            <button type="button" data-cookie-choice="accepted">Accept cookies</button>
+        </div>
+    </aside>
 
     @unless ($minimalPage)
     <!-- Start Script Area -->
@@ -745,6 +757,7 @@
     <script src="{{ asset('/assets/js/wt-cursor.js') }}"></script>
     @endunless
     @stack('scripts')
+    <script src="{{ asset('/assets/js/cookie-consent.js') }}?v=1.0" defer></script>
 </body>
 
 </html>

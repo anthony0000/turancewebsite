@@ -81,7 +81,7 @@
         </td>
     </tr></table>
 
-    <div class="pd-balance"><table><tr><td><div class="pd-label" style="margin:0">Balance after this payment</div><strong>{{ $symbol }}{{ number_format($invoice->balance_amount, 2) }} / {{ $invoice->local_currency }} {{ number_format($invoice->local_balance_amount, 0) }}</strong></td><td>{{ $invoice->notes ?: 'Thank you for your continued partnership.' }}</td></tr></table></div>
+    <div class="pd-balance"><table><tr><td><div class="pd-label" style="margin:0">Balance after this payment</div><strong>{{ $symbol }}{{ number_format($invoice->balance_amount, 2) }} / {{ $invoice->local_currency }} {{ number_format($invoice->local_balance_amount, 0) }}</strong></td><td>{{ $invoice->notes ?: config('project-payments.closing_note') }}</td></tr></table></div>
 
     <table class="pd-footer"><tr>
         <td><span>Phone</span><strong>{{ $brand['contact_phone'] ?? '+2348061209440' }}</strong></td>

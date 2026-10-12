@@ -107,6 +107,17 @@ it('resolves the invoice archive route before the quote wildcard route', functio
         ->assertSee('Saved invoices');
 });
 
+it('prefills new invoices with a clear value proposition and next step', function () {
+    $this->withSession([
+        config('luxury-quotes.admin.session_key', 'luxury_quote_admin_authenticated') => true,
+        'luxury_quote_admin_email' => 'admin@example.com',
+    ])->get(route('admin.quotes.create'))
+        ->assertOk()
+        ->assertSee(config('luxury-quotes.defaults.executive_summary'))
+        ->assertSee(config('luxury-quotes.defaults.intro_message'))
+        ->assertSee(config('luxury-quotes.defaults.closing_note'));
+});
+
 it('resolves the activity route before the quote wildcard route', function () {
     $sessionKey = config('luxury-quotes.admin.session_key', 'luxury_quote_admin_authenticated');
 
@@ -182,6 +193,7 @@ it('stores an invoice and exports invoice and mou pdfs', function () {
         ->assertSee('data:image/png;base64,', false)
         ->assertSee('Turance Technologies logo')
         ->assertSee('<strong>refined website experience</strong>', false)
+        ->assertSee('Prepared to elevate the company presentation with calm premium clarity.')
         ->assertSee('<strong>Sharper trust</strong>', false);
 
     $this->assertDatabaseHas('luxury_quotes', [

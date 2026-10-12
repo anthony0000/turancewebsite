@@ -148,10 +148,9 @@
                         <i aria-hidden="true"></i>
                     </div>
 
-                    @if (! empty($anniversaryPromo['years']))
-                        <a class="tt-hero__anniversary tt-reveal tt-reveal--one {{ $promoIsActive ? 'is-offer' : '' }}"
-                            href="{{ $promoIsActive ? '#anniversary-offer' : '#contact' }}"
-                            @if ($promoIsActive) data-conversion="hero_anniversary_offer" @endif>
+                    @if ($promoIsActive)
+                        <a class="tt-hero__anniversary tt-reveal tt-reveal--one is-offer"
+                            href="#anniversary-offer" data-conversion="hero_anniversary_offer">
                             <span class="tt-hero__anniversary-mark">{{ $anniversaryPromo['years'] }}</span>
 
                             <span class="tt-hero__anniversary-copy">
@@ -159,12 +158,10 @@
                                 <small>Celebrating {{ $anniversaryPromo['years'] }} years of digital craftsmanship</small>
                             </span>
 
-                            @if ($promoIsActive)
-                                <span class="tt-hero__anniversary-offer">
-                                    <b>{{ $anniversaryPromo['discount_percent'] + 0 }}%</b>
-                                    <i>off</i>
-                                </span>
-                            @endif
+                            <span class="tt-hero__anniversary-offer">
+                                <b>{{ $anniversaryPromo['discount_percent'] + 0 }}%</b>
+                                <i>off</i>
+                            </span>
 
                             <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 4v12M5 11l5 5 5-5" /></svg>
                         </a>

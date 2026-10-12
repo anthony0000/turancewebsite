@@ -124,6 +124,20 @@
         $isQuoteArchive => 'Archive',
         default => 'Dashboard',
     };
+    // Resolve once so desktop and compact navigation expose the same action.
+    $adminPageAction = match (true) {
+        $isVisitAnalytics => ['Activity overview', 'admin.quotes.activity', false],
+        $isSubaccountWorkspace => ['New Staff account', 'admin.subaccounts.create', true],
+        $isAdminProfile => $isFullAdmin ? ['Manage Staff accounts', 'admin.subaccounts.index', false] : null,
+        $isProjectPaymentWorkspace => ['New Payment Invoice', 'admin.project-payments.create', true],
+        $isProposalWorkspace => ['New Proposal', 'admin.proposals.index', true],
+        $isProjectPreview => ['Back to Projects', 'admin.projects.index', false],
+        $isProjectManagementWorkspace => $isFullAdmin ? ['New Project', 'admin.project-management.projects.create', true] : null,
+        $isStaffContractWorkspace => ['New Staff Contract', 'admin.staff-contracts.create', true],
+        $isLetterWorkspace => ['New Letter', 'admin.letters.create', true],
+        $canInvoices => ['New Invoice', 'admin.quotes.create', true],
+        default => null,
+    };
 @endphp
 <!DOCTYPE html>
 <html lang="en">
@@ -2581,7 +2595,7 @@
                             </button>
                             <div>
                                 <span class="eyebrow">Workspace</span>
-                                <h1>{{ $adminPageTitle }}</h1>
+                                <h1 title="{{ $adminPageTitle }}">{{ $adminPageTitle }}</h1>
                             </div>
                         </div>
 
@@ -2593,30 +2607,30 @@
                                 <kbd>⌘ K</kbd>
                             </button>
                             @endif
-                            @if ($isVisitAnalytics)
-                                <a class="ghost-button" href="{{ route('admin.quotes.activity') }}">Activity overview</a>
-                            @elseif ($isSubaccountWorkspace)
-                                <a class="button" href="{{ route('admin.subaccounts.create') }}">New Staff account</a>
-                            @elseif ($isAdminProfile)
-                                @if ($isFullAdmin)
-                                    <a class="ghost-button" href="{{ route('admin.subaccounts.index') }}">Manage Staff accounts</a>
-                                @endif
-                            @elseif ($isProjectPaymentWorkspace)
-                                <a class="button" href="{{ route('admin.project-payments.create') }}">New Payment Invoice</a>
-                            @elseif ($isProposalWorkspace)
-                                <a class="button" href="{{ route('admin.proposals.index') }}">New Proposal</a>
-                              @elseif ($isProjectPreview)
-                                  <a class="ghost-button" href="{{ route('admin.projects.index') }}">Back to Projects</a>
-                              @elseif ($isProjectManagementWorkspace)
-                                  @if ($isFullAdmin)
-                                  <a class="button" href="{{ route('admin.project-management.projects.create') }}">New Project</a>
-                                  @endif
-                              @elseif ($isStaffContractWorkspace)
-                                <a class="button" href="{{ route('admin.staff-contracts.create') }}">New Staff Contract</a>
-                            @elseif ($isLetterWorkspace)
-                                <a class="button" href="{{ route('admin.letters.create') }}">New Letter</a>
-                            @elseif ($canInvoices)
-                                <a class="button" href="{{ route('admin.quotes.create') }}">New Invoice</a>
+                            @if ($adminPageAction)
+                                <a class="{{ $adminPageAction[2] ? 'button' : 'ghost-button' }}" href="{{ route($adminPageAction[1]) }}">{{ $adminPageAction[0] }}</a>
+                            @endif
+                            @if ($isFullAdmin || $adminPageAction)
+                                <details class="admin-page-actions-menu">
+                                    <summary class="admin-icon-button" aria-label="Open page actions" title="Page actions">
+                                        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg>
+                                    </summary>
+                                    <div class="admin-page-actions-panel">
+                                        <span class="admin-page-actions-label">Page actions</span>
+                                        @if ($adminPageAction)
+                                            <a class="admin-page-actions-link" href="{{ route($adminPageAction[1]) }}">
+                                                <span class="admin-page-action-symbol" aria-hidden="true">{{ $adminPageAction[2] ? '+' : '↗' }}</span>
+                                                <span>{{ $adminPageAction[0] }}</span>
+                                            </a>
+                                        @endif
+                                        @if ($isFullAdmin)
+                                            <button class="admin-page-actions-link" type="button" data-command-open aria-haspopup="dialog">
+                                                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg>
+                                                <span>Search workspace</span>
+                                            </button>
+                                        @endif
+                                    </div>
+                                </details>
                             @endif
                             <details class="admin-profile-menu">
                                 <summary aria-label="Open profile menu">
@@ -2820,8 +2834,33 @@
         })();
 
         (() => {
+            const menus = Array.from(document.querySelectorAll('.admin-pagebar details'));
+            const closeMenus = () => menus.forEach((menu) => { menu.open = false; });
+
+            document.addEventListener('click', (event) => {
+                menus.forEach((menu) => {
+                    if (!menu.contains(event.target)) menu.open = false;
+                });
+            });
+            document.addEventListener('keydown', (event) => {
+                if (event.key !== 'Escape') return;
+                const openMenu = menus.find((menu) => menu.open);
+                if (openMenu) {
+                    closeMenus();
+                    openMenu.querySelector('summary')?.focus();
+                }
+            });
+            document.addEventListener('focusin', (event) => {
+                menus.forEach((menu) => {
+                    if (!menu.contains(event.target)) menu.open = false;
+                });
+            });
+            window.matchMedia('(max-width: 767px)').addEventListener('change', closeMenus);
+        })();
+
+        (() => {
             const palette = document.querySelector('[data-command-palette]');
-            const openButton = document.querySelector('[data-command-open]');
+            const openButtons = document.querySelectorAll('[data-command-open]');
             const closeButtons = document.querySelectorAll('[data-command-close]');
             const input = palette?.querySelector('[data-command-input]');
             const items = palette ? Array.from(palette.querySelectorAll('[data-command-item]')) : [];
@@ -2860,7 +2899,9 @@
                     return;
                 }
 
-                lastFocusedElement = document.activeElement;
+                const actionsMenu = document.querySelector('.admin-page-actions-menu[open]');
+                lastFocusedElement = actionsMenu?.querySelector('summary') || document.activeElement;
+                if (actionsMenu) actionsMenu.open = false;
                 palette.hidden = false;
                 document.body.classList.add('is-command-open');
                 input?.focus();
@@ -2885,7 +2926,7 @@
                 setActiveItem(0);
             };
 
-            openButton?.addEventListener('click', openPalette);
+            openButtons.forEach((button) => button.addEventListener('click', openPalette));
             closeButtons.forEach((button) => button.addEventListener('click', closePalette));
             input?.addEventListener('input', filterItems);
 

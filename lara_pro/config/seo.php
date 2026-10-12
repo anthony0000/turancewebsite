@@ -7,7 +7,7 @@ return [
     'site_name' => 'Turance Technologies',
     'tagline' => 'Excellence Delivered',
     'anniversary_promo' => [
-        'enabled' => true,
+        'enabled' => false,
         'years' => 7,
         'discount_percent' => 50,
         'code' => 'TURANCE7',

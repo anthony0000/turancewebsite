@@ -236,13 +236,15 @@
     font-weight: 700;
 }
 
-.quote-project-copy {
+.quote-project-intro, .quote-project-copy {
     max-width: 620px;
     margin: 6px 0 0;
     color: #606873;
     font-size: 10px;
     line-height: 1.45;
 }
+
+.quote-project-intro { color: #374151; font-weight: 600; }
 
 .quote-items-table {
     margin-top: 10px;

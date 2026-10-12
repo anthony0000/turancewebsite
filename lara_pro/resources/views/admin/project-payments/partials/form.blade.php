@@ -87,7 +87,7 @@
                     <div class="field"><label for="account_name">Account name</label><input id="account_name" name="account_name" value="{{ $field('account_name', config('project-payments.account_name')) }}"></div>
                     <div class="field"><label for="account_number">Account number</label><input id="account_number" name="account_number" value="{{ $field('account_number', config('project-payments.account_number')) }}"></div>
                     <div class="field"><label for="prepared_by">Prepared by</label><input id="prepared_by" name="prepared_by" value="{{ $field('prepared_by', config('luxury-quotes.brand.studio_name')) }}"></div>
-                    <div class="field ppi-field-wide"><label for="notes">Closing note</label><textarea id="notes" name="notes" rows="2">{{ $field('notes', 'Thank you for your continued partnership.') }}</textarea></div>
+                    <div class="field ppi-field-wide"><label for="notes">Closing note</label><textarea id="notes" name="notes" rows="2">{{ $field('notes', config('project-payments.closing_note')) }}</textarea></div>
                 </div>
             </section>
 

@@ -3,6 +3,8 @@
 use App\Models\PageVisit;
 use App\Support\VisitAnalytics;
 use App\Support\VisitCountryResolver;
+use Illuminate\Http\Middleware\TrustProxies;
+use Illuminate\Http\Request;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Http;
@@ -118,6 +120,23 @@ it('keeps unresolved countries retryable when the lookup service is unavailable'
         ->and(PageVisit::query()->first()->country_name)->toBeNull()
         ->and($resolver->resolve('8.8.4.4'))->toBeTrue()
         ->and(PageVisit::query()->first()->country_name)->toBe('United States');
+});
+
+it('uses forwarded visitor IPs only from configured trusted proxies', function () {
+    config()->set('trustedproxy.proxies', '10.0.0.1');
+    $middleware = new TrustProxies;
+
+    $trusted = Request::create('/', 'GET', [], [], [], [
+        'REMOTE_ADDR' => '10.0.0.1',
+        'HTTP_X_FORWARDED_FOR' => '8.8.8.8',
+    ]);
+    $untrusted = Request::create('/', 'GET', [], [], [], [
+        'REMOTE_ADDR' => '10.0.0.2',
+        'HTTP_X_FORWARDED_FOR' => '8.8.8.8',
+    ]);
+
+    expect($middleware->handle($trusted, fn ($request) => $request->ip()))->toBe('8.8.8.8')
+        ->and($middleware->handle($untrusted, fn ($request) => $request->ip()))->toBe('10.0.0.2');
 });
 
 it('applies filters consistently to totals, charts, tables, and exports', function () {

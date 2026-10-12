@@ -292,6 +292,11 @@ class AdminProjectPaymentInvoiceController extends Controller
         $client = $project?->client;
         $progress = $project?->progress_percentage ?? 0;
         $contractValue = (float) ($project?->budget ?: $sourceInvoice?->investment_amount ?: 0);
+        $description = trim((string) ($project?->description ?: strip_tags((string) ($sourceInvoice?->executive_summary ?? ''))));
+
+        if ($description === '' && $project) {
+            $description = "This payment supports the agreed work for {$project->name}, with a focus on clear delivery and a dependable handover.";
+        }
 
         return [
             'project_id' => $project?->id,
@@ -306,7 +311,7 @@ class AdminProjectPaymentInvoiceController extends Controller
             'client_title' => $sourceInvoice?->recipient_title ?: '',
             'client_email' => $client?->email ?: $sourceInvoice?->recipient_email ?: '',
             'client_phone' => $client?->phone ?: $sourceInvoice?->recipient_phone ?: '',
-            'description' => $project?->description ?: $sourceInvoice?->executive_summary ?: '',
+            'description' => $description,
             'payment_description' => $progress > 0 ? $progress.'% Project Payment' : 'Project Progress Payment',
             'original_invoice_id' => $sourceInvoice?->id,
             'original_invoice_number' => $sourceInvoice?->quote_number ?: '',
@@ -321,7 +326,7 @@ class AdminProjectPaymentInvoiceController extends Controller
             'account_name' => config('project-payments.account_name'),
             'account_number' => config('project-payments.account_number'),
             'prepared_by' => config('luxury-quotes.brand.studio_name', 'Turance Technologies'),
-            'notes' => 'Thank you for your continued partnership.',
+            'notes' => config('project-payments.closing_note'),
         ];
     }
 

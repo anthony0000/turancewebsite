@@ -25,11 +25,11 @@
     $validUntil = optional($quote->valid_until)->format('d M Y');
     $introMessage = filled($quote->intro_message)
         ? $quote->intro_message
-        : "Prepared for {$quote->company_name} as a structured invoice for the approved engagement.";
+        : config('luxury-quotes.defaults.intro_message');
     $projectCopy = filled($quote->executive_summary) ? $quote->executive_summary : $introMessage;
     $closingNote = filled($quote->closing_note)
         ? $quote->closing_note
-        : 'Once this invoice is approved, the next step is to confirm scope, lock the timeline, and move into delivery.';
+        : config('luxury-quotes.defaults.closing_note');
     $recipientName = $quote->recipient_name ?: $quote->company_name;
     $recipientTitle = $quote->recipient_title ?: ($quote->company_industry ?: 'Client');
     $recipientLines = array_filter([
@@ -185,6 +185,9 @@
                 <td class="quote-project-cell" colspan="3">
                     <span class="quote-project-kicker">{{ $quote->project_category }}</span>
                     <strong class="quote-project-title">{{ $quote->project_title }}</strong>
+                    @if (filled($introMessage) && $projectCopy !== $introMessage)
+                        <div class="quote-project-intro">{!! $renderRichText($introMessage) !!}</div>
+                    @endif
                     <div class="quote-project-copy">{!! $renderRichText($projectCopy) !!}</div>
                 </td>
             </tr>
