@@ -39,10 +39,38 @@
   border-radius: 36%;
 }
 
-.tt-ai-robot__stage { display: block; position: relative; width: 100%; height: 100%; }
-.tt-ai-robot__stage canvas { display: block; width: 100%; height: 100%; }
-.tt-ai-robot__fallback { display: block; width: 100%; height: 100%; object-fit: contain; }
-.tt-ai-robot__stage.is-3d .tt-ai-robot__fallback { display: none; }
+.tt-ai-robot__puppet {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  filter: drop-shadow(0 18px 20px rgba(45, 48, 58, .16));
+}
+
+.tt-ai-robot__arm,
+.tt-ai-robot__forearm { transform-box: view-box; }
+.tt-ai-robot__arm {
+  transform-origin: 63% 36%;
+  animation: tt-robot-wave-arm 18s ease-in-out infinite;
+}
+.tt-ai-robot__forearm {
+  transform-origin: 65% 45%;
+  animation: tt-robot-wave-forearm 18s ease-in-out infinite;
+}
+.tt-ai-robot__gesture.is-reacting .tt-ai-robot__arm { animation: tt-robot-click-arm 1.8s ease-in-out; }
+.tt-ai-robot__gesture.is-reacting .tt-ai-robot__forearm { animation: tt-robot-click-forearm 1.8s ease-in-out; }
+
+.tt-ai-robot__expression { opacity: 0; pointer-events: none; }
+.tt-ai-robot__expression path {
+  fill: none;
+  stroke: #8bdcff;
+  stroke-width: 11;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 8px #36aafa);
+}
+.tt-ai-robot__expression--wink { animation: tt-robot-wink 18s linear infinite; }
+.tt-ai-robot__expression--blink { animation: tt-robot-blink 18s linear infinite; }
+.tt-ai-robot__gesture.is-reacting .tt-ai-robot__expression--wink { animation: tt-robot-click-wink 1.8s ease-in-out; }
 
 .tt-ai-robot__shadow {
   position: absolute;
@@ -66,6 +94,39 @@
 .tt-ai-robot__orbit-node--one { top: 16%; left: 11%; }
 .tt-ai-robot__orbit-node--two { right: 12%; bottom: 11%; width: 5px; height: 5px; }
 
+@keyframes tt-robot-wave-arm {
+  0%, 13%, 30%, 100% { transform: rotate(0); }
+  18%, 26% { transform: rotate(-49deg); }
+  22% { transform: rotate(-53deg); }
+}
+@keyframes tt-robot-wave-forearm {
+  0%, 13%, 30%, 100% { transform: rotate(0); }
+  18%, 26% { transform: rotate(-94deg); }
+  20%, 24% { transform: rotate(-106deg); }
+  22% { transform: rotate(-84deg); }
+}
+@keyframes tt-robot-click-arm {
+  0%, 100% { transform: rotate(0); }
+  28%, 72% { transform: rotate(-49deg); }
+}
+@keyframes tt-robot-click-forearm {
+  0%, 100% { transform: rotate(0); }
+  28%, 72% { transform: rotate(-94deg); }
+  42%, 58% { transform: rotate(-106deg); }
+  50% { transform: rotate(-84deg); }
+}
+@keyframes tt-robot-wink {
+  0%, 17%, 27%, 100% { opacity: 0; }
+  19%, 25% { opacity: 1; }
+}
+@keyframes tt-robot-blink {
+  0%, 45%, 47%, 80%, 82%, 100% { opacity: 0; }
+  46%, 81% { opacity: 1; }
+}
+@keyframes tt-robot-click-wink {
+  0%, 20%, 75%, 100% { opacity: 0; }
+  28%, 67% { opacity: 1; }
+}
 @keyframes tt-robot-aura {
   0%, 100% { opacity: .7; transform: scale(.98); }
   50% { opacity: 1; transform: scale(1.04); }
@@ -83,5 +144,6 @@
 @media (prefers-reduced-motion: reduce) {
   .tt-hero-visual--robot .tt-hero-visual__orbit,
   .tt-hero-visual--robot .tt-hero-visual__orbit-inner,
-  .tt-ai-robot__aura { animation: none !important; }
+  .tt-ai-robot__aura,
+  .tt-ai-robot__puppet g { animation: none !important; }
 }
