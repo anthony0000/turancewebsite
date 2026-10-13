@@ -10,7 +10,7 @@
     <div class="tt-ai-robot__track">
         <div class="tt-ai-robot__pose">
             <button class="tt-ai-robot__gesture" type="button" data-robot-gesture
-                aria-label="Make the robot dance">
+                aria-label="Make the robot react">
                 <svg class="tt-ai-robot__puppet" viewBox="0 0 1024 1536" aria-hidden="true">
                     <defs>
                         <clipPath id="tt-robot-lower-body"><polygon points="325,695 755,695 790,1536 145,1536 180,1210 300,1050 315,845" /></clipPath>
@@ -56,9 +56,9 @@
 
 @once
     @push('styles')
-        <link rel="stylesheet" href="{{ asset('/assets/css/ai-robot.css') }}?v=7">
+        <link rel="stylesheet" href="{{ asset('/assets/css/ai-robot.css') }}?v=9">
     @endpush
     @push('scripts')
-        <script src="{{ asset('/assets/js/ai-robot.js') }}?v=3" defer></script>
+        <script src="{{ asset('/assets/js/ai-robot.js') }}?v=4" defer></script>
     @endpush
 @endonce
