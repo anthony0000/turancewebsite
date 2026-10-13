@@ -1,58 +1,25 @@
 (() => {
   const robot = document.querySelector('[data-hero-robot]');
   if (!robot) return;
+
   const button = robot.querySelector('[data-robot-gesture]');
-  const frames = [...robot.querySelectorAll('[data-robot-pose]')];
   const hero = robot.closest('section');
-  if (!button || !hero || frames.length !== 3) return;
+  if (!button || !hero) return;
 
-  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  let current = 'wave';
-  let nextFunny = 'thumbs';
-  let autoTimer;
-  let resetTimer;
-  let visible = false;
-  let lastGesture = 0;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    button.disabled = true;
+    button.setAttribute('aria-label', 'Robot character');
+    return;
+  }
 
-  const showPose = (pose) => {
-    current = pose;
-    robot.dataset.gesture = pose;
-    frames.forEach((frame) => frame.classList.toggle('is-active', frame.dataset.robotPose === pose));
-  };
-
-  const scheduleGesture = () => {
-    clearTimeout(autoTimer);
-    if (reducedMotion || !visible || document.hidden) return;
-    autoTimer = window.setTimeout(() => react(), 5800 + Math.random() * 3600);
-  };
-
-  const react = () => {
-    clearTimeout(autoTimer);
-    clearTimeout(resetTimer);
-    const pose = nextFunny;
-    nextFunny = pose === 'thumbs' ? 'shrug' : 'thumbs';
-    showPose(pose);
-    lastGesture = Date.now();
-
-    if (reducedMotion) return;
+  let danceTimer;
+  button.addEventListener('click', () => {
+    clearTimeout(danceTimer);
     button.classList.remove('is-reacting');
     void button.offsetWidth;
     button.classList.add('is-reacting');
-    resetTimer = window.setTimeout(() => {
-      button.classList.remove('is-reacting');
-      showPose('wave');
-      scheduleGesture();
-    }, 1950);
-  };
-
-  button.addEventListener('click', () => {
-    if (Date.now() - lastGesture > 450) react();
+    danceTimer = window.setTimeout(() => button.classList.remove('is-reacting'), 1600);
   });
-  button.addEventListener('pointerenter', (event) => {
-    if (event.pointerType === 'mouse' && !reducedMotion && Date.now() - lastGesture > 2200) react();
-  });
-
-  if (reducedMotion) return;
 
   hero.addEventListener('pointermove', (event) => {
     if (event.pointerType === 'touch') return;
@@ -68,28 +35,5 @@
     robot.style.removeProperty('--robot-x');
     robot.style.removeProperty('--robot-y');
     robot.style.removeProperty('--robot-tilt');
-  });
-
-  if ('IntersectionObserver' in window) {
-    new IntersectionObserver(([entry]) => {
-      visible = entry.isIntersecting;
-      if (visible) scheduleGesture();
-      else {
-        clearTimeout(autoTimer);
-        clearTimeout(resetTimer);
-        showPose('wave');
-      }
-    }, { threshold: .2 }).observe(robot);
-  } else {
-    visible = true;
-    scheduleGesture();
-  }
-
-  document.addEventListener('visibilitychange', () => {
-    if (document.hidden) {
-      clearTimeout(autoTimer);
-      clearTimeout(resetTimer);
-      showPose('wave');
-    } else scheduleGesture();
   });
 })();
