@@ -7,8 +7,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&amp;family=Hanken+Grotesk:wght@400;500;600;700&amp;display=swap">
-    <link rel="stylesheet" href="{{ asset('/assets/css/home-reference.css') }}?v=2.7">
-    <link rel="stylesheet" href="{{ asset('/assets/css/home-sections.css') }}?v=2.5">
+    <link rel="stylesheet" href="{{ asset('/assets/css/home-reference.css') }}?v=2.8">
+    <link rel="stylesheet" href="{{ asset('/assets/css/home-sections.css') }}?v=2.8">
 @endpush
 
 @section('content')
@@ -25,24 +25,27 @@
         $projects = [
             [
                 'name' => 'TailorsMind', 'industry' => 'Fashion technology', 'category' => 'Product ecosystem',
-                'summary' => 'A connected platform designed to make bespoke fashion discovery, measurement and fulfilment more considered.',
+                'summary' => 'A workspace for fashion professionals to manage clients, measurements, orders, payments, designs and deadlines.',
                 'services' => ['Product strategy', 'UX design', 'Platform engineering'], 'year' => '2026',
-                'outcome' => 'A scalable foundation connecting customers, creators and operations.', 'visual' => 'fashion',
-                'image' => asset('/assets/img/project/project-2-thumb7.jpg'), 'image_alt' => 'Mobile product interface preview', 'link' => null,
+                'outcome' => 'One clear place to run day-to-day tailoring operations.', 'visual' => 'fashion',
+                'image' => asset('/assets/img/project/tailorsmind-live.webp'), 'image_alt' => 'TailorsMind live website homepage',
+                'link' => 'https://tailorsmind.com/', 'link_label' => 'View live project',
             ],
             [
                 'name' => '3Hjobs', 'industry' => 'Local services', 'category' => 'Marketplace platform',
                 'summary' => 'A location-aware marketplace that helps people discover and engage trusted artisans around them.',
                 'services' => ['Service design', 'Mobile experience', 'Backend development'], 'year' => '2026',
                 'outcome' => 'A clearer path from local discovery to service engagement.', 'visual' => 'marketplace',
-                'image' => asset('/assets/img/project/project-2-thumb11.jpg'), 'image_alt' => 'Marketplace mobile interface preview', 'link' => null,
+                'image' => asset('/assets/img/project/3hjobs-live.webp'), 'image_alt' => '3Hjobs live website homepage',
+                'link' => 'https://3hjobs.com/', 'link_label' => 'View live project',
             ],
             [
                 'name' => 'KleanManager', 'industry' => 'Business operations', 'category' => 'Management software',
                 'summary' => 'An operations platform bringing orders, customers, payments and daily laundry workflows into one view.',
                 'services' => ['Workflow strategy', 'UI/UX design', 'Web application'], 'year' => '2025',
                 'outcome' => 'Better operational visibility and more consistent service control.', 'visual' => 'operations',
-                'image' => asset('/assets/img/project/project-2-thumb4.jpg'), 'image_alt' => 'Operations dashboard interface preview', 'link' => null,
+                'image' => asset('/assets/img/project/kleanmanager-live.webp'), 'image_alt' => 'KleanManager live website homepage showing its dashboard',
+                'link' => 'https://kleanmanager.com/', 'link_label' => 'View live project',
             ],
             [
                 'name' => '36 Plus One', 'industry' => 'Social impact', 'category' => 'Nonprofit platform',
@@ -60,7 +63,7 @@
                 'services' => ['Marketplace UX', 'Vendor management', 'Commerce engineering'], 'year' => 'Live',
                 'outcome' => 'A connected destination where families can discover products and shop across trusted seller stores.',
                 'visual' => 'family',
-                'image' => asset('/assets/img/project/project-2-thumb1.jpg'), 'image_alt' => 'Marketplace website interface preview',
+                'image' => asset('/assets/img/project/kiddovista-live.webp'), 'image_alt' => 'KiddoVista live marketplace homepage',
                 'link' => 'https://kiddovista.co.uk/',
                 'link_label' => 'View live project',
             ],
@@ -70,7 +73,7 @@
                 'services' => ['Commerce strategy', 'UI/UX design', 'E-commerce development'], 'year' => 'Live',
                 'outcome' => 'A structured digital shop connecting healthcare customers with essential products and clear purchasing journeys.',
                 'visual' => 'healthcare',
-                'image' => asset('/assets/img/project/project-2-thumb6.jpg'), 'image_alt' => 'E-commerce website interface preview',
+                'image' => null,
                 'link' => 'https://shop.ihcpro.co.uk/',
                 'link_label' => 'View live project',
             ],
@@ -200,14 +203,6 @@
                 <x-home.hero-visual />
             </div>
 
-            <div class="tt-service-highlights" aria-label="Core services">
-                <x-home.service-highlight icon="strategy" title="Strategy"
-                    subtitle="Purpose-driven solutions" />
-                <x-home.service-highlight icon="design" title="Design"
-                    subtitle="Intuitive and impactful" />
-                <x-home.service-highlight icon="development" title="Development"
-                    subtitle="Scalable and future-ready" />
-            </div>
         </section>
 
         @if ($promoIsActive)
@@ -325,15 +320,10 @@
                                 @if ($project['image'])
                                     <img src="{{ $project['image'] }}" alt="{{ $project['image_alt'] ?? $project['name'].' project preview' }}" loading="lazy" decoding="async">
                                 @else
-                                    <div class="tt-project-ui" aria-label="Abstract interface preview for {{ $project['name'] }}" role="img">
-                                        <div class="tt-project-ui__bar"><i></i><span>{{ $project['name'] }}</span><i></i></div>
-                                        <div class="tt-project-ui__rail"><i></i><i></i><i></i><i></i></div>
-                                        <div class="tt-project-ui__canvas">
-                                            <span class="tt-project-ui__label">{{ $project['category'] }}</span>
-                                            <strong>{{ $project['name'] }}</strong>
-                                            <div class="tt-project-ui__metric"><i></i><i></i><i></i><i></i></div>
-                                            <div class="tt-project-ui__panels"><i></i><i></i><i></i></div>
-                                        </div>
+                                    <div class="tt-project-preview-unavailable" role="status">
+                                        <span>{{ $project['name'] }}</span>
+                                        <strong>Storefront preview unavailable</strong>
+                                        <small>The shop could not be reached for a current capture.</small>
                                     </div>
                                 @endif
                                 <span class="tt-project__index" aria-hidden="true">{{ str_pad($loop->iteration, 2, '0', STR_PAD_LEFT) }}</span>
@@ -580,5 +570,5 @@
 @endsection
 
 @push('scripts')
-    <script src="{{ asset('/assets/js/home-reference.js') }}?v=2.7" defer></script>
+    <script src="{{ asset('/assets/js/home-reference.js') }}?v=2.8" defer></script>
 @endpush

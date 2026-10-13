@@ -184,7 +184,7 @@ body.tt-custom-cursor-active button {
   position: relative;
   isolation: isolate;
   display: grid;
-  grid-template-rows: 112px minmax(500px, 1fr) 120px;
+  grid-template-rows: 112px minmax(500px, 1fr);
   width: 100%;
   min-height: max(760px, 100svh);
   overflow: hidden;
@@ -1824,7 +1824,7 @@ body.tt-custom-cursor-active button {
 
 @media (max-width: 1099.98px) {
   .tt-hero {
-    grid-template-rows: 96px minmax(500px, 1fr) 110px;
+    grid-template-rows: 96px minmax(500px, 1fr);
   }
 
   .tt-header {
@@ -1871,7 +1871,7 @@ body.tt-custom-cursor-active button {
   }
 
   .tt-hero {
-    grid-template-rows: 92px auto auto;
+    grid-template-rows: 92px auto;
     min-height: 100svh;
   }
 

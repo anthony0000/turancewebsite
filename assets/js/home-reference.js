@@ -269,39 +269,6 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 document.addEventListener("DOMContentLoaded", function () {
-  const cards = Array.from(document.querySelectorAll(".tt-service-highlight"));
-  const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const hasFinePointer = window.matchMedia("(pointer: fine)").matches;
-
-  if (!cards.length || prefersReducedMotion || !hasFinePointer) {
-    return;
-  }
-
-  cards.forEach(function (card) {
-    card.addEventListener("pointermove", function (event) {
-      const rect = card.getBoundingClientRect();
-      const relX = (event.clientX - rect.left) / rect.width;
-      const relY = (event.clientY - rect.top) / rect.height;
-      const tiltX = (0.5 - relY) * 10;
-      const tiltY = (relX - 0.5) * 12;
-
-      card.style.setProperty("--spot-x", (relX * 100).toFixed(1) + "%");
-      card.style.setProperty("--spot-y", (relY * 100).toFixed(1) + "%");
-      card.style.transition = "transform 120ms ease-out";
-      card.style.transform =
-        "translateY(-3px) perspective(600px) rotateX(" + tiltX.toFixed(2) + "deg) rotateY(" + tiltY.toFixed(2) + "deg)";
-      card.classList.add("is-tilting");
-    });
-
-    card.addEventListener("pointerleave", function () {
-      card.style.transition = "transform 420ms cubic-bezier(0.2, 0.8, 0.2, 1)";
-      card.style.transform = "";
-      card.classList.remove("is-tilting");
-    });
-  });
-});
-
-document.addEventListener("DOMContentLoaded", function () {
   const hero = document.querySelector(".tt-hero");
   const canvas = document.querySelector("[data-particle-network]");
   const motionPreference = window.matchMedia("(prefers-reduced-motion: reduce)");
