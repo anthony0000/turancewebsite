@@ -73,27 +73,42 @@
 
 .tt-ai-robot__head {
   transform-origin: 49% 27%;
-  animation: tt-robot-head 7.5s ease-in-out infinite;
+  animation: tt-robot-head 12s ease-in-out infinite;
 }
 
 .tt-ai-robot__arm--right {
   transform-origin: 65% 33%;
-  animation: tt-robot-wave 6.4s ease-in-out infinite;
+  animation: tt-robot-wave 12s ease-in-out infinite;
 }
 
 .tt-ai-robot__arm--left {
   transform-origin: 31% 34%;
-  animation: tt-robot-arm-swing 7.5s ease-in-out infinite;
+  animation: tt-robot-arm-swing 12s ease-in-out infinite;
 }
 
-.tt-ai-robot__leg--left {
-  transform-origin: 40% 51%;
-  animation: tt-robot-step-left 7.5s ease-in-out infinite;
+.tt-ai-robot__expression {
+  opacity: 0;
+  pointer-events: none;
 }
 
-.tt-ai-robot__leg--right {
-  transform-origin: 58% 51%;
-  animation: tt-robot-step-right 7.5s ease-in-out infinite;
+.tt-ai-robot__expression path {
+  fill: none;
+  stroke: #8bdcff;
+  stroke-width: 11;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 8px #36aafa);
+}
+
+.tt-ai-robot__round-eye {
+  fill: #a1e5ff;
+  filter: drop-shadow(0 0 10px #44bfff);
+}
+
+.tt-ai-robot__expression--wink { animation: tt-robot-wink 12s linear infinite; }
+.tt-ai-robot__expression--surprised { animation: tt-robot-surprise 12s linear infinite; }
+.tt-ai-robot__expression--blink { animation: tt-robot-blink 12s linear infinite; }
+.tt-ai-robot__gesture.is-reacting .tt-ai-robot__expression--wink {
+  animation: tt-robot-click-wink 1.6s ease-in-out;
 }
 
 .tt-ai-robot__shadow {
@@ -124,31 +139,42 @@
   50% { transform: translateY(-12px) rotate(1.4deg); }
 }
 @keyframes tt-robot-head {
-  0%, 15%, 60%, 100% { transform: rotate(0); }
-  25%, 35% { transform: rotate(-6deg); }
-  43% { transform: rotate(3deg); }
-  75%, 82% { transform: rotate(5deg); }
+  0%, 13%, 32%, 38%, 57%, 84%, 100% { transform: rotate(0); }
+  19%, 26% { transform: rotate(-5deg); }
+  43%, 51% { transform: rotate(7deg); }
+  67%, 78% { transform: rotate(-4deg); }
+  72% { transform: rotate(5deg); }
 }
 @keyframes tt-robot-wave {
-  0%, 12%, 55%, 100% { transform: rotate(0); }
-  18%, 32% { transform: rotate(-15deg); }
-  24%, 38% { transform: rotate(13deg); }
-  45% { transform: rotate(-7deg); }
-  74%, 85% { transform: rotate(-18deg); }
+  0%, 12%, 32%, 38%, 55%, 62%, 84%, 100% { transform: rotate(0); }
+  17%, 26% { transform: rotate(-15deg); }
+  21% { transform: rotate(13deg); }
+  42% { transform: rotate(-23deg); }
+  49% { transform: rotate(-16deg); }
+  67%, 78% { transform: rotate(10deg); }
+  73% { transform: rotate(-12deg); }
 }
 @keyframes tt-robot-arm-swing {
-  0%, 18%, 55%, 100% { transform: rotate(0); }
-  28%, 38% { transform: rotate(-8deg); }
-  70%, 80% { transform: rotate(13deg); }
+  0%, 36%, 55%, 62%, 84%, 100% { transform: rotate(0); }
+  42%, 49% { transform: rotate(-14deg); }
+  67%, 78% { transform: rotate(12deg); }
+  72% { transform: rotate(-8deg); }
 }
-@keyframes tt-robot-step-left {
-  0%, 58%, 100% { transform: rotate(0); }
-  70% { transform: rotate(-3deg) translateY(-5px); }
-  83% { transform: rotate(2deg); }
+@keyframes tt-robot-wink {
+  0%, 15%, 27%, 100% { opacity: 0; }
+  17%, 25% { opacity: 1; }
 }
-@keyframes tt-robot-step-right {
-  0%, 60%, 100% { transform: rotate(0); }
-  75% { transform: rotate(3deg) translateY(-4px); }
+@keyframes tt-robot-surprise {
+  0%, 40%, 54%, 100% { opacity: 0; }
+  43%, 51% { opacity: 1; }
+}
+@keyframes tt-robot-blink {
+  0%, 59%, 61%, 64%, 87%, 89%, 92%, 100% { opacity: 0; }
+  60%, 62%, 88%, 90% { opacity: 1; }
+}
+@keyframes tt-robot-click-wink {
+  0%, 12%, 73%, 100% { opacity: 0; }
+  20%, 65% { opacity: 1; }
 }
 @keyframes tt-robot-dance {
   0%, 100% { transform: translateY(0) rotate(0); }
