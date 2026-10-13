@@ -1,4 +1,4 @@
-@php($robotImage = asset('/assets/img/hero/turance-ai-robot.webp'))
+@php($robotImage = asset('/assets/img/hero/turance-ai-robot-neutral.webp'))
 
 <div class="tt-hero-visual tt-hero-visual--robot" data-hero-robot>
     <div class="tt-hero-visual__orbit" aria-hidden="true">
@@ -13,11 +13,11 @@
                 aria-label="Make the robot react">
                 <svg class="tt-ai-robot__puppet" viewBox="0 0 1024 1536" aria-hidden="true">
                     <defs>
-                        <clipPath id="tt-robot-lower-body"><polygon points="325,695 755,695 790,1536 145,1536 180,1210 300,1050 315,845" /></clipPath>
-                        <clipPath id="tt-robot-arm-left"><polygon points="90,390 365,390 390,560 310,670 285,830 315,1010 305,1070 95,1070 90,585" /></clipPath>
-                        <clipPath id="tt-robot-arm-right"><polygon points="755,170 1024,170 1024,710 705,710 610,625 600,455 690,405 755,405" /></clipPath>
-                        <clipPath id="tt-robot-torso"><polygon points="365,390 650,390 680,475 665,620 650,705 715,805 665,895 320,895 340,800 355,675 345,545 340,470" /></clipPath>
-                        <clipPath id="tt-robot-head"><polygon points="125,0 760,0 760,385 720,445 270,445 150,390" /></clipPath>
+                        <clipPath id="tt-robot-lower-body"><polygon points="315,690 660,690 660,1100 800,1350 800,1536 150,1536 180,1300 220,1100 310,1020" /></clipPath>
+                        <clipPath id="tt-robot-arm-left"><polygon points="100,420 375,420 380,595 310,700 315,1080 105,1080" /></clipPath>
+                        <clipPath id="tt-robot-arm-right"><polygon points="590,420 810,420 815,1100 660,1100 645,760 600,665" /></clipPath>
+                        <clipPath id="tt-robot-torso"><polygon points="320,400 680,400 710,510 680,680 665,900 310,900 320,690 315,510" /></clipPath>
+                        <clipPath id="tt-robot-head"><polygon points="155,0 755,0 755,395 700,445 320,455 190,390" /></clipPath>
                         <radialGradient id="tt-robot-eye-cover">
                             <stop offset="0" stop-color="#061326" />
                             <stop offset=".7" stop-color="#061326" />
@@ -56,7 +56,7 @@
 
 @once
     @push('styles')
-        <link rel="stylesheet" href="{{ asset('/assets/css/ai-robot.css') }}?v=9">
+        <link rel="stylesheet" href="{{ asset('/assets/css/ai-robot.css') }}?v=10">
     @endpush
     @push('scripts')
         <script src="{{ asset('/assets/js/ai-robot.js') }}?v=4" defer></script>

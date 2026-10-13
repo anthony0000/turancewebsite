@@ -71,12 +71,12 @@
 }
 
 .tt-ai-robot__arm--right {
-  transform-origin: 65% 33%;
-  animation: tt-robot-wave 18s ease-in-out infinite;
+  transform-origin: 63% 31%;
+  animation: tt-robot-arm-right 18s ease-in-out infinite;
 }
 
 .tt-ai-robot__arm--left {
-  transform-origin: 31% 34%;
+  transform-origin: 31% 32%;
   animation: tt-robot-arm-swing 18s ease-in-out infinite;
 }
 
@@ -134,11 +134,11 @@
   70% { transform: rotate(-2deg); }
   75% { transform: rotate(2deg); }
 }
-@keyframes tt-robot-wave {
-  0%, 16%, 24%, 44%, 52%, 100% { transform: rotate(0); }
-  18%, 22% { transform: rotate(-8deg); }
-  20% { transform: rotate(7deg); }
-  48% { transform: rotate(-10deg); }
+@keyframes tt-robot-arm-right {
+  0%, 17%, 27%, 42%, 55%, 100% { transform: rotate(0); }
+  20%, 24% { transform: rotate(-10deg); }
+  22% { transform: rotate(-14deg); }
+  47%, 51% { transform: rotate(7deg); }
 }
 @keyframes tt-robot-arm-swing {
   0%, 41%, 55%, 65%, 81%, 100% { transform: rotate(0); }
@@ -169,8 +169,8 @@
 }
 @keyframes tt-robot-arm-react {
   0%, 100% { transform: rotate(0); }
-  25%, 65% { transform: rotate(-9deg); }
-  45% { transform: rotate(8deg); }
+  25%, 65% { transform: rotate(-13deg); }
+  45% { transform: rotate(-5deg); }
 }
 @keyframes tt-robot-arm-left-react {
   0%, 100% { transform: rotate(0); }
