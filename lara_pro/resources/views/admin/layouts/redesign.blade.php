@@ -6877,6 +6877,54 @@ body.is-project-files .admin-main { width: auto; max-width: none; justify-self: 
  * The pagebar has two independent groups. Each breakpoint chooses which
  * controls belong in the single row; the toolbar never creates a second row
  * by wrapping its children. */
+.admin-page-actions-menu {
+    position: relative;
+    flex: 0 0 auto;
+}
+
+.admin-page-actions-menu > summary {
+    display: grid;
+    width: 36px;
+    height: 36px;
+    place-items: center;
+    border: 1px solid #e2e6e9;
+    border-radius: 8px;
+    background: #fff;
+    color: #4b5662;
+    cursor: pointer;
+    list-style: none;
+}
+
+.admin-page-actions-menu > summary::-webkit-details-marker { display: none; }
+.admin-page-actions-menu > summary:hover,
+.admin-page-actions-menu[open] > summary { border-color: #c8a552; background: #fffaf0; color: #8f6508; }
+.admin-page-actions-menu > summary:focus-visible { outline: 3px solid rgba(184, 134, 11, .25); outline-offset: 2px; }
+.admin-page-actions-menu > summary svg,
+.admin-page-actions-link svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.8; }
+.admin-page-actions-menu > summary svg circle { fill: currentColor; stroke: none; }
+
+.admin-page-actions-panel {
+    position: absolute;
+    z-index: 100;
+    top: calc(100% + 9px);
+    right: 0;
+    display: grid;
+    width: min(250px, calc(100vw - 28px));
+    gap: 4px;
+    padding: 9px;
+    border: 1px solid #e3e7ea;
+    border-radius: 10px;
+    background: #fff;
+    box-shadow: 0 18px 42px rgba(20, 31, 42, .16);
+}
+
+.admin-page-actions-menu:not([open]) .admin-page-actions-panel { display: none; }
+.admin-page-actions-label { padding: 7px 9px 5px; color: #77838e; font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.admin-page-actions-link { display: flex; min-height: 38px; align-items: center; gap: 10px; width: 100%; padding: 8px 9px; border: 0; border-radius: 6px; background: transparent; color: #26333e; cursor: pointer; font: inherit; font-size: 12px; font-weight: 600; text-align: left; }
+.admin-page-actions-link:hover,
+.admin-page-actions-link:focus-visible { background: #f6f7f8; color: #8f6508; outline: none; }
+.admin-page-action-symbol { display: grid; width: 17px; height: 17px; flex: 0 0 17px; place-items: center; color: #a57308; font-size: 18px; font-weight: 500; }
+
 body.is-admin .admin-pagebar {
     display: flex;
     width: calc(100% + 84px);
@@ -6937,6 +6985,19 @@ body.is-admin .admin-pagebar-actions .admin-search-trigger {
     width: 230px;
     min-width: 0;
     flex: 0 1 230px;
+}
+
+@media (max-width: 1200px) and (min-width: 768px) {
+    body.is-admin .admin-pagebar-actions .admin-search-trigger {
+        width: 36px;
+        min-width: 36px;
+        height: 36px;
+        flex-basis: 36px;
+        justify-content: center;
+        padding: 0;
+    }
+    body.is-admin .admin-pagebar-actions .admin-search-trigger span,
+    body.is-admin .admin-pagebar-actions .admin-search-trigger kbd { display: none; }
 }
 
 .admin-mobile-page-action {

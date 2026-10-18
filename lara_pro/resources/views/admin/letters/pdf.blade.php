@@ -23,6 +23,7 @@
             'backgroundSrc' => $backgroundSrc,
             'showHeader' => $page['first'],
             'showSignoff' => $page['last'],
+            'showPlaceholder' => false,
         ])
     @endforeach
 </body>

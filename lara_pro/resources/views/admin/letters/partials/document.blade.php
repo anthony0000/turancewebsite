@@ -52,7 +52,7 @@
             @endif
 
             <div class="letter-body {{ blank($letter['body']) ? 'is-empty' : '' }}" data-letter-preview="body">
-                {!! $letter['body'] ? \App\Support\LetterBody::clean($letter['body']) : 'Your letter content will appear here.' !!}
+                {!! $letter['body'] ? \App\Support\LetterBody::clean($letter['body']) : (($showPlaceholder ?? true) ? 'Your letter content will appear here.' : '') !!}
             </div>
 
             @if ($showSignoff ?? true)

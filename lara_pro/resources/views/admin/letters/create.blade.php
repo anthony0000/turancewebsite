@@ -486,8 +486,8 @@
         .letter-preview-sheet { width: 100%; max-width: 650px; margin: 0 auto; }
         body.is-admin .letter-preview-sheet .letter-document { width: 210mm; height: 297mm; min-height: 297mm; aspect-ratio: auto; background: #fff; font-size: 11px; line-height: 1.55; transform-origin: top left; }
         body.is-admin .letter-preview-sheet .letter-content { top: 68mm; right: 20mm; bottom: 48mm; left: 20mm; padding: 0; }
-        body.is-admin .letter-preview-sheet .letter-date { margin-top: 19px; font-size: 10.5px; }
-        body.is-admin .letter-preview-sheet .letter-recipient { margin-top: 22px; }
+        body.is-admin .letter-preview-sheet .letter-date { margin-top: 12px; font-size: 10.5px; }
+        body.is-admin .letter-preview-sheet .letter-recipient { margin-top: 16px; }
         body.is-admin .letter-preview-sheet .letter-recipient strong,
         body.is-admin .letter-preview-sheet .letter-signoff strong { font-size: 12px; }
         body.is-admin .letter-preview-sheet .letter-recipient-line,
@@ -496,12 +496,12 @@
         body.is-admin .letter-preview-sheet .letter-greeting,
         body.is-admin .letter-preview-sheet .letter-signoff,
         body.is-admin .letter-preview-sheet .letter-signatory-title { font-size: 11px; }
-        body.is-admin .letter-preview-sheet .letter-copy { margin-top: 25px; }
-        body.is-admin .letter-preview-sheet .letter-subject { margin-bottom: 21px; font-size: 11px; }
-        body.is-admin .letter-preview-sheet .letter-greeting { margin-bottom: 16px; }
+        body.is-admin .letter-preview-sheet .letter-copy { margin-top: 18px; }
+        body.is-admin .letter-preview-sheet .letter-subject { margin-bottom: 15px; font-size: 11px; }
+        body.is-admin .letter-preview-sheet .letter-greeting { margin-bottom: 12px; }
         body.is-admin .letter-preview-sheet .letter-body { min-height: 100px; }
-        body.is-admin .letter-preview-sheet .letter-signoff { margin-top: 24px; }
-        body.is-admin .letter-preview-sheet .letter-signoff p { margin-bottom: 18px; }
+        body.is-admin .letter-preview-sheet .letter-signoff { margin-top: 16px; }
+        body.is-admin .letter-preview-sheet .letter-signoff p { margin-bottom: 10px; }
 
         .letter-preview-guidance { display: flex; gap: 8px; align-items: flex-start; margin: 13px 2px 0; color: #60707d; font-size: 11px; line-height: 1.5; }
         .letter-preview-guidance::before { content: '●'; color: #b8860b; font-size: 9px; line-height: 1.8; }

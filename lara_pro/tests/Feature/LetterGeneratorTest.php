@@ -3,6 +3,7 @@
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Models\LetterDraft;
 use App\Support\LetterBody;
+use App\Support\LetterPageLayout;
 
 uses(RefreshDatabase::class);
 
@@ -94,4 +95,64 @@ it('saves incomplete letters as drafts and reopens them for editing', function (
 it('keeps only supported formatting in letter bodies', function () {
     expect(LetterBody::clean('<p onclick="bad()">Hello <strong style="color:red">team</strong><script>alert(1)</script></p>'))
         ->toBe('<p>Hello <strong>team</strong></p>');
+});
+
+it('paginates long letters without dropping body text or letterhead pages', function () {
+    $body = implode('', array_map(
+        fn (int $number) => '<p>Paragraph '.$number.': '.str_repeat('The subscription details remain readable. ', 4).'</p>',
+        range(1, 38)
+    ));
+    $pages = LetterPageLayout::pages([
+        'body' => $body,
+        'recipient_name' => 'Phillips Anthony',
+        'subject' => 'Subscription renewal',
+    ]);
+
+    expect(count($pages))->toBeGreaterThan(1)
+        ->and($pages[0]['first'])->toBeTrue()
+        ->and($pages[0]['last'])->toBeFalse()
+        ->and($pages[count($pages) - 1]['last'])->toBeTrue()
+        ->and(implode('', array_column($pages, 'body')))->toBe($body);
+    expect(array_filter($pages, fn (array $page) => trim(strip_tags($page['body'])) === ''))->toBeEmpty();
+
+    $plainText = LetterBody::clean("First line\nSecond line\n\nFourth line");
+    $plainPages = LetterPageLayout::pages(['body' => $plainText]);
+    expect(preg_replace('/\s+/u', '', implode('', array_column($plainPages, 'body'))))
+        ->toContain('Firstline<br>Secondline<br><br>Fourthline');
+
+    $singleParagraphPages = LetterPageLayout::pages([
+        'body' => '<p>'.str_repeat('A long paragraph still needs a readable continuation. ', 80).'</p>',
+        'recipient_role' => 'Managing Director',
+        'recipient_company' => 'Turance Technologies',
+        'subject' => 'Long paragraph',
+    ]);
+    expect(count($singleParagraphPages))->toBeGreaterThan(1);
+    expect(array_filter($singleParagraphPages, fn (array $page) => trim(strip_tags($page['body'])) === ''))->toBeEmpty();
+});
+
+it('keeps a letter with recipient details and a sign-off on one PDF page when it fits', function () {
+    $paragraph = 'This is a review of subscriptions, infrastructure, storage plans and communication services. Each line should remain in the writing area when the document continues.';
+    $body = implode('', array_fill(0, 7, '<p>'.$paragraph.'</p>'));
+    $session = [
+        config('luxury-quotes.admin.session_key', 'luxury_quote_admin_authenticated') => true,
+        'luxury_quote_admin_email' => 'admin@example.com',
+    ];
+
+    $response = $this->withSession($session)->post(route('admin.letters.pdf'), [
+        'document_type' => 'Official Letter',
+        'date' => '2026-10-18',
+        'recipient_name' => 'Phillips Anthony',
+        'recipient_role' => 'Managing Director',
+        'recipient_company' => 'Turance Technologies',
+        'recipient_address' => 'Abuja, Nigeria',
+        'subject' => 'Subscriptions and renewal dates',
+        'greeting' => 'Dear team,',
+        'body' => $body,
+        'closing' => 'Kind regards,',
+        'signatory_name' => 'Phillips Anthony',
+        'signatory_title' => 'Managing Director',
+    ]);
+
+    $response->assertOk();
+    expect(preg_match_all('~/Type\s*/Page\b~', $response->getContent()))->toBe(1);
 });

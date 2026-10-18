@@ -15,35 +15,39 @@ final class LetterPageLayout
      */
     public static function pages(array $letter): array
     {
-        $firstLimit = max(15, 27
+        $firstLimit = max(15, 30
             - min(5, substr_count((string) ($letter['recipient_address'] ?? ''), "\n"))
             - (filled($letter['recipient_role'] ?? null) ? 1 : 0)
             - (filled($letter['recipient_company'] ?? null) ? 1 : 0)
             - (filled($letter['subject'] ?? null) ? 2 : 0));
-        $laterLimit = 32;
-        $pages = [['body' => '', 'units' => 0]];
+        $laterLimit = 36;
+        $pages = [['blocks' => [], 'units' => 0]];
 
         foreach (self::blocks((string) $letter['body']) as $block) {
-            foreach (self::splitLargeBlock($block, $laterLimit) as $part) {
+            foreach (self::splitLargeBlock($block, min($firstLimit, $laterLimit) - 5) as $part) {
                 $index = count($pages) - 1;
                 $limit = $index === 0 ? $firstLimit : $laterLimit;
                 $units = self::units($part);
                 if ($pages[$index]['units'] > 0 && $pages[$index]['units'] + $units > $limit) {
-                    $pages[] = ['body' => '', 'units' => 0];
+                    $pages[] = ['blocks' => [], 'units' => 0];
                     $index++;
                 }
-                $pages[$index]['body'] .= $part;
+                $pages[$index]['blocks'][] = $part;
                 $pages[$index]['units'] += $units;
             }
         }
 
         $last = count($pages) - 1;
         if ($pages[$last]['units'] > ($last === 0 ? $firstLimit : $laterLimit) - 5) {
-            $pages[] = ['body' => '', 'units' => 0];
+            $moved = array_pop($pages[$last]['blocks']);
+            if ($moved !== null) {
+                $pages[$last]['units'] -= self::units($moved);
+                $pages[] = ['blocks' => [$moved], 'units' => self::units($moved)];
+            }
         }
 
         return array_map(static fn (array $page, int $index): array => [
-            'body' => $page['body'],
+            'body' => implode('', $page['blocks']),
             'first' => $index === 0,
             'last' => $index === count($pages) - 1,
         ], $pages, array_keys($pages));
@@ -59,19 +63,30 @@ final class LetterPageLayout
         libxml_use_internal_errors($previous);
 
         $blocks = [];
+        $inline = '';
+        $flushInline = static function () use (&$inline, &$blocks): void {
+            if (trim(strip_tags($inline)) !== '') {
+                $blocks[] = '<p>'.$inline.'</p>';
+            }
+            $inline = '';
+        };
+
         foreach ($document->documentElement->childNodes as $node) {
             if ($node instanceof DOMElement && in_array($node->tagName, ['ul', 'ol'], true)) {
+                $flushInline();
                 foreach ($node->childNodes as $item) {
                     if ($item instanceof DOMElement && $item->tagName === 'li') {
                         $blocks[] = '<'.$node->tagName.'>'.$document->saveHTML($item).'</'.$node->tagName.'>';
                     }
                 }
-            } elseif ($node instanceof DOMElement) {
+            } elseif ($node instanceof DOMElement && $node->tagName === 'p') {
+                $flushInline();
                 $blocks[] = $document->saveHTML($node);
-            } elseif (trim($node->textContent) !== '') {
-                $blocks[] = '<p>'.e($node->textContent).'</p>';
+            } else {
+                $inline .= $node instanceof DOMElement ? $document->saveHTML($node) : e($node->textContent);
             }
         }
+        $flushInline();
 
         return $blocks;
     }

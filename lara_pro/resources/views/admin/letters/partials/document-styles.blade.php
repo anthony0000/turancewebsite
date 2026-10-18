@@ -41,14 +41,14 @@
 }
 
 .letter-date {
-    margin-top: 19px;
+    margin-top: 12px;
     color: #56606c;
     font-size: 10.5px;
 }
 
 .letter-recipient {
     display: block;
-    margin-top: 22px;
+    margin-top: 16px;
     color: #17202b;
 }
 
@@ -66,16 +66,19 @@
 .letter-recipient-line,
 .letter-recipient-address {
     color: #56606c;
+}
+
+.letter-recipient-address > span {
     white-space: pre-line;
 }
 
 .letter-copy {
-    margin-top: 25px;
+    margin-top: 18px;
 }
 
 .letter-subject {
     display: block;
-    margin-bottom: 21px;
+    margin-bottom: 15px;
     color: #17202b;
 }
 
@@ -92,7 +95,7 @@
 }
 
 .letter-greeting {
-    margin-bottom: 16px;
+    margin-bottom: 12px;
 }
 
 .letter-body {
@@ -102,7 +105,7 @@
 }
 
 .letter-body p {
-    margin: 0 0 0.7em;
+    margin: 0 0 0.5em;
 }
 
 .letter-body ul,
@@ -116,11 +119,11 @@
 }
 
 .letter-signoff {
-    margin-top: 24px;
+    margin-top: 16px;
 }
 
 .letter-signoff p {
-    margin-bottom: 18px;
+    margin-bottom: 10px;
 }
 
 .letter-signoff strong,
