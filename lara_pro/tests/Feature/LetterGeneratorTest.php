@@ -138,7 +138,7 @@ it('keeps a letter with recipient details and a sign-off on one PDF page when it
         'luxury_quote_admin_email' => 'admin@example.com',
     ];
 
-    $response = $this->withSession($session)->post(route('admin.letters.pdf'), [
+    $payload = [
         'document_type' => 'Official Letter',
         'date' => '2026-10-18',
         'recipient_name' => 'Phillips Anthony',
@@ -151,8 +151,14 @@ it('keeps a letter with recipient details and a sign-off on one PDF page when it
         'closing' => 'Kind regards,',
         'signatory_name' => 'Phillips Anthony',
         'signatory_title' => 'Managing Director',
-    ]);
+    ];
+    $response = $this->withSession($session)->post(route('admin.letters.pdf'), $payload);
 
     $response->assertOk();
     expect(preg_match_all('~/Type\s*/Page\b~', $response->getContent()))->toBe(1);
+
+    $payload['body'] = implode('', array_fill(0, 12, '<p>Subscription renewal and service update.</p>'));
+    $shortBlocksResponse = $this->withSession($session)->post(route('admin.letters.pdf'), $payload);
+    $shortBlocksResponse->assertOk();
+    expect(preg_match_all('~/Type\s*/Page\b~', $shortBlocksResponse->getContent()))->toBe(1);
 });

@@ -4,53 +4,106 @@ namespace App\Support;
 
 use DOMDocument;
 use DOMElement;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 final class LetterPageLayout
 {
-    /**
-     * Keep every page inside the letterhead's 68–249 mm writing area.
-     * The limits leave room for font and line-wrap differences in Dompdf.
-     *
-     * @return array<int, array{body: string, first: bool, last: bool}>
-     */
+    /** @return array<int, array{body: string, first: bool, last: bool}> */
     public static function pages(array $letter): array
     {
-        $firstLimit = max(15, 30
-            - min(5, substr_count((string) ($letter['recipient_address'] ?? ''), "\n"))
-            - (filled($letter['recipient_role'] ?? null) ? 1 : 0)
-            - (filled($letter['recipient_company'] ?? null) ? 1 : 0)
-            - (filled($letter['subject'] ?? null) ? 2 : 0));
-        $laterLimit = 36;
-        $pages = [['blocks' => [], 'units' => 0]];
+        $blocks = self::blocks((string) ($letter['body'] ?? ''));
+        $pages = [];
+        $cursor = 0;
+        $fitCache = [];
+        $fits = static function (string $body, bool $first, bool $last) use ($letter, &$fitCache): bool {
+            $key = ($first ? '1' : '0').($last ? '1' : '0').sha1($body);
 
-        foreach (self::blocks((string) $letter['body']) as $block) {
-            foreach (self::splitLargeBlock($block, min($firstLimit, $laterLimit) - 5) as $part) {
-                $index = count($pages) - 1;
-                $limit = $index === 0 ? $firstLimit : $laterLimit;
-                $units = self::units($part);
-                if ($pages[$index]['units'] > 0 && $pages[$index]['units'] + $units > $limit) {
-                    $pages[] = ['blocks' => [], 'units' => 0];
-                    $index++;
+            return $fitCache[$key] ??= self::fitsOnPage($letter, $body, $first, $last);
+        };
+
+        while ($cursor < count($blocks)) {
+            $first = $pages === [];
+            $remaining = array_slice($blocks, $cursor);
+            if ($fits(implode('', $remaining), $first, true)) {
+                $pages[] = ['body' => implode('', $remaining), 'first' => $first, 'last' => true];
+                break;
+            }
+
+            $maximum = count($remaining) - 1;
+            $low = 1;
+            $high = $maximum;
+            $take = 0;
+            while ($low <= $high) {
+                $middle = intdiv($low + $high, 2);
+                if ($fits(implode('', array_slice($remaining, 0, $middle)), $first, false)) {
+                    $take = $middle;
+                    $low = $middle + 1;
+                } else {
+                    $high = $middle - 1;
                 }
-                $pages[$index]['blocks'][] = $part;
-                $pages[$index]['units'] += $units;
             }
+
+            if ($take === 0) {
+                $parts = self::splitBlock($blocks[$cursor]);
+                if (count($parts) > 1) {
+                    array_splice($blocks, $cursor, 1, $parts);
+                    continue;
+                }
+                $take = 1;
+            }
+
+            $pages[] = [
+                'body' => implode('', array_slice($blocks, $cursor, $take)),
+                'first' => $first,
+                'last' => false,
+            ];
+            $cursor += $take;
         }
 
-        $last = count($pages) - 1;
-        if ($pages[$last]['units'] > ($last === 0 ? $firstLimit : $laterLimit) - 5) {
-            $moved = array_pop($pages[$last]['blocks']);
-            if ($moved !== null) {
-                $pages[$last]['units'] -= self::units($moved);
-                $pages[] = ['blocks' => [$moved], 'units' => self::units($moved)];
-            }
-        }
+        return $pages ?: [['body' => '', 'first' => true, 'last' => true]];
+    }
 
-        return array_map(static fn (array $page, int $index): array => [
-            'body' => implode('', $page['blocks']),
-            'first' => $index === 0,
-            'last' => $index === count($pages) - 1,
-        ], $pages, array_keys($pages));
+    private static function fitsOnPage(array $letter, string $body, bool $first, bool $last): bool
+    {
+        $letter = array_merge([
+            'document_type' => 'Official Letter',
+            'date_label' => '',
+            'recipient_name' => '',
+            'recipient_role' => '',
+            'recipient_company' => '',
+            'recipient_address' => '',
+            'subject' => '',
+            'greeting' => 'Dear Sir/Madam,',
+            'closing' => 'Kind regards,',
+            'signatory_name' => '',
+            'signatory_title' => '',
+        ], $letter);
+        $measurements = [];
+        $pdf = Pdf::loadView('admin.letters.pdf', [
+            'letter' => $letter,
+            'pages' => [['body' => $body, 'first' => $first, 'last' => $last]],
+            'backgroundSrc' => null,
+        ])->setPaper('a4', 'portrait');
+        $dompdf = $pdf->getDomPDF();
+        DocumentTypography::registerDompdfFonts($dompdf);
+        $dompdf->setCallbacks([['event' => 'end_frame', 'f' => static function ($frame) use (&$measurements): void {
+            $node = $frame->get_node();
+            if (! $node instanceof DOMElement) {
+                return;
+            }
+            $classes = explode(' ', $node->getAttribute('class'));
+            foreach (['letter-content', 'letter-body', 'letter-signoff'] as $class) {
+                if (in_array($class, $classes, true)) {
+                    $measurements[$class] = $frame->get_position('y') + $frame->get_padding_box()['h'];
+                }
+            }
+        }]]);
+        $dompdf->render();
+
+        $end = $measurements[$last ? 'letter-signoff' : 'letter-body'] ?? INF;
+        $safeBottom = $measurements['letter-content'] ?? -INF;
+
+        return $dompdf->getCanvas()->get_page_count() === 1 && $end <= $safeBottom - 3;
     }
 
     /** @return list<string> */
@@ -92,36 +145,27 @@ final class LetterPageLayout
     }
 
     /** @return list<string> */
-    private static function splitLargeBlock(string $block, int $limit): array
+    private static function splitBlock(string $block): array
     {
-        if (self::units($block) <= $limit) {
-            return [$block];
-        }
-
-        $text = trim(html_entity_decode(strip_tags($block), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+        $text = trim(html_entity_decode(strip_tags(preg_replace('/<br\s*\/?\s*>/i', ' ', $block)), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
         $words = preg_split('/\s+/u', $text) ?: [];
-        $parts = [];
-        $current = '';
-        $maxCharacters = ($limit - 2) * 90;
-        foreach ($words as $word) {
-            if ($current !== '' && mb_strlen($current.' '.$word) > $maxCharacters) {
-                $parts[] = '<p>'.e($current).'</p>';
-                $current = '';
+        if (count($words) < 2) {
+            if (mb_strlen($text) < 2) {
+                return [$block];
             }
-            $current .= ($current === '' ? '' : ' ').$word;
+            $middle = intdiv(mb_strlen($text), 2);
+
+            return [
+                '<p>'.e(mb_substr($text, 0, $middle)).'</p>',
+                '<p>'.e(mb_substr($text, $middle)).'</p>',
+            ];
         }
-        if ($current !== '') {
-            $parts[] = '<p>'.e($current).'</p>';
-        }
 
-        return $parts;
-    }
+        $middle = intdiv(count($words), 2);
 
-    private static function units(string $html): int
-    {
-        $text = html_entity_decode(strip_tags($html), ENT_QUOTES | ENT_HTML5, 'UTF-8');
-        $lineBreaks = substr_count($html, '<br');
-
-        return max(1, (int) ceil(mb_strlen($text) / 90) + $lineBreaks + 1);
+        return [
+            '<p>'.e(implode(' ', array_slice($words, 0, $middle))).'</p>',
+            '<p>'.e(implode(' ', array_slice($words, $middle))).'</p>',
+        ];
     }
 }
