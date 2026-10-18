@@ -5,31 +5,26 @@
     <meta charset="utf-8">
     <title>{{ $letter['document_type'] }} | Turance Technologies</title>
     <style>
-        @page {
-            margin: 0;
-            size: A4 portrait;
-        }
-
-        html,
-        body {
-            margin: 0;
-            padding: 0;
-            background: #ffffff;
-        }
+        html, body { margin: 0; padding: 0; }
 
         @include('admin.letters.partials.document-styles')
 
-        .letter-document {
-            page-break-after: avoid;
-        }
+        .letter-document { page-break-after: always; }
+        .letter-document:last-child { page-break-after: avoid; }
+        .letter-copy--continuation { margin-top: 0; }
+        @page { margin: 0; size: A4 portrait; }
     </style>
 </head>
 
 <body>
-    @include('admin.letters.partials.document', [
-        'letter' => $letter,
-        'backgroundSrc' => $backgroundSrc,
-    ])
+    @foreach ($pages as $page)
+        @include('admin.letters.partials.document', [
+            'letter' => array_merge($letter, ['body' => $page['body']]),
+            'backgroundSrc' => $backgroundSrc,
+            'showHeader' => $page['first'],
+            'showSignoff' => $page['last'],
+        ])
+    @endforeach
 </body>
 
 </html>

@@ -7,7 +7,7 @@
     min-height: 297mm;
     overflow: hidden;
     color: #17202b;
-    background: #ffffff;
+    background: transparent;
     font-family: 'Urbanist', sans-serif;
     font-size: 11px;
     line-height: 1.55;
@@ -32,9 +32,12 @@
 
 .letter-content {
     position: absolute;
-    inset: 0;
+    top: 68mm;
+    right: 20mm;
+    bottom: 48mm;
+    left: 20mm;
     z-index: 1;
-    padding: 68mm 20mm 48mm;
+    overflow: hidden;
 }
 
 .letter-date {

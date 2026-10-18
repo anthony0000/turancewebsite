@@ -19,8 +19,8 @@
     @if ($backgroundSrc)
         <img class="letterhead-background" src="{{ $backgroundSrc }}" alt="">
     @endif
-
     <div class="letter-content">
+        @if ($showHeader ?? true)
         <div class="letter-date" data-letter-preview="date">{{ $letter['date_label'] }}</div>
 
         <section class="letter-recipient" aria-label="Recipient">
@@ -38,8 +38,10 @@
                 <span data-letter-preview="recipient_address">{{ $letter['recipient_address'] }}</span>
             </span>
         </section>
+        @endif
 
-        <section class="letter-copy">
+        <section class="letter-copy {{ ($showHeader ?? true) ? '' : 'letter-copy--continuation' }}">
+            @if ($showHeader ?? true)
             <div class="letter-subject {{ blank($letter['subject']) ? 'is-empty' : '' }}"
                 data-letter-preview-wrap="subject">
                 <span class="letter-subject-label">Subject:</span>
@@ -47,11 +49,13 @@
             </div>
 
             <p class="letter-greeting" data-letter-preview="greeting">{{ $letter['greeting'] }}</p>
+            @endif
 
             <div class="letter-body {{ blank($letter['body']) ? 'is-empty' : '' }}" data-letter-preview="body">
                 {!! $letter['body'] ? \App\Support\LetterBody::clean($letter['body']) : 'Your letter content will appear here.' !!}
             </div>
 
+            @if ($showSignoff ?? true)
             <div class="letter-signoff">
                 <p data-letter-preview="closing">{{ $letter['closing'] }}</p>
                 <strong data-letter-preview="signatory_name">{{ $letter['signatory_name'] ?: 'Your name' }}</strong>
@@ -60,6 +64,7 @@
                     <span data-letter-preview="signatory_title">{{ $letter['signatory_title'] }}</span>
                 </span>
             </div>
+            @endif
         </section>
     </div>
 </div>

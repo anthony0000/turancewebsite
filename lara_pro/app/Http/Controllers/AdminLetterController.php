@@ -6,6 +6,7 @@ use App\Models\LetterDraft;
 use App\Support\DocumentBranding;
 use App\Support\DocumentTypography;
 use App\Support\LetterBody;
+use App\Support\LetterPageLayout;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -99,8 +100,9 @@ class AdminLetterController extends Controller
         $validated['date_label'] = Carbon::parse($validated['date'])->format('F j, Y');
 
         $pdf = Pdf::loadView('admin.letters.pdf', [
-            'backgroundSrc' => DocumentBranding::logoSource(config('letters.background_path')),
             'letter' => $validated,
+            'pages' => LetterPageLayout::pages($validated),
+            'backgroundSrc' => DocumentBranding::logoSource(config('letters.background_path')),
         ])->setPaper('a4', 'portrait');
 
         DocumentTypography::registerDompdfFonts($pdf->getDomPDF());
