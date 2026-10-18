@@ -19,7 +19,7 @@
     $isCredentialWorkspace = request()->routeIs('admin.credentials.*');
     $isProjectManagementWorkspace = request()->routeIs('admin.project-management.*');
     $isProjectPaymentWorkspace = request()->routeIs('admin.project-payments.*');
-    $isLetterBuilder = request()->routeIs('admin.letters.create');
+    $isLetterBuilder = request()->routeIs('admin.letters.create', 'admin.letters.drafts.edit');
     $isLetterWorkspace = request()->routeIs('admin.letters.*');
     $isAdminProfile = request()->routeIs('admin.profile');
     $isSubaccountWorkspace = request()->routeIs('admin.subaccounts.*');

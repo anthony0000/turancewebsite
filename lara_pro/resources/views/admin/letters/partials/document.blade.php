@@ -49,7 +49,7 @@
             <p class="letter-greeting" data-letter-preview="greeting">{{ $letter['greeting'] }}</p>
 
             <div class="letter-body {{ blank($letter['body']) ? 'is-empty' : '' }}" data-letter-preview="body">
-                {{ $letter['body'] ?: 'Your letter content will appear here.' }}
+                {!! $letter['body'] ? \App\Support\LetterBody::clean($letter['body']) : 'Your letter content will appear here.' !!}
             </div>
 
             <div class="letter-signoff">

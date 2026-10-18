@@ -95,7 +95,21 @@
 .letter-body {
     min-height: 100px;
     color: #303a46;
-    white-space: pre-line;
+    overflow-wrap: anywhere;
+}
+
+.letter-body p {
+    margin: 0 0 0.7em;
+}
+
+.letter-body ul,
+.letter-body ol {
+    margin: 0 0 0.7em 1.3em;
+    padding: 0;
+}
+
+.letter-body li {
+    margin-bottom: 0.25em;
 }
 
 .letter-signoff {

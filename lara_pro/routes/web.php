@@ -341,6 +341,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::middleware('admin.permission:letters')->prefix('letters')->name('letters.')->group(function () {
             Route::get('/create', [AdminLetterController::class, 'create'])->name('create');
+            Route::post('/drafts', [AdminLetterController::class, 'storeDraft'])->name('drafts.store');
+            Route::get('/drafts/{draft}/edit', [AdminLetterController::class, 'edit'])->name('drafts.edit');
+            Route::post('/drafts/{draft}', [AdminLetterController::class, 'updateDraft'])->name('drafts.update');
             Route::post('/pdf', [AdminLetterController::class, 'downloadPdf'])->name('pdf');
         });
     });

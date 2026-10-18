@@ -8,26 +8,28 @@
         'signatory_name' => '',
         'signatory_title' => '',
     ], $defaults ?? []);
-    $letterDate = old('date', now()->format('Y-m-d'));
+    $saved = $draft?->content ?? [];
+    $savedValue = fn (string $key, string $default = '') => array_key_exists($key, $saved) ? ($saved[$key] ?? '') : $default;
+    $letterDate = old('date', $savedValue('date', now()->format('Y-m-d')));
     try {
-        $letterDateLabel = \Illuminate\Support\Carbon::parse($letterDate)->format('F j, Y');
+        $letterDateLabel = filled($letterDate) ? \Illuminate\Support\Carbon::parse($letterDate)->format('F j, Y') : '';
     } catch (\Throwable $exception) {
         $letterDateLabel = $letterDate;
     }
     $letter = [
-        'document_type' => old('document_type', $defaults['document_type']),
+        'document_type' => old('document_type', $savedValue('document_type', $defaults['document_type'])),
         'date' => $letterDate,
         'date_label' => $letterDateLabel,
-        'recipient_name' => old('recipient_name'),
-        'recipient_role' => old('recipient_role'),
-        'recipient_company' => old('recipient_company'),
-        'recipient_address' => old('recipient_address'),
-        'subject' => old('subject'),
-        'greeting' => old('greeting', $defaults['greeting']),
-        'body' => old('body'),
-        'closing' => old('closing', $defaults['closing']),
-        'signatory_name' => old('signatory_name', $defaults['signatory_name']),
-        'signatory_title' => old('signatory_title', $defaults['signatory_title']),
+        'recipient_name' => old('recipient_name', $savedValue('recipient_name')),
+        'recipient_role' => old('recipient_role', $savedValue('recipient_role')),
+        'recipient_company' => old('recipient_company', $savedValue('recipient_company')),
+        'recipient_address' => old('recipient_address', $savedValue('recipient_address')),
+        'subject' => old('subject', $savedValue('subject')),
+        'greeting' => old('greeting', $savedValue('greeting', $defaults['greeting'])),
+        'body' => old('body', $savedValue('body')),
+        'closing' => old('closing', $savedValue('closing', $defaults['closing'])),
+        'signatory_name' => old('signatory_name', $savedValue('signatory_name', $defaults['signatory_name'])),
+        'signatory_title' => old('signatory_title', $savedValue('signatory_title', $defaults['signatory_title'])),
     ];
 @endphp
 
@@ -76,8 +78,53 @@
             resize: vertical;
         }
 
-        .letter-editor textarea[name="body"] {
+        .letter-rich-editor {
             min-height: 225px;
+            padding: 14px;
+            border: 1px solid var(--border, #d8dce0);
+            border-radius: 10px;
+            background: #fff;
+            line-height: 1.6;
+            outline: none;
+            overflow-wrap: anywhere;
+        }
+
+        .letter-rich-editor:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(184, 134, 11, 0.12);
+        }
+
+        .letter-rich-editor:empty::before {
+            content: attr(data-placeholder);
+            color: var(--muted);
+        }
+
+        .letter-rich-editor p { margin: 0 0 0.7em; }
+        .letter-rich-editor ul, .letter-rich-editor ol { margin: 0 0 0.7em 1.4em; padding: 0; }
+
+        .letter-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin: 8px 0;
+        }
+
+        .letter-toolbar button {
+            min-width: 36px;
+            padding: 6px 10px;
+            border: 1px solid var(--border, #d8dce0);
+            border-radius: 7px;
+            background: #fff;
+            cursor: pointer;
+        }
+
+        .letter-toolbar button:hover { background: rgba(184, 134, 11, 0.1); }
+
+        .letter-drafts { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+        .letter-drafts a { color: var(--accent-soft); }
+        .letter-drafts select { max-width: 300px; }
+
+        .letter-save-status { margin: 0; color: #34734e; font-weight: 700; }
         }
 
         .letter-editor .form-help {
@@ -279,6 +326,25 @@
             </div>
         </section>
 
+        <div class="letter-drafts">
+            <a href="{{ route('admin.letters.create') }}">New letter</a>
+            @if ($drafts->isNotEmpty())
+                <label for="saved_letter">Saved drafts</label>
+                <select id="saved_letter" aria-label="Open a saved draft" data-draft-picker>
+                    <option value="">Choose a draft</option>
+                    @foreach ($drafts as $savedDraft)
+                        <option value="{{ route('admin.letters.drafts.edit', $savedDraft) }}" @selected($draft?->is($savedDraft))>
+                            {{ ($savedDraft->content['subject'] ?? null) ?: (($savedDraft->content['recipient_name'] ?? null) ?: 'Untitled letter') }} · {{ $savedDraft->updated_at->format('M j, Y') }}
+                        </option>
+                    @endforeach
+                </select>
+            @endif
+        </div>
+
+        @if (session('status'))
+            <p class="letter-save-status" role="status">{{ session('status') }}</p>
+        @endif
+
         @if ($errors->any())
             <div class="validation-summary">
                 <strong>Complete the highlighted document details.</strong>
@@ -291,7 +357,7 @@
         @endif
 
         <div class="letter-workspace">
-            <form class="panel panel-padded letter-editor" method="POST" action="{{ route('admin.letters.pdf') }}"
+            <form class="panel panel-padded letter-editor" method="POST" action="{{ $draft ? route('admin.letters.drafts.update', $draft) : route('admin.letters.drafts.store') }}"
                 data-letter-form>
                 @csrf
 
@@ -365,10 +431,18 @@
                                 required maxlength="255">
                         </div>
                         <div class="field-full">
-                            <label for="body">Body</label>
-                            <textarea id="body" name="body" data-letter-field="body" required maxlength="20000"
-                                placeholder="Write the main message here...">{{ $letter['body'] }}</textarea>
-                            <p class="form-help">Plain text is kept deliberately clean for reliable PDF export.</p>
+                            <label id="body-label">Body</label>
+                            <div class="letter-toolbar" role="toolbar" aria-label="Body formatting">
+                                <button type="button" data-format="bold" aria-label="Bold"><strong>B</strong></button>
+                                <button type="button" data-format="italic" aria-label="Italic"><em>I</em></button>
+                                <button type="button" data-format="underline" aria-label="Underline"><u>U</u></button>
+                                <button type="button" data-format="insertUnorderedList" aria-label="Bulleted list">• List</button>
+                                <button type="button" data-format="insertOrderedList" aria-label="Numbered list">1. List</button>
+                            </div>
+                            <div id="body" class="letter-rich-editor" contenteditable="true" role="textbox" aria-multiline="true"
+                                aria-labelledby="body-label" data-placeholder="Write the main message here..." data-body-editor>{!! \App\Support\LetterBody::clean($letter['body']) !!}</div>
+                            <input type="hidden" name="body" value="{{ $letter['body'] }}" data-letter-field="body">
+                            <p class="form-help">Format your message with bold, italic, underline, and lists.</p>
                         </div>
                     </div>
                 </section>
@@ -402,7 +476,8 @@
                     <p class="letter-actions-note">The generated PDF uses the same letterhead background shown in the preview.</p>
                     <div style="display: flex; flex-wrap: wrap; gap: 10px;">
                         <button class="ghost-button" type="reset">Clear edits</button>
-                        <button class="button" type="submit">Download PDF</button>
+                        <button class="ghost-button" type="submit" formnovalidate>Save draft</button>
+                        <button class="button" type="submit" formaction="{{ route('admin.letters.pdf') }}" data-pdf-button>Download PDF</button>
                     </div>
                 </div>
             </form>
@@ -436,6 +511,31 @@
                 return;
             }
 
+            const editor = form.querySelector('[data-body-editor]');
+            const bodyInput = form.querySelector('[data-letter-field="body"]');
+            const initialBody = editor.innerHTML;
+            const allowed = new Set(['P', 'BR', 'STRONG', 'EM', 'U', 'UL', 'OL', 'LI']);
+
+            const cleanNode = (node, destination) => {
+                if (node.nodeType === Node.TEXT_NODE) {
+                    destination.appendChild(document.createTextNode(node.textContent));
+                    return;
+                }
+                if (node.nodeType !== Node.ELEMENT_NODE || ['SCRIPT', 'STYLE', 'IFRAME', 'SVG', 'OBJECT'].includes(node.tagName)) {
+                    return;
+                }
+                const tag = { B: 'STRONG', I: 'EM', DIV: 'P' }[node.tagName] || node.tagName;
+                const target = allowed.has(tag) ? document.createElement(tag.toLowerCase()) : destination;
+                if (target !== destination) destination.appendChild(target);
+                node.childNodes.forEach(child => cleanNode(child, target));
+            };
+
+            const bodyHtml = () => {
+                const clean = document.createElement('div');
+                editor.childNodes.forEach(node => cleanNode(node, clean));
+                return clean.innerHTML.trim();
+            };
+
             const formatDate = (value) => {
                 if (!value) {
                     return '';
@@ -450,7 +550,7 @@
             };
 
             const updatePreview = () => {
-                form.querySelectorAll('[data-letter-field]').forEach((field) => {
+                form.querySelectorAll('[data-letter-field]:not([name="body"])').forEach((field) => {
                     const key = field.dataset.letterField;
                     const value = field.value.trim();
                     const previewValue = key === 'date' ? formatDate(value) : value;
@@ -468,15 +568,46 @@
                 const body = document.querySelector('[data-letter-preview="body"]');
 
                 if (body) {
-                    const value = form.querySelector('[data-letter-field="body"]')?.value.trim() || '';
-                    body.textContent = value || 'Your letter content will appear here.';
-                    body.classList.toggle('is-empty', !value);
+                    const value = bodyHtml();
+                    bodyInput.value = value;
+                    body.innerHTML = editor.textContent.trim() ? value : 'Your letter content will appear here.';
+                    body.classList.toggle('is-empty', !editor.textContent.trim());
                 }
             };
 
+            form.querySelectorAll('[data-format]').forEach(button => {
+                button.addEventListener('mousedown', event => event.preventDefault());
+                button.addEventListener('click', () => {
+                    editor.focus();
+                    document.execCommand(button.dataset.format, false);
+                    updatePreview();
+                });
+            });
+            editor.addEventListener('paste', event => {
+                event.preventDefault();
+                document.execCommand('insertText', false, event.clipboardData.getData('text/plain'));
+            });
+            editor.addEventListener('input', updatePreview);
+            form.querySelector('[data-pdf-button]').addEventListener('click', event => {
+                updatePreview();
+                if (!editor.textContent.trim()) {
+                    event.preventDefault();
+                    editor.focus();
+                    editor.setAttribute('aria-invalid', 'true');
+                } else {
+                    editor.removeAttribute('aria-invalid');
+                }
+            });
+            document.querySelector('[data-draft-picker]')?.addEventListener('change', event => {
+                if (event.target.value) window.location.assign(event.target.value);
+            });
             form.addEventListener('input', updatePreview);
             form.addEventListener('change', updatePreview);
-            form.addEventListener('reset', () => window.requestAnimationFrame(updatePreview));
+            form.addEventListener('reset', () => window.requestAnimationFrame(() => {
+                editor.innerHTML = initialBody;
+                updatePreview();
+            }));
+            form.addEventListener('submit', updatePreview);
             updatePreview();
         })();
     </script>

@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Models\LetterDraft;
+use App\Support\LetterBody;
 
 uses(RefreshDatabase::class);
 
@@ -48,4 +50,48 @@ it('renders the dynamic Turance letterhead workspace and downloads a PDF', funct
 
     expect(substr($pdfResponse->getContent(), 0, 4))->toBe('%PDF')
         ->and(strlen($pdfResponse->getContent()))->toBeGreaterThan(1000);
+});
+
+it('saves incomplete letters as drafts and reopens them for editing', function () {
+    $session = [
+        config('luxury-quotes.admin.session_key', 'luxury_quote_admin_authenticated') => true,
+        'luxury_quote_admin_email' => 'admin@example.com',
+    ];
+
+    $this->withSession($session)
+        ->post(route('admin.letters.drafts.store'), [
+            'document_type' => 'Official Letter',
+            'date' => '',
+            'subject' => 'First draft',
+            'greeting' => '',
+            'closing' => '',
+            'body' => '<p>Hello <strong>team</strong>.</p>',
+        ])
+        ->assertRedirect();
+
+    $draft = LetterDraft::query()->sole();
+    expect($draft->content['body'])->toBe('<p>Hello <strong>team</strong>.</p>');
+
+    $this->withSession($session)
+        ->get(route('admin.letters.drafts.edit', $draft))
+        ->assertOk()
+        ->assertSee('First draft')
+        ->assertSee('Hello <strong>team</strong>.', false)
+        ->assertSee('id="date" type="date" name="date" value=""', false)
+        ->assertSee('Save draft');
+
+    $this->withSession($session)
+        ->post(route('admin.letters.drafts.update', $draft), [
+            'subject' => 'Revised draft',
+            'body' => '<p>Updated <em>copy</em>.</p>',
+        ])
+        ->assertRedirect(route('admin.letters.drafts.edit', $draft));
+
+    expect($draft->fresh()->content['subject'])->toBe('Revised draft')
+        ->and(LetterDraft::query()->count())->toBe(1);
+});
+
+it('keeps only supported formatting in letter bodies', function () {
+    expect(LetterBody::clean('<p onclick="bad()">Hello <strong style="color:red">team</strong><script>alert(1)</script></p>'))
+        ->toBe('<p>Hello <strong>team</strong></p>');
 });
