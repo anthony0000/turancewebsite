@@ -2,11 +2,13 @@
 @section('minimal_page', 'true')
 @section('seo_description', 'Turance Technologies designs and builds thoughtful websites, digital products, mobile applications and software for ambitious teams.')
 @push('styles')
+<link rel="preload" as="font" type="font/ttf" crossorigin href="{{ asset('/assets/fonts/Urbanist-Regular.ttf') }}">
 <link rel="preload" as="image" media="(min-width: 901px)" href="{{ asset('/assets/img/hero/turance-editorial-reference.png') }}" fetchpriority="high">
-<link rel="stylesheet" href="{{ asset('/assets/css/editorial-home.css') }}?v=1.0">
+<link rel="preload" as="image" media="(max-width: 900px)" href="{{ asset('/assets/img/hero/turance-editorial-ribbon.png') }}" fetchpriority="high">
+<link rel="stylesheet" href="{{ asset('/assets/css/editorial-home.css') }}?v=1.2">
 @endpush
 @push('scripts')
-<script src="{{ asset('/assets/js/editorial-home.js') }}?v=1.0" defer></script>
+<script src="{{ asset('/assets/js/editorial-home.js') }}?v=1.1" defer></script>
 @endpush
 @section('content')
 @php
@@ -37,10 +39,10 @@
     </header>
     <main id="main-content">
         <section class="ed-hero" aria-labelledby="hero-title">
-            <div class="ed-hero__art" aria-hidden="true" data-hero-art><picture><source media="(max-width: 900px)" srcset="{{ asset('/assets/img/hero/turance-editorial-ribbon.png') }}"><img src="{{ asset('/assets/img/hero/turance-editorial-reference.png') }}" width="1620" height="6031" alt="" fetchpriority="high" decoding="async"></picture></div>
+            <div class="ed-hero__art" aria-hidden="true" data-hero-art><picture><source media="(max-width: 900px)" srcset="{{ asset('/assets/img/hero/turance-editorial-ribbon.png') }}"><img src="{{ asset('/assets/img/hero/turance-editorial-reference.png') }}" width="1620" height="6031" alt="" fetchpriority="high" decoding="sync"></picture></div>
             <div class="ed-hero__content">
                 <div class="ed-hero__rule" aria-hidden="true"></div>
-                <h1 id="hero-title" class="ed-hero__title"><span class="ed-mask"><span>T<span class="ed-gold">URA</span>NCE</span></span><small>TECHNOLOGIES</small></h1>
+                <h1 id="hero-title" class="ed-hero__title"><span class="ed-mask"><span>TU<span class="ed-gold">RA</span>NCE</span></span><small>TECHNOLOGIES</small></h1>
                 <p class="ed-hero__tagline">Digital experiences<br>with purpose.</p>
                 <a class="ed-circle-link ed-hero__cta" href="{{ route('contact.show') }}" data-conversion="hero_project"><span class="ed-circle-link__icon" aria-hidden="true">↗</span><span>Start your project</span></a>
             </div>
@@ -99,9 +101,13 @@
         <section class="ed-section ed-contact" id="contact" aria-labelledby="contact-title">
             <div class="ed-section__top"><span>06 / The next chapter</span><span>Have a project in mind?</span></div>
             <h2 id="contact-title" class="ed-display" data-reveal>Something<br><em>remarkable.</em></h2>
-            <div class="ed-contact__action"><p>Good ideas deserve to become great experiences.<br>Tell us what you’re building.</p><a class="ed-circle-link" href="{{ route('contact.show') }}" data-conversion="final_project"><span>Start a conversation</span><span class="ed-circle-link__icon" aria-hidden="true">↗</span></a></div>
+            <div class="ed-contact__action"><div><p>Good ideas deserve to become great experiences.<br>Tell us what you’re building.</p><div class="ed-contact__channels"><a href="mailto:{{ config('seo.email') }}">Email us</a><a href="{{ config('seo.whatsapp_url') }}" target="_blank" rel="noopener noreferrer">WhatsApp</a></div></div><a class="ed-circle-link" href="{{ route('contact.show') }}" data-conversion="final_project"><span>Start a conversation</span><span class="ed-circle-link__icon" aria-hidden="true">↗</span></a></div>
             <div class="ed-contact__notice">Proposal materials are confidential. Please review our <a href="{{ route('terms.show') }}#proposal-design-rights">proposal and design rights terms</a> before sharing materials.</div>
-            <footer class="ed-footer"><div><a class="ed-footer__wordmark" href="#top">TURANCE<small>TECHNOLOGIES</small></a><span>Excellence delivered</span></div><nav aria-label="Footer navigation"><a href="#work">Work</a><a href="#services">Services</a><a href="{{ route('contact.show') }}">Contact</a><a href="{{ route('services.branding') }}">Branding</a><a href="mailto:{{ config('seo.email') }}">{{ config('seo.email') }}</a><a href="{{ config('seo.whatsapp_url') }}" target="_blank" rel="noopener noreferrer">WhatsApp</a><a href="{{ route('privacy.show') }}">Privacy</a><a href="{{ route('terms.show') }}">Terms</a><button type="button" data-cookie-preferences>Cookie preferences</button></nav><small>© {{ date('Y') }} Turance Technologies</small></footer>
+            <footer class="ed-footer">
+                <div class="ed-footer__brand"><a class="ed-footer__wordmark" href="#top">TURANCE<small>TECHNOLOGIES</small></a><span>Excellence delivered</span></div>
+                <div class="ed-footer__right"><nav aria-label="Footer navigation"><a href="#work">Work</a><a href="#services">Services</a><a href="{{ route('contact.show') }}">Contact</a></nav><small>© {{ date('Y') }} Turance Technologies</small></div>
+                <div class="ed-footer__utility"><a href="{{ route('privacy.show') }}">Privacy</a><a href="{{ route('terms.show') }}">Terms</a><button type="button" data-cookie-preferences>Cookie preferences</button></div>
+            </footer>
         </section>
     </main>
 </div>

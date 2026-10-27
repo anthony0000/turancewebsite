@@ -3,7 +3,6 @@ document.addEventListener("DOMContentLoaded", () => {
   if (!site) return;
 
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-  const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)");
   const menuButton = document.querySelector("[data-menu-button]");
   const menu = document.getElementById("ed-nav");
   let lastFocused = null;
@@ -48,39 +47,18 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   if (!reducedMotion.matches && "IntersectionObserver" in window) {
-    site.classList.add("ed-ready");
-    const targets = [...site.querySelectorAll("[data-reveal]")];
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
         if (!entry.isIntersecting) return;
         entry.target.classList.add("is-visible");
         observer.unobserve(entry.target);
       });
-    }, { threshold: 0.12, rootMargin: "0px 0px -25px 0px" });
-    targets.forEach((target) => observer.observe(target));
-  }
-
-  if (!reducedMotion.matches && finePointer.matches) {
-    document.querySelectorAll(".ed-circle-link").forEach((link) => {
-      link.addEventListener("pointermove", (event) => {
-        const rect = link.getBoundingClientRect();
-        const x = (event.clientX - rect.left - rect.width / 2) * 0.08;
-        const y = (event.clientY - rect.top - rect.height / 2) * 0.08;
-        link.style.transform = `translate3d(${x.toFixed(1)}px,${y.toFixed(1)}px,0)`;
-      });
-      link.addEventListener("pointerleave", () => { link.style.transform = ""; });
+    }, { threshold: 0.08, rootMargin: "0px 0px -10px 0px" });
+    site.querySelectorAll("[data-reveal]").forEach((target) => {
+      if (target.getBoundingClientRect().top <= window.innerHeight + 24) return;
+      target.classList.add("ed-reveal-pending");
+      observer.observe(target);
     });
-    const hero = document.querySelector(".ed-hero");
-    const art = document.querySelector("[data-hero-art]");
-    if (hero && art) {
-      hero.addEventListener("pointermove", (event) => {
-        const rect = hero.getBoundingClientRect();
-        const x = ((event.clientX - rect.left) / rect.width - 0.5) * 10;
-        const y = ((event.clientY - rect.top) / rect.height - 0.5) * 7;
-        art.style.translate = `${x.toFixed(1)}px ${y.toFixed(1)}px`;
-      });
-      hero.addEventListener("pointerleave", () => { art.style.translate = ""; });
-    }
   }
 
   document.addEventListener("click", (event) => {

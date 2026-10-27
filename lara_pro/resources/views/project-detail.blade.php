@@ -5,11 +5,12 @@
 @section('seo_canonical', route('work.show', ['slug' => $project['slug']]))
 @section('seo_image', asset($project['image']))
 @push('styles')
-<link rel="stylesheet" href="{{ asset('/assets/css/editorial-home.css') }}?v=1.0">
+<link rel="preload" as="font" type="font/ttf" crossorigin href="{{ asset('/assets/fonts/Urbanist-Regular.ttf') }}">
+<link rel="stylesheet" href="{{ asset('/assets/css/editorial-home.css') }}?v=1.2">
 <link rel="stylesheet" href="{{ asset('/assets/css/editorial-project.css') }}?v=1.0">
 @endpush
 @push('scripts')
-<script src="{{ asset('/assets/js/editorial-home.js') }}?v=1.0" defer></script>
+<script src="{{ asset('/assets/js/editorial-home.js') }}?v=1.1" defer></script>
 @endpush
 @section('content')
 <a class="ed-skip" href="#main-content">Skip to content</a>
@@ -39,7 +40,7 @@
             <div class="ed-section__top"><span>The next chapter</span><span>Have a project in mind?</span></div>
             <h2 id="case-contact-title" class="ed-display" data-reveal>Something<br><em>remarkable.</em></h2>
             <div class="ed-contact__action"><p>Tell us what you’re building.</p><a class="ed-circle-link" href="{{ route('contact.show') }}"><span>Start a conversation</span><span class="ed-circle-link__icon" aria-hidden="true">↗</span></a></div>
-            <footer class="ed-footer"><div><a class="ed-footer__wordmark" href="{{ route('home') }}">TURANCE<small>TECHNOLOGIES</small></a><span>Excellence delivered</span></div><nav aria-label="Footer navigation"><a href="{{ route('home') }}#work">Work</a><a href="{{ route('home') }}#services">Services</a><a href="{{ route('contact.show') }}">Contact</a><a href="{{ route('privacy.show') }}">Privacy</a><a href="{{ route('terms.show') }}">Terms</a><button type="button" data-cookie-preferences>Cookie preferences</button></nav><small>© {{ date('Y') }} Turance Technologies</small></footer>
+            <footer class="ed-footer"><div class="ed-footer__brand"><a class="ed-footer__wordmark" href="{{ route('home') }}">TURANCE<small>TECHNOLOGIES</small></a><span>Excellence delivered</span></div><div class="ed-footer__right"><nav aria-label="Footer navigation"><a href="{{ route('home') }}#work">Work</a><a href="{{ route('home') }}#services">Services</a><a href="{{ route('contact.show') }}">Contact</a></nav><small>© {{ date('Y') }} Turance Technologies</small></div><div class="ed-footer__utility"><a href="{{ route('privacy.show') }}">Privacy</a><a href="{{ route('terms.show') }}">Terms</a><button type="button" data-cookie-preferences>Cookie preferences</button></div></footer>
         </section>
     </main>
 </div>
