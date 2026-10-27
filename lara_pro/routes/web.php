@@ -91,7 +91,7 @@ Route::redirect('/index4.html', '/single/branding', 301);
 Route::redirect('/about.html', '/#about', 301);
 Route::redirect('/team.html', '/#about', 301);
 Route::redirect('/team-details.html', '/#about', 301);
-Route::redirect('/testimonial.html', '/#perspectives', 301);
+Route::redirect('/testimonial.html', '/#testimonials', 301);
 Route::redirect('/pricing.html', '/service#service-pricing', 301);
 Route::redirect('/portfolio.html', '/#work', 301);
 Route::redirect('/portfolio-gallery.html', '/#work', 301);

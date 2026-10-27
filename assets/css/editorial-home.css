@@ -40,10 +40,11 @@ body.tt-minimal-page:has(.ed-site){overflow-x:hidden}
 .ed-gold{color:#aa8653}
 .ed-hero__title small{display:block;margin-top:18px;padding-left:var(--hero-inset);font-family:Urbanist,Arial,sans-serif;font-size:clamp(16px,1.7vw,25px);font-weight:400;letter-spacing:.48em;line-height:1.2;color:#77736e;animation:ed-fade .8s .9s both}
 .ed-hero__tagline{margin:43px 0 0 var(--hero-inset);font-size:clamp(13px,1.05vw,17px);font-weight:500;line-height:1.5;letter-spacing:.24em;text-transform:uppercase;color:#65615c;animation:ed-up .7s 1s both}
+.ed-hero__descriptor{margin:18px 0 0 var(--hero-inset);color:#302e2b;font-size:clamp(16px,1.25vw,19px);font-weight:500;line-height:1.45;letter-spacing:.005em;animation:ed-up .7s 1.15s both}
 .ed-circle-link{display:inline-flex;align-items:center;gap:24px;width:max-content;font-size:10px;font-weight:500;letter-spacing:.2em;text-transform:uppercase}
 .ed-circle-link__icon{display:grid;place-items:center;flex:0 0 auto;width:68px;height:68px;border:1px solid var(--ed-gold);border-radius:50%;font-size:26px;font-weight:400;letter-spacing:0;transition:background .28s ease,color .28s ease,transform .28s ease}
 .ed-circle-link:hover .ed-circle-link__icon{background:var(--ed-gold);color:#fff;transform:translate(2px,-2px)}
-.ed-hero__cta{margin:90px 0 0 6px;animation:ed-up .7s 1s both}
+.ed-hero__cta{margin:58px 0 0 6px;animation:ed-up .7s 1.25s both}
 .ed-promo{display:flex;justify-content:space-between;gap:30px;padding:22px clamp(30px,7.3vw,120px);background:#131313;color:#fff;font-size:12px;letter-spacing:.07em}
 .ed-promo a{color:#d4b98e;text-decoration:underline}
 .ed-section{padding:70px clamp(30px,7.3vw,120px) 80px;scroll-margin-top:90px}
@@ -116,6 +117,19 @@ body.tt-minimal-page:has(.ed-site){overflow-x:hidden}
 .ed-credibility__grid>div{max-width:360px}
 .ed-credibility__grid a{display:inline-block;margin-top:32px;padding-bottom:7px;border-bottom:1px solid #111;font-size:11px;text-transform:uppercase;letter-spacing:.14em}
 .ed-anchor-alias{position:absolute}
+.ed-testimonials{background:#f5f2ed;padding-bottom:115px}
+.ed-testimonials .ed-section__heading{padding:80px 0 72px}
+.ed-testimonials .ed-display{font-size:clamp(70px,7.4vw,126px)}
+.ed-testimonials .ed-section__heading p{max-width:310px;color:#77736d}
+.ed-testimonials__grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(25px,3.5vw,60px)}
+.ed-testimonial{display:flex;flex-direction:column;min-width:0;min-height:350px;margin:0;padding-top:22px;border-top:1px solid #c7c0b5}
+.ed-testimonial__index{color:#97784f;font-size:10px;font-weight:500;letter-spacing:.16em}
+.ed-testimonial blockquote{margin:35px 0 42px}
+.ed-testimonial blockquote p{margin:0;font-size:clamp(20px,1.75vw,28px);font-weight:400;line-height:1.38;letter-spacing:-.03em}
+.ed-testimonial figcaption{display:flex;flex-direction:column;gap:5px;margin-top:auto;padding-top:20px;border-top:1px solid #d7d1c8}
+.ed-testimonial figcaption strong{font-size:15px;font-weight:500}
+.ed-testimonial figcaption span{color:#77736d;font-size:12px}
+@media(max-width:900px) and (min-width:651px){.ed-testimonials__grid{grid-template-columns:repeat(2,minmax(0,1fr))}.ed-testimonial:last-child{grid-column:1/-1;max-width:calc(50% - 13px)}}
 .ed-faq{background:#f0f0ee}
 .ed-faq__grid{display:grid;grid-template-columns:1fr 1fr;gap:60px;padding:70px 0 40px}
 .ed-faq__items{align-self:center;border-top:1px solid #d5d5d2}
@@ -133,8 +147,11 @@ body.tt-minimal-page:has(.ed-site){overflow-x:hidden}
 .ed-contact__channels{display:flex;gap:22px;margin-top:20px;color:#a6a6a6;font-size:10px;letter-spacing:.14em;text-transform:uppercase}
 .ed-contact__channels a{border-bottom:1px solid #666;padding-bottom:4px}
 .ed-contact .ed-circle-link__icon{border-color:#666}
-.ed-contact__notice{max-width:500px;margin:0 0 145px;color:#898989;font-size:11px;line-height:1.5}
-.ed-contact__notice a{text-decoration:underline}
+.ed-contact__notice{max-width:780px;margin:0 0 105px;padding:22px 26px;border-left:2px solid var(--ed-gold);background:#1c1c1b;color:#d5d3ce}
+.ed-contact__notice-label{display:block;margin-bottom:11px;color:#d4b98e;font-size:11px;font-weight:500;letter-spacing:.17em;text-transform:uppercase}
+.ed-contact__notice p{margin:0;font-size:clamp(14px,1.1vw,17px);line-height:1.6}
+.ed-contact__notice a{color:#f8f7f4;text-decoration:underline;text-decoration-color:#d4b98e;text-underline-offset:4px;transition:color .25s ease}
+.ed-contact__notice a:hover,.ed-contact__notice a:focus-visible{color:#d4b98e}
 .ed-footer{display:grid;grid-template-columns:1fr auto;align-items:end;column-gap:40px;row-gap:18px;padding-top:42px;border-top:1px solid #353535}
 .ed-footer__brand>span{display:block;margin-top:19px;color:#aaa49b;font-size:11px;line-height:1.4;letter-spacing:.12em;text-transform:uppercase}
 .ed-footer__wordmark{display:inline-block;font-size:24px;line-height:.9;letter-spacing:.18em}
@@ -160,7 +177,7 @@ body.tt-minimal-page:has(.ed-site){overflow-x:hidden}
 .ed-project:focus-visible .ed-project__view{opacity:1;transform:none}
 .ed-more-work>a,.ed-contact__channels a,.ed-credibility__grid a,.ed-footer a,.ed-footer button{transition:color .3s ease,border-color .3s ease}
 .ed-more-work>a:hover,.ed-more-work>a:focus-visible,.ed-contact__channels a:hover,.ed-contact__channels a:focus-visible,.ed-credibility__grid a:hover,.ed-credibility__grid a:focus-visible{color:var(--ed-gold);border-color:var(--ed-gold)}
-.ed-service{position:relative;isolation:isolate;overflow:hidden}
+.ed-service{position:relative;isolation:isolate;padding-right:16px}
 .ed-service:before{content:"";position:absolute;z-index:0;inset:0;background:rgba(183,146,87,.09);pointer-events:none;transform:scaleX(0);transform-origin:left;transition:transform .55s cubic-bezier(.2,.7,.2,1)}
 .ed-service>*{position:relative;z-index:1}
 .ed-service:hover:before,.ed-service:focus-visible:before{transform:scaleX(1)}
@@ -229,7 +246,8 @@ body.tt-minimal-page:has(.ed-site){overflow-x:hidden}
  .ed-hero__title{font-size:clamp(58px,14vw,92px)}
  .ed-hero__title small{margin-top:15px;font-size:clamp(11px,2.7vw,16px);letter-spacing:.42em}
  .ed-hero__tagline{margin-top:26px;font-size:12px;letter-spacing:.22em}
- .ed-hero__cta{margin:32px 0 0 4px}
+ .ed-hero__descriptor{margin-top:14px;font-size:14px;letter-spacing:0}
+ .ed-hero__cta{margin:16px 0 0 4px}
  .ed-circle-link__icon{width:56px;height:56px;font-size:22px}
  .ed-hero__art{inset:auto -42% 0 auto;width:120%;height:auto;aspect-ratio:3/2;overflow:visible}
  .ed-hero__art img{position:static;width:100%;height:100%;max-width:100%;object-fit:contain;filter:drop-shadow(0 28px 20px rgba(65,43,20,.14))}
@@ -250,7 +268,7 @@ body.tt-minimal-page:has(.ed-site){overflow-x:hidden}
  .ed-project__image{height:280px}
  .ed-project__view{opacity:1;transform:none}
  .ed-services .ed-section__heading{padding:65px 0 53px}
- .ed-service{grid-template-columns:25px minmax(0,1fr) 20px;min-height:105px;gap:12px}
+ .ed-service{grid-template-columns:25px minmax(0,1fr) 20px;min-height:105px;gap:12px;padding-right:8px}
  .ed-service strong{font-size:23px}
  .ed-service small{grid-column:2;grid-row:2;margin-top:-28px;font-size:10px}
  .ed-service__arrow{grid-column:3;grid-row:1}
@@ -268,13 +286,21 @@ body.tt-minimal-page:has(.ed-site){overflow-x:hidden}
  .ed-credibility{min-height:auto}
  .ed-credibility__grid{display:block;padding:72px 0 55px}
  .ed-credibility__grid>div{margin:38px 0 0 auto}
+ .ed-testimonials{padding-bottom:70px}
+ .ed-testimonials .ed-section__heading{padding:62px 0 55px}
+ .ed-testimonials .ed-display{font-size:clamp(60px,12vw,84px)}
+ .ed-testimonials__grid{grid-template-columns:1fr;gap:42px}
+ .ed-testimonial{min-height:0}
+ .ed-testimonial blockquote{margin:26px 0 36px}
+ .ed-testimonial blockquote p{max-width:620px;font-size:clamp(23px,6vw,29px)}
  .ed-faq__grid{display:block;padding:66px 0 20px}
  .ed-faq__items{margin-top:45px}
  .ed-contact{min-height:690px}
  .ed-contact>.ed-display{margin:95px 0 70px;font-size:clamp(59px,12vw,90px)}
  .ed-contact__action{align-items:flex-start;flex-direction:column;padding-bottom:45px}
  .ed-contact__action .ed-circle-link{margin-top:28px}
- .ed-contact__notice{margin:0 0 45px}
+ .ed-contact__notice{margin:0 0 45px;padding:18px}
+ .ed-contact__notice p{font-size:14px}
  .ed-footer{grid-template-columns:1fr;row-gap:35px}
  .ed-footer__right{align-items:flex-start;justify-content:space-between;gap:20px;flex-wrap:wrap}
  .ed-footer__right nav{gap:24px}

@@ -5,7 +5,7 @@ $siteUrl = rtrim(env('SEO_SITE_URL', 'https://turancetechnologies.com'), '/');
 return [
     'site_url' => $siteUrl,
     'site_name' => 'Turance Technologies',
-    'tagline' => 'Digital experiences with purpose.',
+    'tagline' => 'Excellence Delivered',
     'anniversary_promo' => [
         'enabled' => false,
         'years' => 7,

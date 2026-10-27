@@ -5,7 +5,7 @@
 <link rel="preload" as="font" type="font/ttf" crossorigin href="{{ asset('/assets/fonts/Urbanist-Regular.ttf') }}">
 <link rel="preload" as="image" media="(min-width: 651px)" href="{{ asset('/assets/img/hero/turance-editorial-hero-clean.png') }}" fetchpriority="high">
 <link rel="preload" as="image" media="(max-width: 650px)" href="{{ asset('/assets/img/hero/turance-editorial-ribbon.png') }}" fetchpriority="high">
-<link rel="stylesheet" href="{{ asset('/assets/css/editorial-home.css') }}?v=1.7">
+<link rel="stylesheet" href="{{ asset('/assets/css/editorial-home.css') }}?v=2.1">
 @endpush
 @push('scripts')
 <script src="{{ asset('/assets/js/editorial-home.js') }}?v=1.3" defer></script>
@@ -27,6 +27,11 @@
         ['name' => 'Develop', 'detail' => 'Build, test and refine the product.'],
         ['name' => 'Deliver', 'detail' => 'Launch carefully and keep improving.'],
     ];
+    $testimonials = [
+        ['quote' => 'Turance delivered a clean, scalable platform on time. Deployment was smooth and our team was impressed with the code quality.', 'name' => 'Oluwafemi Oluwole', 'company' => 'Oracode Limited'],
+        ['quote' => 'Their design and execution turned our idea into a product customers actually use. Communication was clear every step of the way.', 'name' => 'Joy Ugoyah', 'company' => 'Stavmia Technologies'],
+        ['quote' => 'Professional and responsive. The new site improved lead quality and made our listings easier to manage.', 'name' => 'Chirdan John', 'company' => 'Homafella Realty'],
+    ];
     $anniversaryPromo = app(\App\Support\AnniversaryPromotion::class)->current();
 @endphp
 <a class="ed-skip" href="#main-content">Skip to content</a>
@@ -43,7 +48,8 @@
             <div class="ed-hero__content">
                 <div class="ed-hero__rule" aria-hidden="true"></div>
                 <h1 id="hero-title" class="ed-hero__title"><span class="ed-mask"><span>TU<span class="ed-gold">RA</span>NCE</span></span><small>TECHNOLOGIES</small></h1>
-                <p class="ed-hero__tagline">Digital experiences<br>with purpose.</p>
+                <p class="ed-hero__tagline">Excellence<br>Delivered</p>
+                <p class="ed-hero__descriptor">Websites · Mobile apps · Software</p>
                 <a class="ed-circle-link ed-hero__cta" href="{{ route('contact.show') }}" data-conversion="hero_project"><span class="ed-circle-link__icon" aria-hidden="true">↗</span><span>Start your project</span></a>
             </div>
         </section>
@@ -94,15 +100,28 @@
             <div class="ed-section__top"><span>05 / In practice</span><span>Real products, real purpose</span></div>
             <div class="ed-credibility__grid"><h2 id="credibility-title" class="ed-display" data-reveal>Built for<br><em>real use.</em></h2><div data-reveal><p>Our work is visible in live products—from TailorsMind’s fashion workspace to 3Hjobs’ local services marketplace.</p><a href="#work">See selected work <span aria-hidden="true">↗</span></a></div></div>
         </section>
+        <section class="ed-section ed-testimonials" id="testimonials" aria-labelledby="testimonials-title">
+            <div class="ed-section__top"><span>06 / Client perspectives</span><span>In their words</span></div>
+            <div class="ed-section__heading"><h2 id="testimonials-title" class="ed-display" data-reveal>Words that<br><em>matter.</em></h2><p data-reveal>What our clients say about the work, the process and the result.</p></div>
+            <div class="ed-testimonials__grid">
+                @foreach ($testimonials as $testimonial)
+                <figure class="ed-testimonial" data-reveal>
+                    <span class="ed-testimonial__index" aria-hidden="true">{{ str_pad($loop->iteration, 2, '0', STR_PAD_LEFT) }} / 0{{ count($testimonials) }}</span>
+                    <blockquote><p>“{{ $testimonial['quote'] }}”</p></blockquote>
+                    <figcaption><strong>{{ $testimonial['name'] }}</strong><span>{{ $testimonial['company'] }}</span></figcaption>
+                </figure>
+                @endforeach
+            </div>
+        </section>
         <section class="ed-section ed-faq" id="faq" aria-labelledby="faq-title">
             <div class="ed-section__top"><span>Questions / Answers</span><span>Before we begin</span></div>
             <div class="ed-faq__grid"><h2 id="faq-title" class="ed-display" data-reveal>Good to<br><em>know.</em></h2><div class="ed-faq__items" data-reveal>@foreach (config('seo.home_faqs', []) as $faq)<details><summary>{{ $faq['question'] }}<span aria-hidden="true">+</span></summary><p>{{ $faq['answer'] }}</p></details>@endforeach</div></div>
         </section>
         <section class="ed-section ed-contact" id="contact" aria-labelledby="contact-title">
-            <div class="ed-section__top"><span>06 / The next chapter</span><span>Have a project in mind?</span></div>
+            <div class="ed-section__top"><span>07 / The next chapter</span><span>Have a project in mind?</span></div>
             <h2 id="contact-title" class="ed-display" data-reveal>Something<br><em>remarkable.</em></h2>
             <div class="ed-contact__action" data-reveal><div><p>Good ideas deserve to become great experiences.<br>Tell us what you’re building.</p><div class="ed-contact__channels"><a href="mailto:{{ config('seo.email') }}">Email us</a><a href="{{ config('seo.whatsapp_url') }}" target="_blank" rel="noopener noreferrer">WhatsApp</a></div></div><a class="ed-circle-link" href="{{ route('contact.show') }}" data-conversion="final_project"><span>Start a conversation</span><span class="ed-circle-link__icon" aria-hidden="true">↗</span></a></div>
-            <div class="ed-contact__notice">Proposal materials are confidential. Please review our <a href="{{ route('terms.show') }}#proposal-design-rights">proposal and design rights terms</a> before sharing materials.</div>
+            <aside class="ed-contact__notice" aria-label="Proposal confidentiality"><span class="ed-contact__notice-label">Proposal confidentiality</span><p>Proposal materials are confidential. Please review our <a href="{{ route('terms.show') }}#proposal-design-rights">proposal and design rights terms</a> before sharing materials.</p></aside>
             <footer class="ed-footer">
                 <div class="ed-footer__brand"><a class="ed-footer__wordmark" href="#top">TURANCE<small>TECHNOLOGIES</small></a><span>{{ config('seo.tagline') }}</span></div>
                 <div class="ed-footer__right"><nav aria-label="Footer navigation"><a href="#work">Work</a><a href="#services">Services</a><a href="{{ route('contact.show') }}">Contact</a></nav><small>© {{ date('Y') }} Turance Technologies</small></div>

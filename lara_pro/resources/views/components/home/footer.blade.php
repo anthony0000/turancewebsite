@@ -7,7 +7,7 @@
                     <img src="{{ asset('/assets/img/logo/logo.png') }}" width="694" height="178" alt="">
                     <span class="tt-footer__wordmark">TURANCE<small>TECHNOLOGIES</small></span>
                 </a>
-                <span class="tt-footer__tagline">{{ config('seo.tagline', 'Digital experiences with purpose.') }}</span>
+                <span class="tt-footer__tagline">{{ config('seo.tagline', 'Excellence Delivered') }}</span>
                 <p>Software and digital products shaped with clarity, precision and lasting purpose.</p>
                 <x-preferred-source />
             </div>

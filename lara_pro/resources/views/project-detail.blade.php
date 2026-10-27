@@ -6,7 +6,7 @@
 @section('seo_image', asset($project['image']))
 @push('styles')
 <link rel="preload" as="font" type="font/ttf" crossorigin href="{{ asset('/assets/fonts/Urbanist-Regular.ttf') }}">
-<link rel="stylesheet" href="{{ asset('/assets/css/editorial-home.css') }}?v=1.7">
+<link rel="stylesheet" href="{{ asset('/assets/css/editorial-home.css') }}?v=2.0">
 <link rel="stylesheet" href="{{ asset('/assets/css/editorial-project.css') }}?v=1.0">
 @endpush
 @push('scripts')
