@@ -1,574 +1,108 @@
 @extends('layouts.master')
-
 @section('minimal_page', 'true')
-
+@section('seo_description', 'Turance Technologies designs and builds thoughtful websites, digital products, mobile applications and software for ambitious teams.')
 @push('styles')
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&amp;family=Hanken+Grotesk:wght@400;500;600;700&amp;display=swap">
-    <link rel="stylesheet" href="{{ asset('/assets/css/home-reference.css') }}?v=2.8">
-    <link rel="stylesheet" href="{{ asset('/assets/css/home-sections.css') }}?v=2.8">
+<link rel="preload" as="image" media="(min-width: 901px)" href="{{ asset('/assets/img/hero/turance-editorial-reference.png') }}" fetchpriority="high">
+<link rel="stylesheet" href="{{ asset('/assets/css/editorial-home.css') }}?v=1.0">
 @endpush
-
-@section('content')
-    @php
-        $services = [
-            ['name' => 'Product Strategy', 'copy' => 'Transform ideas and business requirements into focused digital roadmaps.', 'route' => 'service.show'],
-            ['name' => 'UI/UX Design', 'copy' => 'Create intuitive, memorable and conversion-focused digital experiences.', 'route' => 'service.show'],
-            ['name' => 'Web Development', 'copy' => 'Build fast, responsive, secure and scalable websites and applications.', 'route' => 'services.web'],
-            ['name' => 'Mobile Development', 'copy' => 'Develop high-quality mobile products for modern customer experiences.', 'route' => 'services.mobile'],
-            ['name' => 'SaaS & Automation', 'copy' => 'Turn complex operations into scalable products and connected workflows.', 'route' => 'services.saas'],
-            ['name' => 'Branding & Identity', 'copy' => 'Build a distinct visual and verbal system that earns recognition and trust.', 'route' => 'services.branding'],
-        ];
-
-        $projects = [
-            [
-                'name' => 'TailorsMind', 'industry' => 'Fashion technology', 'category' => 'Product ecosystem',
-                'summary' => 'A workspace for fashion professionals to manage clients, measurements, orders, payments, designs and deadlines.',
-                'services' => ['Product strategy', 'UX design', 'Platform engineering'], 'year' => '2026',
-                'outcome' => 'One clear place to run day-to-day tailoring operations.', 'visual' => 'fashion',
-                'image' => asset('/assets/img/project/tailorsmind-live.webp'), 'image_alt' => 'TailorsMind live website homepage',
-                'link' => 'https://tailorsmind.com/', 'link_label' => 'View live project',
-            ],
-            [
-                'name' => '3Hjobs', 'industry' => 'Local services', 'category' => 'Marketplace platform',
-                'summary' => 'A location-aware marketplace that helps people discover and engage trusted artisans around them.',
-                'services' => ['Service design', 'Mobile experience', 'Backend development'], 'year' => '2026',
-                'outcome' => 'A clearer path from local discovery to service engagement.', 'visual' => 'marketplace',
-                'image' => asset('/assets/img/project/3hjobs-live.webp'), 'image_alt' => '3Hjobs live website homepage',
-                'link' => 'https://3hjobs.com/', 'link_label' => 'View live project',
-            ],
-            [
-                'name' => 'KleanManager', 'industry' => 'Business operations', 'category' => 'Management software',
-                'summary' => 'An operations platform bringing orders, customers, payments and daily laundry workflows into one view.',
-                'services' => ['Workflow strategy', 'UI/UX design', 'Web application'], 'year' => '2025',
-                'outcome' => 'Better operational visibility and more consistent service control.', 'visual' => 'operations',
-                'image' => asset('/assets/img/project/kleanmanager-live.webp'), 'image_alt' => 'KleanManager live website homepage showing its dashboard',
-                'link' => 'https://kleanmanager.com/', 'link_label' => 'View live project',
-            ],
-            [
-                'name' => '36 Plus One', 'industry' => 'Social impact', 'category' => 'Nonprofit platform',
-                'summary' => 'A public-facing platform helping a development initiative communicate its mission and connect people with community causes.',
-                'services' => ['UX design', 'Web development', 'Donation workflows'], 'year' => 'Live',
-                'outcome' => 'One accessible destination for causes, donations, volunteering, organisational work and partner engagement.',
-                'visual' => 'impact',
-                'image' => asset('/assets/img/project/36plusone-live.webp'), 'image_alt' => '36 Plus One website homepage',
-                'link' => 'https://www.36plusone.org/',
-                'link_label' => 'View live project',
-            ],
-            [
-                'name' => 'KiddoVista', 'industry' => 'Family commerce', 'category' => 'Multi-vendor marketplace',
-                'summary' => 'A trusted baby marketplace that brings approved sellers, independent storefronts and essential products into one family-friendly shopping experience.',
-                'services' => ['Marketplace UX', 'Vendor management', 'Commerce engineering'], 'year' => 'Live',
-                'outcome' => 'A connected destination where families can discover products and shop across trusted seller stores.',
-                'visual' => 'family',
-                'image' => asset('/assets/img/project/kiddovista-live.webp'), 'image_alt' => 'KiddoVista live marketplace homepage',
-                'link' => 'https://kiddovista.co.uk/',
-                'link_label' => 'View live project',
-            ],
-            [
-                'name' => 'IHcPro Store', 'industry' => 'Healthcare commerce', 'category' => 'E-commerce platform',
-                'summary' => 'A UK healthcare storefront designed to make medical supplies, cleaning products and specialist equipment easier to discover and purchase.',
-                'services' => ['Commerce strategy', 'UI/UX design', 'E-commerce development'], 'year' => 'Live',
-                'outcome' => 'A structured digital shop connecting healthcare customers with essential products and clear purchasing journeys.',
-                'visual' => 'healthcare',
-                'image' => null,
-                'link' => 'https://shop.ihcpro.co.uk/',
-                'link_label' => 'View live project',
-            ],
-        ];
-
-        $process = [
-            ['name' => 'Discover', 'copy' => 'Understand the organisation, users, challenges, goals and opportunities.'],
-            ['name' => 'Define', 'copy' => 'Translate insight into priorities, requirements and a clear execution plan.'],
-            ['name' => 'Design & Build', 'copy' => 'Create, test and develop a refined digital solution.'],
-            ['name' => 'Launch & Improve', 'copy' => 'Deploy, monitor, optimise and support long-term growth.'],
-        ];
-
-        $capabilities = [
-            ['group' => 'Frontend Engineering', 'tools' => ['React', 'Next.js', 'Vue']],
-            ['group' => 'Backend & APIs', 'tools' => ['Laravel', 'Node.js', 'REST APIs']],
-            ['group' => 'Mobile Applications', 'tools' => ['Flutter', 'React Native', 'Native integrations']],
-            ['group' => 'Cloud & Deployment', 'tools' => ['AWS', 'DigitalOcean', 'CI/CD']],
-            ['group' => 'Database Architecture', 'tools' => ['MySQL', 'PostgreSQL', 'Data modelling']],
-            ['group' => 'Integrations & Automation', 'tools' => ['Paystack', 'Webhooks', 'Workflow systems']],
-        ];
-
-        $impacts = [
-            ['index' => '01', 'title' => 'Faster digital operations', 'copy' => 'Less friction across the processes that keep work moving.'],
-            ['index' => '02', 'title' => 'Stronger customer experiences', 'copy' => 'Clearer journeys that make digital interactions feel considered.'],
-            ['index' => '03', 'title' => 'Scalable technical foundations', 'copy' => 'Architecture built to support change without unnecessary complexity.'],
-            ['index' => '04', 'title' => 'Better business visibility', 'copy' => 'Connected information that supports confident decisions and control.'],
-        ];
-
-        $testimonials = [
-            ['name' => 'Oluwafemi Oluwole', 'initials' => 'OO', 'company' => 'Oracode Limited', 'rating' => 96, 'quote' => 'Turance delivered a clean, scalable platform on time. Deployment was smooth and our team was impressed with the code quality.'],
-            ['name' => 'Joy Ugoyah', 'initials' => 'JU', 'company' => 'Stavmia Technologies', 'rating' => 92, 'quote' => 'Their design and execution turned our idea into a product customers actually use. Communication was clear every step of the way.'],
-            ['name' => 'Chirdan John', 'initials' => 'CJ', 'company' => 'Homafella Realty', 'rating' => 90, 'quote' => 'Professional and responsive. The new site improved lead quality and made our listings easier to manage.'],
-            ['name' => 'Aquila Kalagbor', 'initials' => 'AK', 'company' => 'Aqqute Labs', 'rating' => 88, 'quote' => 'Attention to detail and practical solutions. They met our deadlines and kept the project on budget.'],
-            ['name' => 'Excellence Idoko', 'initials' => 'EI', 'company' => 'MarketXtra Group', 'rating' => 94, 'quote' => 'Clear communication, measurable results, and a partner we can trust. The project exceeded our expectations.'],
-            ['name' => 'Mafeng Micheal', 'initials' => 'MM', 'company' => 'BitesBanq Technologies', 'rating' => 91, 'quote' => 'They translated strategy into concrete features that boosted user engagement and simplified workflows.'],
-            ['name' => 'Glory Atagholo', 'initials' => 'GA', 'company' => 'Vitasfield Agric Services', 'rating' => 89, 'quote' => 'Great collaboration and fast iterations. The launch went smoothly and adoption was quick.'],
-            ['name' => 'Oghenetega Onadarho', 'initials' => 'OO', 'company' => 'IHcPro Integrated Service', 'rating' => 95, 'quote' => 'Reliable team, robust product, and excellent post-launch support. They stood by us through every update.'],
-        ];
-
-        $insights = [
-            ['category' => 'Architecture', 'title' => 'Why scalable architecture matters before rapid growth', 'summary' => 'The early technical decisions that protect product momentum as demand changes.', 'date' => 'Editorial preview', 'time' => '6 min read', 'visual' => 'architecture', 'link' => null],
-            ['category' => 'Product design', 'title' => 'Designing digital products around real user behaviour', 'summary' => 'How observation and evidence turn product assumptions into useful experiences.', 'date' => 'Editorial preview', 'time' => '5 min read', 'visual' => 'behaviour', 'link' => null],
-            ['category' => 'Automation', 'title' => 'When business automation becomes a competitive advantage', 'summary' => 'Where thoughtful automation creates capacity without losing human judgement.', 'date' => 'Editorial preview', 'time' => '7 min read', 'visual' => 'automation', 'link' => null],
-        ];
-
-        $faqs = config('seo.home_faqs', []);
-        $anniversaryPromo = app(\App\Support\AnniversaryPromotion::class)->current();
-        $promoEndsAt = ! empty($anniversaryPromo['ends_at']) ? \Illuminate\Support\Carbon::parse($anniversaryPromo['ends_at']) : null;
-        $promoIsActive = $anniversaryPromo['is_active'];
-        $proposalWarning = config('legal.terms.warning', []);
-    @endphp
-
-    <a class="tt-skip-link" href="#main-content">Skip to main content</a>
-
-    <main class="tt-reference-home" id="main-content">
-        <x-home.header />
-
-        <section class="tt-hero" aria-labelledby="hero-title">
-            <div class="tt-hero__curves" data-parallax-layer="curves" aria-hidden="true">
-                <span class="tt-hero__glow" data-cursor-glow></span>
-                <span class="tt-hero__sweep tt-hero__sweep--one"></span>
-                <span class="tt-hero__sweep tt-hero__sweep--two"></span>
-                <svg class="tt-hero__linework" viewBox="0 0 900 900" fill="none"
-                    xmlns="http://www.w3.org/2000/svg">
-                    <ellipse cx="660" cy="426" rx="390" ry="318" stroke="currentColor" stroke-width="1" />
-                </svg>
-            </div>
-
-            <canvas class="tt-hero__particles" data-particle-network aria-hidden="true"></canvas>
-
-            <div class="tt-hero__main">
-                <div class="tt-hero__content">
-                    <div class="tt-hero__eyebrow tt-reveal tt-reveal--one">
-                        <span>Web design &amp; software development</span>
-                        <i aria-hidden="true"></i>
-                    </div>
-
-                    @if ($promoIsActive)
-                        <a class="tt-hero__anniversary tt-reveal tt-reveal--one is-offer"
-                            href="#anniversary-offer" data-conversion="hero_anniversary_offer">
-                            <span class="tt-hero__anniversary-mark">{{ $anniversaryPromo['years'] }}</span>
-
-                            <span class="tt-hero__anniversary-copy">
-                                <strong>{{ $anniversaryPromo['years'] }} years of Turance</strong>
-                                <small>Celebrating {{ $anniversaryPromo['years'] }} years of digital craftsmanship</small>
-                            </span>
-
-                            <span class="tt-hero__anniversary-offer">
-                                <b>{{ $anniversaryPromo['discount_percent'] + 0 }}%</b>
-                                <i>off</i>
-                            </span>
-
-                            <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 4v12M5 11l5 5 5-5" /></svg>
-                        </a>
-                    @endif
-
-                    <h1 class="tt-hero__title tt-reveal tt-reveal--two" id="hero-title"
-                        aria-label="Excellence Delivered">
-                        <span data-scramble aria-hidden="true">Excellence</span>
-                        <span data-scramble aria-hidden="true">Delivered</span>
-                    </h1>
-
-                    <p class="tt-hero__description tt-reveal tt-reveal--three">
-                        Conversion-focused websites, mobile apps and SaaS platforms<br>
-                        for ambitious businesses in Nigeria and worldwide.
-                    </p>
-
-                    <div class="tt-hero__actions tt-reveal tt-reveal--four">
-                        <x-home.primary-button :href="route('contact.show')"
-                            data-conversion="home_hero_quote">
-                            Get a project estimate
-                        </x-home.primary-button>
-                        <a class="tt-hero__secondary" href="{{ route('service.show') }}" data-ai-sales>
-                            View services &amp; pricing
-                            <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5" /></svg>
-                        </a>
-                    </div>
-
-                    <ul class="tt-hero__assurances tt-reveal tt-reveal--four"
-                        aria-label="What every Turance engagement includes">
-                        <li>Strategy to launch</li>
-                        <li>SEO-ready builds</li>
-                        <li>Post-launch support</li>
-                    </ul>
-                </div>
-
-                <x-home.hero-visual />
-            </div>
-
-        </section>
-
-        @if ($promoIsActive)
-            <section class="tt-anniversary-promo" id="anniversary-offer" aria-labelledby="anniversary-offer-title"
-                style="--promo-years: '{{ $anniversaryPromo['years'] }}'"
-                data-countdown-end="{{ $promoEndsAt->toIso8601String() }}">
-                <div class="tt-section__inner tt-anniversary-promo__inner">
-                    <div class="tt-anniversary-promo__copy">
-                        <p class="tt-section-heading__eyebrow" data-reveal>
-                            <i aria-hidden="true"></i>{{ $anniversaryPromo['years'] }} years of Turance
-                        </p>
-                        <h2 id="anniversary-offer-title" data-reveal>{{ $anniversaryPromo['years'] }} years of building what matters.</h2>
-
-                        <div class="tt-promo-figure" data-reveal>
-                            <span class="tt-promo-figure__value">
-                                {{ $anniversaryPromo['discount_percent'] + 0 }}<sup>%</sup>
-                            </span>
-                            <span class="tt-promo-figure__copy">
-                                <strong>off your new engagement</strong>
-                                <small>Websites, mobile apps, SaaS platforms and branding</small>
-                            </span>
-                        </div>
-
-                        <p data-reveal>To celebrate {{ $anniversaryPromo['years'] }} years of digital craftsmanship, reserve your
-                            project before the offer ends and we apply the discount to your entire engagement.</p>
-
-                        <a class="tt-anniversary-promo__link" href="{{ route('contact.show', ['promo' => $anniversaryPromo['code']]) }}" data-conversion="anniversary_offer" data-reveal>Claim the anniversary offer <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5" /></svg></a>
-                    </div>
-                    <div class="tt-anniversary-promo__timer" data-countdown aria-live="polite" data-reveal>
-                        <span class="tt-anniversary-promo__timer-label">Offer closes in</span>
-                        <div class="tt-countdown" aria-label="Time remaining until the anniversary offer ends">
-                            <div><strong data-countdown-days>00</strong><span>Days</span></div><i>:</i>
-                            <div><strong data-countdown-hours>00</strong><span>Hours</span></div><i>:</i>
-                            <div><strong data-countdown-minutes>00</strong><span>Minutes</span></div><i>:</i>
-                            <div><strong data-countdown-seconds>00</strong><span>Seconds</span></div>
-                        </div>
-                        <small>Use code <b>{{ $anniversaryPromo['code'] }}</b> when you enquire.</small>
-                    </div>
-                </div>
-            </section>
-        @endif
-
-        <section class="tt-section tt-about" id="about" aria-labelledby="about-title">
-            <div class="tt-section__inner tt-about__grid">
-                <div class="tt-about__content">
-                    <x-home.section-heading eyebrow="About Turance" id="about-title"
-                        title="Technology shaped around real business ambitions."
-                        copy="Turance Technologies designs and develops digital products that help ambitious organisations operate better, connect with customers and scale with confidence." />
-
-                    <ul class="tt-about__principles" aria-label="Our approach" data-reveal>
-                        <li><span>01</span>Strategy before execution</li>
-                        <li><span>02</span>Design with purpose</li>
-                        <li><span>03</span>Technology built to scale</li>
-                    </ul>
-                </div>
-
-                <div class="tt-about__visual" aria-hidden="true" data-reveal>
-                    <svg width="0" height="0" style="position:absolute" focusable="false">
-                        <filter id="tt-liquid-gold" x="-12%" y="-12%" width="124%" height="124%" color-interpolation-filters="sRGB">
-                            <feTurbulence type="fractalNoise" baseFrequency="0.006 0.013" numOctaves="1" seed="7" result="tt-liquid-noise">
-                                <animate attributeName="baseFrequency" dur="22s" values="0.006 0.013;0.008 0.017;0.005 0.01;0.006 0.013" repeatCount="indefinite" />
-                            </feTurbulence>
-                            <feDisplacementMap in="SourceGraphic" in2="tt-liquid-noise" scale="9" xChannelSelector="R" yChannelSelector="G" />
-                        </filter>
-                    </svg>
-                    <span class="tt-about__orbit tt-about__orbit--outer"></span>
-                    <span class="tt-about__orbit tt-about__orbit--inner"></span>
-                    <span class="tt-about__node tt-about__node--one"></span>
-                    <span class="tt-about__node tt-about__node--two"></span>
-                    <span class="tt-about__node tt-about__node--three"></span>
-                    <span class="tt-about__form"><img src="{{ asset('/assets/img/hero/turance-gold-sculpture.webp') }}" width="1254" height="1254" alt="" loading="lazy" decoding="async"></span>
-                    <p><strong>One considered system.</strong><span>Strategy, design and engineering aligned around the outcome.</span></p>
-                </div>
-            </div>
-        </section>
-
-        <section class="tt-section tt-services" id="services" aria-labelledby="services-title">
-            <div class="tt-section__inner tt-services__layout">
-                <div class="tt-services__intro">
-                    <x-home.section-heading eyebrow="What we do" id="services-title"
-                        title="Expertise built for meaningful digital progress."
-                        copy="Focused capabilities, brought together around the needs of each product." />
-                    <a class="tt-text-link" href="{{ route('service.show') }}" data-ai-sales>Explore all capabilities
-                        <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5" /></svg>
-                    </a>
-                </div>
-
-                <div class="tt-services__list">
-                    @foreach ($services as $service)
-                        <a class="tt-service-row" href="{{ route($service['route']) }}" data-ai-sales data-reveal>
-                            <span class="tt-service-row__number">{{ str_pad($loop->iteration, 2, '0', STR_PAD_LEFT) }}</span>
-                            <span class="tt-service-row__body">
-                                <strong>{{ $service['name'] }}</strong>
-                                <span>{{ $service['copy'] }}</span>
-                            </span>
-                            <span class="tt-service-row__arrow" aria-hidden="true">
-                                <svg viewBox="0 0 24 24"><path d="M5 12h14M14 7l5 5-5 5" /></svg>
-                            </span>
-                        </a>
-                    @endforeach
-                </div>
-            </div>
-        </section>
-
-        <section class="tt-section tt-work" id="work" aria-labelledby="work-title">
-            <div class="tt-section__inner">
-                <x-home.section-heading eyebrow="Selected work" id="work-title"
-                    title="Digital products created to move businesses forward."
-                    copy="A selection of product platforms shaped around clear commercial and operational needs." />
-
-                <div class="tt-work__list">
-                    @foreach ($projects as $project)
-                        <article class="tt-project {{ $loop->even ? 'tt-project--reverse' : '' }}" data-reveal>
-                            <div class="tt-project__visual tt-project__visual--{{ $project['visual'] }} {{ $project['image'] ? 'tt-project__visual--image' : '' }}">
-                                @if ($project['image'])
-                                    <img src="{{ $project['image'] }}" alt="{{ $project['image_alt'] ?? $project['name'].' project preview' }}" loading="lazy" decoding="async">
-                                @else
-                                    <div class="tt-project-preview-unavailable" role="status">
-                                        <span>{{ $project['name'] }}</span>
-                                        <strong>Storefront preview unavailable</strong>
-                                        <small>The shop could not be reached for a current capture.</small>
-                                    </div>
-                                @endif
-                                <span class="tt-project__index" aria-hidden="true">{{ str_pad($loop->iteration, 2, '0', STR_PAD_LEFT) }}</span>
-                            </div>
-
-                            <div class="tt-project__content">
-                                <div class="tt-project__meta"><span>{{ $project['industry'] }}</span><span>{{ $project['year'] }}</span></div>
-                                <h3>{{ $project['name'] }}</h3>
-                                <p>{{ $project['summary'] }}</p>
-                                <ul aria-label="Services provided">
-                                    @foreach ($project['services'] as $service)
-                                        <li>{{ $service }}</li>
-                                    @endforeach
-                                </ul>
-                                <div class="tt-project__outcome"><span>Outcome</span><strong>{{ $project['outcome'] }}</strong></div>
-                                @if ($project['link'])
-                                    <a class="tt-text-link" href="{{ $project['link'] }}"
-                                        @if (\Illuminate\Support\Str::startsWith($project['link'], ['http://', 'https://'])) target="_blank" rel="noopener noreferrer" @endif>
-                                        {{ $project['link_label'] ?? 'View case study' }}
-                                        <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5" /></svg>
-                                    </a>
-                                @else
-                                    <span class="tt-project__status">Case study awaiting publication</span>
-                                @endif
-                            </div>
-                        </article>
-                    @endforeach
-                </div>
-
-                <div class="tt-work__footer" data-reveal>
-                    <p>Need to see work relevant to your brief?</p>
-                    <a class="tt-text-link" href="{{ route('contact.show') }}" data-ai-sales>Request a tailored portfolio
-                        <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5" /></svg>
-                    </a>
-                </div>
-            </div>
-        </section>
-
-        <section class="tt-section tt-process" id="process" aria-labelledby="process-title">
-            <div class="tt-section__inner">
-                <x-home.section-heading eyebrow="How we work" id="process-title"
-                    title="A clear process from ambition to execution."
-                    copy="Every stage makes decisions visible, keeps momentum focused and protects the quality of the result." />
-
-                <ol class="tt-process__timeline" data-process-timeline>
-                    @foreach ($process as $stage)
-                        <li data-reveal>
-                            <span class="tt-process__node" aria-hidden="true"><i></i></span>
-                            <span class="tt-process__number">{{ str_pad($loop->iteration, 2, '0', STR_PAD_LEFT) }}</span>
-                            <h3>{{ $stage['name'] }}</h3>
-                            <p>{{ $stage['copy'] }}</p>
-                        </li>
-                    @endforeach
-                    <span class="tt-process__progress" data-process-progress aria-hidden="true"></span>
-                </ol>
-            </div>
-        </section>
-
-        <section class="tt-section tt-capabilities" id="capabilities" aria-labelledby="capabilities-title">
-            <div class="tt-section__inner">
-                <x-home.section-heading eyebrow="Built with purpose" id="capabilities-title"
-                    title="Modern technology selected around your product’s needs."
-                    copy="Tools are chosen for fit, maintainability and the people who will rely on the product—not for trend value." />
-
-                <div class="tt-capabilities__matrix">
-                    @foreach ($capabilities as $capability)
-                        <article data-reveal>
-                            <span>{{ str_pad($loop->iteration, 2, '0', STR_PAD_LEFT) }}</span>
-                            <h3>{{ $capability['group'] }}</h3>
-                            <ul>
-                                @foreach ($capability['tools'] as $tool)
-                                    <li>{{ $tool }}</li>
-                                @endforeach
-                            </ul>
-                        </article>
-                    @endforeach
-                </div>
-            </div>
-        </section>
-
-        <section class="tt-section tt-impact" id="impact" aria-labelledby="impact-title">
-            <div class="tt-impact__geometry" aria-hidden="true"><i></i><i></i><i></i><span><img src="{{ asset('/assets/img/hero/hero-bg-shape3.png') }}" width="250" height="250" alt="" loading="lazy" decoding="async"></span></div>
-            <div class="tt-section__inner tt-impact__inner">
-                <x-home.section-heading eyebrow="Beyond delivery" id="impact-title"
-                    title="We build for progress you can measure."
-                    copy="The product is only valuable when it improves how the organisation serves, decides and grows." />
-
-                <div class="tt-impact__grid">
-                    @foreach ($impacts as $impact)
-                        <article data-reveal>
-                            <span>{{ $impact['index'] }}</span>
-                            <h3>{{ $impact['title'] }}</h3>
-                            <p>{{ $impact['copy'] }}</p>
-                        </article>
-                    @endforeach
-                </div>
-            </div>
-        </section>
-
-        <section class="tt-section tt-testimonials" id="perspectives" aria-labelledby="testimonials-title">
-            <div class="tt-section__inner">
-                <x-home.section-heading eyebrow="Client perspectives" id="testimonials-title"
-                    title="Partnerships built on clarity and results."
-                    copy="Past clients reflect on the quality, communication and dependable delivery behind their work with Turance." />
-
-                <div class="tt-testimonial-carousel" data-testimonial-carousel data-reveal tabindex="0"
-                    aria-roledescription="carousel" aria-label="Client testimonials. Use the left and right arrow keys to browse.">
-                    <div class="tt-testimonial-carousel__viewport" aria-live="polite">
-                        @foreach ($testimonials as $testimonial)
-                            <article class="tt-testimonial-slide {{ $loop->first ? 'is-active' : '' }}"
-                                data-testimonial-slide aria-hidden="{{ $loop->first ? 'false' : 'true' }}"
-                                aria-label="Testimonial {{ $loop->iteration }} of {{ count($testimonials) }}">
-                                <div class="tt-testimonial-slide__portrait">
-                                    <span aria-hidden="true"></span>
-                                    <div class="tt-testimonial-slide__initials"
-                                        aria-label="{{ $testimonial['name'] }}">{{ $testimonial['initials'] }}</div>
-                                </div>
-                                <div class="tt-testimonial-slide__content">
-                                    <div class="tt-testimonial-slide__topline">
-                                        <span>Verified client perspective</span>
-                                        <span class="tt-testimonial-rating" role="img"
-                                            aria-label="{{ number_format($testimonial['rating'] / 20, 1) }} out of 5 stars">
-                                            <i style="--rating: {{ $testimonial['rating'] }}%" aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9733;</i>
-                                        </span>
-                                    </div>
-                                    <blockquote aria-label="&ldquo;{{ $testimonial['quote'] }}&rdquo;"><span data-decode aria-hidden="true">&ldquo;{{ $testimonial['quote'] }}&rdquo;</span></blockquote>
-                                    <footer>
-                                        <span></span>
-                                        <div><strong aria-label="{{ $testimonial['name'] }}"><span data-decode aria-hidden="true">{{ $testimonial['name'] }}</span></strong><small>{{ $testimonial['company'] }}</small></div>
-                                    </footer>
-                                </div>
-                            </article>
-                        @endforeach
-                    </div>
-
-                    <div class="tt-testimonial-carousel__controls">
-                        <span class="tt-testimonial-carousel__counter"><b data-testimonial-current>01</b><i></i><span>{{ str_pad(count($testimonials), 2, '0', STR_PAD_LEFT) }}</span></span>
-                        <div>
-                            <button type="button" data-testimonial-previous aria-label="Show previous testimonial">
-                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M10 7l-5 5 5 5" /></svg>
-                            </button>
-                            <button type="button" data-testimonial-next aria-label="Show next testimonial">
-                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M14 7l5 5-5 5" /></svg>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section class="tt-section tt-insights" id="insights" aria-labelledby="insights-title">
-            <div class="tt-section__inner">
-                <x-home.section-heading eyebrow="Insights" id="insights-title"
-                    title="Ideas for building stronger digital products."
-                    copy="Practical thinking on product design, engineering decisions and digital operations." />
-
-                <div class="tt-insights__grid">
-                    @foreach ($insights as $insight)
-                        <article class="tt-insight {{ $loop->first ? 'tt-insight--featured' : '' }}" data-reveal>
-                            <div class="tt-insight__visual tt-insight__visual--{{ $insight['visual'] }}" aria-hidden="true">
-                                <span></span><i></i><i></i><i></i>
-                            </div>
-                            <div class="tt-insight__body">
-                                <div class="tt-insight__meta"><span>{{ $insight['category'] }}</span><span>{{ $insight['time'] }}</span></div>
-                                <h3>{{ $insight['title'] }}</h3>
-                                <p>{{ $insight['summary'] }}</p>
-                                <div class="tt-insight__footer"><span>{{ $insight['date'] }}</span>
-                                    @if ($insight['link'])
-                                        <a href="{{ $insight['link'] }}" aria-label="Read {{ $insight['title'] }}"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5" /></svg></a>
-                                    @else
-                                        <span class="tt-insight__soon">Coming soon</span>
-                                    @endif
-                                </div>
-                            </div>
-                        </article>
-                    @endforeach
-                </div>
-            </div>
-        </section>
-
-        <section class="tt-section tt-faq" id="faq" aria-labelledby="faq-title">
-            <div class="tt-section__inner tt-faq__grid">
-                <div class="tt-faq__intro">
-                    <x-home.section-heading eyebrow="Frequently asked questions" id="faq-title"
-                        title="The details you may need before we begin."
-                        copy="A concise view of how engagements are shaped. If your question is more specific, we are happy to discuss it." />
-                    <a class="tt-text-link" href="{{ route('contact.show') }}" data-ai-sales>Ask another question
-                        <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5" /></svg>
-                    </a>
-                </div>
-
-                <div class="tt-faq__items" data-accordion>
-                    @foreach ($faqs as $faq)
-                        @php($faqId = 'faq-answer-'.$loop->iteration)
-                        <article class="tt-faq__item {{ $loop->first ? 'is-open' : '' }}">
-                            <h3>
-                                <button type="button" aria-expanded="{{ $loop->first ? 'true' : 'false' }}" aria-controls="{{ $faqId }}">
-                                    <span><i>{{ str_pad($loop->iteration, 2, '0', STR_PAD_LEFT) }}</i>{{ $faq['question'] }}</span>
-                                    <b aria-hidden="true"></b>
-                                </button>
-                            </h3>
-                            <div class="tt-faq__answer" id="{{ $faqId }}" role="region" @unless($loop->first) hidden @endunless>
-                                <div><p>{{ $faq['answer'] }}</p></div>
-                            </div>
-                        </article>
-                    @endforeach
-                </div>
-            </div>
-        </section>
-
-        <section class="tt-contact-cta" id="contact" aria-labelledby="contact-title">
-            <div class="tt-contact-cta__network" aria-hidden="true"><i></i><i></i><i></i><i></i><span><img src="{{ asset('/assets/img/hero/hero-bg-shape3.png') }}" width="250" height="250" alt="" loading="lazy" decoding="async"></span></div>
-            <div class="tt-section__inner tt-contact-cta__inner">
-                <x-home.section-heading theme="dark" eyebrow="Start a conversation" id="contact-title"
-                    title="Have an ambitious digital idea? Let’s shape it properly."
-                    copy="Tell us what you are building, improving or trying to solve. We will help you identify the right next step." />
-                <div class="tt-contact-cta__actions" data-reveal>
-                    <x-home.primary-button :href="route('contact.show')"
-                        data-conversion="home_bottom_quote">Get a project estimate</x-home.primary-button>
-                    <a class="tt-contact-cta__secondary" href="mailto:{{ config('seo.email') }}">Contact our team
-                        <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5" /></svg>
-                    </a>
-                </div>
-                @if (filled($proposalWarning['title'] ?? null))
-                    <aside class="tt-contact-cta__notice" aria-labelledby="home-proposal-warning-title" data-reveal>
-                        <span class="tt-contact-cta__notice-icon" aria-hidden="true">
-                            <svg viewBox="0 0 24 24"><path d="M12 3 20 6v5c0 5.1-3.4 8.6-8 10-4.6-1.4-8-4.9-8-10V6l8-3Z"/><path d="M9.5 12.2 11.2 14l3.6-4"/></svg>
-                        </span>
-                        <div>
-                            <span>{{ $proposalWarning['eyebrow'] }}</span>
-                            <h3 id="home-proposal-warning-title">{{ $proposalWarning['title'] }}</h3>
-                            <p>{{ $proposalWarning['body'] }}</p>
-                        </div>
-                        <a href="{{ route('terms.show') }}#{{ $proposalWarning['target'] }}">{{ $proposalWarning['link_label'] }}
-                            <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5" /></svg>
-                        </a>
-                    </aside>
-                @endif
-            </div>
-        </section>
-
-        <x-home.footer />
-    </main>
-@endsection
-
 @push('scripts')
-    <script src="{{ asset('/assets/js/home-reference.js') }}?v=2.8" defer></script>
+<script src="{{ asset('/assets/js/editorial-home.js') }}?v=1.0" defer></script>
 @endpush
+@section('content')
+@php
+    $projects = array_values(config('portfolio.projects'));
+    $services = [
+        ['name' => 'Digital product design', 'detail' => 'Research / Experience / Interface', 'route' => 'service.show'],
+        ['name' => 'Websites & platforms', 'detail' => 'Digital presence / Web applications', 'route' => 'services.web'],
+        ['name' => 'Mobile applications', 'detail' => 'iOS / Android / Cross-platform', 'route' => 'services.mobile'],
+        ['name' => 'Custom software & automation', 'detail' => 'Systems / Integrations / Workflows', 'route' => 'services.saas'],
+        ['name' => 'Branding & identity', 'detail' => 'Positioning / Visual systems', 'route' => 'services.branding'],
+    ];
+    $steps = [
+        ['name' => 'Discover', 'detail' => 'Understand the people, the challenge and the opportunity.'],
+        ['name' => 'Define', 'detail' => 'Give the work a clear direction and practical scope.'],
+        ['name' => 'Design', 'detail' => 'Shape a useful, considered experience.'],
+        ['name' => 'Develop', 'detail' => 'Build, test and refine the product.'],
+        ['name' => 'Deliver', 'detail' => 'Launch carefully and keep improving.'],
+    ];
+    $anniversaryPromo = app(\App\Support\AnniversaryPromotion::class)->current();
+@endphp
+<a class="ed-skip" href="#main-content">Skip to content</a>
+<div class="ed-site" id="top">
+    <header class="ed-header" data-header>
+        <a class="ed-brand" href="{{ route('home') }}" aria-label="Turance Technologies home"><img src="{{ asset('/assets/img/logo/logo.png') }}" width="694" height="178" alt="" decoding="async"><span>TURANCE<small>TECHNOLOGIES</small></span></a>
+        <nav class="ed-nav" id="ed-nav" aria-label="Primary navigation"><a href="#work">Work</a><a href="#services">Services</a><a href="#about">About</a><a class="ed-nav__mobile-contact" href="{{ route('contact.show') }}">Contact <span aria-hidden="true">↗</span></a></nav>
+        <a class="ed-header__contact" href="{{ route('contact.show') }}" data-conversion="header_contact">Contact <span aria-hidden="true">✦</span></a>
+        <button class="ed-menu" type="button" aria-label="Open menu" aria-controls="ed-nav" aria-expanded="false" data-menu-button><span></span><span></span></button>
+    </header>
+    <main id="main-content">
+        <section class="ed-hero" aria-labelledby="hero-title">
+            <div class="ed-hero__art" aria-hidden="true" data-hero-art><picture><source media="(max-width: 900px)" srcset="{{ asset('/assets/img/hero/turance-editorial-ribbon.png') }}"><img src="{{ asset('/assets/img/hero/turance-editorial-reference.png') }}" width="1620" height="6031" alt="" fetchpriority="high" decoding="async"></picture></div>
+            <div class="ed-hero__content">
+                <div class="ed-hero__rule" aria-hidden="true"></div>
+                <h1 id="hero-title" class="ed-hero__title"><span class="ed-mask"><span>T<span class="ed-gold">URA</span>NCE</span></span><small>TECHNOLOGIES</small></h1>
+                <p class="ed-hero__tagline">Digital experiences<br>with purpose.</p>
+                <a class="ed-circle-link ed-hero__cta" href="{{ route('contact.show') }}" data-conversion="hero_project"><span class="ed-circle-link__icon" aria-hidden="true">↗</span><span>Start your project</span></a>
+            </div>
+        </section>
+        @if ($anniversaryPromo['is_active'])
+        <aside class="ed-promo tt-hero__anniversary tt-reveal" aria-label="Current anniversary offer"><span>{{ $anniversaryPromo['years'] }} years of Turance · {{ $anniversaryPromo['discount_percent'] + 0 }}% anniversary offer</span><a href="{{ route('contact.show', ['promo' => $anniversaryPromo['code']]) }}" data-conversion="anniversary_offer">Explore the offer <span aria-hidden="true">↗</span></a></aside>
+        @endif
+        <section class="ed-section ed-intro" id="about" aria-labelledby="intro-title">
+            <div class="ed-section__top"><span>01 / The studio</span><span>Independent creative technology studio</span></div>
+            <div class="ed-intro__grid"><h2 id="intro-title" class="ed-display" data-reveal>Everything<br><em>considered.</em></h2><p data-reveal>We turn complex challenges into beautifully simple digital experiences. Thoughtful in design. Precise in execution.</p></div>
+            <div class="ed-section__bottom"><span>Strategy / Design / Technology</span><a href="#work">Scroll to explore <span aria-hidden="true">↓</span></a></div>
+        </section>
+        <section class="ed-section ed-work" id="work" aria-labelledby="work-title">
+            <div class="ed-section__top"><span>02 / Selected work</span><span>A small selection of what we build</span></div>
+            <div class="ed-section__heading"><h2 id="work-title" class="ed-display" data-reveal>Made to matter.</h2><p data-reveal>Thoughtful digital products, designed with care and built for real-world use.</p></div>
+            <div class="ed-work__grid">
+                @foreach ($projects as $project)
+                <a class="ed-project" href="{{ route('work.show', ['slug' => $project['slug']]) }}" aria-label="Read about {{ $project['name'] }}" data-reveal>
+                    <div class="ed-project__image"><img src="{{ asset($project['image']) }}" alt="{{ $project['image_alt'] }}" width="1440" height="1800" loading="lazy" decoding="async"><span class="ed-project__number">{{ $project['number'] }} / {{ $project['category'] }}</span><span class="ed-project__view">View project ↗</span></div>
+                    <div class="ed-project__caption"><span><strong>{{ $project['name'] }}</strong><small>{{ $project['description'] }}</small></span><span aria-hidden="true">↗</span></div>
+                </a>
+                @endforeach
+            </div>
+            <div class="ed-more-work" aria-label="More live projects">
+                <span>More live work</span>
+                <a href="https://www.36plusone.org/" target="_blank" rel="noopener noreferrer">36 Plus One <span aria-hidden="true">↗</span></a>
+                <a href="https://kiddovista.co.uk/" target="_blank" rel="noopener noreferrer">KiddoVista <span aria-hidden="true">↗</span></a>
+                <a href="https://shop.ihcpro.co.uk/" target="_blank" rel="noopener noreferrer">IHcPro Store <span aria-hidden="true">↗</span></a>
+            </div>
+            <div class="ed-section__bottom"><span>Every detail has a purpose.</span><a href="{{ route('contact.show') }}">Explore what we can build <span aria-hidden="true">↗</span></a></div>
+        </section>
+        <section class="ed-section ed-services" id="services" aria-labelledby="services-title">
+            <div class="ed-section__top"><span>03 / Capabilities</span><span>From first idea to finished product</span></div>
+            <div class="ed-section__heading"><h2 id="services-title" class="ed-display" data-reveal>What we<br>bring to life.</h2><p data-reveal>From the first idea to the finished product, our work brings design thinking and engineering together.</p></div>
+            <div class="ed-service-list">
+                @foreach ($services as $service)
+                <a class="ed-service" href="{{ route($service['route']) }}" data-reveal><span class="ed-service__number">{{ str_pad($loop->iteration, 2, '0', STR_PAD_LEFT) }}</span><strong>{{ $service['name'] }}</strong><small>{{ $service['detail'] }}</small><span class="ed-service__arrow" aria-hidden="true">↗</span></a>
+                @endforeach
+            </div>
+        </section>
+        <section class="ed-section ed-process" id="approach" aria-labelledby="process-title">
+            <div class="ed-section__top"><span>04 / Our approach</span><span>Clarity from beginning to beyond launch</span></div>
+            <h2 id="process-title" class="ed-display" data-reveal>Nothing<br><em>unnecessary.</em></h2>
+            <div class="ed-process__intro"><p>The thoughtful details<br>make all the difference.</p><p>No clutter. No complexity for its own sake. Just clarity, craft and technology working together—so every interaction earns its place.</p></div>
+            <ol class="ed-process__steps" aria-label="Our process">@foreach ($steps as $step)<li data-reveal><span>{{ str_pad($loop->iteration, 2, '0', STR_PAD_LEFT) }}</span><strong>{{ $step['name'] }}</strong><small>{{ $step['detail'] }}</small></li>@endforeach</ol>
+        </section>
+        <section class="ed-section ed-credibility" id="perspectives" aria-labelledby="credibility-title">
+            <span id="insights" class="ed-anchor-alias" aria-hidden="true"></span>
+            <div class="ed-section__top"><span>05 / In practice</span><span>Real products, real purpose</span></div>
+            <div class="ed-credibility__grid"><h2 id="credibility-title" class="ed-display" data-reveal>Built for<br><em>real use.</em></h2><div data-reveal><p>Our work is visible in live products—from TailorsMind’s fashion workspace to 3Hjobs’ local services marketplace.</p><a href="#work">See selected work <span aria-hidden="true">↗</span></a></div></div>
+        </section>
+        <section class="ed-section ed-faq" id="faq" aria-labelledby="faq-title">
+            <div class="ed-section__top"><span>Questions / Answers</span><span>Before we begin</span></div>
+            <div class="ed-faq__grid"><h2 id="faq-title" class="ed-display" data-reveal>Good to<br><em>know.</em></h2><div class="ed-faq__items">@foreach (config('seo.home_faqs', []) as $faq)<details><summary>{{ $faq['question'] }}<span aria-hidden="true">+</span></summary><p>{{ $faq['answer'] }}</p></details>@endforeach</div></div>
+        </section>
+        <section class="ed-section ed-contact" id="contact" aria-labelledby="contact-title">
+            <div class="ed-section__top"><span>06 / The next chapter</span><span>Have a project in mind?</span></div>
+            <h2 id="contact-title" class="ed-display" data-reveal>Something<br><em>remarkable.</em></h2>
+            <div class="ed-contact__action"><p>Good ideas deserve to become great experiences.<br>Tell us what you’re building.</p><a class="ed-circle-link" href="{{ route('contact.show') }}" data-conversion="final_project"><span>Start a conversation</span><span class="ed-circle-link__icon" aria-hidden="true">↗</span></a></div>
+            <div class="ed-contact__notice">Proposal materials are confidential. Please review our <a href="{{ route('terms.show') }}#proposal-design-rights">proposal and design rights terms</a> before sharing materials.</div>
+            <footer class="ed-footer"><div><a class="ed-footer__wordmark" href="#top">TURANCE<small>TECHNOLOGIES</small></a><span>Excellence delivered</span></div><nav aria-label="Footer navigation"><a href="#work">Work</a><a href="#services">Services</a><a href="{{ route('contact.show') }}">Contact</a><a href="{{ route('services.branding') }}">Branding</a><a href="mailto:{{ config('seo.email') }}">{{ config('seo.email') }}</a><a href="{{ config('seo.whatsapp_url') }}" target="_blank" rel="noopener noreferrer">WhatsApp</a><a href="{{ route('privacy.show') }}">Privacy</a><a href="{{ route('terms.show') }}">Terms</a><button type="button" data-cookie-preferences>Cookie preferences</button></nav><small>© {{ date('Y') }} Turance Technologies</small></footer>
+        </section>
+    </main>
+</div>
+@endsection

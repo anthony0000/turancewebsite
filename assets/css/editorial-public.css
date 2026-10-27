@@ -1,0 +1,53 @@
+@font-face{font-family:Urbanist;src:url('/assets/fonts/Urbanist-Regular.ttf') format('truetype');font-style:normal;font-weight:400;font-display:swap}
+@font-face{font-family:Urbanist;src:url('/assets/fonts/Urbanist-Medium.ttf') format('truetype');font-style:normal;font-weight:500;font-display:swap}
+:root{--tt-ivory:#faf9f6;--tt-ivory-deep:#f3f3f1;--tt-navy:#111110;--tt-muted:#777773;--tt-gold:#b79257;--tt-gold-light:#cfb88e;--tt-gold-soft:#eee6d9;--tt-gold-border:rgba(183,146,87,.25);--tt-body-font:Urbanist,Arial,sans-serif;--tt-display-font:Urbanist,Arial,sans-serif}
+html{scrollbar-color:#b9b9b5 #f3f3f1}
+html::-webkit-scrollbar-thumb,html::-webkit-scrollbar-thumb:hover{background:#b9b9b5}
+body.tt-minimal-page{background:#faf9f6;color:#111110;font-family:var(--tt-body-font)}
+.tt-header{padding-top:26px;padding-bottom:16px;background:rgba(250,249,246,.94);border-bottom:1px solid rgba(17,17,16,.08);box-shadow:none}
+.tt-header.is-scrolled{background:rgba(250,249,246,.96);border-bottom-color:rgba(17,17,16,.12);box-shadow:none}
+.tt-header__brand{width:auto;gap:10px}
+.tt-header__brand img{width:58px;flex:0 0 auto}
+.tt-header__brand span{font-size:16px;line-height:.9;letter-spacing:.2em;font-weight:500}
+.tt-header__brand small{display:block;margin-top:8px;font-size:6px;letter-spacing:.43em}
+.tt-header.is-scrolled .tt-header__brand img{transform:none}
+.tt-header__nav a,.tt-header__inquiries{font-size:10px;font-weight:500;letter-spacing:.16em;text-transform:uppercase}
+.tt-header__inquiries{border-bottom:1px solid var(--tt-gold)}
+.tt-header__inquiries svg{width:14px}
+.tt-menu-button{border:1px solid #d6d5d1;border-radius:50%;background:transparent;box-shadow:none}
+.tt-reference-home .tt-primary-button{border-radius:0;background:#111110;color:#fff;box-shadow:none}
+.tt-reference-home .tt-primary-button:hover{box-shadow:none}
+.tt-reference-home .tt-primary-button::before{background:#b79257}
+.tt-contact-hero,.tt-services-overview-hero,.tt-detail-hero,.tt-legal-hero{background:#faf9f6}
+.tt-contact-hero::after,.tt-contact-hero__geometry,.tt-services-overview-hero__mesh,.tt-detail-hero__linework,.tt-legal-hero__geometry{display:none}
+.tt-contact-hero,.tt-services-overview-hero,.tt-detail-hero{min-height:auto}
+.tt-contact-hero__intro h1,.tt-services-overview-hero h1,.tt-detail-hero h1,.tt-legal-hero h1{color:#111110;font-family:Urbanist,Arial,sans-serif;font-size:clamp(60px,6.6vw,110px);font-weight:400;line-height:.94;letter-spacing:-.075em;text-transform:none}
+.tt-contact-hero__intro>p,.tt-services-overview-hero__lead,.tt-detail-hero__lead,.tt-legal-hero__intro{color:#777773;line-height:1.5}
+.tt-contact-hero__details,.tt-services-overview-hero__stats,.tt-detail-meta{border-color:#d9d9d5}
+.tt-contact-form-shell,.tt-capability-deck{border-radius:0;box-shadow:none}
+.tt-contact-form-shell{border:1px solid #e1e1de;background:#fff}
+.tt-contact-form-shell:before{display:none}
+.tt-contact-form-shell__top h2,.tt-contact-next h2,.tt-section-heading h2,.tt-detail-overview h2,.tt-detail-process h2,.tt-detail-deliverables h2,.tt-legal-content h2,.tt-legal-cta h2{font-family:Urbanist,Arial,sans-serif;font-weight:400;letter-spacing:-.065em;text-transform:none}
+.tt-contact-submit{background:#111110;box-shadow:none}
+.tt-contact-submit:hover{background:#b79257;box-shadow:none}
+.tt-contact-field input,.tt-contact-field textarea,.tt-contact-field select{border-radius:0}
+.tt-contact-field input:focus,.tt-contact-field textarea:focus,.tt-contact-field select:focus{border-color:#b79257}
+.tt-capability-deck{background:#111110;color:#fff}
+.tt-detail-hero__backplate,.tt-detail-hero__frame{box-shadow:none}
+.tt-legal-hero__topline,.tt-legal-hero__summary,.tt-legal-index,.tt-legal-section{border-color:#dededb}
+.tt-contact-cta,.tt-detail-related,.tt-legal-cta{background:#111110}
+.tt-footer{background:#111110;border-color:#343434}
+.tt-footer__network{display:none}
+.tt-footer__tagline{color:#b79257;font-family:Urbanist,Arial,sans-serif;font-size:12px;font-weight:500;letter-spacing:.2em}
+.tt-footer__links nav>span,.tt-footer__links address>span{color:#b79257}
+.tt-footer__brand>a{align-items:center;gap:12px;width:auto}
+.tt-footer__brand img{width:60px}
+.tt-footer__wordmark{font-size:18px;line-height:.9;letter-spacing:.2em}
+.tt-footer__wordmark small{display:block;margin-top:8px;font-size:6px;letter-spacing:.42em}
+.tt-mobile-navigation__brand{display:inline-flex;align-items:center;gap:9px}
+.tt-mobile-navigation__brand img{width:48px}
+.tt-mobile-navigation__brand span{font-size:15px;line-height:.9;letter-spacing:.2em}
+.tt-mobile-navigation__brand small{display:block;margin-top:7px;font-size:5px;letter-spacing:.43em}
+.tt-footer__bottom{border-color:#343434}
+@media(max-width:950px){.tt-header{grid-template-columns:1fr auto;padding:16px 24px}.tt-header__brand img{width:48px}.tt-header__brand span{font-size:14px}.tt-header__brand small{font-size:5px}.tt-contact-hero,.tt-services-overview-hero,.tt-detail-hero{padding-top:145px}.tt-contact-hero__intro h1,.tt-services-overview-hero h1,.tt-detail-hero h1,.tt-legal-hero h1{font-size:clamp(52px,8vw,82px)}}
+@media(max-width:600px){.tt-header{padding:12px 20px}.tt-header__brand img{width:43px}.tt-header__brand span{font-size:12px}.tt-header__brand small{font-size:4px}.tt-contact-hero,.tt-services-overview-hero,.tt-detail-hero,.tt-legal-hero{padding-top:120px}.tt-contact-hero__intro h1,.tt-services-overview-hero h1,.tt-detail-hero h1,.tt-legal-hero h1{font-size:clamp(49px,12vw,72px)}.tt-footer__top{gap:42px}}

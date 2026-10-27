@@ -17,7 +17,7 @@ it('shows cookie choices and no anniversary tag when no campaign is active', fun
         ->assertSee('data-cookie-choice="essential"', false)
         ->assertSee('data-cookie-choice="accepted"', false)
         ->assertSee('Cookie preferences')
-        ->assertDontSee('tt-hero__anniversary tt-reveal', false);
+        ->assertDontSee('ed-promo tt-hero__anniversary tt-reveal', false);
 });
 
 it('shows the anniversary tag only while an enabled campaign is live', function () {
@@ -31,8 +31,8 @@ it('shows the anniversary tag only while an enabled campaign is live', function 
         'ends_at' => '2026-07-31 23:59:59',
     ]);
 
-    $this->get(route('home'))->assertOk()->assertSee('tt-hero__anniversary tt-reveal', false);
+    $this->get(route('home'))->assertOk()->assertSee('ed-promo tt-hero__anniversary tt-reveal', false);
 
     $promotion->update(['enabled' => false]);
-    $this->get(route('home'))->assertOk()->assertDontSee('tt-hero__anniversary tt-reveal', false);
+    $this->get(route('home'))->assertOk()->assertDontSee('ed-promo tt-hero__anniversary tt-reveal', false);
 });

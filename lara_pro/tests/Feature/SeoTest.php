@@ -32,14 +32,11 @@ it('presents a search focused homepage with direct conversion paths', function (
         ->assertSee('<title>Web Design &amp; Software Development Agency | Turance</title>', false)
         ->assertDontSee('&amp;amp;', false)
         ->assertSee('Excellence')
-        ->assertSee('Delivered')
-        ->assertSee('Get a project estimate')
-        ->assertSee('data-conversion="home_hero_quote"', false)
-        ->assertSee('tt-contact-cta__notice', false)
+        ->assertSee('Start your project')
+        ->assertSee('data-conversion="hero_project"', false)
+        ->assertSee('ed-contact__notice', false)
         ->assertSee('Proposal materials are confidential.')
         ->assertSee(route('terms.show', absolute: false).'#proposal-design-rights', false)
-        ->assertSee('data-mobile-sales-bar', false)
-        ->assertSee('data-conversion="mobile_sales_whatsapp"', false)
         ->assertSee('https://wa.me/2348061209440', false)
         ->assertSee('WhatsApp')
         ->assertDontSee('Call us')
@@ -107,10 +104,24 @@ it('links every detailed service from the home page', function () {
         ->assertSee('https://kiddovista.co.uk/', false)
         ->assertSee('IHcPro Store')
         ->assertSee('https://shop.ihcpro.co.uk/', false)
-        ->assertSee('Abstract interface preview for 36 Plus One')
-        ->assertSee('Abstract interface preview for KiddoVista')
-        ->assertSee('Abstract interface preview for IHcPro Store')
+        ->assertSee('TailorsMind')
+        ->assertSee('3Hjobs')
+        ->assertSee(route('work.show', ['slug' => 'tailorsmind'], absolute: false), false)
+        ->assertSee(route('work.show', ['slug' => '3hjobs'], absolute: false), false)
         ->assertDontSee('/assets/img/project/36plusone-live.webp', false);
+});
+
+it('opens the featured project details without inventing project data', function () {
+    foreach (['tailorsmind', '3hjobs'] as $slug) {
+        $project = config('portfolio.projects')[$slug];
+        $this->get(route('work.show', ['slug' => $slug]))
+            ->assertOk()
+            ->assertSee($project['name'])
+            ->assertSee($project['url'], false)
+            ->assertSee('<link rel="canonical" href="'.route('work.show', ['slug' => $slug]).'">', false);
+    }
+
+    $this->get('/work/unknown-project')->assertNotFound();
 });
 
 it('renders the services overview with the current public design system', function () {

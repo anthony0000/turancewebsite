@@ -67,6 +67,12 @@ Route::get('/llms.txt', function () {
 })->name('seo.llms');
 
 Route::view('/', 'index')->name('home');
+Route::get('/work/{slug}', function (string $slug) {
+    $project = config('portfolio.projects')[$slug] ?? null;
+    abort_unless($project, 404);
+
+    return view('project-detail', ['project' => $project]);
+})->name('work.show');
 Route::view('/service', 'services-overview')->name('service.show');
 Route::redirect('/index.htm', '/', 301);
 Route::redirect('/index.html', '/', 301);

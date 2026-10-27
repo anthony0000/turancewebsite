@@ -5,9 +5,9 @@ it('returns a successful response', function () {
 
     $response
         ->assertStatus(200)
-        ->assertSee('Excellence')
-        ->assertSee('Delivered')
-        ->assertSee('turance-gold-sculpture.webp', false)
+        ->assertSee('Digital experiences')
+        ->assertSee('Start your project')
+        ->assertSee('turance-editorial-reference.png', false)
         ->assertDontSee('Web Authority Sharper')
         ->assertDontSee('home-luxury');
 });

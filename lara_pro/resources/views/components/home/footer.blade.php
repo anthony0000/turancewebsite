@@ -4,7 +4,8 @@
         <div class="tt-footer__top">
             <div class="tt-footer__brand">
                 <a href="{{ route('home') }}" aria-label="Turance Technologies home">
-                    <img src="{{ asset('/assets/img/logo/logo.png') }}" width="694" height="178" alt="Turance Technologies">
+                    <img src="{{ asset('/assets/img/logo/logo.png') }}" width="694" height="178" alt="">
+                    <span class="tt-footer__wordmark">TURANCE<small>TECHNOLOGIES</small></span>
                 </a>
                 <span class="tt-footer__tagline">{{ config('seo.tagline', 'Excellence Delivered') }}</span>
                 <p>Software and digital products shaped with clarity, precision and lasting purpose.</p>

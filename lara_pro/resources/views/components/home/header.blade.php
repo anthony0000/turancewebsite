@@ -3,14 +3,14 @@
 <header class="tt-header" aria-label="Primary header">
     <a class="tt-header__brand" href="{{ route('home') }}" aria-label="Turance Technologies home">
         <img src="{{ asset('/assets/img/logo/logo.png') }}" width="694" height="178"
-            alt="Turance Technologies">
+            alt="">
+        <span>TURANCE<small>TECHNOLOGIES</small></span>
     </a>
 
     <nav class="tt-header__nav" aria-label="Primary navigation">
-        <a href="{{ $homeAnchor('about') }}" data-nav-link>About Us</a>
-        <a href="{{ $homeAnchor('services') }}" data-nav-link data-ai-sales>Services</a>
         <a href="{{ $homeAnchor('work') }}" data-nav-link>Work</a>
-        <a href="{{ $homeAnchor('insights') }}" data-nav-link>Insights</a>
+        <a href="{{ $homeAnchor('services') }}" data-nav-link data-ai-sales>Services</a>
+        <a href="{{ $homeAnchor('about') }}" data-nav-link>About</a>
         <a href="{{ request()->routeIs('home') ? '#contact' : route('contact.show') }}" data-nav-link data-ai-sales>Contact</a>
     </nav>
 
