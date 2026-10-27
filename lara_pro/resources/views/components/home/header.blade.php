@@ -4,7 +4,6 @@
     <a class="tt-header__brand" href="{{ route('home') }}" aria-label="Turance Technologies home">
         <img src="{{ asset('/assets/img/logo/logo.png') }}" width="694" height="178"
             alt="">
-        <span>TURANCE<small>TECHNOLOGIES</small></span>
     </a>
 
     <nav class="tt-header__nav" aria-label="Primary navigation">

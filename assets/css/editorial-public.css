@@ -6,10 +6,8 @@ html::-webkit-scrollbar-thumb,html::-webkit-scrollbar-thumb:hover{background:#b9
 body.tt-minimal-page{background:#faf9f6;color:#111110;font-family:var(--tt-body-font)}
 .tt-header{padding-top:26px;padding-bottom:16px;background:rgba(250,249,246,.94);border-bottom:1px solid rgba(17,17,16,.08);box-shadow:none}
 .tt-header.is-scrolled{background:rgba(250,249,246,.96);border-bottom-color:rgba(17,17,16,.12);box-shadow:none}
-.tt-header__brand{width:auto;gap:10px}
-.tt-header__brand img{width:76px;flex:0 0 auto}
-.tt-header__brand span{font-size:17px;line-height:.9;letter-spacing:.2em;font-weight:500}
-.tt-header__brand small{display:block;margin-top:7px;font-size:6px;letter-spacing:.43em}
+.tt-header__brand{width:165px}
+.tt-header__brand img{width:100%;height:auto}
 .tt-header.is-scrolled .tt-header__brand img{transform:none}
 .tt-header__nav a,.tt-header__inquiries{font-size:clamp(12px,.9vw,14px);font-weight:500;letter-spacing:.16em;text-transform:uppercase}
 .tt-header__inquiries{border-bottom:1px solid var(--tt-gold)}
@@ -50,10 +48,8 @@ body.tt-minimal-page .tt-reference-home [class*="kicker"],body.tt-minimal-page .
 .tt-footer__brand img{width:60px}
 .tt-footer__wordmark{font-size:18px;line-height:.9;letter-spacing:.2em}
 .tt-footer__wordmark small{display:block;margin-top:8px;font-size:6px;letter-spacing:.42em}
-.tt-mobile-navigation__brand{display:inline-flex;align-items:center;gap:9px}
-.tt-mobile-navigation__brand img{width:48px}
-.tt-mobile-navigation__brand span{font-size:15px;line-height:.9;letter-spacing:.2em}
-.tt-mobile-navigation__brand small{display:block;margin-top:7px;font-size:5px;letter-spacing:.43em}
+.tt-mobile-navigation__brand{display:block;width:145px}
+.tt-mobile-navigation__brand img{width:100%;height:auto}
 .tt-footer__bottom{border-color:#343434}
-@media(max-width:950px){.tt-header{grid-template-columns:1fr auto;padding:16px 24px}.tt-header__brand img{width:60px}.tt-header__brand span{font-size:14px}.tt-header__brand small{font-size:5px}.tt-contact-hero,.tt-services-overview-hero,.tt-detail-hero{padding-top:145px}.tt-contact-hero__intro h1,.tt-services-overview-hero h1,.tt-detail-hero h1,.tt-legal-hero h1{font-size:clamp(52px,8vw,82px)}}
-@media(max-width:600px){.tt-header{padding:12px 20px}.tt-header__brand img{width:50px}.tt-header__brand span{font-size:13px}.tt-header__brand small{font-size:5px}.tt-contact-hero,.tt-services-overview-hero,.tt-detail-hero,.tt-legal-hero{padding-top:120px}.tt-contact-hero__intro h1,.tt-services-overview-hero h1,.tt-detail-hero h1,.tt-legal-hero h1{font-size:clamp(49px,12vw,72px)}.tt-footer__top{gap:42px}}
+@media(max-width:950px){.tt-header{grid-template-columns:1fr auto;padding:16px 24px}.tt-header__brand{width:132px}.tt-contact-hero,.tt-services-overview-hero,.tt-detail-hero{padding-top:145px}.tt-contact-hero__intro h1,.tt-services-overview-hero h1,.tt-detail-hero h1,.tt-legal-hero h1{font-size:clamp(52px,8vw,82px)}}
+@media(max-width:600px){.tt-header{padding:12px 20px}.tt-header__brand{width:110px}.tt-mobile-navigation__brand{width:120px}.tt-contact-hero,.tt-services-overview-hero,.tt-detail-hero,.tt-legal-hero{padding-top:120px}.tt-contact-hero__intro h1,.tt-services-overview-hero h1,.tt-detail-hero h1,.tt-legal-hero h1{font-size:clamp(49px,12vw,72px)}.tt-footer__top{gap:42px}}

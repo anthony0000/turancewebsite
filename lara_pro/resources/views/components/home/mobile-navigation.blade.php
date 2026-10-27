@@ -7,7 +7,6 @@
     <div class="tt-mobile-navigation__top">
         <a class="tt-mobile-navigation__brand" href="{{ route('home') }}" aria-label="Turance Technologies home">
             <img src="{{ asset('/assets/img/logo/logo.png') }}" width="694" height="178" alt="">
-            <span>TURANCE<small>TECHNOLOGIES</small></span>
         </a>
 
         <div class="tt-mobile-navigation__count" aria-hidden="true">

@@ -89,7 +89,7 @@ document.addEventListener("DOMContentLoaded", () => {
       entries.forEach((entry) => {
         entry.target.classList.toggle("is-active", entry.isIntersecting);
       });
-    }, { rootMargin: "-22% 0px -22% 0px" });
+    }, { rootMargin: "-10% 0px -10% 0px" });
     site.querySelectorAll(".ed-hero, .ed-section").forEach((section) => {
       ambientObserver.observe(section);
     });
