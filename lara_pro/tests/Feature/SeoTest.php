@@ -31,7 +31,7 @@ it('presents a search focused homepage with direct conversion paths', function (
         ->assertDontSee('support@turancetechnologies.com')
         ->assertSee('<title>Web Design &amp; Software Development Agency | Turance</title>', false)
         ->assertDontSee('&amp;amp;', false)
-        ->assertSee('Excellence')
+        ->assertSee('Digital experiences with purpose.')
         ->assertSee('Start your project')
         ->assertSee('data-conversion="hero_project"', false)
         ->assertSee('ed-contact__notice', false)

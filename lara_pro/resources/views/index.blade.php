@@ -5,10 +5,10 @@
 <link rel="preload" as="font" type="font/ttf" crossorigin href="{{ asset('/assets/fonts/Urbanist-Regular.ttf') }}">
 <link rel="preload" as="image" media="(min-width: 651px)" href="{{ asset('/assets/img/hero/turance-editorial-hero-clean.png') }}" fetchpriority="high">
 <link rel="preload" as="image" media="(max-width: 650px)" href="{{ asset('/assets/img/hero/turance-editorial-ribbon.png') }}" fetchpriority="high">
-<link rel="stylesheet" href="{{ asset('/assets/css/editorial-home.css') }}?v=1.3">
+<link rel="stylesheet" href="{{ asset('/assets/css/editorial-home.css') }}?v=1.7">
 @endpush
 @push('scripts')
-<script src="{{ asset('/assets/js/editorial-home.js') }}?v=1.1" defer></script>
+<script src="{{ asset('/assets/js/editorial-home.js') }}?v=1.3" defer></script>
 @endpush
 @section('content')
 @php
@@ -66,7 +66,7 @@
                 </a>
                 @endforeach
             </div>
-            <div class="ed-more-work" aria-label="More live projects">
+            <div class="ed-more-work" aria-label="More live projects" data-reveal>
                 <span>More live work</span>
                 <a href="https://www.36plusone.org/" target="_blank" rel="noopener noreferrer">36 Plus One <span aria-hidden="true">↗</span></a>
                 <a href="https://kiddovista.co.uk/" target="_blank" rel="noopener noreferrer">KiddoVista <span aria-hidden="true">↗</span></a>
@@ -86,7 +86,7 @@
         <section class="ed-section ed-process" id="approach" aria-labelledby="process-title">
             <div class="ed-section__top"><span>04 / Our approach</span><span>Clarity from beginning to beyond launch</span></div>
             <h2 id="process-title" class="ed-display" data-reveal>Nothing<br><em>unnecessary.</em></h2>
-            <div class="ed-process__intro"><p>The thoughtful details<br>make all the difference.</p><p>No clutter. No complexity for its own sake. Just clarity, craft and technology working together—so every interaction earns its place.</p></div>
+            <div class="ed-process__intro" data-reveal><p>The thoughtful details<br>make all the difference.</p><p>No clutter. No complexity for its own sake. Just clarity, craft and technology working together—so every interaction earns its place.</p></div>
             <ol class="ed-process__steps" aria-label="Our process">@foreach ($steps as $step)<li data-reveal><span>{{ str_pad($loop->iteration, 2, '0', STR_PAD_LEFT) }}</span><strong>{{ $step['name'] }}</strong><small>{{ $step['detail'] }}</small></li>@endforeach</ol>
         </section>
         <section class="ed-section ed-credibility" id="perspectives" aria-labelledby="credibility-title">
@@ -96,15 +96,15 @@
         </section>
         <section class="ed-section ed-faq" id="faq" aria-labelledby="faq-title">
             <div class="ed-section__top"><span>Questions / Answers</span><span>Before we begin</span></div>
-            <div class="ed-faq__grid"><h2 id="faq-title" class="ed-display" data-reveal>Good to<br><em>know.</em></h2><div class="ed-faq__items">@foreach (config('seo.home_faqs', []) as $faq)<details><summary>{{ $faq['question'] }}<span aria-hidden="true">+</span></summary><p>{{ $faq['answer'] }}</p></details>@endforeach</div></div>
+            <div class="ed-faq__grid"><h2 id="faq-title" class="ed-display" data-reveal>Good to<br><em>know.</em></h2><div class="ed-faq__items" data-reveal>@foreach (config('seo.home_faqs', []) as $faq)<details><summary>{{ $faq['question'] }}<span aria-hidden="true">+</span></summary><p>{{ $faq['answer'] }}</p></details>@endforeach</div></div>
         </section>
         <section class="ed-section ed-contact" id="contact" aria-labelledby="contact-title">
             <div class="ed-section__top"><span>06 / The next chapter</span><span>Have a project in mind?</span></div>
             <h2 id="contact-title" class="ed-display" data-reveal>Something<br><em>remarkable.</em></h2>
-            <div class="ed-contact__action"><div><p>Good ideas deserve to become great experiences.<br>Tell us what you’re building.</p><div class="ed-contact__channels"><a href="mailto:{{ config('seo.email') }}">Email us</a><a href="{{ config('seo.whatsapp_url') }}" target="_blank" rel="noopener noreferrer">WhatsApp</a></div></div><a class="ed-circle-link" href="{{ route('contact.show') }}" data-conversion="final_project"><span>Start a conversation</span><span class="ed-circle-link__icon" aria-hidden="true">↗</span></a></div>
+            <div class="ed-contact__action" data-reveal><div><p>Good ideas deserve to become great experiences.<br>Tell us what you’re building.</p><div class="ed-contact__channels"><a href="mailto:{{ config('seo.email') }}">Email us</a><a href="{{ config('seo.whatsapp_url') }}" target="_blank" rel="noopener noreferrer">WhatsApp</a></div></div><a class="ed-circle-link" href="{{ route('contact.show') }}" data-conversion="final_project"><span>Start a conversation</span><span class="ed-circle-link__icon" aria-hidden="true">↗</span></a></div>
             <div class="ed-contact__notice">Proposal materials are confidential. Please review our <a href="{{ route('terms.show') }}#proposal-design-rights">proposal and design rights terms</a> before sharing materials.</div>
             <footer class="ed-footer">
-                <div class="ed-footer__brand"><a class="ed-footer__wordmark" href="#top">TURANCE<small>TECHNOLOGIES</small></a><span>Excellence delivered</span></div>
+                <div class="ed-footer__brand"><a class="ed-footer__wordmark" href="#top">TURANCE<small>TECHNOLOGIES</small></a><span>{{ config('seo.tagline') }}</span></div>
                 <div class="ed-footer__right"><nav aria-label="Footer navigation"><a href="#work">Work</a><a href="#services">Services</a><a href="{{ route('contact.show') }}">Contact</a></nav><small>© {{ date('Y') }} Turance Technologies</small></div>
                 <div class="ed-footer__utility"><a href="{{ route('privacy.show') }}">Privacy</a><a href="{{ route('terms.show') }}">Terms</a><button type="button" data-cookie-preferences>Cookie preferences</button></div>
             </footer>
