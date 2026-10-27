@@ -434,7 +434,7 @@
 
     @if ($minimalPage)
         @yield('content')
-        @if (request()->routeIs('home', 'service.show', 'services.*'))
+        @if (request()->routeIs('service.show', 'services.*'))
             <aside class="tt-mobile-sales-bar" aria-label="Project enquiry shortcuts" data-mobile-sales-bar>
                 <a href="{{ config('seo.whatsapp_url') }}" target="_blank" rel="noopener noreferrer"
                     data-conversion="mobile_sales_whatsapp">WhatsApp</a>

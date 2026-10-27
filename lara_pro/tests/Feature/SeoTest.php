@@ -39,6 +39,7 @@ it('presents a search focused homepage with direct conversion paths', function (
         ->assertSee(route('terms.show', absolute: false).'#proposal-design-rights', false)
         ->assertSee('https://wa.me/2348061209440', false)
         ->assertSee('WhatsApp')
+        ->assertDontSee('data-mobile-sales-bar', false)
         ->assertDontSee('Call us')
         ->assertSee('"@type": "FAQPage"', false);
 });
@@ -132,6 +133,7 @@ it('renders the services overview with the current public design system', functi
         ->assertSee('tt-header', false)
         ->assertSee('tt-footer', false)
         ->assertSee('id="service-pricing"', false)
+        ->assertSee('data-mobile-sales-bar', false)
         ->assertSee('From $500')
         ->assertSee('From $2,500')
         ->assertSee('From $6,500')

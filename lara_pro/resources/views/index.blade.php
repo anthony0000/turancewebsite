@@ -3,9 +3,9 @@
 @section('seo_description', 'Turance Technologies designs and builds thoughtful websites, digital products, mobile applications and software for ambitious teams.')
 @push('styles')
 <link rel="preload" as="font" type="font/ttf" crossorigin href="{{ asset('/assets/fonts/Urbanist-Regular.ttf') }}">
-<link rel="preload" as="image" media="(min-width: 901px)" href="{{ asset('/assets/img/hero/turance-editorial-reference.png') }}" fetchpriority="high">
-<link rel="preload" as="image" media="(max-width: 900px)" href="{{ asset('/assets/img/hero/turance-editorial-ribbon.png') }}" fetchpriority="high">
-<link rel="stylesheet" href="{{ asset('/assets/css/editorial-home.css') }}?v=1.2">
+<link rel="preload" as="image" media="(min-width: 651px)" href="{{ asset('/assets/img/hero/turance-editorial-hero-clean.png') }}" fetchpriority="high">
+<link rel="preload" as="image" media="(max-width: 650px)" href="{{ asset('/assets/img/hero/turance-editorial-ribbon.png') }}" fetchpriority="high">
+<link rel="stylesheet" href="{{ asset('/assets/css/editorial-home.css') }}?v=1.3">
 @endpush
 @push('scripts')
 <script src="{{ asset('/assets/js/editorial-home.js') }}?v=1.1" defer></script>
@@ -39,7 +39,7 @@
     </header>
     <main id="main-content">
         <section class="ed-hero" aria-labelledby="hero-title">
-            <div class="ed-hero__art" aria-hidden="true" data-hero-art><picture><source media="(max-width: 900px)" srcset="{{ asset('/assets/img/hero/turance-editorial-ribbon.png') }}"><img src="{{ asset('/assets/img/hero/turance-editorial-reference.png') }}" width="1620" height="6031" alt="" fetchpriority="high" decoding="sync"></picture></div>
+            <div class="ed-hero__art" aria-hidden="true" data-hero-art><picture><source media="(max-width: 650px)" srcset="{{ asset('/assets/img/hero/turance-editorial-ribbon.png') }}"><img src="{{ asset('/assets/img/hero/turance-editorial-hero-clean.png') }}" width="1672" height="941" alt="" fetchpriority="high" decoding="sync"></picture></div>
             <div class="ed-hero__content">
                 <div class="ed-hero__rule" aria-hidden="true"></div>
                 <h1 id="hero-title" class="ed-hero__title"><span class="ed-mask"><span>TU<span class="ed-gold">RA</span>NCE</span></span><small>TECHNOLOGIES</small></h1>
