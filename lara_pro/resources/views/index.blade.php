@@ -5,10 +5,10 @@
 <link rel="preload" as="font" type="font/ttf" crossorigin href="{{ asset('/assets/fonts/Urbanist-Regular.ttf') }}">
 <link rel="preload" as="image" media="(min-width: 651px)" href="{{ asset('/assets/img/hero/turance-editorial-hero-clean.png') }}" fetchpriority="high">
 <link rel="preload" as="image" media="(max-width: 650px)" href="{{ asset('/assets/img/hero/turance-editorial-ribbon.png') }}" fetchpriority="high">
-<link rel="stylesheet" href="{{ asset('/assets/css/editorial-home.css') }}?v=2.6">
+<link rel="stylesheet" href="{{ asset('/assets/css/editorial-home.css') }}?v=2.8">
 @endpush
 @push('scripts')
-<script src="{{ asset('/assets/js/editorial-home.js') }}?v=1.5" defer></script>
+<script src="{{ asset('/assets/js/editorial-home.js') }}?v=1.7" defer></script>
 @endpush
 @section('content')
 @php
@@ -46,7 +46,6 @@
         <section class="ed-hero" aria-labelledby="hero-title">
             <div class="ed-hero__art" aria-hidden="true" data-hero-art><picture><source media="(max-width: 650px)" srcset="{{ asset('/assets/img/hero/turance-editorial-ribbon.png') }}"><img src="{{ asset('/assets/img/hero/turance-editorial-hero-clean.png') }}" width="1672" height="941" alt="" fetchpriority="high" decoding="sync"></picture></div>
             <div class="ed-hero__content">
-                <div class="ed-hero__rule" aria-hidden="true"></div>
                 <h1 id="hero-title" class="ed-hero__title"><span class="ed-mask"><span>TU<span class="ed-gold">RA</span>NCE</span></span><small>TECHNOLOGIES</small></h1>
                 <p class="ed-hero__tagline">Excellence<br>Delivered</p>
                 <p class="ed-hero__descriptor">Websites · Mobile apps · Software</p>
@@ -57,7 +56,7 @@
         <aside class="ed-promo tt-hero__anniversary tt-reveal" aria-label="Current anniversary offer"><span>{{ $anniversaryPromo['years'] }} years of Turance · {{ $anniversaryPromo['discount_percent'] + 0 }}% anniversary offer</span><a href="{{ route('contact.show', ['promo' => $anniversaryPromo['code']]) }}" data-conversion="anniversary_offer">Explore the offer <span aria-hidden="true">↗</span></a></aside>
         @endif
         <section class="ed-section ed-intro" id="about" aria-labelledby="intro-title">
-            <div class="ed-section__top"><span>01 / The studio</span><span>Independent creative technology studio</span></div>
+            <div class="ed-section__top"><span>01 / Head office</span><span>Creative technology company · Abuja</span></div>
             <div class="ed-intro__grid"><h2 id="intro-title" class="ed-display" data-reveal>Everything<br><em>considered.</em></h2><p data-reveal>We turn complex challenges into beautifully simple digital experiences. Thoughtful in design. Precise in execution.</p></div>
             <div class="ed-section__bottom"><span>Strategy / Design / Technology</span><a href="#work">Scroll to explore <span aria-hidden="true">↓</span></a></div>
         </section>
@@ -122,11 +121,7 @@
             <h2 id="contact-title" class="ed-display" data-reveal>Something<br><em>remarkable.</em></h2>
             <div class="ed-contact__action" data-reveal><div><p>Good ideas deserve to become great experiences.<br>Tell us what you’re building.</p><div class="ed-contact__channels"><a href="mailto:{{ config('seo.email') }}">Email us</a><a href="{{ config('seo.whatsapp_url') }}" target="_blank" rel="noopener noreferrer">WhatsApp</a></div></div><a class="ed-circle-link" href="{{ route('contact.show') }}" data-conversion="final_project"><span>Start a conversation</span><span class="ed-circle-link__icon" aria-hidden="true">↗</span></a></div>
             <aside class="ed-contact__notice" aria-label="Proposal confidentiality"><span class="ed-contact__notice-label">Proposal confidentiality</span><p>Proposal materials are confidential. Please review our <a href="{{ route('terms.show') }}#proposal-design-rights">proposal and design rights terms</a> before sharing materials.</p></aside>
-            <footer class="ed-footer">
-                <div class="ed-footer__brand"><a class="ed-footer__wordmark" href="#top">TURANCE<small>TECHNOLOGIES</small></a><span>{{ config('seo.tagline') }}</span></div>
-                <div class="ed-footer__right"><nav aria-label="Footer navigation"><a href="#work">Work</a><a href="#services">Services</a><a href="{{ route('contact.show') }}">Contact</a></nav><small>© {{ date('Y') }} Turance Technologies</small></div>
-                <div class="ed-footer__utility"><a href="{{ route('privacy.show') }}">Privacy</a><a href="{{ route('terms.show') }}">Terms</a><button type="button" data-cookie-preferences>Cookie preferences</button></div>
-            </footer>
+            <x-home.footer :embedded="true" />
         </section>
     </main>
 </div>

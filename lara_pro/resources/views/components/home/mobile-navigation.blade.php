@@ -24,7 +24,7 @@
     <div class="tt-mobile-navigation__body">
         <div class="tt-mobile-navigation__intro">
             <span class="tt-mobile-navigation__eyebrow"><i aria-hidden="true"></i> Navigation</span>
-            <p>Explore our studio, capabilities and thinking.</p>
+            <p>Explore our head office, capabilities and thinking.</p>
         </div>
 
         <nav aria-label="Menu navigation">

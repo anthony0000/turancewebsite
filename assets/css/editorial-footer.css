@@ -1,0 +1,19 @@
+.ed-footer{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:end;column-gap:40px;row-gap:18px;padding-top:42px;border-top:1px solid #353535;background:#111110;color:#f7f7f5;font-family:Urbanist,Arial,sans-serif}
+.ed-footer--standalone{position:relative;padding:98px clamp(30px,7.3vw,120px) 42px;border-top:0}
+.ed-footer--standalone::before{content:"";position:absolute;top:56px;right:clamp(30px,7.3vw,120px);left:clamp(30px,7.3vw,120px);height:1px;background:#353535}
+.ed-footer a{color:inherit;text-decoration:none}
+.ed-footer button{font:inherit}
+.ed-footer__wordmark{display:inline-block;font-size:24px;line-height:.9;letter-spacing:.18em;transition:color .3s ease}
+.ed-footer__wordmark small{display:block;margin-top:8px;font-size:6px;letter-spacing:.46em}
+.ed-footer__brand>span{display:block;margin-top:19px;color:#aaa49b;font-size:11px;line-height:1.4;letter-spacing:.12em;text-transform:uppercase}
+.ed-footer__right{display:flex;align-items:center;gap:40px}
+.ed-footer__right nav{display:flex;align-items:center;gap:30px}
+.ed-footer__right small{white-space:nowrap}
+.ed-footer__utility{grid-column:2;display:flex;justify-content:flex-end;gap:20px}
+.ed-footer nav a,.ed-footer button,.ed-footer__right small,.ed-footer__utility a{padding:0;border:0;background:none;color:#a4a4a4;font-size:10px;font-weight:400;letter-spacing:.12em;text-transform:uppercase}
+.ed-footer button{cursor:pointer}
+.ed-footer a,.ed-footer button{transition:color .3s ease}
+.ed-footer a:hover,.ed-footer a:focus-visible,.ed-footer button:hover,.ed-footer button:focus-visible{color:#b79257}
+.ed-footer a:focus-visible,.ed-footer button:focus-visible{outline:2px solid #b79257;outline-offset:5px}
+@media(max-width:900px){.ed-footer__right{gap:22px}.ed-footer__right nav{gap:18px}}
+@media(max-width:650px){.ed-footer{grid-template-columns:1fr;row-gap:35px}.ed-footer--standalone{padding:77px 24px 35px}.ed-footer--standalone::before{top:35px;right:24px;left:24px}.ed-footer__right{align-items:flex-start;justify-content:space-between;gap:20px;flex-wrap:wrap}.ed-footer__right nav{gap:24px}.ed-footer__utility{grid-column:1;justify-content:flex-start;flex-wrap:wrap}}

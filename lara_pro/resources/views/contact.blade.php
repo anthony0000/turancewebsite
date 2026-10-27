@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="{{ asset('/assets/css/home-reference.css') }}?v=2.7">
     <link rel="stylesheet" href="{{ asset('/assets/css/home-sections.css') }}?v=2.4">
     <link rel="stylesheet" href="{{ asset('/assets/css/contact-reference.css') }}?v=1.5">
-    <link rel="stylesheet" href="{{ asset('/assets/css/editorial-public.css') }}?v=1.4">
+    <link rel="stylesheet" href="{{ asset('/assets/css/editorial-public.css') }}?v=1.6">
 @endpush
 
 @section('content')
@@ -54,7 +54,7 @@
                                     rel="noopener noreferrer">{{ config('seo.phone') }}</a></dd>
                         </div>
                         <div>
-                            <dt>Studio</dt>
+                            <dt>Head office</dt>
                             <dd>{{ config('seo.address.city') }}, {{ config('seo.address.region') }} &middot; {{ config('seo.address.country') }}</dd>
                         </div>
                     </dl>
@@ -200,7 +200,7 @@
 
                 <div class="tt-contact-location" data-reveal>
                     <div class="tt-contact-location__copy">
-                        <span>Abuja studio</span>
+                        <span>Abuja head office</span>
                         <h2>Based in Nigeria.<br>Working without borders.</h2>
                         <address>
                             {{ config('seo.address.street') }}<br>

@@ -18,7 +18,7 @@
     <link rel="stylesheet" href="{{ asset('/assets/css/home-reference.css') }}?v=2.7">
     <link rel="stylesheet" href="{{ asset('/assets/css/home-sections.css') }}?v=2.4">
     <link rel="stylesheet" href="{{ asset('/assets/css/service-detail-reference.css') }}?v=1.0">
-    <link rel="stylesheet" href="{{ asset('/assets/css/editorial-public.css') }}?v=1.4">
+    <link rel="stylesheet" href="{{ asset('/assets/css/editorial-public.css') }}?v=1.6">
 @endpush
 
 @section('content')
@@ -152,11 +152,13 @@
                     </a>
                 </div>
                 <div class="tt-detail-related__grid">
+                    @php($relatedNumber = 0)
                     @foreach ($serviceRoutes as $key => $routeName)
                         @continue($key === $serviceKey)
                         @php($related = config('service-pages.'.$key))
+                        @php($relatedNumber++)
                         <a href="{{ route($routeName) }}" data-reveal>
-                            <span>{{ str_pad($loop->iteration, 2, '0', STR_PAD_LEFT) }}</span>
+                            <span>{{ str_pad($relatedNumber, 2, '0', STR_PAD_LEFT) }}</span>
                             <h3>{{ $related['name'] }}</h3>
                             <p>{{ $related['lead'] }}</p>
                             <b>Explore service <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5" /></svg></b>

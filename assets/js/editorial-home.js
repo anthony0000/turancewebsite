@@ -69,19 +69,6 @@ document.addEventListener("DOMContentLoaded", () => {
       target.classList.add("ed-reveal-pending");
       revealObserver.observe(target);
     });
-
-    const sectionObserver = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (!entry.isIntersecting) return;
-        entry.target.classList.add("is-in-view");
-        sectionObserver.unobserve(entry.target);
-      });
-    }, { rootMargin: "0px 0px -15% 0px" });
-    site.querySelectorAll(".ed-section").forEach((section) => {
-      if (section.getBoundingClientRect().top <= window.innerHeight) return;
-      section.classList.add("ed-motion-prepared");
-      sectionObserver.observe(section);
-    });
   }
 
   if ("IntersectionObserver" in window) {

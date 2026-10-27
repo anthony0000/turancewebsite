@@ -256,6 +256,7 @@
         <link rel="stylesheet" href="{{ asset('/assets/css/main.css') }}?v=1.3">
     @endunless
     @stack('styles')
+    <link rel="stylesheet" href="{{ asset('/assets/css/editorial-footer.css') }}?v=1.0">
     <link rel="stylesheet" href="{{ asset('/assets/css/preferred-source.css') }}?v=1.0">
     <link rel="stylesheet" href="{{ asset('/assets/css/cookie-consent.css') }}?v=1.0">
 </head>
@@ -450,119 +451,7 @@
         <div id="smooth-content">
             @yield('content')
 
-            <!-- Footer area start -->
-            <footer class="wt-footer-area fix">
-                <div class="wt-footer-top">
-                    <div class="container">
-                        <div class="row">
-                            <div class="col-xl-2 col-lg-2">
-                                <div class="wt-footer-info mt-55 wt_fade_anim" data-delay=".3">
-                                    <div class="wt-footer-logo mb-20">
-                                        <a href="{{ route('home') }}">
-                                            <img src="{{ asset('/assets/img/logo/logo.png') }}" height="45"
-                                                alt="Turance Technologies">
-                                        </a>
-                                    </div>
-                                    <div class="wt-footer-content">
-                                        <p class="text-center">Premium web, app, SaaS, and branding agency.</p>
-                                        <x-preferred-source />
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-xl-9 col-lg-9">
-                                <div class="wt-footer-widget-top text-center wt_fade_anim" data-delay=".5">
-                                    <div class="wt-section-wrapper">
-                                        <h2 class="wt-section-title wt-text-invert">want to <br> work together
-                                        </h2>
-                                    </div>
-                                    <div class="wt-footer-widget-border"></div>
-                                    <div class="wt-footer-widget-mail">
-                                        <h6>email us</h6>
-                                        <a href="mailto:{{ config('seo.email') }}">{{ config('seo.email') }}</a>
-                                    </div>
-                                    <div class="wt-footer-right-social">
-                                        <ul>
-                                            <li>
-                                                <a href="{{ url('#') }}">
-                                                    <span class="active-media">Dribbble</span>
-                                                    <span class="hover-media"><i
-                                                            class="fa-brands fa-dribbble"></i></span>
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a href="{{ url('#') }}">
-                                                    <span class="active-media">LnkedIn</span>
-                                                    <span class="hover-media"><i
-                                                            class="fa-brands fa-linkedin-in"></i></span>
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a href="{{ url('#') }}">
-                                                    <span class="active-media">Behance</span>
-                                                    <span class="hover-media"><i
-                                                            class="fa-brands fa-behance"></i></span>
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a href="{{ url('#') }}">
-                                                    <span class="active-media">Twitter</span>
-                                                    <span class="hover-media"><i
-                                                            class="fa-brands fa-twitter"></i></span>
-                                                </a>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-xl-1 col-lg-1">
-                                <div class="wt-footer-widget-menu">
-                                    <div class="wt-header-menu mt-40 wt_fade_anim" data-delay=".7">
-                                        <ul>
-                                            <li>
-                                                <a href="{{ url('#') }}"><img
-                                                        src="{{ asset('/assets/img/icon/menu.svg') }}"
-                                                        alt="Open Turance Technologies menu">
-                                                    menu</a>
-                                                <ul class="submenu">
-                                                    <li><a href="{{ route('home') }}">Home</a></li>
-                                                    <li><a href="{{ route('service.show') }}">Services</a></li>
-                                                    <li><a href="{{ route('home') }}#about">About</a></li>
-                                                    <li><a href="{{ route('contact.show') }}">Contact</a></li>
-                                                </ul>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="wt-footer-center">
-                    <div class="container-fluid">
-                        <div class="row">
-                            <div class="col">
-                                <div class="wt-about-bottom-content text-center">
-                                    <h2 class="wt-about-title">Turance Technologies</h2>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="wt-footer-bottom">
-                    <div class="container">
-                        <div class="row justify-content-center">
-                            <div class="col">
-                                <div class="wt-footer-copyright text-center">
-                                    <p class="wt-footer-copyright-pagaraph">Copyright © {{ date('Y') }} <a
-                                            href="{{ url('#') }}">Turance tech</a>. All
-                                        Rights Reserved. <button type="button" class="tt-footer__cookie-link" data-cookie-preferences>Cookie preferences</button></p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </footer>
-            <!-- Footer area end -->
+            <x-home.footer />
         </div>
     </div>
     <!-- End Contenet Area -->

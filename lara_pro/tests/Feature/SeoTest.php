@@ -19,7 +19,7 @@ it('renders page specific seo metadata on public pages', function () {
             ->assertSee('"@type": "BreadcrumbList"', false)
             ->assertSee('tt-detail-hero', false)
             ->assertSee('tt-header', false)
-            ->assertSee('tt-footer', false)
+            ->assertSee('ed-footer', false)
             ->assertDontSee('wt-breadcrumb', false);
     }
 });
@@ -131,7 +131,7 @@ it('renders the services overview with the current public design system', functi
         ->assertSee('tt-services-overview-hero', false)
         ->assertSee('tt-capability-deck', false)
         ->assertSee('tt-header', false)
-        ->assertSee('tt-footer', false)
+        ->assertSee('ed-footer', false)
         ->assertSee('id="service-pricing"', false)
         ->assertSee('data-mobile-sales-bar', false)
         ->assertSee('From $500')
@@ -153,7 +153,7 @@ it('renders linked privacy and terms pages with current public metadata', functi
         ->assertSee('For privacy questions or requests, email hello@turancetechnologies.com.')
         ->assertDontSee('or write to , , .')
         ->assertSee(route('terms.show', absolute: false), false)
-        ->assertSee('tt-footer', false);
+        ->assertSee('ed-footer', false);
 
     $this->get('/terms')
         ->assertOk()
@@ -169,8 +169,19 @@ it('renders linked privacy and terms pages with current public metadata', functi
         ->assertSee('receiving or reviewing those materials grants no right to copy')
         ->assertSee('The Copyright Act, 2022 protects qualifying original expression rather than abstract ideas alone')
         ->assertSee(route('privacy.show', absolute: false), false)
-        ->assertSee('tt-footer', false);
+        ->assertSee('ed-footer', false);
 
     $this->get('/privacy-policy')->assertRedirect('/privacy');
     $this->get('/terms-and-conditions')->assertRedirect('/terms');
+});
+
+it('uses the same editorial footer across public pages', function () {
+    foreach (['/', '/work/tailorsmind', '/service', '/single/web', '/contact', '/privacy', '/terms'] as $url) {
+        $response = $this->get($url)->assertOk();
+        $html = $response->getContent();
+
+        expect(substr_count($html, '<footer class="ed-footer'))->toBe(1);
+        expect($html)->toContain('ed-footer__wordmark', 'ed-footer__utility', 'data-cookie-preferences');
+        expect($html)->not->toContain('tt-footer__top');
+    }
 });
