@@ -6,11 +6,11 @@
 @section('seo_image', asset($project['image']))
 @push('styles')
 <link rel="preload" as="font" type="font/ttf" crossorigin href="{{ asset('/assets/fonts/Urbanist-Regular.ttf') }}">
-<link rel="stylesheet" href="{{ asset('/assets/css/editorial-home.css') }}?v=2.8">
+<link rel="stylesheet" href="{{ asset('/assets/css/editorial-home.css') }}?v=2.9">
 <link rel="stylesheet" href="{{ asset('/assets/css/editorial-project.css') }}?v=1.0">
 @endpush
 @push('scripts')
-<script src="{{ asset('/assets/js/editorial-home.js') }}?v=1.7" defer></script>
+<script src="{{ asset('/assets/js/editorial-home.js') }}?v=1.8" defer></script>
 @endpush
 @section('content')
 <a class="ed-skip" href="#main-content">Skip to content</a>

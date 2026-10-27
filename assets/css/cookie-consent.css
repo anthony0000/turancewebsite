@@ -1,42 +1,91 @@
 .tt-cookie-prompt[hidden] { display: none !important; }
+
 .tt-cookie-prompt {
     position: fixed;
     z-index: 10000;
-    inset: auto 20px 20px;
-    width: min(680px, calc(100% - 40px));
-    margin: 0 auto;
-    padding: 22px 24px;
-    display: flex;
+    right: 24px;
+    bottom: 24px;
+    left: 24px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
-    gap: 22px;
-    background: #071426;
-    border: 1px solid rgba(255, 255, 255, .2);
-    border-radius: 18px;
-    box-shadow: 0 18px 55px rgba(0, 0, 0, .25);
-    color: #fff;
-    font-family: Arial, sans-serif;
+    gap: 36px;
+    width: min(860px, calc(100% - 48px));
+    margin: 0 auto;
+    padding: 28px 30px;
+    border: 1px solid #d8d2c8;
+    border-radius: 3px;
+    background: #faf9f6;
+    box-shadow: 0 20px 60px rgba(17, 17, 16, .17);
+    color: #111110;
+    font-family: Urbanist, Arial, sans-serif;
+    pointer-events: auto;
 }
-.tt-cookie-prompt__copy { flex: 1; min-width: 0; }
-.tt-cookie-prompt__copy strong { display: block; margin-bottom: 7px; color: #fff; font-size: 17px; line-height: 1.3; }
-.tt-cookie-prompt__copy p { margin: 0; color: #d9e2ed; font-size: 13px; line-height: 1.55; }
-.tt-cookie-prompt__copy a { color: #f7c974; text-decoration: underline; text-underline-offset: 3px; }
-.tt-cookie-prompt__actions { display: flex; flex-direction: column; gap: 9px; flex: 0 0 auto; }
-.tt-cookie-prompt__actions button {
-    min-width: 145px;
-    padding: 10px 13px;
-    border: 1px solid rgba(255, 255, 255, .55);
-    border-radius: 8px;
-    background: transparent;
-    color: #fff;
-    font: 600 13px/1.3 Arial, sans-serif;
+
+.tt-cookie-prompt__copy { min-width: 0; }
+.tt-cookie-prompt__copy strong {
+    display: block;
+    margin-bottom: 9px;
+    color: #111110;
+    font-family: "Helvetica Neue", Urbanist, Arial, sans-serif;
+    font-size: clamp(22px, 2vw, 27px);
+    font-weight: 300;
+    line-height: 1.1;
+    letter-spacing: -.045em;
+}
+.tt-cookie-prompt__copy p {
+    max-width: 530px;
+    margin: 0;
+    color: #625e58;
+    font-size: 14px;
+    line-height: 1.55;
+}
+.tt-cookie-prompt__copy a {
+    color: #815d31;
+    text-decoration: underline;
+    text-decoration-color: #b79257;
+    text-underline-offset: 4px;
     cursor: pointer;
+    transition: color .25s ease;
 }
-.tt-cookie-prompt__actions button[data-cookie-choice="accepted"] { border-color: #f7c974; background: #f7c974; color: #071426; }
-.tt-cookie-prompt__actions button:hover { filter: brightness(1.1); }
-.tt-cookie-prompt :focus-visible, .tt-footer__cookie-link:focus-visible { outline: 2px solid #f7c974; outline-offset: 3px; }
-.tt-footer__cookie-link { padding: 0; border: 0; background: none; color: inherit; font: inherit; text-decoration: underline; cursor: pointer; }
-@media (max-width: 600px) {
-    .tt-cookie-prompt { inset: auto 12px 12px; width: calc(100% - 24px); padding: 18px; flex-direction: column; align-items: stretch; gap: 16px; }
-    .tt-cookie-prompt__actions { flex-direction: row; }
+.tt-cookie-prompt__copy a:hover { color: #111110; }
+
+.tt-cookie-prompt__actions { display: flex; align-items: center; gap: 10px; }
+.tt-cookie-prompt__actions button {
+    min-width: 132px;
+    min-height: 48px;
+    padding: 12px 15px;
+    border: 1px solid #aaa49b;
+    border-radius: 2px;
+    background: transparent;
+    color: #111110;
+    font: 500 11px/1.25 Urbanist, Arial, sans-serif;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background-color .25s ease, border-color .25s ease, color .25s ease, transform .25s ease;
+}
+.tt-cookie-prompt__actions button:hover { border-color: #b79257; background: #eee7dc; transform: translateY(-2px); }
+.tt-cookie-prompt__actions button[data-cookie-choice="accepted"] { border-color: #111110; background: #111110; color: #fff; }
+.tt-cookie-prompt__actions button[data-cookie-choice="accepted"]:hover { border-color: #987447; background: #987447; }
+.tt-cookie-prompt__actions button:active { transform: translateY(0); }
+.tt-cookie-prompt :focus-visible { outline: 2px solid #b79257; outline-offset: 4px; }
+
+@media (max-width: 760px) {
+    .tt-cookie-prompt {
+        right: 16px;
+        bottom: 16px;
+        left: 16px;
+        grid-template-columns: 1fr;
+        gap: 20px;
+        width: calc(100% - 32px);
+        padding: 22px;
+    }
     .tt-cookie-prompt__actions button { flex: 1; min-width: 0; }
+}
+
+@media (max-width: 420px) {
+    .tt-cookie-prompt { right: 12px; bottom: 12px; left: 12px; width: calc(100% - 24px); padding: 20px; }
+    .tt-cookie-prompt__copy p { font-size: 13px; }
+    .tt-cookie-prompt__actions button { padding: 11px 8px; font-size: 10px; }
 }

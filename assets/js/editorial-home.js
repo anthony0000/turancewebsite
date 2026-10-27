@@ -9,6 +9,40 @@ document.addEventListener("DOMContentLoaded", () => {
     updateHeader();
     window.addEventListener("scroll", updateHeader, { passive: true });
   }
+  const hero = site.querySelector(".ed-hero");
+  const heroPicture = hero?.querySelector(".ed-hero__art picture");
+  const finePointer = window.matchMedia("(hover: hover) and (pointer: fine) and (min-width: 651px)");
+  if (hero && heroPicture && !reducedMotion.matches && finePointer.matches) {
+    let currentX = 0;
+    let currentY = 0;
+    let targetX = 0;
+    let targetY = 0;
+    let frame = null;
+
+    const animatePointer = () => {
+      currentX += (targetX - currentX) * 0.1;
+      currentY += (targetY - currentY) * 0.1;
+      if (Math.abs(targetX - currentX) < 0.05) currentX = targetX;
+      if (Math.abs(targetY - currentY) < 0.05) currentY = targetY;
+      heroPicture.style.setProperty("--ed-pointer-x", `${currentX.toFixed(2)}px`);
+      heroPicture.style.setProperty("--ed-pointer-y", `${currentY.toFixed(2)}px`);
+      frame = currentX === targetX && currentY === targetY ? null : window.requestAnimationFrame(animatePointer);
+    };
+    const schedulePointer = () => {
+      if (frame === null) frame = window.requestAnimationFrame(animatePointer);
+    };
+    hero.addEventListener("pointermove", (event) => {
+      const bounds = hero.getBoundingClientRect();
+      targetX = ((event.clientX - bounds.left) / bounds.width - 0.5) * 28;
+      targetY = ((event.clientY - bounds.top) / bounds.height - 0.5) * 18;
+      schedulePointer();
+    }, { passive: true });
+    hero.addEventListener("pointerleave", () => {
+      targetX = 0;
+      targetY = 0;
+      schedulePointer();
+    });
+  }
   const menuButton = document.querySelector("[data-menu-button]");
   const menu = document.getElementById("ed-nav");
   let lastFocused = null;

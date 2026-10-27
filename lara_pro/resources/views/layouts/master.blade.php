@@ -258,7 +258,7 @@
     @stack('styles')
     <link rel="stylesheet" href="{{ asset('/assets/css/editorial-footer.css') }}?v=1.0">
     <link rel="stylesheet" href="{{ asset('/assets/css/preferred-source.css') }}?v=1.0">
-    <link rel="stylesheet" href="{{ asset('/assets/css/cookie-consent.css') }}?v=1.0">
+    <link rel="stylesheet" href="{{ asset('/assets/css/cookie-consent.css') }}?v=1.1">
 </head>
 
 <body class="{{ $minimalPage ? 'tt-minimal-page' : 'page-wrapper wt-magic-cursor' }}">
@@ -457,10 +457,10 @@
     <!-- End Contenet Area -->
     @endif
 
-    <aside class="tt-cookie-prompt" data-cookie-prompt aria-labelledby="tt-cookie-title" hidden>
+    <aside class="tt-cookie-prompt" data-cookie-prompt aria-labelledby="tt-cookie-title" aria-describedby="tt-cookie-description" hidden>
         <div class="tt-cookie-prompt__copy">
             <strong id="tt-cookie-title">Your privacy matters</strong>
-            <p>We use essential cookies for site functions. We also record basic page activity to improve the website. <a href="{{ route('privacy.show') }}">Read our privacy policy</a>.</p>
+            <p id="tt-cookie-description">We use essential cookies for site functions. We also record basic page activity to improve the website. <a href="{{ route('privacy.show') }}">Read our privacy policy</a>.</p>
         </div>
         <div class="tt-cookie-prompt__actions">
             <button type="button" data-cookie-choice="essential">Essential only</button>
