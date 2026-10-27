@@ -84,6 +84,22 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  if ("IntersectionObserver" in window) {
+    const ambientObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        entry.target.classList.toggle("is-active", entry.isIntersecting);
+      });
+    }, { rootMargin: "-22% 0px -22% 0px" });
+    site.querySelectorAll(".ed-hero, .ed-section").forEach((section) => {
+      ambientObserver.observe(section);
+    });
+    site.classList.add("ed-ambient-ready");
+    site.classList.toggle("ed-ambient-paused", document.hidden);
+    document.addEventListener("visibilitychange", () => {
+      site.classList.toggle("ed-ambient-paused", document.hidden);
+    });
+  }
+
   site.querySelectorAll(".ed-faq__items details").forEach((details) => {
     const summary = details.querySelector("summary");
     const answer = details.querySelector("p");

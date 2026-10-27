@@ -47,7 +47,7 @@ body.tt-minimal-page:has(.ed-site){overflow-x:hidden}
 .ed-hero__cta{margin:58px 0 0 6px;animation:ed-up .7s 1.25s both}
 .ed-promo{display:flex;justify-content:space-between;gap:30px;padding:22px clamp(30px,7.3vw,120px);background:#131313;color:#fff;font-size:12px;letter-spacing:.07em}
 .ed-promo a{color:#d4b98e;text-decoration:underline}
-.ed-section{padding:70px clamp(30px,7.3vw,120px) 80px;scroll-margin-top:90px}
+.ed-section{position:relative;padding:70px clamp(30px,7.3vw,120px) 80px;scroll-margin-top:90px}
 .ed-section__top,.ed-section__bottom{display:flex;justify-content:space-between;align-items:center;gap:24px;font-size:10px;font-weight:500;letter-spacing:.16em;text-transform:uppercase}
 .ed-section__top span:first-child:before{content:"";display:inline-block;width:32px;height:1px;margin:0 19px 3px 0;background:currentColor;opacity:.4}
 .ed-section__bottom{padding-top:24px;border-top:1px solid var(--ed-line);color:#888}
@@ -195,6 +195,17 @@ body.tt-minimal-page:has(.ed-site){overflow-x:hidden}
 @media(min-width:901px){.ed-nav a:not(.ed-nav__mobile-contact){position:relative;padding:10px 0}.ed-nav a:not(.ed-nav__mobile-contact):after{content:"";position:absolute;bottom:4px;left:0;right:0;height:1px;background:var(--ed-gold);transform:scaleX(0);transform-origin:left;transition:transform .4s cubic-bezier(.2,.7,.2,1)}.ed-nav a:not(.ed-nav__mobile-contact):hover:after,.ed-nav a:not(.ed-nav__mobile-contact):focus-visible:after{transform:scaleX(1)}}
 @media(hover:hover){.ed-brand:hover img{transform:translateY(-2px)}.ed-header__contact:hover span{transform:rotate(45deg)}.ed-circle-link:hover .ed-circle-link__icon{transform:translate(3px,-3px)}.ed-project:hover .ed-project__caption>span:last-child{transform:translate(4px,-4px)}}
 @media(prefers-reduced-motion:no-preference){.ed-hero__art img{animation:ed-art-settle 1.8s cubic-bezier(.2,.7,.2,1) both,ed-art-drift 12s 1.8s ease-in-out infinite alternate}.ed-hero__rule{transform-origin:left;animation:ed-rule-draw .85s .2s cubic-bezier(.2,.7,.2,1) both}.ed-hero__title .ed-gold{background:linear-gradient(105deg,#aa8653 30%,#dfbf8b 49%,#aa8653 67%);background-size:240% 100%;background-position:100% 0;background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:ed-gold-sheen 5.5s .7s ease-in-out infinite}.ed-hero__cta .ed-circle-link__icon{position:relative}.ed-hero__cta .ed-circle-link__icon:after{content:"";position:absolute;inset:-1px;border:1px solid var(--ed-gold);border-radius:50%;pointer-events:none;opacity:0;animation:ed-cta-halo 3.8s .8s ease-out infinite}.ed-section.ed-motion-prepared .ed-section__top span:first-child:before{transform:scaleX(0)}.ed-section.ed-motion-prepared.is-in-view .ed-section__top span:first-child:before{transform:scaleX(1)}}
+@media(prefers-reduced-motion:no-preference){
+ .ed-section::after{content:"";position:absolute;top:18%;left:0;width:2px;height:clamp(70px,8vw,120px);background:var(--ed-gold);opacity:0;pointer-events:none;transform:translate3d(0,-14px,0);animation:ed-ambient-rail 9s ease-in-out infinite alternate;animation-play-state:paused;transition:opacity .7s ease}
+ .ed-section.is-active::after{opacity:.38;animation-play-state:running}
+ .ed-section__top span:first-child:before{background:var(--ed-gold);animation:ed-accent-breathe 5.5s ease-in-out infinite;animation-play-state:paused}
+ .ed-section.is-active .ed-section__top span:first-child:before{animation-play-state:running}
+ .ed-site.ed-ambient-ready .ed-hero__art img{animation-play-state:running,paused}
+ .ed-site.ed-ambient-ready .ed-hero.is-active .ed-hero__art img{animation-play-state:running,running}
+ .ed-site.ed-ambient-ready .ed-hero__title .ed-gold,.ed-site.ed-ambient-ready .ed-hero__cta .ed-circle-link__icon:after{animation-play-state:paused}
+ .ed-site.ed-ambient-ready .ed-hero.is-active .ed-hero__title .ed-gold,.ed-site.ed-ambient-ready .ed-hero.is-active .ed-hero__cta .ed-circle-link__icon:after{animation-play-state:running}
+ .ed-site.ed-ambient-paused *,.ed-site.ed-ambient-paused *::before,.ed-site.ed-ambient-paused *::after{animation-play-state:paused!important}
+}
 @keyframes ed-fade{from{opacity:0}to{opacity:1}}
 @keyframes ed-up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 @keyframes ed-rise{to{transform:none}}
@@ -203,6 +214,8 @@ body.tt-minimal-page:has(.ed-site){overflow-x:hidden}
 @keyframes ed-rule-draw{from{opacity:0;transform:scaleX(0)}to{opacity:1;transform:scaleX(1)}}
 @keyframes ed-gold-sheen{0%,8%{background-position:100% 0}55%,100%{background-position:0 0}}
 @keyframes ed-cta-halo{0%{opacity:0;transform:scale(1)}12%{opacity:.55}62%,100%{opacity:0;transform:scale(1.38)}}
+@keyframes ed-ambient-rail{from{transform:translate3d(0,-14px,0)}to{transform:translate3d(0,40px,0)}}
+@keyframes ed-accent-breathe{0%,100%{opacity:.35}50%{opacity:.85}}
 @media(max-width:900px){
  .ed-hero{--hero-inset:22px}
  .ed-header{grid-template-columns:1fr auto auto;padding:25px 5vw}
