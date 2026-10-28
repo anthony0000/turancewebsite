@@ -240,8 +240,8 @@
     @stack('structured_data')
 
     <link rel="shortcut icon" type="image/x-icon" href="{{ asset('/assets/img/logo/favicon.png') }}">
-    <link rel="preload" as="font" type="font/ttf" crossorigin href="{{ asset('/assets/fonts/Helvetica-Neue-UltraLight.ttf') }}">
-    <link rel="stylesheet" href="{{ asset('/assets/css/typography.css') }}?v=1.2">
+    <link rel="preload" as="font" type="font/otf" crossorigin href="{{ asset('/assets/fonts/HelveticaNeueThin.otf') }}">
+    <link rel="stylesheet" href="{{ asset('/assets/css/typography.css') }}?v=1.3">
 
     @php($minimalPage = trim($__env->yieldContent('minimal_page', 'false')) === 'true')
 

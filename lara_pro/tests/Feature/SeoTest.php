@@ -189,8 +189,8 @@ it('uses the same editorial footer across public pages', function () {
 it('serves one self-hosted display face across public brand typography', function () {
     $this->get('/')
         ->assertOk()
-        ->assertSee('/assets/fonts/Helvetica-Neue-UltraLight.ttf', false)
-        ->assertSee('/assets/css/typography.css?v=1.2', false);
+        ->assertSee('/assets/fonts/HelveticaNeueThin.otf', false)
+        ->assertSee('/assets/css/typography.css?v=1.3', false);
 
     $assetRoot = dirname(base_path()).DIRECTORY_SEPARATOR.'assets';
     $displayStylesheets = [
@@ -206,6 +206,6 @@ it('serves one self-hosted display face across public brand typography', functio
         expect($css)->not->toContain('"Helvetica Neue"', '"Urbanist Display"');
     }
 
-    expect($assetRoot.DIRECTORY_SEPARATOR.'fonts'.DIRECTORY_SEPARATOR.'Helvetica-Neue-UltraLight.ttf')
+    expect($assetRoot.DIRECTORY_SEPARATOR.'fonts'.DIRECTORY_SEPARATOR.'HelveticaNeueThin.otf')
         ->toBeFile();
 });
