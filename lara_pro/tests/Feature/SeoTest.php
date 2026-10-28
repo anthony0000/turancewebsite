@@ -185,3 +185,29 @@ it('uses the same editorial footer across public pages', function () {
         expect($html)->not->toContain('tt-footer__top');
     }
 });
+
+it('serves one self-hosted display face across public brand typography', function () {
+    $this->get('/')
+        ->assertOk()
+        ->assertSee('/assets/fonts/Roboto-Variable-Latin.woff2', false)
+        ->assertSee('/assets/css/typography.css?v=1.1', false);
+
+    $assetRoot = dirname(base_path()).DIRECTORY_SEPARATOR.'assets';
+    $displayStylesheets = [
+        'css/editorial-home.css',
+        'css/editorial-public.css',
+        'css/editorial-footer.css',
+        'css/public-menu.css',
+        'css/cookie-consent.css',
+    ];
+
+    foreach ($displayStylesheets as $stylesheet) {
+        $css = file_get_contents($assetRoot.DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $stylesheet));
+
+        expect($css)->toContain('"Turance Display"');
+        expect($css)->not->toContain('"Helvetica Neue"', '"Urbanist Display"');
+    }
+
+    expect($assetRoot.DIRECTORY_SEPARATOR.'fonts'.DIRECTORY_SEPARATOR.'Roboto-Variable-Latin.woff2')
+        ->toBeFile();
+});

@@ -3,7 +3,7 @@
 .ed-footer--standalone::before{content:"";position:absolute;top:56px;right:clamp(30px,7.3vw,120px);left:clamp(30px,7.3vw,120px);height:1px;background:#353535}
 .ed-footer a{color:inherit;text-decoration:none}
 .ed-footer button{font:inherit}
-.ed-footer__wordmark{display:inline-block;font-size:24px;line-height:.9;letter-spacing:.18em;transition:color .3s ease}
+.ed-footer__wordmark{display:inline-block;font-family:"Turance Display",Arial,sans-serif;font-size:24px;font-weight:300;line-height:.9;letter-spacing:.18em;transition:color .3s ease}
 .ed-footer__wordmark small{display:block;margin-top:8px;font-size:6px;letter-spacing:.46em}
 .ed-footer__brand>span{display:block;margin-top:19px;color:#aaa49b;font-size:11px;line-height:1.4;letter-spacing:.12em;text-transform:uppercase}
 .ed-footer__right{display:flex;align-items:center;gap:40px}
