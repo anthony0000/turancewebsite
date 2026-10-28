@@ -190,7 +190,8 @@ it('serves one self-hosted display face across public brand typography', functio
     $this->get('/')
         ->assertOk()
         ->assertSee('/assets/fonts/HelveticaNeueThin.otf', false)
-        ->assertSee('/assets/css/typography.css?v=1.5', false);
+        ->assertSee('/assets/css/typography.css?v=1.5', false)
+        ->assertSee('/assets/css/editorial-home.css?v=3.6', false);
 
     $assetRoot = dirname(base_path()).DIRECTORY_SEPARATOR.'assets';
     $displayStylesheets = [
@@ -208,4 +209,10 @@ it('serves one self-hosted display face across public brand typography', functio
 
     expect($assetRoot.DIRECTORY_SEPARATOR.'fonts'.DIRECTORY_SEPARATOR.'HelveticaNeueThin.otf')
         ->toBeFile();
+
+    $homeCss = file_get_contents($assetRoot.DIRECTORY_SEPARATOR.'css'.DIRECTORY_SEPARATOR.'editorial-home.css');
+
+    expect($homeCss)->toContain(
+        '.ed-hero__title .ed-mask{display:block;overflow:hidden;position:relative;top:-.12em;padding:.12em 0 .09em;margin-bottom:-.12em}'
+    );
 });

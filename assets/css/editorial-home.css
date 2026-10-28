@@ -31,7 +31,7 @@ body.tt-minimal-page:has(.ed-site){overflow-x:hidden}
 .ed-hero__art img{position:absolute;inset:0;width:100%;height:100%;max-width:none;object-fit:cover;object-position:center}
 .ed-hero__content{position:relative;z-index:5;display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;min-height:inherit;width:min(65%,930px);padding:clamp(261px,calc(18vw + 41px),341px) 0 80px clamp(30px,6.2vw,106px)}
 .ed-hero__title{margin:0;font-family:"Turance Display",Arial,sans-serif;font-size:clamp(82px,10vw,178px);font-weight:200;line-height:.82;letter-spacing:-.075em;white-space:nowrap}
-.ed-hero__title .ed-mask{display:block;overflow:hidden;padding-bottom:.09em}
+.ed-hero__title .ed-mask{display:block;overflow:hidden;position:relative;top:-.12em;padding:.12em 0 .09em;margin-bottom:-.12em}
 .ed-hero__title .ed-mask>span{display:block;transform:translateY(110%);animation:ed-rise .9s .35s cubic-bezier(.2,.75,.22,1) forwards}
 .ed-gold{color:#aa8653}
 .ed-hero__title small{display:block;margin-top:18px;padding-left:var(--hero-inset);font-family:Urbanist,Arial,sans-serif;font-size:clamp(16px,1.7vw,25px);font-weight:400;letter-spacing:.48em;line-height:1.2;color:#77736e;animation:ed-fade .8s .9s both}
