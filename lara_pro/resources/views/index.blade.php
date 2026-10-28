@@ -5,7 +5,7 @@
 <link rel="preload" as="font" type="font/ttf" crossorigin href="{{ asset('/assets/fonts/Urbanist-Regular.ttf') }}">
 <link rel="preload" as="image" media="(min-width: 651px)" href="{{ asset('/assets/img/hero/turance-editorial-hero-clean.png') }}" fetchpriority="high">
 <link rel="preload" as="image" media="(max-width: 650px)" href="{{ asset('/assets/img/hero/turance-editorial-ribbon.png') }}" fetchpriority="high">
-<link rel="stylesheet" href="{{ asset('/assets/css/editorial-home.css') }}?v=3.3">
+<link rel="stylesheet" href="{{ asset('/assets/css/editorial-home.css') }}?v=3.4">
 @endpush
 @push('scripts')
 <script src="{{ asset('/assets/js/editorial-home.js') }}?v=1.9" defer></script>

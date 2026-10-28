@@ -202,6 +202,7 @@ body.tt-menu-open { overflow: hidden; }
   font-family: "Turance Display", Arial, sans-serif;
   font-size: clamp(43px, 4.8vw, 64px);
   font-weight: 200;
+  -webkit-text-stroke: .35px currentColor;
   line-height: .95;
   letter-spacing: -.06em;
   text-transform: none;

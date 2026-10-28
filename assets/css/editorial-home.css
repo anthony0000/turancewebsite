@@ -30,11 +30,11 @@ body.tt-minimal-page:has(.ed-site){overflow-x:hidden}
 .ed-hero__art picture{position:absolute;inset:-18px;display:block;transform:translate3d(var(--ed-pointer-x,0px),var(--ed-pointer-y,0px),0);will-change:transform}
 .ed-hero__art img{position:absolute;inset:0;width:100%;height:100%;max-width:none;object-fit:cover;object-position:center}
 .ed-hero__content{position:relative;z-index:5;display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;min-height:inherit;width:min(65%,930px);padding:clamp(261px,calc(18vw + 41px),341px) 0 80px clamp(30px,6.2vw,106px)}
-.ed-hero__title{margin:0;font-family:"Turance Display",Arial,sans-serif;font-size:clamp(82px,10vw,178px);font-weight:200;line-height:.82;letter-spacing:-.075em;white-space:nowrap}
+.ed-hero__title{margin:0;font-family:"Turance Display",Arial,sans-serif;font-size:clamp(82px,10vw,178px);font-weight:200;line-height:.82;letter-spacing:-.075em;white-space:nowrap;-webkit-text-stroke:.35px currentColor}
 .ed-hero__title .ed-mask{display:block;overflow:hidden;padding-bottom:.09em}
 .ed-hero__title .ed-mask>span{display:block;transform:translateY(110%);animation:ed-rise .9s .35s cubic-bezier(.2,.75,.22,1) forwards}
 .ed-gold{color:#aa8653}
-.ed-hero__title small{display:block;margin-top:18px;padding-left:var(--hero-inset);font-family:Urbanist,Arial,sans-serif;font-size:clamp(16px,1.7vw,25px);font-weight:400;letter-spacing:.48em;line-height:1.2;color:#77736e;animation:ed-fade .8s .9s both}
+.ed-hero__title small{display:block;margin-top:18px;padding-left:var(--hero-inset);font-family:Urbanist,Arial,sans-serif;font-size:clamp(16px,1.7vw,25px);font-weight:400;letter-spacing:.48em;line-height:1.2;color:#77736e;-webkit-text-stroke:0;animation:ed-fade .8s .9s both}
 .ed-hero__tagline{margin:43px 0 0 var(--hero-inset);font-size:clamp(13px,1.05vw,17px);font-weight:500;line-height:1.65;letter-spacing:.24em;text-transform:uppercase;color:#65615c;animation:ed-up .7s 1s both}
 .ed-hero__descriptor{margin:34px 0 0 var(--hero-inset);color:#5d5953;font-size:clamp(14px,1.05vw,16px);font-weight:400;line-height:1.5;letter-spacing:.055em;animation:ed-up .7s 1.15s both}
 .ed-circle-link{display:inline-flex;align-items:center;gap:24px;width:max-content;font-size:10px;font-weight:500;letter-spacing:.2em;text-transform:uppercase}
@@ -50,7 +50,7 @@ body.tt-minimal-page:has(.ed-site){overflow-x:hidden}
 .ed-section__bottom a:hover{color:var(--ed-gold)}
 .ed-section__bottom a span{display:inline-block;margin-left:12px;transition:transform .25s}
 .ed-section__bottom a:hover span{transform:translate(3px,-3px)}
-.ed-display{margin:0;font-family:"Turance Display",Arial,sans-serif;font-size:clamp(72px,8.1vw,142px);font-weight:200;line-height:.9;letter-spacing:-.075em}
+.ed-display{margin:0;font-family:"Turance Display",Arial,sans-serif;font-size:clamp(72px,8.1vw,142px);font-weight:200;line-height:.9;letter-spacing:-.075em;-webkit-text-stroke:.35px currentColor}
 .ed-section .ed-display{position:relative}
 .ed-display em{font-style:normal}
 .ed-intro{min-height:810px;display:flex;flex-direction:column;justify-content:space-between;padding-top:100px;padding-bottom:170px}

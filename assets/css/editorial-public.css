@@ -19,17 +19,17 @@ body.tt-minimal-page{background:#faf9f6;color:#111110;font-family:var(--tt-body-
 .tt-contact-hero,.tt-services-overview-hero,.tt-detail-hero,.tt-legal-hero{background:#faf9f6}
 .tt-contact-hero::after,.tt-contact-hero__geometry,.tt-services-overview-hero__mesh,.tt-detail-hero__linework,.tt-legal-hero__geometry{display:none}
 .tt-contact-hero,.tt-services-overview-hero,.tt-detail-hero{min-height:auto}
-.tt-contact-hero__intro h1,.tt-services-overview-hero h1,.tt-detail-hero h1,.tt-legal-hero h1{color:#111110;font-family:"Turance Display",Arial,sans-serif;font-size:clamp(60px,6.6vw,110px);font-weight:200;line-height:.94;letter-spacing:-.075em;text-transform:none}
+.tt-contact-hero__intro h1,.tt-services-overview-hero h1,.tt-detail-hero h1,.tt-legal-hero h1{color:#111110;font-family:"Turance Display",Arial,sans-serif;font-size:clamp(60px,6.6vw,110px);font-weight:200;line-height:.94;letter-spacing:-.075em;text-transform:none;-webkit-text-stroke:.35px currentColor}
 .tt-contact-hero__intro>p,.tt-services-overview-hero__lead,.tt-detail-hero__lead,.tt-legal-hero__intro{color:#777773;line-height:1.5}
 .tt-contact-hero__details,.tt-services-overview-hero__stats,.tt-detail-meta{border-color:#d9d9d5}
 .tt-contact-form-shell,.tt-capability-deck{border-radius:0;box-shadow:none}
 .tt-contact-form-shell{border:1px solid #e1e1de;background:#fff}
 .tt-contact-form-shell:before{display:none}
-.tt-contact-form-shell__top h2,.tt-contact-next h2,.tt-section-heading h2,.tt-detail-overview h2,.tt-detail-process h2,.tt-detail-deliverables h2,.tt-legal-content h2,.tt-legal-cta h2{font-family:"Turance Display",Arial,sans-serif;font-weight:200;letter-spacing:-.065em;text-transform:none}
-body.tt-minimal-page .tt-reference-home h1,body.tt-minimal-page .tt-reference-home h2{font-family:"Turance Display",Arial,sans-serif;font-weight:200;text-transform:none}
+.tt-contact-form-shell__top h2,.tt-contact-next h2,.tt-section-heading h2,.tt-detail-overview h2,.tt-detail-process h2,.tt-detail-deliverables h2,.tt-legal-content h2,.tt-legal-cta h2{font-family:"Turance Display",Arial,sans-serif;font-weight:200;letter-spacing:-.065em;text-transform:none;-webkit-text-stroke:.35px currentColor}
+body.tt-minimal-page .tt-reference-home h1,body.tt-minimal-page .tt-reference-home h2{font-family:"Turance Display",Arial,sans-serif;font-weight:200;text-transform:none;-webkit-text-stroke:.35px currentColor}
 body.tt-minimal-page .tt-reference-home h3{font-family:Urbanist,Arial,sans-serif;font-weight:400;letter-spacing:-.04em;text-transform:none}
 body.tt-minimal-page .tt-reference-home [class*="kicker"],body.tt-minimal-page .tt-reference-home [class*="__eyebrow"]{font-weight:500}
-.tt-capability-deck__prompt{font-family:"Turance Display",Arial,sans-serif;font-weight:200;letter-spacing:-.05em;text-transform:none}
+.tt-capability-deck__prompt{font-family:"Turance Display",Arial,sans-serif;font-weight:200;letter-spacing:-.05em;text-transform:none;-webkit-text-stroke:.35px currentColor}
 .tt-capability-deck__service strong{font-family:Urbanist,Arial,sans-serif;font-weight:400;letter-spacing:-.045em;text-transform:none}
 .tt-reference-home .tt-primary-button,.tt-reference-home .tt-text-link{font-weight:500}
 .tt-contact-submit{background:#111110;color:#fff;box-shadow:none}
