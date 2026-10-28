@@ -1,0 +1,7 @@
+@font-face {
+  font-family: "Urbanist Display";
+  src: url("/assets/fonts/Urbanist-Variable.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+}

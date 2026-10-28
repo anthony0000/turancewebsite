@@ -199,7 +199,7 @@ body.tt-menu-open { overflow: hidden; }
 .tt-mobile-navigation__link-copy { display: flex; flex: 1; min-width: 0; flex-direction: column; gap: 4px; }
 .tt-mobile-navigation__label {
   display: block;
-  font-family: "Helvetica Neue", Urbanist, Arial, sans-serif;
+  font-family: "Urbanist Display", Urbanist, Arial, sans-serif;
   font-size: clamp(43px, 4.8vw, 64px);
   font-weight: 200;
   line-height: .95;
