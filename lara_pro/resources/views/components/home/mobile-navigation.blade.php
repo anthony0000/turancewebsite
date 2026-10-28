@@ -1,6 +1,7 @@
 @php($homeAnchor = fn (string $anchor) => request()->routeIs('home') ? '#'.$anchor : route('home').'#'.$anchor)
 
-<div class="tt-menu-backdrop" data-menu-backdrop hidden></div>
+<div class="tt-menu-backdrop" data-menu-backdrop></div>
+<div class="tt-menu-curtain" data-menu-curtain aria-hidden="true"></div>
 
 <aside class="tt-mobile-navigation" id="tt-mobile-navigation" aria-hidden="true" aria-label="Navigation menu"
     data-mobile-navigation inert>

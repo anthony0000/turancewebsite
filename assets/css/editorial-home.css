@@ -202,10 +202,7 @@ body.tt-minimal-page:has(.ed-site){overflow-x:hidden}
  .ed-header{grid-template-columns:1fr auto auto;padding:25px 5vw}
  .ed-header.is-scrolled{padding-top:13px;padding-bottom:13px}
  .ed-brand{width:138px}
- .ed-nav{position:absolute;top:100%;left:0;right:0;display:flex;flex-direction:column;align-items:stretch;gap:0;padding:12px 5vw 26px;background:rgba(250,249,246,.97);box-shadow:0 15px 25px rgba(0,0,0,.07);opacity:0;visibility:hidden;transform:translateY(-8px);transition:opacity .25s,transform .25s,visibility .25s}
- .ed-nav.is-open{opacity:1;visibility:visible;transform:none}
- .ed-nav a{padding:16px 0;border-bottom:1px solid #ddd;font-size:14px}
- .ed-nav__mobile-contact{display:block}
+ .ed-nav{display:none}
  .ed-header__contact{display:none}
  .ed-menu{display:flex;flex-direction:column;justify-content:center;gap:7px;width:42px;height:42px;padding:8px;border:0;background:none;cursor:pointer}
  .ed-menu span{width:100%;height:1px;background:#111;transition:transform .25s}

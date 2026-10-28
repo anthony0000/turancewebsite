@@ -257,6 +257,7 @@
     @endunless
     @stack('styles')
     <link rel="stylesheet" href="{{ asset('/assets/css/editorial-footer.css') }}?v=1.0">
+    <link rel="stylesheet" href="{{ asset('/assets/css/public-menu.css') }}?v=1.1">
     <link rel="stylesheet" href="{{ asset('/assets/css/preferred-source.css') }}?v=1.0">
     <link rel="stylesheet" href="{{ asset('/assets/css/cookie-consent.css') }}?v=1.1">
 </head>
@@ -646,6 +647,7 @@
     <script src="{{ asset('/assets/js/wt-cursor.js') }}"></script>
     @endunless
     @stack('scripts')
+    <script src="{{ asset('/assets/js/public-menu.js') }}?v=1.0" defer></script>
     <script src="{{ asset('/assets/js/cookie-consent.js') }}?v=1.0" defer></script>
 </body>
 

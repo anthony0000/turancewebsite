@@ -117,5 +117,5 @@
 @endsection
 
 @push('scripts')
-    <script src="{{ asset('/assets/js/home-reference.js') }}?v=2.6" defer></script>
+    <script src="{{ asset('/assets/js/home-reference.js') }}?v=2.7" defer></script>
 @endpush

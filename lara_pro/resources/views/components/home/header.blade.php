@@ -24,9 +24,9 @@
 
         <button class="tt-menu-button" type="button" aria-label="Open navigation menu"
             aria-expanded="false" aria-controls="tt-mobile-navigation" data-menu-open data-magnetic>
-            <span></span><span></span><span></span><span></span>
+            <span></span><span></span>
         </button>
     </div>
 
-    <x-home.mobile-navigation />
 </header>
+<x-home.mobile-navigation />

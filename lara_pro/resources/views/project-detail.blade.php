@@ -6,11 +6,11 @@
 @section('seo_image', asset($project['image']))
 @push('styles')
 <link rel="preload" as="font" type="font/ttf" crossorigin href="{{ asset('/assets/fonts/Urbanist-Regular.ttf') }}">
-<link rel="stylesheet" href="{{ asset('/assets/css/editorial-home.css') }}?v=2.9">
+<link rel="stylesheet" href="{{ asset('/assets/css/editorial-home.css') }}?v=3.0">
 <link rel="stylesheet" href="{{ asset('/assets/css/editorial-project.css') }}?v=1.0">
 @endpush
 @push('scripts')
-<script src="{{ asset('/assets/js/editorial-home.js') }}?v=1.8" defer></script>
+<script src="{{ asset('/assets/js/editorial-home.js') }}?v=1.9" defer></script>
 @endpush
 @section('content')
 <a class="ed-skip" href="#main-content">Skip to content</a>
@@ -19,8 +19,9 @@
         <a class="ed-brand" href="{{ route('home') }}" aria-label="Turance Technologies home"><img src="{{ asset('/assets/img/logo/logo.png') }}" width="694" height="178" alt="" decoding="async"></a>
         <nav class="ed-nav" id="ed-nav" aria-label="Primary navigation"><a href="{{ route('home') }}#work">Work</a><a href="{{ route('home') }}#services">Services</a><a href="{{ route('home') }}#about">About</a><a class="ed-nav__mobile-contact" href="{{ route('contact.show') }}">Contact <span aria-hidden="true">↗</span></a></nav>
         <a class="ed-header__contact" href="{{ route('contact.show') }}">Contact <span aria-hidden="true">✦</span></a>
-        <button class="ed-menu" type="button" aria-label="Open menu" aria-controls="ed-nav" aria-expanded="false" data-menu-button><span></span><span></span></button>
+        <button class="ed-menu" type="button" aria-label="Open navigation menu" aria-controls="tt-mobile-navigation" aria-expanded="false" data-menu-open><span></span><span></span></button>
     </header>
+    <x-home.mobile-navigation />
     <main id="main-content">
         <article class="ed-case">
             <div class="ed-case__intro ed-section">

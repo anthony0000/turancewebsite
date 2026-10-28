@@ -256,6 +256,6 @@
         </script>
         <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
     @endif
-    <script src="{{ asset('/assets/js/home-reference.js') }}?v=2.6" defer></script>
+    <script src="{{ asset('/assets/js/home-reference.js') }}?v=2.7" defer></script>
     <script src="{{ asset('/assets/js/contact-reference.js') }}?v=1.3" defer></script>
 @endpush

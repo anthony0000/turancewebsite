@@ -5,10 +5,10 @@
 <link rel="preload" as="font" type="font/ttf" crossorigin href="{{ asset('/assets/fonts/Urbanist-Regular.ttf') }}">
 <link rel="preload" as="image" media="(min-width: 651px)" href="{{ asset('/assets/img/hero/turance-editorial-hero-clean.png') }}" fetchpriority="high">
 <link rel="preload" as="image" media="(max-width: 650px)" href="{{ asset('/assets/img/hero/turance-editorial-ribbon.png') }}" fetchpriority="high">
-<link rel="stylesheet" href="{{ asset('/assets/css/editorial-home.css') }}?v=2.9">
+<link rel="stylesheet" href="{{ asset('/assets/css/editorial-home.css') }}?v=3.0">
 @endpush
 @push('scripts')
-<script src="{{ asset('/assets/js/editorial-home.js') }}?v=1.8" defer></script>
+<script src="{{ asset('/assets/js/editorial-home.js') }}?v=1.9" defer></script>
 @endpush
 @section('content')
 @php
@@ -40,8 +40,9 @@
         <a class="ed-brand" href="{{ route('home') }}" aria-label="Turance Technologies home"><img src="{{ asset('/assets/img/logo/logo.png') }}" width="694" height="178" alt="" decoding="async"></a>
         <nav class="ed-nav" id="ed-nav" aria-label="Primary navigation"><a href="#work">Work</a><a href="#services">Services</a><a href="#about">About</a><a class="ed-nav__mobile-contact" href="{{ route('contact.show') }}">Contact <span aria-hidden="true">↗</span></a></nav>
         <a class="ed-header__contact" href="{{ route('contact.show') }}" data-conversion="header_contact">Contact <span aria-hidden="true">✦</span></a>
-        <button class="ed-menu" type="button" aria-label="Open menu" aria-controls="ed-nav" aria-expanded="false" data-menu-button><span></span><span></span></button>
+        <button class="ed-menu" type="button" aria-label="Open navigation menu" aria-controls="tt-mobile-navigation" aria-expanded="false" data-menu-open><span></span><span></span></button>
     </header>
+    <x-home.mobile-navigation />
     <main id="main-content">
         <section class="ed-hero" aria-labelledby="hero-title">
             <div class="ed-hero__art" aria-hidden="true" data-hero-art><picture><source media="(max-width: 650px)" srcset="{{ asset('/assets/img/hero/turance-editorial-ribbon.png') }}"><img src="{{ asset('/assets/img/hero/turance-editorial-hero-clean.png') }}" width="1672" height="941" alt="" fetchpriority="high" decoding="sync"></picture></div>
