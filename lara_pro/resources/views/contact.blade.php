@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="{{ asset('/assets/css/home-reference.css') }}?v=2.7">
     <link rel="stylesheet" href="{{ asset('/assets/css/home-sections.css') }}?v=2.4">
     <link rel="stylesheet" href="{{ asset('/assets/css/contact-reference.css') }}?v=1.5">
-    <link rel="stylesheet" href="{{ asset('/assets/css/editorial-public.css') }}?v=1.8">
+    <link rel="stylesheet" href="{{ asset('/assets/css/editorial-public.css') }}?v=1.9">
 @endpush
 
 @section('content')

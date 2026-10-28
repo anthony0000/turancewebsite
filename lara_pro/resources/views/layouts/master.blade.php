@@ -240,8 +240,8 @@
     @stack('structured_data')
 
     <link rel="shortcut icon" type="image/x-icon" href="{{ asset('/assets/img/logo/favicon.png') }}">
-    <link rel="preload" as="font" type="font/woff2" crossorigin href="{{ asset('/assets/fonts/Roboto-Variable-Latin.woff2') }}">
-    <link rel="stylesheet" href="{{ asset('/assets/css/typography.css') }}?v=1.1">
+    <link rel="preload" as="font" type="font/ttf" crossorigin href="{{ asset('/assets/fonts/Helvetica-Neue-UltraLight.ttf') }}">
+    <link rel="stylesheet" href="{{ asset('/assets/css/typography.css') }}?v=1.2">
 
     @php($minimalPage = trim($__env->yieldContent('minimal_page', 'false')) === 'true')
 
@@ -258,10 +258,10 @@
         <link rel="stylesheet" href="{{ asset('/assets/css/main.css') }}?v=1.3">
     @endunless
     @stack('styles')
-    <link rel="stylesheet" href="{{ asset('/assets/css/editorial-footer.css') }}?v=1.1">
-    <link rel="stylesheet" href="{{ asset('/assets/css/public-menu.css') }}?v=1.3">
+    <link rel="stylesheet" href="{{ asset('/assets/css/editorial-footer.css') }}?v=1.2">
+    <link rel="stylesheet" href="{{ asset('/assets/css/public-menu.css') }}?v=1.4">
     <link rel="stylesheet" href="{{ asset('/assets/css/preferred-source.css') }}?v=1.0">
-    <link rel="stylesheet" href="{{ asset('/assets/css/cookie-consent.css') }}?v=1.3">
+    <link rel="stylesheet" href="{{ asset('/assets/css/cookie-consent.css') }}?v=1.4">
 </head>
 
 <body class="{{ $minimalPage ? 'tt-minimal-page' : 'page-wrapper wt-magic-cursor' }}">
