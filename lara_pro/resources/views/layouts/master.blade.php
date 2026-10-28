@@ -240,8 +240,8 @@
     @stack('structured_data')
 
     <link rel="shortcut icon" type="image/x-icon" href="{{ asset('/assets/img/logo/favicon.png') }}">
-    <link rel="preload" as="font" type="font/ttf" crossorigin href="{{ asset('/assets/fonts/Helvetica-Neue-UltraLight.ttf') }}">
-    <link rel="stylesheet" href="{{ asset('/assets/css/typography.css') }}?v=1.4">
+    <link rel="preload" as="font" type="font/otf" crossorigin href="{{ asset('/assets/fonts/HelveticaNeueThin.otf') }}">
+    <link rel="stylesheet" href="{{ asset('/assets/css/typography.css') }}?v=1.5">
 
     @php($minimalPage = trim($__env->yieldContent('minimal_page', 'false')) === 'true')
 
@@ -259,7 +259,7 @@
     @endunless
     @stack('styles')
     <link rel="stylesheet" href="{{ asset('/assets/css/editorial-footer.css') }}?v=1.2">
-    <link rel="stylesheet" href="{{ asset('/assets/css/public-menu.css') }}?v=1.5">
+    <link rel="stylesheet" href="{{ asset('/assets/css/public-menu.css') }}?v=1.6">
     <link rel="stylesheet" href="{{ asset('/assets/css/preferred-source.css') }}?v=1.0">
     <link rel="stylesheet" href="{{ asset('/assets/css/cookie-consent.css') }}?v=1.4">
 </head>
