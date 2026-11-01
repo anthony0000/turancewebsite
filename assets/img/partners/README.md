@@ -7,4 +7,4 @@ These files were downloaded from the companies' public websites on 1 November 20
 - `ihcpro.webp` — https://www.ihcpro.co.uk/assets/logo-CDpmRx9U.webp
 - `kiddovista.png` — https://kiddovista.co.uk/assets/images/logo.png
 
-Strongpack Limited and MillionDollar Photography use visible placeholders until their official logo files are supplied.
+MillionDollar Photography is shown as a typeset name until its official logo file is supplied.

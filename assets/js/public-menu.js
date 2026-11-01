@@ -1,4 +1,39 @@
 document.addEventListener("DOMContentLoaded", () => {
+  const scrollToAnchor = (target, behavior = "smooth") => {
+    target.scrollIntoView({ behavior, block: "start" });
+  };
+  const cleanUrl = () => {
+    if (window.location.hash) {
+      window.history.replaceState(window.history.state, "", window.location.pathname + window.location.search);
+    }
+  };
+
+  document.addEventListener("click", (event) => {
+    if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    const link = event.target.closest("a[href*='#']");
+    if (!link || link.hasAttribute("download") || (link.target && link.target !== "_self")) return;
+    const destination = new URL(link.href, window.location.href);
+    if (!destination.hash || destination.origin !== window.location.origin || destination.pathname !== window.location.pathname || destination.search !== window.location.search) return;
+    const target = document.getElementById(decodeURIComponent(destination.hash.slice(1)));
+    if (!target) return;
+    event.preventDefault();
+    scrollToAnchor(target, window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth");
+    cleanUrl();
+    if (link.classList.contains("ed-skip")) {
+      target.focus({ preventScroll: true });
+    }
+  });
+
+  if (window.location.hash) {
+    const target = document.getElementById(decodeURIComponent(window.location.hash.slice(1)));
+    if (target) {
+      window.requestAnimationFrame(() => {
+        scrollToAnchor(target, "auto");
+        cleanUrl();
+      });
+    }
+  }
+
   const trigger = document.querySelector("[data-menu-open]");
   const closeButton = document.querySelector("[data-menu-close]");
   const panel = document.querySelector("[data-mobile-navigation]");

@@ -649,7 +649,7 @@
     <script src="{{ asset('/assets/js/wt-cursor.js') }}"></script>
     @endunless
     @stack('scripts')
-    <script src="{{ asset('/assets/js/public-menu.js') }}?v=1.0" defer></script>
+    <script src="{{ asset('/assets/js/public-menu.js') }}?v=1.1" defer></script>
     <script src="{{ asset('/assets/js/cookie-consent.js') }}?v=1.0" defer></script>
 </body>
 

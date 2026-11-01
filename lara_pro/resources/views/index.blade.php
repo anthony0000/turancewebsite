@@ -5,7 +5,7 @@
 <link rel="preload" as="font" type="font/ttf" crossorigin href="{{ asset('/assets/fonts/Urbanist-Regular.ttf') }}">
 <link rel="preload" as="image" media="(min-width: 651px)" href="{{ asset('/assets/img/hero/turance-editorial-hero-clean.png') }}" fetchpriority="high">
 <link rel="preload" as="image" media="(max-width: 650px)" href="{{ asset('/assets/img/hero/turance-editorial-ribbon.png') }}" fetchpriority="high">
-<link rel="stylesheet" href="{{ asset('/assets/css/editorial-home.css') }}?v=3.7">
+<link rel="stylesheet" href="{{ asset('/assets/css/editorial-home.css') }}?v=3.8">
 @endpush
 @push('scripts')
 <script src="{{ asset('/assets/js/editorial-home.js') }}?v=1.9" defer></script>
@@ -35,7 +35,6 @@
     $partners = [
         ['name' => 'Rex Insurance', 'logo' => 'assets/img/partners/rex-insurance.svg', 'square' => false],
         ['name' => '3Hjobs', 'logo' => 'assets/img/partners/3hjobs.png', 'square' => true],
-        ['name' => 'Strongpack Limited', 'logo' => null, 'square' => false],
         ['name' => 'IHcPro', 'logo' => 'assets/img/partners/ihcpro.webp', 'square' => false],
         ['name' => 'KiddoVista', 'logo' => 'assets/img/partners/kiddovista.png', 'square' => false],
         ['name' => 'MillionDollar Photography', 'logo' => null, 'square' => false],
@@ -51,7 +50,7 @@
         <button class="ed-menu" type="button" aria-label="Open navigation menu" aria-controls="tt-mobile-navigation" aria-expanded="false" data-menu-open><span></span><span></span></button>
     </header>
     <x-home.mobile-navigation />
-    <main id="main-content">
+    <main id="main-content" tabindex="-1">
         <section class="ed-hero" aria-labelledby="hero-title">
             <div class="ed-hero__art" aria-hidden="true" data-hero-art><picture><source media="(max-width: 650px)" srcset="{{ asset('/assets/img/hero/turance-editorial-ribbon.png') }}"><img src="{{ asset('/assets/img/hero/turance-editorial-hero-clean.png') }}" width="1672" height="941" alt="" fetchpriority="high" decoding="sync"></picture></div>
             <div class="ed-hero__content">
@@ -114,14 +113,15 @@
             <ul class="ed-partners__grid" aria-label="Our partners">
                 @foreach ($partners as $partner)
                 <li class="ed-partner" data-reveal>
-                    <div class="ed-partner__mark">
+                    <span class="ed-partner__index" aria-hidden="true">{{ str_pad($loop->iteration, 2, '0', STR_PAD_LEFT) }} <span>/ {{ str_pad(count($partners), 2, '0', STR_PAD_LEFT) }}</span></span>
+                    <div class="ed-partner__identity">
                         @if ($partner['logo'])
-                            <img class="{{ $partner['square'] ? 'ed-partner__logo--square' : '' }}" src="{{ asset($partner['logo']) }}" alt="" loading="lazy" decoding="async">
-                        @else
-                            <span class="ed-partner__placeholder">Logo pending</span>
+                            <img class="{{ $partner['square'] ? 'ed-partner__logo--square' : '' }}" src="{{ asset($partner['logo']) }}" alt="{{ $partner['square'] ? '' : $partner['name'] }}" loading="lazy" decoding="sync">
+                        @endif
+                        @if ($partner['square'] || !$partner['logo'])
+                            <strong>{{ $partner['name'] }}</strong>
                         @endif
                     </div>
-                    <strong>{{ $partner['name'] }}</strong>
                 </li>
                 @endforeach
             </ul>
