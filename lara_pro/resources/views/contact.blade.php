@@ -5,7 +5,7 @@
 @push('styles')
     <link rel="stylesheet" href="{{ asset('/assets/css/home-reference.css') }}?v=2.7">
     <link rel="stylesheet" href="{{ asset('/assets/css/home-sections.css') }}?v=2.4">
-    <link rel="stylesheet" href="{{ asset('/assets/css/contact-reference.css') }}?v=1.5">
+    <link rel="stylesheet" href="{{ asset('/assets/css/contact-reference.css') }}?v=1.6">
     <link rel="stylesheet" href="{{ asset('/assets/css/editorial-public.css') }}?v=2.1">
 @endpush
 
@@ -149,12 +149,35 @@
                             </div>
                         @endif
 
+                        <div class="tt-contact-field {{ $errors->has('biggest_challenge') ? 'has-error' : '' }}">
+                            <label for="biggest_challenge">What is the single biggest challenge in your business right now?</label>
+                            <textarea name="biggest_challenge" rows="3" id="biggest_challenge"
+                                placeholder="Tell us about the main problem you want to solve" required maxlength="5000"
+                                aria-describedby="{{ $errors->has('biggest_challenge') ? 'biggest-challenge-error' : '' }}">{{ old('biggest_challenge') }}</textarea>
+                            @error('biggest_challenge')<small id="biggest-challenge-error">{{ $message }}</small>@enderror
+                        </div>
+
+                        <div class="tt-contact-field {{ $errors->has('problem_duration') ? 'has-error' : '' }}">
+                            <label for="problem_duration">How long has the problem existed?</label>
+                            <input type="text" id="problem_duration" name="problem_duration"
+                                value="{{ old('problem_duration') }}" placeholder="For example, six months" required maxlength="255"
+                                aria-describedby="{{ $errors->has('problem_duration') ? 'problem-duration-error' : '' }}">
+                            @error('problem_duration')<small id="problem-duration-error">{{ $message }}</small>@enderror
+                        </div>
+
+                        <div class="tt-contact-field {{ $errors->has('previous_attempts') ? 'has-error' : '' }}">
+                            <label for="previous_attempts">What have you already tried that did not work?</label>
+                            <textarea name="previous_attempts" rows="3" id="previous_attempts"
+                                placeholder="If you have not tried anything yet, you can say so" required maxlength="5000"
+                                aria-describedby="{{ $errors->has('previous_attempts') ? 'previous-attempts-error' : '' }}">{{ old('previous_attempts') }}</textarea>
+                            @error('previous_attempts')<small id="previous-attempts-error">{{ $message }}</small>@enderror
+                        </div>
+
                         <div class="tt-contact-field {{ $errors->has('message') ? 'has-error' : '' }}">
-                            <label for="message">Project context</label>
-                            <textarea name="message" rows="5" id="message"
-                                placeholder="What are you building, improving or trying to solve?" required
-                                aria-describedby="message-guidance {{ $errors->has('message') ? 'message-error' : '' }}">{{ old('message') }}</textarea>
-                            <span class="tt-contact-field__guidance" id="message-guidance">A few clear details are enough to begin.</span>
+                            <label for="message">Additional project context <span>(optional)</span></label>
+                            <textarea name="message" rows="3" id="message" maxlength="5000"
+                                placeholder="Anything else we should know about your project?"
+                                aria-describedby="{{ $errors->has('message') ? 'message-error' : '' }}">{{ old('message') }}</textarea>
                             @error('message')<small id="message-error">{{ $message }}</small>@enderror
                         </div>
 

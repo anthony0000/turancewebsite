@@ -245,6 +245,8 @@
   resize: vertical;
 }
 
+.tt-contact-field textarea[rows="3"] { min-height: 104px; }
+
 .tt-contact-field input::placeholder,
 .tt-contact-field textarea::placeholder { color: #9299a6; opacity: 1; }
 

@@ -23,6 +23,15 @@ function contactFormContext(?int $issuedAt = null): string
     ], JSON_THROW_ON_ERROR));
 }
 
+function contactSalesAnswers(): array
+{
+    return [
+        'biggest_challenge' => 'Our customers struggle to track their requests.',
+        'problem_duration' => 'About six months',
+        'previous_attempts' => 'We tried a shared spreadsheet, but updates were often missed.',
+    ];
+}
+
 it('stores contact form submissions and sends a notification email', function () {
     Mail::fake();
 
@@ -30,6 +39,7 @@ it('stores contact form submissions and sends a notification email', function ()
     Config::set('contact.recipient.name', 'Turance Team');
 
     $response = $this->post(route('contact.store'), [
+        ...contactSalesAnswers(),
         'name' => 'Jane Doe',
         'email' => 'jane@example.com',
         'topic' => 'Web Development',
@@ -45,12 +55,16 @@ it('stores contact form submissions and sends a notification email', function ()
         'name' => 'Jane Doe',
         'email' => 'jane@example.com',
         'topic' => 'Web Development',
+        'biggest_challenge' => contactSalesAnswers()['biggest_challenge'],
+        'problem_duration' => contactSalesAnswers()['problem_duration'],
+        'previous_attempts' => contactSalesAnswers()['previous_attempts'],
     ]);
 
     Mail::assertSent(ContactMessageReceived::class, function (ContactMessageReceived $mail) {
         return $mail->hasTo('team@example.com')
             && $mail->contactMessage->name === 'Jane Doe'
-            && $mail->contactMessage->email === 'jane@example.com';
+            && $mail->contactMessage->email === 'jane@example.com'
+            && $mail->contactMessage->biggest_challenge === contactSalesAnswers()['biggest_challenge'];
     });
 });
 
@@ -58,7 +72,49 @@ it('renders the encrypted form context and honeypot field', function () {
     $this->get(route('contact.show'))
         ->assertOk()
         ->assertSee('name="contact_context"', false)
-        ->assertSee('name="company_fax"', false);
+        ->assertSee('name="company_fax"', false)
+        ->assertSee('name="biggest_challenge"', false)
+        ->assertSee('name="problem_duration"', false)
+        ->assertSee('name="previous_attempts"', false);
+});
+
+it('requires answers to all three sales questions', function () {
+    $this->postJson(route('contact.store'), [
+        'name' => 'Jane Doe',
+        'email' => 'jane@example.com',
+        'topic' => 'Web Development',
+        'contact_context' => contactFormContext(),
+    ])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors(['biggest_challenge', 'problem_duration', 'previous_attempts']);
+
+    $this->assertDatabaseCount('contact_messages', 0);
+});
+
+it('accepts an enquiry without additional project context and includes the answers in email', function () {
+    Mail::fake();
+    Config::set('contact.recipient.address', 'team@example.com');
+
+    $this->post(route('contact.store'), [
+        ...contactSalesAnswers(),
+        'name' => 'Jane Doe',
+        'email' => 'jane@example.com',
+        'topic' => 'Web Development',
+        'contact_context' => contactFormContext(),
+    ])->assertRedirect(route('contact.show'));
+
+    $this->assertDatabaseHas('contact_messages', [
+        'email' => 'jane@example.com',
+        'message' => null,
+    ]);
+
+    Mail::assertSent(ContactMessageReceived::class, function (ContactMessageReceived $mail) {
+        $mail->assertSeeInHtml(contactSalesAnswers()['biggest_challenge']);
+        $mail->assertSeeInText(contactSalesAnswers()['problem_duration']);
+        $mail->assertSeeInText(contactSalesAnswers()['previous_attempts']);
+
+        return true;
+    });
 });
 
 it('keeps the contact submit button disabled until Turnstile is verified', function () {
@@ -91,6 +147,7 @@ it('rejects forms submitted faster than a human can complete them', function () 
     Config::set('contact.security.minimum_form_seconds', 3);
 
     $this->postJson(route('contact.store'), [
+        ...contactSalesAnswers(),
         'name' => 'Fast Bot',
         'email' => 'fast@example.com',
         'topic' => 'Web Development',
@@ -110,6 +167,7 @@ it('deduplicates repeat submissions with the same signed context', function () {
     Config::set('contact.recipient.address', 'team@example.com');
 
     $payload = [
+        ...contactSalesAnswers(),
         'name' => 'Jane Doe',
         'email' => 'jane@example.com',
         'topic' => 'Web Development',
@@ -132,6 +190,7 @@ it('rate limits repeated contact submissions by ip address', function () {
     for ($attempt = 1; $attempt <= 5; $attempt++) {
         $this->withServerVariables(['REMOTE_ADDR' => '203.0.113.15'])
             ->post(route('contact.store'), [
+                ...contactSalesAnswers(),
                 'name' => 'Rate Limit Test',
                 'email' => "sender{$attempt}@example.com",
                 'topic' => 'Web Development',
@@ -143,6 +202,7 @@ it('rate limits repeated contact submissions by ip address', function () {
 
     $this->withServerVariables(['REMOTE_ADDR' => '203.0.113.15'])
         ->post(route('contact.store'), [
+            ...contactSalesAnswers(),
             'name' => 'Rate Limit Test',
             'email' => 'blocked@example.com',
             'topic' => 'Web Development',
@@ -169,6 +229,7 @@ it('validates turnstile server side when enabled', function () {
     Config::set('contact.turnstile.secret_key', 'test-secret-key');
 
     $this->postJson(route('contact.store'), [
+        ...contactSalesAnswers(),
         'name' => 'Jane Doe',
         'email' => 'jane@example.com',
         'topic' => 'Web Development',
@@ -193,6 +254,7 @@ it('rejects contact submissions without a Turnstile token when enabled', functio
     Config::set('contact.turnstile.secret_key', 'test-secret-key');
 
     $this->postJson(route('contact.store'), [
+        ...contactSalesAnswers(),
         'name' => 'Jane Doe',
         'email' => 'jane@example.com',
         'topic' => 'Web Development',
@@ -214,6 +276,7 @@ it('can queue contact notifications when queue delivery is enabled', function ()
     Config::set('contact.delivery.queue', true);
 
     $this->post(route('contact.store'), [
+        ...contactSalesAnswers(),
         'name' => 'Queued Sender',
         'email' => 'queued@example.com',
         'topic' => 'Mobile App Development',
@@ -272,6 +335,8 @@ it('returns validation errors for invalid ajax submissions', function () {
             'name',
             'email',
             'topic',
-            'message',
+            'biggest_challenge',
+            'problem_duration',
+            'previous_attempts',
         ]);
 });

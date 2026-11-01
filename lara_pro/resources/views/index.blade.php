@@ -5,7 +5,7 @@
 <link rel="preload" as="font" type="font/ttf" crossorigin href="{{ asset('/assets/fonts/Urbanist-Regular.ttf') }}">
 <link rel="preload" as="image" media="(min-width: 651px)" href="{{ asset('/assets/img/hero/turance-editorial-hero-clean.png') }}" fetchpriority="high">
 <link rel="preload" as="image" media="(max-width: 650px)" href="{{ asset('/assets/img/hero/turance-editorial-ribbon.png') }}" fetchpriority="high">
-<link rel="stylesheet" href="{{ asset('/assets/css/editorial-home.css') }}?v=3.6">
+<link rel="stylesheet" href="{{ asset('/assets/css/editorial-home.css') }}?v=3.7">
 @endpush
 @push('scripts')
 <script src="{{ asset('/assets/js/editorial-home.js') }}?v=1.9" defer></script>
@@ -31,6 +31,14 @@
         ['quote' => 'Turance delivered a clean, scalable platform on time. Deployment was smooth and our team was impressed with the code quality.', 'name' => 'Oluwafemi Oluwole', 'company' => 'Oracode Limited'],
         ['quote' => 'Their design and execution turned our idea into a product customers actually use. Communication was clear every step of the way.', 'name' => 'Joy Ugoyah', 'company' => 'Stavmia Technologies'],
         ['quote' => 'Professional and responsive. The new site improved lead quality and made our listings easier to manage.', 'name' => 'Chirdan John', 'company' => 'Homafella Realty'],
+    ];
+    $partners = [
+        ['name' => 'Rex Insurance', 'logo' => 'assets/img/partners/rex-insurance.svg', 'square' => false],
+        ['name' => '3Hjobs', 'logo' => 'assets/img/partners/3hjobs.png', 'square' => true],
+        ['name' => 'Strongpack Limited', 'logo' => null, 'square' => false],
+        ['name' => 'IHcPro', 'logo' => 'assets/img/partners/ihcpro.webp', 'square' => false],
+        ['name' => 'KiddoVista', 'logo' => 'assets/img/partners/kiddovista.png', 'square' => false],
+        ['name' => 'MillionDollar Photography', 'logo' => null, 'square' => false],
     ];
     $anniversaryPromo = app(\App\Support\AnniversaryPromotion::class)->current();
 @endphp
@@ -100,8 +108,26 @@
             <div class="ed-section__top"><span>05 / In practice</span><span>Real products, real purpose</span></div>
             <div class="ed-credibility__grid"><h2 id="credibility-title" class="ed-display" data-reveal>Built for<br><em>real use.</em></h2><div data-reveal><p>Our work is visible in live products—from TailorsMind’s fashion workspace to 3Hjobs’ local services marketplace.</p><a href="#work">See selected work <span aria-hidden="true">↗</span></a></div></div>
         </section>
+        <section class="ed-section ed-partners" id="partners" aria-labelledby="partners-title">
+            <div class="ed-section__top"><span>06 / Partners</span><span>People and teams we have worked with</span></div>
+            <div class="ed-section__heading"><h2 id="partners-title" class="ed-display" data-reveal>In good<br><em>company.</em></h2><p data-reveal>A selection of the brands and teams we have worked alongside.</p></div>
+            <ul class="ed-partners__grid" aria-label="Our partners">
+                @foreach ($partners as $partner)
+                <li class="ed-partner" data-reveal>
+                    <div class="ed-partner__mark">
+                        @if ($partner['logo'])
+                            <img class="{{ $partner['square'] ? 'ed-partner__logo--square' : '' }}" src="{{ asset($partner['logo']) }}" alt="" loading="lazy" decoding="async">
+                        @else
+                            <span class="ed-partner__placeholder">Logo pending</span>
+                        @endif
+                    </div>
+                    <strong>{{ $partner['name'] }}</strong>
+                </li>
+                @endforeach
+            </ul>
+        </section>
         <section class="ed-section ed-testimonials" id="testimonials" aria-labelledby="testimonials-title">
-            <div class="ed-section__top"><span>06 / Client perspectives</span><span>In their words</span></div>
+            <div class="ed-section__top"><span>07 / Client perspectives</span><span>In their words</span></div>
             <div class="ed-section__heading"><h2 id="testimonials-title" class="ed-display" data-reveal>Words that<br><em>matter.</em></h2><p data-reveal>What our clients say about the work, the process and the result.</p></div>
             <div class="ed-testimonials__grid">
                 @foreach ($testimonials as $testimonial)
@@ -118,7 +144,7 @@
             <div class="ed-faq__grid"><h2 id="faq-title" class="ed-display" data-reveal>Good to<br><em>know.</em></h2><div class="ed-faq__items" data-reveal>@foreach (config('seo.home_faqs', []) as $faq)<details><summary>{{ $faq['question'] }}<span aria-hidden="true">+</span></summary><p>{{ $faq['answer'] }}</p></details>@endforeach</div></div>
         </section>
         <section class="ed-section ed-contact" id="contact" aria-labelledby="contact-title">
-            <div class="ed-section__top"><span>07 / The next chapter</span><span>Have a project in mind?</span></div>
+            <div class="ed-section__top"><span>08 / The next chapter</span><span>Have a project in mind?</span></div>
             <h2 id="contact-title" class="ed-display" data-reveal>Something<br><em>remarkable.</em></h2>
             <div class="ed-contact__action" data-reveal><div><p>Good ideas deserve to become great experiences.<br>Tell us what you’re building.</p><div class="ed-contact__channels"><a href="mailto:{{ config('seo.email') }}">Email us</a><a href="{{ config('seo.whatsapp_url') }}" target="_blank" rel="noopener noreferrer">WhatsApp</a></div></div><a class="ed-circle-link" href="{{ route('contact.show') }}" data-conversion="final_project"><span>Start a conversation</span><span class="ed-circle-link__icon" aria-hidden="true">↗</span></a></div>
             <aside class="ed-contact__notice" aria-label="Proposal confidentiality"><span class="ed-contact__notice-label">Proposal confidentiality</span><p>Proposal materials are confidential. Please review our <a href="{{ route('terms.show') }}#proposal-design-rights">proposal and design rights terms</a> before sharing materials.</p></aside>

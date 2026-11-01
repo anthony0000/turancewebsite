@@ -15,7 +15,17 @@
     @endif
     <p style="margin: 0 0 8px;"><strong>Submitted:</strong> {{ $contactMessage->created_at?->format('F j, Y g:i A') }}</p>
 
-    <h2 style="margin: 24px 0 12px; font-size: 18px;">Message</h2>
-    <p style="white-space: pre-line; margin: 0;">{{ $contactMessage->message }}</p>
+    @if ($contactMessage->biggest_challenge)
+        <h2 style="margin: 24px 0 12px; font-size: 18px;">What is the single biggest challenge in your business right now?</h2>
+        <p style="white-space: pre-line; margin: 0;">{{ $contactMessage->biggest_challenge }}</p>
+        <h2 style="margin: 24px 0 12px; font-size: 18px;">How long has the problem existed?</h2>
+        <p style="white-space: pre-line; margin: 0;">{{ $contactMessage->problem_duration }}</p>
+        <h2 style="margin: 24px 0 12px; font-size: 18px;">What have you already tried that did not work?</h2>
+        <p style="white-space: pre-line; margin: 0;">{{ $contactMessage->previous_attempts }}</p>
+    @endif
+    @if ($contactMessage->message)
+        <h2 style="margin: 24px 0 12px; font-size: 18px;">{{ $contactMessage->biggest_challenge ? 'Additional project context' : 'Message' }}</h2>
+        <p style="white-space: pre-line; margin: 0;">{{ $contactMessage->message }}</p>
+    @endif
  </body>
 </html>

@@ -4,7 +4,7 @@
 .ed-footer a{color:inherit;text-decoration:none}
 .ed-footer button{font:inherit}
 .ed-footer__wordmark{display:inline-block;font-size:24px;line-height:.9;letter-spacing:.18em;transition:color .3s ease}
-.ed-footer__wordmark small{display:block;margin-top:8px;font-size:6px;letter-spacing:.46em}
+.ed-footer__wordmark small{display:block;margin-top:8px;font-size:9px;letter-spacing:.72em}
 .ed-footer__brand>span{display:block;margin-top:19px;color:#aaa49b;font-size:11px;line-height:1.4;letter-spacing:.12em;text-transform:uppercase}
 .ed-footer__right{display:flex;align-items:center;gap:40px}
 .ed-footer__right nav{display:flex;align-items:center;gap:30px}

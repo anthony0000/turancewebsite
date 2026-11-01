@@ -191,7 +191,7 @@ it('serves one self-hosted display face across public brand typography', functio
         ->assertOk()
         ->assertSee('/assets/fonts/HelveticaNeueThin.otf', false)
         ->assertSee('/assets/css/typography.css?v=1.5', false)
-        ->assertSee('/assets/css/editorial-home.css?v=3.6', false);
+        ->assertSee('/assets/css/editorial-home.css?v=3.7', false);
 
     $assetRoot = dirname(base_path()).DIRECTORY_SEPARATOR.'assets';
     $displayStylesheets = [

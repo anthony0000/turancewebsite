@@ -917,7 +917,7 @@
                                     </div>
                                     <span>{{ optional($message->created_at)->format('M d') }}</span>
                                 </div>
-                                <p>{{ \Illuminate\Support\Str::limit($message->message, 110) }}</p>
+                                <p>{{ \Illuminate\Support\Str::limit($message->biggest_challenge ?: $message->message, 110) }}</p>
                             </div>
                         @endforeach
                     </div>

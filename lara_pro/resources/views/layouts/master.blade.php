@@ -258,7 +258,7 @@
         <link rel="stylesheet" href="{{ asset('/assets/css/main.css') }}?v=1.3">
     @endunless
     @stack('styles')
-    <link rel="stylesheet" href="{{ asset('/assets/css/editorial-footer.css') }}?v=1.2">
+    <link rel="stylesheet" href="{{ asset('/assets/css/editorial-footer.css') }}?v=1.3">
     <link rel="stylesheet" href="{{ asset('/assets/css/public-menu.css') }}?v=1.6">
     <link rel="stylesheet" href="{{ asset('/assets/css/preferred-source.css') }}?v=1.0">
     <link rel="stylesheet" href="{{ asset('/assets/css/cookie-consent.css') }}?v=1.4">
