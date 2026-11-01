@@ -5,10 +5,10 @@
 <link rel="preload" as="font" type="font/ttf" crossorigin href="{{ asset('/assets/fonts/Urbanist-Regular.ttf') }}">
 <link rel="preload" as="image" media="(min-width: 651px)" href="{{ asset('/assets/img/hero/turance-editorial-hero-clean.png') }}" fetchpriority="high">
 <link rel="preload" as="image" media="(max-width: 650px)" href="{{ asset('/assets/img/hero/turance-editorial-ribbon.png') }}" fetchpriority="high">
-<link rel="stylesheet" href="{{ asset('/assets/css/editorial-home.css') }}?v=3.8">
+<link rel="stylesheet" href="{{ asset('/assets/css/editorial-home.css') }}?v=3.9">
 @endpush
 @push('scripts')
-<script src="{{ asset('/assets/js/editorial-home.js') }}?v=1.9" defer></script>
+<script src="{{ asset('/assets/js/editorial-home.js') }}?v=2.0" defer></script>
 @endpush
 @section('content')
 @php
@@ -37,7 +37,7 @@
         ['name' => '3Hjobs', 'logo' => 'assets/img/partners/3hjobs.png', 'square' => true],
         ['name' => 'IHcPro', 'logo' => 'assets/img/partners/ihcpro.webp', 'square' => false],
         ['name' => 'KiddoVista', 'logo' => 'assets/img/partners/kiddovista.png', 'square' => false],
-        ['name' => 'MillionDollar Photography', 'logo' => null, 'square' => false],
+        ['name' => 'Million Dollars Photography', 'logo' => 'assets/img/partners/million-dollars-photography.png', 'square' => false, 'tall' => true],
     ];
     $anniversaryPromo = app(\App\Support\AnniversaryPromotion::class)->current();
 @endphp
@@ -110,21 +110,23 @@
         <section class="ed-section ed-partners" id="partners" aria-labelledby="partners-title">
             <div class="ed-section__top"><span>06 / Partners</span><span>People and teams we have worked with</span></div>
             <div class="ed-section__heading"><h2 id="partners-title" class="ed-display" data-reveal>In good<br><em>company.</em></h2><p data-reveal>A selection of the brands and teams we have worked alongside.</p></div>
-            <ul class="ed-partners__grid" aria-label="Our partners">
-                @foreach ($partners as $partner)
-                <li class="ed-partner" data-reveal>
-                    <span class="ed-partner__index" aria-hidden="true">{{ str_pad($loop->iteration, 2, '0', STR_PAD_LEFT) }} <span>/ {{ str_pad(count($partners), 2, '0', STR_PAD_LEFT) }}</span></span>
-                    <div class="ed-partner__identity">
-                        @if ($partner['logo'])
-                            <img class="{{ $partner['square'] ? 'ed-partner__logo--square' : '' }}" src="{{ asset($partner['logo']) }}" alt="{{ $partner['square'] ? '' : $partner['name'] }}" loading="lazy" decoding="sync">
-                        @endif
-                        @if ($partner['square'] || !$partner['logo'])
-                            <strong>{{ $partner['name'] }}</strong>
-                        @endif
-                    </div>
-                </li>
-                @endforeach
-            </ul>
+            <div class="ed-partners__control-row"><span>Selected collaborators / {{ str_pad(count($partners), 2, '0', STR_PAD_LEFT) }}</span><button class="ed-partners__motion" type="button" data-partners-motion aria-pressed="false" hidden>Pause motion</button></div>
+            <div class="ed-partners__marquee">
+                <div class="ed-partners__track">
+                    @for ($copy = 0; $copy < 2; $copy++)
+                    <ul class="ed-partners__group" @if ($copy === 0) aria-label="Our partners" @else aria-hidden="true" @endif>
+                        @foreach ($partners as $partner)
+                        <li class="ed-partner">
+                            <div class="ed-partner__identity">
+                                <img class="{{ $partner['square'] ? 'ed-partner__logo--square' : '' }} {{ ($partner['tall'] ?? false) ? 'ed-partner__logo--tall' : '' }}" src="{{ asset($partner['logo']) }}" alt="{{ $partner['square'] || $copy === 1 ? '' : $partner['name'] }}" loading="{{ $copy === 0 ? 'eager' : 'lazy' }}" decoding="sync">
+                                @if ($partner['square']) <strong>{{ $partner['name'] }}</strong> @endif
+                            </div>
+                        </li>
+                        @endforeach
+                    </ul>
+                    @endfor
+                </div>
+            </div>
         </section>
         <section class="ed-section ed-testimonials" id="testimonials" aria-labelledby="testimonials-title">
             <div class="ed-section__top"><span>07 / Client perspectives</span><span>In their words</span></div>

@@ -3,6 +3,17 @@ document.addEventListener("DOMContentLoaded", () => {
   if (!site) return;
 
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const partners = site.querySelector(".ed-partners");
+  const partnerMotion = partners?.querySelector("[data-partners-motion]");
+  if (partners && partnerMotion) {
+    partners.classList.add("is-enhanced");
+    partnerMotion.hidden = false;
+    partnerMotion.addEventListener("click", () => {
+      const paused = partners.classList.toggle("is-paused");
+      partnerMotion.setAttribute("aria-pressed", String(paused));
+      partnerMotion.textContent = paused ? "Resume motion" : "Pause motion";
+    });
+  }
   const header = site.querySelector("[data-header]");
   if (header) {
     const updateHeader = () => header.classList.toggle("is-scrolled", window.scrollY > 96);
